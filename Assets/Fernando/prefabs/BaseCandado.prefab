@@ -285,6 +285,7 @@ GameObject:
   - component: {fileID: 9050825851253740164}
   - component: {fileID: 440537499003397621}
   - component: {fileID: 6527301848022585528}
+  - component: {fileID: 5642473882256516898}
   m_Layer: 0
   m_Name: RuedaNumerica03
   m_TagString: Untagged
@@ -300,7 +301,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1432999515399864936}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0.46174863, z: 0, w: 0.8870109}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -409,6 +410,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 94
   m_CollisionDetection: 0
+--- !u!114 &5642473882256516898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1432999515399864936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5720249e81c7d544e9d2714fb723d886, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lockMove: 0
+  otherNumberLock1: {fileID: 2453431630473584971}
+  otherNumberLock2: {fileID: 5117764368795857424}
+  lockAnimation: {fileID: 3430486221372608156}
+  valueKey: 0
+  value: 0
 --- !u!1 &1872347082006054142
 GameObject:
   m_ObjectHideFlags: 0
@@ -468,7 +487,7 @@ Transform:
   m_GameObject: {fileID: 3430486221372608156}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -0.035, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -604,6 +623,7 @@ GameObject:
   - component: {fileID: 8747867429127262385}
   - component: {fileID: 5849028144097521538}
   - component: {fileID: 7158395764011254273}
+  - component: {fileID: 5117764368795857424}
   m_Layer: 0
   m_Name: RuedaNumerica02
   m_TagString: Untagged
@@ -619,7 +639,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7644136915750277102}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0.46174863, z: 0, w: 0.8870109}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -728,6 +748,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 94
   m_CollisionDetection: 0
+--- !u!114 &5117764368795857424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7644136915750277102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5720249e81c7d544e9d2714fb723d886, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lockMove: 0
+  otherNumberLock1: {fileID: 2453431630473584971}
+  otherNumberLock2: {fileID: 5642473882256516898}
+  lockAnimation: {fileID: 3430486221372608156}
+  valueKey: 0
+  value: 0
 --- !u!1 &7695148212397015462
 GameObject:
   m_ObjectHideFlags: 0
@@ -741,6 +779,7 @@ GameObject:
   - component: {fileID: 2757118441801643365}
   - component: {fileID: 1135025877528778931}
   - component: {fileID: 5191015859754335428}
+  - component: {fileID: 2453431630473584971}
   m_Layer: 0
   m_Name: RuedaNumerica01
   m_TagString: Untagged
@@ -756,7 +795,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7695148212397015462}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0.46174863, z: 0, w: 0.8870109}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -865,6 +904,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 94
   m_CollisionDetection: 0
+--- !u!114 &2453431630473584971
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7695148212397015462}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5720249e81c7d544e9d2714fb723d886, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lockMove: 0
+  otherNumberLock1: {fileID: 5117764368795857424}
+  otherNumberLock2: {fileID: 5642473882256516898}
+  lockAnimation: {fileID: 3430486221372608156}
+  valueKey: 0
+  value: 0
 --- !u!1 &7938354764833730149
 GameObject:
   m_ObjectHideFlags: 0
