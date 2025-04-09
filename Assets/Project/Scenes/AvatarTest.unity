@@ -547,6 +547,7 @@ GameObject:
   - component: {fileID: 1483182654}
   - component: {fileID: 1483182656}
   - component: {fileID: 1483182655}
+  - component: {fileID: 1483182657}
   m_Layer: 6
   m_Name: Entity
   m_TagString: Untagged
@@ -662,6 +663,21 @@ MonoBehaviour:
   _autoCdnRetry: 1
   _enablePollingForAvatarCreation: 1
   _changeCheckInterval: 8
+--- !u!114 &1483182657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1483182653}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 581586ea6a7cdd44f93b7640164508e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _initializationDelay: 1
+  _debugLogs: 1
+  _inputManager: {fileID: 1014992222}
 --- !u!1 &1655199311
 GameObject:
   m_ObjectHideFlags: 0
