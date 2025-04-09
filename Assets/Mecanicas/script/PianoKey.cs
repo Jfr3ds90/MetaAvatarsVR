@@ -1,5 +1,4 @@
 using UnityEngine;
-using System;
 
 public class PianoKey : MonoBehaviour
 {
@@ -9,8 +8,9 @@ public class PianoKey : MonoBehaviour
     {
        piano = FindAnyObjectByType<Piano>();
     }
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
+        Debug.Log(other.transform.name);
         piano.partiture(KeyNote);
     }
 }
