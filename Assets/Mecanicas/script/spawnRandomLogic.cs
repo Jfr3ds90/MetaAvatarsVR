@@ -6,34 +6,43 @@ public class spawnRandomLogic : MonoBehaviour
     public GameObject[] objectForTable;
     private int objectsTotal; 
     public Transform tablePos;
-    public GameObject[,] squares = new GameObject[10, 10];
+    public Vector2 TotalArea;
+    public GameObject[,] squares;
+    public Vector2[] Value;
     private void Awake()
     {
-        objectsTotal= objectForTable.Length;
-        Debug.Log(objectsTotal);
-            for (int i = 0; i < 10; i++)
+        squares = new GameObject[Mathf.RoundToInt(TotalArea.x),Mathf.RoundToInt(TotalArea.y)];
+    }
+    private void OnEnable()
+    {
+        objectsTotal = objectForTable.Length;
+        for (int i = 0; i < Mathf.RoundToInt(TotalArea.x); i++)
+        {
+            for (int j = 0; j < Mathf.RoundToInt(TotalArea.y); j++)
             {
-            Debug.Log("inicio");
-                    for (int j = 0; j < 10; j++)
-                    {
-                      int randomObject =  Random.Range(0, objectsTotal);
-                        sorterOfPositions( i, j, objectForTable,randomObject);
-                Debug.Log("activacion "+ randomObject);
+                int randomObject = Random.Range(0, objectsTotal);
 
-                    }
+                sorterOfPositions(i, j, objectForTable, randomObject);
             }
+        }
     }
     void sorterOfPositions( int i, int j, GameObject[] objects, int v)
     {
-        int boolean = Random.Range(0, 2);
+        int boolean = Random.Range(0, 2); for (int k = 0; k < Value.Length; k++)
+        {
+            if (Value[k].x == i && Value[k].y == j)
+            {
+                boolean = 0;
+            }
+
+        }
         switch (boolean)
         {
             case 0:
-                Debug.Log("Slot empty (" + i + " , " + j + ")");
+                Debug.Log("los valores "+i+","+j+" son vacios");
                 break;
             case 1:
                 squares[i, j] = Instantiate(objects[v], tablePos.position + new Vector3(i, 0, j), Quaternion.identity);
-                Debug.Log("Slot used (" + i + " , " + j + ")");
                 break;
         }
     }
