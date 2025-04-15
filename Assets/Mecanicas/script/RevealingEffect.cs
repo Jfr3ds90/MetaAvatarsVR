@@ -4,15 +4,20 @@ using UnityEngine.Experimental.GlobalIllumination;
 
 public class RevealingEffect : MonoBehaviour
 {
-    public MeshRenderer meshRenderer;
+    bool OnOff = false;
     private void Update()
     {
-        Appear();           
+        Appear();
+        if (Input.GetKeyUp(KeyCode.Q))
+        changeLight();
+        if (Input.GetKeyUp(KeyCode.R)) 
+            OnOffLight();
     }
 
     
     public void Appear()
     {
+        
         Light light;
         light = GetComponent<Light>();
         for (float i = 0; i < 15; i++)
@@ -27,67 +32,62 @@ public class RevealingEffect : MonoBehaviour
                 || Physics.Raycast(transform.position, currentPointPositionLeft + currentPointPositionUp, out hit, light.range)
                 || Physics.Raycast(transform.position, currentPointPositionRight + currentPointPositionDown, out hit, light.range)
                 || Physics.Raycast(transform.position, currentPointPositionLeft + currentPointPositionDown, out hit, light.range))
-            {
-          
-               if(hit.collider.gameObject == meshRenderer.gameObject)
-                    meshRenderer.material.SetFloat("_Aparicion", meshRenderer.material.GetFloat("_Aparicion")+light.intensity);
-                else
                 {
+                MeshRenderer meshRenderer = hit.collider.GetComponent<MeshRenderer>();
+                    if (hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV")
+                    meshRenderer.material.SetFloat("_Aparicion", meshRenderer.material.GetFloat("_Aparicion")+light.intensity);
+                    else
+                    {
                     meshRenderer.material.SetFloat("_Aparicion", -light.intensity);
                     if(meshRenderer.material.GetFloat("_Aparicion") <= 0)
                         meshRenderer.material.SetFloat("_Aparicion", 0) ;
+                    }
                 }
+       
                     
             }
-
-
-
-
-            //Debug.DrawRay(transform.position, currentPointPositionRight, Color.red, light.range);
-            //Debug.DrawRay(transform.position, currentPointPositionUp, Color.red, light.range);
-
-            //Debug.DrawRay(transform.position, currentPointPositionRight + currentPointPositionUp, Color.green, light.range);
-            //Debug.DrawRay(transform.position, currentPointPositionLeft + currentPointPositionUp, Color.green, light.range);
-            //Debug.DrawRay(transform.position, currentPointPositionRight + currentPointPositionDown, Color.green, light.range);
-            //Debug.DrawRay(transform.position, currentPointPositionLeft + currentPointPositionDown, Color.green, light.range);
-
-            //Debug.DrawRay(transform.position, currentPointPositionLeft, Color.red, light.range);
-            //Debug.DrawRay(transform.position, currentPointPositionDown, Color.red, light.range);
-            //Debug.DrawRay(transform.position, currentPointPosition, UnityEngine.Color.blue, light.range);
-            //Debug.DrawLine(transform.position, currentPointPosition);
-            //  Debug.Log(light.range);
-
-
-        }
+        
     }
     public void changeLight() //cambio de color de linterna
     {
-        Light light;
-        light = GetComponent<Light>();
-       
-        if(light.color != Color.white)
-        light.color = Color.white;
-
-        else if(light.color != Color.magenta)
-        light.color = Color.magenta;
+        if (OnOff == true)
+        {
+            MeshRenderer meshRenderer;
+            meshRenderer = GetComponentInParent<MeshRenderer>();
+            Debug.Log(meshRenderer.materials[1].color + " es el color");
+            if (meshRenderer.materials[1].color == Color.magenta || meshRenderer.materials[1].color == Color.black)
+            {
+                ; meshRenderer.materials[1].color = Color.white;
+                meshRenderer.materials[1].SetColor("_EmissionColor", Color.white);
+                this.GetComponent<Light>().color = Color.white;
+            }
+            else if (meshRenderer.materials[1].color == Color.white)
+            {
+                meshRenderer.materials[1].color = Color.magenta;
+                meshRenderer.materials[1].SetColor("_EmissionColor", Color.magenta);
+                this.GetComponent<Light>().color = Color.magenta;
+            }
+        }
+            
 
     }
-    //public float coneAngle = 45f; // The angle of the cone
-    //public float distance = 10f;  // The distance of the raycast
-
-    //void Update()
-    //{
-    //    float stepAngleDeg = coneAngle / 180f * Mathf.PI / 15; // angle between two sampled rays
-    //    for (int i = 0; i < 15; i++)
-    //    {
-    //        Vector3 direction = Quaternion.Euler(0, 0, i * stepAngleDeg) * transform.forward;
-    //        RaycastHit hit;
-    //        if (Physics.Raycast(transform.position, direction, out hit, distance))
-    //        {
-    //            Debug.Log("Hit: " + hit.transform.name);
-    //        }
-    //        Debug.DrawRay(transform.position, direction, Color.red, distance);
-    //    }
-    //}
+    public void OnOffLight()
+    {
+        MeshRenderer meshRenderer = GetComponentInParent<MeshRenderer>();
+        if (meshRenderer.materials[1].color != Color.black)
+        {
+            meshRenderer.materials[1].color = Color.black;
+            meshRenderer.materials[1].SetColor("_EmissionColor", Color.black);
+            this.GetComponent<Light>().color = Color.black;
+            OnOff = false;
+        }
+        else
+        {
+            meshRenderer.materials[1].color = Color.white;
+            meshRenderer.materials[1].SetColor("_EmissionColor", Color.white);
+            this.GetComponent<Light>().color = Color.white;
+            OnOff = true;
+        }
+    }
 
 }
