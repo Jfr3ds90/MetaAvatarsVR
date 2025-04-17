@@ -42,10 +42,15 @@ public class RevealingEffect : MonoBehaviour
                 //Debug.Log("el material es "+ hit.collider.GetComponent<MeshRenderer>().material.name);
                 if (hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV" || hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV (Instance)")
                 { 
-                    meshRenderer.material.SetFloat("_Aparicion", meshRenderer.material.GetFloat("_Aparicion") + light.intensity);
-                        
+                    meshRenderer.material.SetFloat("_Aparicion",-light.intensity/*hit.distance*/);
                         meshRenderer.material.SetVector("_PosicionLuz", hit.point - hit.transform.position);// obtiene la posicion del rayo - posicion del objeto
-                        Debug.Log(hit.point-hit.transform.position);
+                        //Debug.Log(hit.distance);// distancia de entre quien apunta y donde llega
+
+                        if(Physics.Raycast(transform.position, currentPointPosition, out hit, light.range))
+                        {
+                           // Debug.Log(hit.point+" posicion en el objeto?");
+                        }
+                        
                     if (meshRenderer.material.GetFloat("_Aparicion") >= 1)
                         meshRenderer.material.SetFloat("_Aparicion", 1);
 
@@ -57,8 +62,12 @@ public class RevealingEffect : MonoBehaviour
 
                     if(LastMeshRenderer!=null)
                     {
-                        LastMeshRenderer.material.SetFloat("_Aparicion", -light.intensity);
-                        if (LastMeshRenderer.material.GetFloat("_Aparicion") <= 0)
+                           // float floatGetter = LastMeshRenderer.material.GetFloat("_Aparicion");
+                        LastMeshRenderer.material.SetFloat("_Aparicion", light.intensity);
+                            //if (LastMeshRenderer.material.GetFloat("_Aparicion") <= floatGetter)
+                            //    LastMeshRenderer.material.SetFloat("_Aparicion",floatGetter);
+
+                            if (LastMeshRenderer.material.GetFloat("_Aparicion") <= 0)
                             LastMeshRenderer.material.SetFloat("_Aparicion", 0);
                     }
 
@@ -67,14 +76,14 @@ public class RevealingEffect : MonoBehaviour
             
             }
 
-            
-            //Debug.DrawRay(transform.position, currentPointPositionRight + currentPointPositionUp, Color.green,light.range);
-            //Debug.DrawRay(transform.position, currentPointPositionLeft + currentPointPositionUp, Color.green, light.range);
-            //Debug.DrawRay(transform.position, currentPointPositionRight + currentPointPositionDown, Color.green, light.range);
-            //Debug.DrawRay(transform.position, currentPointPositionLeft + currentPointPositionDown, Color.green, light.range);
+            // Debug.DrawRay(transform.position, currentPointPosition, Color.green, light.range);
+                //Debug.DrawRay(transform.position, currentPointPositionRight + currentPointPositionUp, Color.green,light.range);
+                //Debug.DrawRay(transform.position, currentPointPositionLeft + currentPointPositionUp, Color.green, light.range);
+                //Debug.DrawRay(transform.position, currentPointPositionRight + currentPointPositionDown, Color.green, light.range);
+                //Debug.DrawRay(transform.position, currentPointPositionLeft + currentPointPositionDown, Color.green, light.range);
 
 
-        }
+            }
         else if (LastMeshRenderer != null)
         {
             LastMeshRenderer.material.SetFloat("_Aparicion", -light.intensity);
