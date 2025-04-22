@@ -3,7 +3,7 @@ using UnityEngine;
 public class Switch : MonoBehaviour
 {
     public Transform Door;
-    bool val;
+    public bool val;
     private void Update()
     {
         

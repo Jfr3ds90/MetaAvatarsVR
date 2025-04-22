@@ -40,7 +40,18 @@ public class RevealingEffect : MonoBehaviour
                 {
                 MeshRenderer meshRenderer = hit.collider.GetComponent<MeshRenderer>();
                 //Debug.Log("el material es "+ hit.collider.GetComponent<MeshRenderer>().material.name);
-                if (hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV" || hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV (Instance)")
+                if (hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV (Instance)"||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV_Delfin" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV_Delfin (Instance)" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV_Aguila" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV_Aguila (Instance)" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV_Tigre" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV_Tigre (Instance)" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV_Oso" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV_Oso (Instance)" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV_Sapo" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV_Sapo (Instance)" )
                 { 
                     meshRenderer.material.SetFloat("_Aparicion",-light.intensity/*hit.distance*/);
                         meshRenderer.material.SetVector("_PosicionLuz", hit.point - hit.transform.position);// obtiene la posicion del rayo - posicion del objeto
@@ -63,7 +74,7 @@ public class RevealingEffect : MonoBehaviour
                     if(LastMeshRenderer!=null)
                     {
                            // float floatGetter = LastMeshRenderer.material.GetFloat("_Aparicion");
-                        LastMeshRenderer.material.SetFloat("_Aparicion", light.intensity);
+                        LastMeshRenderer.material.SetFloat("_Aparicion",light.intensity);
                             //if (LastMeshRenderer.material.GetFloat("_Aparicion") <= floatGetter)
                             //    LastMeshRenderer.material.SetFloat("_Aparicion",floatGetter);
 
