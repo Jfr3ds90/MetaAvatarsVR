@@ -23,7 +23,7 @@ public class DetectorObjectPos : MonoBehaviour
         if (totalCorrect == objectPos.Length)
         {
             Debug.Log("Correct placed order");
-            door.OpenDoor(door.val);
+            door.OpenDoor(door.orientation);
         }
     }
 }

@@ -21,8 +21,8 @@ public class OfficeStaff : MonoBehaviour
     public void kitchenShelf()
     {
         var shelf = ShelfKitchen.GetComponent<Switch>();
-        shelf.val = !shelf.val;
-        shelf.OpenDoor(shelf.val);
+        shelf.orientation = !shelf.orientation;
+        shelf.OpenDoor(shelf.orientation);
     }
     public void kitchenLever() //misma lógica que el piano asi que se reutiliza
     {

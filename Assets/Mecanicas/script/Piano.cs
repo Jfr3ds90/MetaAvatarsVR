@@ -21,7 +21,7 @@ public class Piano : MonoBehaviour
                     if (action !=null)
                     {
                       var actions =  action.GetComponent<Switch>();
-                        actions.OpenDoor(actions.val);
+                        actions.OpenDoor(actions.orientation);
                     }
                 }
                 break;
