@@ -5,6 +5,7 @@ public class DetectorObjectPos : MonoBehaviour
  //si la posicion tiene el objeto indicado entonces queda true bool
  //cada objeto debe tener una ID para identificar en que pos va | cada objeto tendra su codigo con su bool
     public ObjectPos[] objectPos;
+    public Switch door;
     public void orderSolution()
     {
         int totalCorrect = 0;
@@ -19,7 +20,10 @@ public class DetectorObjectPos : MonoBehaviour
 
             }
         }
-        if (totalCorrect == objectPos.Length)  
-            Debug.Log("Correct placed order"); 
+        if (totalCorrect == objectPos.Length)
+        {
+            Debug.Log("Correct placed order");
+            door.OpenDoor(door.orientation);
+        }
     }
 }
