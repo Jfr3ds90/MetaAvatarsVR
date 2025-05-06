@@ -20,10 +20,15 @@ public class DetectorObjectPos : MonoBehaviour
 
             }
         }
-        if (totalCorrect == objectPos.Length)
+        if (totalCorrect == objectPos.Length && door!=null)
         {
             Debug.Log("Correct placed order");
             door.OpenDoor(door.orientation);
+        }
+        else if(totalCorrect == objectPos.Length)
+        {
+            Material[] materials = GetComponents<Material>();
+            materials[0].color = Color.green;
         }
     }
 }
