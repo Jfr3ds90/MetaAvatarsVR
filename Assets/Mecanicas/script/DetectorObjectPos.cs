@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class DetectorObjectPos : MonoBehaviour
@@ -23,7 +24,14 @@ public class DetectorObjectPos : MonoBehaviour
         if (totalCorrect == objectPos.Length && door!=null)
         {
             Debug.Log("Correct placed order");
+            if(door!=null)
             door.OpenDoor(door.orientation);
+            else
+            {
+                MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
+                meshRenderer.materials[0].SetColor("_EmissionColor", Color.green);
+                meshRenderer.materials[0].SetColor("_BaseMap", Color.green); ;
+            }
         }
         else if(totalCorrect == objectPos.Length)
         {
