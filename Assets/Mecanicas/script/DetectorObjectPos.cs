@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class DetectorObjectPos : MonoBehaviour
@@ -20,10 +21,26 @@ public class DetectorObjectPos : MonoBehaviour
 
             }
         }
-        if (totalCorrect == objectPos.Length)
+        if (totalCorrect == objectPos.Length && door!=null)
         {
             Debug.Log("Correct placed order");
-            door.OpenDoor(door.orientation);
+            if(door!=null)
+            door.OpenDoor(door.orientation);   
+        }
+        else if(totalCorrect == objectPos.Length && door == null)
+        {
+            MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
+            meshRenderer.materials[0].SetColor("_EmissionColor", Color.green);
+            meshRenderer.materials[0].SetColor("_BaseColor", Color.green);
+        }
+    }
+    private void Update()
+    {
+        if(Input.GetKeyUp(KeyCode.Space))
+        {
+            MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
+            meshRenderer.materials[0].SetColor("_EmissionColor", Color.green);
+            meshRenderer.materials[0].SetColor("_BaseColor", Color.green);
         }
     }
 }
