@@ -25,18 +25,22 @@ public class DetectorObjectPos : MonoBehaviour
         {
             Debug.Log("Correct placed order");
             if(door!=null)
-            door.OpenDoor(door.orientation);
-            else
-            {
-                MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
-                meshRenderer.materials[0].SetColor("_EmissionColor", Color.green);
-                meshRenderer.materials[0].SetColor("_BaseMap", Color.green); ;
-            }
+            door.OpenDoor(door.orientation);   
         }
-        else if(totalCorrect == objectPos.Length)
+        else if(totalCorrect == objectPos.Length && door == null)
         {
-            Material[] materials = GetComponents<Material>();
-            materials[0].color = Color.green;
+            MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
+            meshRenderer.materials[0].SetColor("_EmissionColor", Color.green);
+            meshRenderer.materials[0].SetColor("_BaseColor", Color.green);
+        }
+    }
+    private void Update()
+    {
+        if(Input.GetKeyUp(KeyCode.Space))
+        {
+            MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
+            meshRenderer.materials[0].SetColor("_EmissionColor", Color.green);
+            meshRenderer.materials[0].SetColor("_BaseColor", Color.green);
         }
     }
 }

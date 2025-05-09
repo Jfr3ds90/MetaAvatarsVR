@@ -62,7 +62,7 @@ public class Switch : MonoBehaviour
     {
         mat.materials[0].SetColor("_EmissionColor", Color.green);
         Door.rotation = Quaternion.Euler(Door.rotation.x, (Door.rotation.y - 90), Door.rotation.z);
-        mat.materials[0].SetColor("_BaseMap", Color.green); ;
+        mat.materials[0].SetColor("_BaseColor", Color.green); ;
         onOff = true;
     }
 }
