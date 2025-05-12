@@ -27,10 +27,22 @@ public class Switch : MonoBehaviour
         //{
         if (onOff == true)
         {
-            if (Door.rotation.y > -90)
+            if(orientation==false)
+            {
+                if (Door.rotation.y > -90)
                 Door.rotation = Quaternion.Euler(Door.rotation.x, -90, Door.rotation.z);
-            else if (Door.rotation.y < (-180))
+                else if (Door.rotation.y < (-180))
                 Door.rotation = Quaternion.Euler(Door.rotation.x, -180, Door.rotation.z);
+            }
+            
+
+            else if(orientation==true)
+            {
+                if (Door.rotation.y > 0)
+                Door.rotation = Quaternion.Euler(Door.rotation.x,0,Door.rotation.z);
+                else if (Door.rotation.y > (-90))
+                Door.rotation = Quaternion.Euler(Door.rotation.x, -90, Door.rotation.z);
+            }
         }
 
         //}
@@ -38,7 +50,7 @@ public class Switch : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.S))
         {
-            orientation = !orientation;
+            //orientation = !orientation;
             OpenDoor(orientation);
         }
         
@@ -47,9 +59,10 @@ public class Switch : MonoBehaviour
     {
         if(value== true)
         {
-            if (mat != null)
+           var doorSound = GetComponent<AudioSource>();
+            if (doorSound != null)
             {
-                //mat.color = Color.green;
+                doorSound.Play();
             }
             Door.rotation = Quaternion.Euler(Door.rotation.x, (Door.rotation.y + 90), Door.rotation.z);
             orientation = !orientation;
@@ -64,5 +77,8 @@ public class Switch : MonoBehaviour
         Door.rotation = Quaternion.Euler(Door.rotation.x, (Door.rotation.y - 90), Door.rotation.z);
         mat.materials[0].SetColor("_BaseColor", Color.green); ;
         onOff = true;
+        var doorSound = GetComponent<AudioSource>();
+        if (doorSound != null)       
+            doorSound.Play();        
     }
 }

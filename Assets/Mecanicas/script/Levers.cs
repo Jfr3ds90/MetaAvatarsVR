@@ -13,7 +13,7 @@ public class Levers : MonoBehaviour
     }
     private void Update()
     {
-        //z = transform.rotation.z;
+        z = transform.rotation.z;
         //Debug.Log(transformThis.rotation.z);
         //if (transformThis.rotation.z <= -0.5f && OnOff == false)
         //{
@@ -27,9 +27,11 @@ public class Levers : MonoBehaviour
         //    piano.partiture(-1);
         //    Debug.Log("palanca inactiva");
         //}
+        Debug.Log(transformThis.rotation.x + " " + transformThis.rotation.y + " " + transformThis.rotation.z);
     }
     public void actionLever()
     {
+        
         if (transformThis.rotation.z <= -0.45f && OnOff == false)//estaba abajo, suelta arriba y es correcto
         {
             OnOff = true;
