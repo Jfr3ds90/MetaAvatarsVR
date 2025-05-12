@@ -4,6 +4,7 @@ public class Piano : MonoBehaviour
 {
     public int[] notes;
     private int noteAction = 0;
+    public Switch door;
     
     public GameObject action;
     public void partiture(int pressed)
@@ -20,8 +21,11 @@ public class Piano : MonoBehaviour
                     Debug.Log("completo");
                     if (action !=null)
                     {
-                      var actions =  action.GetComponent<Switch>();
-                        actions.OpenDoor(actions.orientation);
+                        if(door==null)
+                            door=GetComponent<Switch>();
+
+                        //door.OpenDoor(door.orientation);
+                        door.OpenDoorAct();
                     }
                 }
                 break;
