@@ -11,12 +11,12 @@ public class AvatarTrackingInitializer : MonoBehaviour
     [Tooltip("Habilitar logs detallados para depuración")]
     [SerializeField] private bool _debugLogs = false;
     
-    private OvrAvatarEntity _avatarEntity;
+    [SerializeField] private OvrAvatarEntity _avatarEntity;
     public SampleInputManager _inputManager;
     
     private void Awake()
     {
-        _avatarEntity = GetComponent<OvrAvatarEntity>();
+        //_avatarEntity = GetComponent<OvrAvatarEntity>();
     }
     
     private void Start()
