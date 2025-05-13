@@ -25,7 +25,7 @@ public class DetectorObjectPos : MonoBehaviour
         {
             Debug.Log("Correct placed order");
             if(door!=null)
-            door.OpenDoor(door.orientation);   
+            door.OpenDoorAct();   
         }
         else if(totalCorrect == objectPos.Length && door == null)
         {

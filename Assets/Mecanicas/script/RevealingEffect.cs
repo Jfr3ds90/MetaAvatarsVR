@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class RevealingEffect : MonoBehaviour
 {
-    bool OnOff = false;
+    public bool OnOff = false;
     
     MeshRenderer LastMeshRenderer = null;
     private void Update()
@@ -12,7 +12,11 @@ public class RevealingEffect : MonoBehaviour
         Appear();
 
         if (Input.GetKeyUp(KeyCode.Q))
-        changeLight();
+        {
+            changeLight();
+            OnOff = true;
+        }
+        
         if (Input.GetKeyUp(KeyCode.R)) 
             OnOffLight();
     }
@@ -87,11 +91,11 @@ public class RevealingEffect : MonoBehaviour
             
             }
 
-            // Debug.DrawRay(transform.position, currentPointPosition, Color.green, light.range);
-                //Debug.DrawRay(transform.position, currentPointPositionRight + currentPointPositionUp, Color.green,light.range);
-                //Debug.DrawRay(transform.position, currentPointPositionLeft + currentPointPositionUp, Color.green, light.range);
-                //Debug.DrawRay(transform.position, currentPointPositionRight + currentPointPositionDown, Color.green, light.range);
-                //Debug.DrawRay(transform.position, currentPointPositionLeft + currentPointPositionDown, Color.green, light.range);
+             Debug.DrawRay(transform.position, currentPointPosition, Color.green, light.range);
+                Debug.DrawRay(transform.position, currentPointPositionRight + currentPointPositionUp, Color.green,light.range);
+                Debug.DrawRay(transform.position, currentPointPositionLeft + currentPointPositionUp, Color.green, light.range);
+                Debug.DrawRay(transform.position, currentPointPositionRight + currentPointPositionDown, Color.green, light.range);
+                Debug.DrawRay(transform.position, currentPointPositionLeft + currentPointPositionDown, Color.green, light.range);
 
 
             }

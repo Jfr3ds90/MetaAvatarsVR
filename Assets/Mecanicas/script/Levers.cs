@@ -28,25 +28,28 @@ public class Levers : MonoBehaviour
         //    Debug.Log("palanca inactiva");
         //}
         Debug.Log(transformThis.rotation.x + " " + transformThis.rotation.y + " " + transformThis.rotation.z);
+        //Debug.Log(transformThis.rotation.x + " " + transformThis.rotation.y + " " + transformThis.rotation.z);
+        if (Input.GetKeyDown(KeyCode.E))
+            actionLever();
     }
     public void actionLever()
     {
         
-        if (transformThis.rotation.z <= -0.45f && OnOff == false)//estaba abajo, suelta arriba y es correcto
+        if (transformThis.rotation.z >= -0.55f && OnOff == false)//estaba abajo, suelta arriba y es correcto
         {
             OnOff = true;
             piano.partiture(orderLevel);
             Debug.Log("palanca activa");
         }
-        else if (transformThis.rotation.z! >= -0.45f && OnOff == false) //estaba abajo, suelta abajo
+        else if (transformThis.rotation.z! <= -0.55f && OnOff == false) //estaba abajo, suelta abajo
         {
             Debug.Log("palanca inactiva");
         }
-        else if (transformThis.rotation.z <= -0.45f && OnOff == true)// estaba arriba y queda arriba
+        else if (transformThis.rotation.z >= -0.55f && OnOff == true)// estaba arriba y queda arriba
         { // no ocurre nada
             Debug.Log("palanca activa");
         }
-        else if (transformThis.rotation.z! >= -0.45f && OnOff == true)// estaba arriba y queda abajo
+        else if (transformThis.rotation.z! <= -0.55f && OnOff == true)// estaba arriba y queda abajo
         {
             OnOff = false;
             piano.partiture(-1);

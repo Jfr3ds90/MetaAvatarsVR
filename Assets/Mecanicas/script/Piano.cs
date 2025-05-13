@@ -21,8 +21,8 @@ public class Piano : MonoBehaviour
                     Debug.Log("completo");
                     if (action !=null)
                     {
-                        if(door==null)
-                            door=GetComponent<Switch>();
+                        //if(door==null)
+                          //  door=GetComponent<Switch>();
 
                         //door.OpenDoor(door.orientation);
                         door.OpenDoorAct();
