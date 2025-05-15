@@ -1,6 +1,7 @@
 using Meta.XR.ImmersiveDebugger.UserInterface;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Animations;
 
 public class Switch : MonoBehaviour
 {
@@ -8,11 +9,15 @@ public class Switch : MonoBehaviour
     public bool orientation;
     public MeshRenderer mat;
     bool onOff =false;
+    Animator animator;
+    
 
     private void OnEnable()
     {
         if(Door==null)
             Door = GetComponent<Transform>();
+        if(animator==null)
+            animator = GetComponent<Animator>();
     }
     private void Update()
     {
@@ -39,21 +44,26 @@ public class Switch : MonoBehaviour
     }
     public void OpenDoor(bool value)
     {
-        if (value == true)
-        {
-            Door.rotation = Quaternion.Euler(Door.rotation.x, (Door.rotation.y - 90), Door.rotation.z);
-            if (GetComponent<AudioSource>() != null)
-                GetComponent<AudioSource>().Play();
+        animator.SetBool("Close_",false);
+        animator.SetBool("Right_",true);
+        animator.SetTrigger("Activation_");
 
-            //Door.rotation = Quaternion.Euler(Door.rotation.x, (Door.rotation.y + 90), Door.rotation.z);
-            orientationDoor(orientation);
-            Debug.Log("la puerta esta " + orientation);
-        }
-        else if (value == false)
-        { 
-            Door.rotation = Quaternion.Euler(Door.rotation.x, (Door.rotation.y - 90), Door.rotation.z);
-            orientationDoor(orientation);
-        }
+        //if (value == true)
+        //{
+            
+        //    Door.rotation = Quaternion.Euler(Door.rotation.x, (Door.rotation.y - 90), Door.rotation.z);
+        //    if (GetComponent<AudioSource>() != null)
+        //        GetComponent<AudioSource>().Play();
+
+        //    //Door.rotation = Quaternion.Euler(Door.rotation.x, (Door.rotation.y + 90), Door.rotation.z);
+        //    orientationDoor(orientation);
+        //    Debug.Log("la puerta esta " + orientation);
+        //}
+        //else if (value == false)
+        //{ 
+        //    Door.rotation = Quaternion.Euler(Door.rotation.x, (Door.rotation.y - 90), Door.rotation.z);
+        //    orientationDoor(orientation);
+        //}
     }
     public void OpenDoorAct()
     {

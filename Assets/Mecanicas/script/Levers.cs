@@ -27,7 +27,6 @@ public class Levers : MonoBehaviour
         //    piano.partiture(-1);
         //    Debug.Log("palanca inactiva");
         //}
-        Debug.Log(transformThis.rotation.x + " " + transformThis.rotation.y + " " + transformThis.rotation.z);
         //Debug.Log(transformThis.rotation.x + " " + transformThis.rotation.y + " " + transformThis.rotation.z);
         if (Input.GetKeyDown(KeyCode.E))
             actionLever();
@@ -53,6 +52,7 @@ public class Levers : MonoBehaviour
         {
             OnOff = false;
             piano.partiture(-1);
+            FindAnyObjectByType<AudioManager>().FailLevers +=1;
             Debug.Log("palanca inactiva");
         }
     }

@@ -26,6 +26,7 @@ public class Piano : MonoBehaviour
 
                         //door.OpenDoor(door.orientation);
                         door.OpenDoorAct();
+                        FindAnyObjectByType<AudioManager>().Phase1 = true;
                     }
                 }
                 break;
