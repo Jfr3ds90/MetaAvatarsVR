@@ -65,6 +65,7 @@ public class RevealingEffect : MonoBehaviour
                         hit.collider.GetComponent<MeshRenderer>().material.name == "M_CabezaSapo (Instance)"
                         )
                 {
+                        hit.collider.GetComponent<MeshRenderer>().enabled = true;
                         meshRenderer.material.SetFloat("_Aparicion",-light.intensity/*hit.distance*/);
                         meshRenderer.material.SetVector("_PosicionLuz", hit.point - hit.transform.position);// obtiene la posicion del rayo - posicion del objeto
                         detectado = true;
@@ -126,6 +127,7 @@ public class RevealingEffect : MonoBehaviour
                     
                 //}
             detectado = false;
+                    LastMeshRenderer.enabled = false;
             }
 
              //Debug.DrawRay(transform.position, currentPointPosition, Color.green, light.range);

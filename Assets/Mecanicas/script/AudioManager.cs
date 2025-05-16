@@ -10,7 +10,7 @@ public class AudioManager : MonoBehaviour
     public int FindAnimals = 0, FindLevers = 0, FailLevers=0;
     public float timer;
     RevealingEffect revealingEffect; 
-    bool usedA= false, usedL=false, levers = false;
+    public bool usedA= false, usedL=false, levers = false;
     public bool Phase1=false;
     private void OnEnable()
     {
@@ -37,11 +37,22 @@ public class AudioManager : MonoBehaviour
         switch(FindLevers)
         {
             case 0: break;
-            case 1: break;
+            case 1: StartCoroutine(NarratorLines(8, 5)); break;
             case 2: break;
             case 3: break;
             case 4: break;
             case 5: break;
+            default: break;
+        }
+        switch (FailLevers)
+        {
+            case 0: break;
+            case 1: StartCoroutine(NarratorLines(7, 6)); break;
+            case 2: break;
+            case 3: break;
+            case 4: break;
+            case 5: break;
+            case 6: StartCoroutine(NarratorLines(5, 7)); break;
             default: break;
         }
     }
@@ -56,7 +67,7 @@ public class AudioManager : MonoBehaviour
                 { StartCoroutine(NarratorLines(7, 4)); }
             else { }
             
-        if (FindLevers >= 1 && usedL == false)
+        if (FindLevers == 1 && usedL == false)
             { StartCoroutine(NarratorLines(8, 5)); usedL = true; }
             
         else if (FailLevers == 1 && usedL == true)
@@ -65,7 +76,7 @@ public class AudioManager : MonoBehaviour
         else if (FailLevers == 6 && usedL == true)
             { StartCoroutine(NarratorLines(5, 7)); }
             
-        else if (Phase1 == true)
+        if (Phase1 == true)
             { StartCoroutine(NarratorLines(6, 8)); StartCoroutine(NarratorLines(6, 9)); }
     }
 }
