@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class spawnRandomLogic : MonoBehaviour
 {
-    public GameObject[] objectTotals,placeObject;
+    public GameObject[] objectTotals,posObject;
     private int objectsTotal; 
     public Transform tablePos;
     public Vector2 TotalArea;
@@ -16,7 +16,7 @@ public class spawnRandomLogic : MonoBehaviour
     private void OnEnable()
     {
         //randimInSquare();
-        randomInPlaces(placeObject,objectTotals);
+        randomInPlaces(posObject,objectTotals);
     }
     void sorterOfPositions( int i, int j, GameObject[] objects, int v)
     {
@@ -34,6 +34,7 @@ public class spawnRandomLogic : MonoBehaviour
                 Debug.Log("los valores "+i+","+j+" son vacios");
                 break;
             case 1:
+                if(tablePos!=null)
                 squares[i, j] = Instantiate(objects[v], tablePos.position + new Vector3(i, 0, j), Quaternion.identity);
                 break;
         }
@@ -51,21 +52,35 @@ public class spawnRandomLogic : MonoBehaviour
             }
         }
     }
-    void randomInPlaces(GameObject[] pos, GameObject[] objects)
+    void randomInPlaces(GameObject[] pos, GameObject[] objects)//se instancia de manera aleatoria solo haciendolo 1 vez, solo falta hacer que siempre seand objetos diferentes
     {
         for (int i = 0; i < pos.Length; i++) 
         {
             int randomvalue = Random.Range(0,2);
-            Debug.Log("spawneara");
-            if(randomvalue==1)
+            Debug.Log("spawneara "+randomvalue);
+            if(randomvalue==1 /*&& pos[i].GetComponentInChildren<GameObject>()==null*/)
             {
                 for (int j = 0;j < objects.Length; j++)
                 {
                     int value = Random.Range(0, objects.Length);
-                    Debug.Log("aparecio " + objects[j]);
-                    Instantiate(objects[j], pos[i].transform);
+                    // una vez salga el numero revisar que este no haya salido antes
+                    Debug.Log("aparecio " + objects[j]+ " es "+ objects[j].name+"(Clone)");
+                    if (FindAnyObjectByType<GameObject>().name != objects[j].name)
+                    { Instantiate(objects[j], pos[i].transform); objectsTotal += 1; Debug.Log(objectsTotal + " es el total"); break; }
+                    else if(FindAnyObjectByType<GameObject>().name == objects[j].name )
+                    {
+                        Debug.Log("encontro!!!");
+                    }
+                    Debug.Log(FindAnyObjectByType<GameObject>().name + "(Clone)");
+
                 }
             }
+            else
+            {
+                randomvalue = 0;
+            }//aun es posible que spawneen pero no todos los objetos
+            if (i == pos.Length&& objects.Length != objectsTotal)
+                i = 0;
         }
     }
 }

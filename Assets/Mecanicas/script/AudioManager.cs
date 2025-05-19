@@ -27,7 +27,7 @@ public class AudioManager : MonoBehaviour
         switch (FindAnimals)
         {
             case 0: break;
-            case 1: StartCoroutine(NarratorLines(8,1)); break;
+            case 1: StartCoroutine(NarratorLines(7,1)); break;
             case 2: break;
             case 3: StartCoroutine(NarratorLines(8, 3)); break;
             case 4: break;
@@ -62,7 +62,7 @@ public class AudioManager : MonoBehaviour
         if (timer >= 30)
             if (FindAnimals >= 1 && levers == false)
                 if (usedA == false)
-                { StartCoroutine(NarratorLines(5, 2)); usedA = true; }
+                { StartCoroutine(NarratorLines(4, 2)); usedA = true; }
                 else if (extraNarrator==false)
                 { StartCoroutine(NarratorLines(7, 4)); extraNarrator = true; }
                 else { }
