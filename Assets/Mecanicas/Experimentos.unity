@@ -1650,11 +1650,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 913d8baae62f3bb4c9d8431a35bd4963, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!108 &1158845349 stripped
-Light:
-  m_CorrespondingSourceObject: {fileID: 6373023550567617019, guid: b657881be91c71b49bdbd4d52d8c64e5, type: 3}
-  m_PrefabInstance: {fileID: 1255480730136186519}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1171879033
 GameObject:
   m_ObjectHideFlags: 0
@@ -1777,8 +1772,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ee40ad8151b33942b2e0b0ebb17c88d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Mat: {fileID: 2100000, guid: 19941eedd11f5e04cb709b99fa341296, type: 2}
-  SpotLight: {fileID: 1158845349}
 --- !u!54 &1171879039
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1829,6 +1822,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Door: {fileID: 1238934375}
+  orientation: 0
+  mat: {fileID: 0}
 --- !u!1 &1353032775
 GameObject:
   m_ObjectHideFlags: 0
@@ -2235,6 +2230,7 @@ MonoBehaviour:
   - {fileID: 2121357312}
   - {fileID: 553774191}
   - {fileID: 886932582}
+  door: {fileID: 0}
 --- !u!4 &1663674218
 Transform:
   m_ObjectHideFlags: 0
@@ -3042,13 +3038,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 957372382221100121, guid: b657881be91c71b49bdbd4d52d8c64e5, type: 3}
+      propertyPath: m_IsKinematic
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3830561464022952908, guid: b657881be91c71b49bdbd4d52d8c64e5, type: 3}
       propertyPath: meshRenderer
       value: 
       objectReference: {fileID: 2074587723}
     - target: {fileID: 8519876289749315390, guid: b657881be91c71b49bdbd4d52d8c64e5, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -4.644
+      value: -3.853
       objectReference: {fileID: 0}
     - target: {fileID: 8519876289749315390, guid: b657881be91c71b49bdbd4d52d8c64e5, type: 3}
       propertyPath: m_LocalPosition.y
@@ -3056,7 +3056,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8519876289749315390, guid: b657881be91c71b49bdbd4d52d8c64e5, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.018
+      value: 2.705
       objectReference: {fileID: 0}
     - target: {fileID: 8519876289749315390, guid: b657881be91c71b49bdbd4d52d8c64e5, type: 3}
       propertyPath: m_LocalRotation.w
@@ -3528,6 +3528,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   notes: 000000000200000000000000030000000000000005000000030000000200000006000000060000000300000001000000000000000500000004000000
+  door: {fileID: 0}
+  action: {fileID: 0}
 --- !u!1001 &6286775736438449456
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -8,21 +8,18 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: M_Letra_O
-  m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 710a18caaa4aa214b9c6c65bc66f24f4, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
-  - _ALPHATEST_ON
+  m_ValidKeywords: []
+  m_InvalidKeywords:
   - _ENVIRONMENTREFLECTIONS_OFF
   - _RECEIVE_SHADOWS_OFF
-  - _SPECULAR_SETUP
-  m_InvalidKeywords: []
   m_LightmapFlags: 6
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2450
-  stringTagMap:
-    RenderType: TransparentCutout
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
   m_LockedProperties: 
@@ -66,6 +63,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 19654e666bb84f141a79580b5857fe88, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Mask:
         m_Texture: {fileID: 2800000, guid: 19654e666bb84f141a79580b5857fe88, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -122,6 +123,7 @@ Material:
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 1
     - _AlphaToMask: 1
+    - _Aparicion: 1
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BlendOp: 0
@@ -171,6 +173,8 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EMISSION_COLOR: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _NewColor: {r: 1, g: 1, b: 1, a: 0}
+    - _PosicionLuz: {r: 1, g: 1, b: 0, a: 0}
     - _SPECULAR_COLOR: {r: 1, g: 1, b: 1, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _Specular: {r: 0, g: 0, b: 0, a: 0}

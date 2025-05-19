@@ -9,13 +9,13 @@ public class AudioManager : MonoBehaviour
     AudioSource source;
     public int FindAnimals = 0, FindLevers = 0, FailLevers=0;
     public float timer;
-    RevealingEffect revealingEffect; 
-    public bool usedA= false, usedL=false, levers = false;
+    //RevealingEffect revealingEffect; 
+    bool usedA= false, usedL=false, levers = false, extraNarrator= false;
     public bool Phase1=false;
     private void OnEnable()
     {
         source = GetComponent<AudioSource>();
-        revealingEffect = FindAnyObjectByType<RevealingEffect>();
+        //revealingEffect = FindAnyObjectByType<RevealingEffect>();
     }
     IEnumerator NarratorLines(int tiempo,int objetos)
     {
@@ -63,8 +63,9 @@ public class AudioManager : MonoBehaviour
             if (FindAnimals >= 1 && levers == false)
                 if (usedA == false)
                 { StartCoroutine(NarratorLines(5, 2)); usedA = true; }
-                else
-                { StartCoroutine(NarratorLines(7, 4)); }
+                else if (extraNarrator==false)
+                { StartCoroutine(NarratorLines(7, 4)); extraNarrator = true; }
+                else { }
             else { }
             
         if (FindLevers == 1 && usedL == false)

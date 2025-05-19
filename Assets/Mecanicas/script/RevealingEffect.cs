@@ -10,7 +10,7 @@ public class RevealingEffect : MonoBehaviour
     public bool OnOff = false;
     public AudioManager audioManager;
 
-    MeshRenderer LastMeshRenderer = null;
+    public MeshRenderer LastMeshRenderer;
     Dictionary<string, int> AnimalsKnown = new Dictionary<string,int>();
     int animal;
     private void Update()
@@ -53,19 +53,20 @@ public class RevealingEffect : MonoBehaviour
                 //Debug.Log("el material es "+ hit.collider.GetComponent<MeshRenderer>().material.name);
                 if (hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV" ||
                         hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV (Instance)"||
-                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_CabezaDelfin" ||
-                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_CabezaDelfin (Instance)" ||
-                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_CabezaAguila" ||
-                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_CabezaAguila (Instance)" ||
-                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_CabezaTigre" ||
-                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_CabezaTigre (Instance)" ||
-                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_CabezaOso" ||
-                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_CabezaOso (Instance)" ||
-                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_CabezaSapo" ||
-                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_CabezaSapo (Instance)"
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_Letra_D" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_Letra_D (Instance)" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_Letra_A" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_Letra_A (Instance)" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_Letra_T" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_Letra_T (Instance)" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_Letra_O" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_Letra_O (Instance)" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_Letra_S" ||
+                        hit.collider.GetComponent<MeshRenderer>().material.name == "M_Letra_S (Instance)"
                         )
                 {
-                        hit.collider.GetComponent<MeshRenderer>().enabled = true;
+                        //hit.collider.GetComponent<MeshRenderer>().enabled = true;
+                        Debug.Log("El Mesh renderer es "+ hit.collider.GetComponent<MeshRenderer>().name);
                         meshRenderer.material.SetFloat("_Aparicion",-light.intensity/*hit.distance*/);
                         meshRenderer.material.SetVector("_PosicionLuz", hit.point - hit.transform.position);// obtiene la posicion del rayo - posicion del objeto
                         detectado = true;
@@ -109,25 +110,36 @@ public class RevealingEffect : MonoBehaviour
 
                             LastMeshRenderer = meshRenderer;
                 }
-                //else if (hit.collider.GetComponent<MeshRenderer>().material.name != "M_PistaUV" && hit.collider.GetComponent<MeshRenderer>().material.name != "M_PistaUV (Instance)")
-                //{
-                //    //Debug.Log("no choca y es "+LastMeshRenderer);
 
-                //    if(LastMeshRenderer!=null)
-                //    {
-                //           // float floatGetter = LastMeshRenderer.material.GetFloat("_Aparicion");
-                //        LastMeshRenderer.material.SetFloat("_Aparicion",light.intensity);
-                //            //if (LastMeshRenderer.material.GetFloat("_Aparicion") <= floatGetter)
-                //            //    LastMeshRenderer.material.SetFloat("_Aparicion",floatGetter);
+                    else
+                    {
+                        detectado = false;
+                        if (LastMeshRenderer != null)
+                        {
+                            LastMeshRenderer.material.SetFloat("_Aparicion", -light.intensity);
+                            if (LastMeshRenderer.material.GetFloat("_Aparicion") >= 1)
+                                LastMeshRenderer.material.SetFloat("_Aparicion", 1);
+                            Debug.Log(LastMeshRenderer + " Existe");
+                        }
+                    }
+                        //else if (hit.collider.GetComponent<MeshRenderer>().material.name != "M_PistaUV" && hit.collider.GetComponent<MeshRenderer>().material.name != "M_PistaUV (Instance)")
+                        //{
+                        //    //Debug.Log("no choca y es "+LastMeshRenderer);
 
-                //            if (LastMeshRenderer.material.GetFloat("_Aparicion") <= 0)
-                //            LastMeshRenderer.material.SetFloat("_Aparicion", 0);
-                //    }
+                        //    if(LastMeshRenderer!=null)
+                        //    {
+                        //           // float floatGetter = LastMeshRenderer.material.GetFloat("_Aparicion");
+                        //        LastMeshRenderer.material.SetFloat("_Aparicion",light.intensity);
+                        //            //if (LastMeshRenderer.material.GetFloat("_Aparicion") <= floatGetter)
+                        //            //    LastMeshRenderer.material.SetFloat("_Aparicion",floatGetter);
 
-                    
-                //}
-            detectado = false;
-                    LastMeshRenderer.enabled = false;
+                        //            if (LastMeshRenderer.material.GetFloat("_Aparicion") <= 0)
+                        //            LastMeshRenderer.material.SetFloat("_Aparicion", 0);
+                        //    }
+
+
+                        //}
+
             }
 
              //Debug.DrawRay(transform.position, currentPointPosition, Color.green, light.range);
@@ -137,13 +149,13 @@ public class RevealingEffect : MonoBehaviour
              //   Debug.DrawRay(transform.position, currentPointPositionLeft + currentPointPositionDown, Color.green, light.range);
 
             }
-        else if (LastMeshRenderer != null)
-        {
-            LastMeshRenderer.material.SetFloat("_Aparicion", -light.intensity);
-            if (LastMeshRenderer.material.GetFloat("_Aparicion") <= 0)
-                LastMeshRenderer.material.SetFloat("_Aparicion", 0);
-            
-        }
+        //else if (LastMeshRenderer != null)
+        //{
+        //    LastMeshRenderer.material.SetFloat("_Aparicion", -light.intensity);
+        //    if (LastMeshRenderer.material.GetFloat("_Aparicion") >= 1)
+        //        LastMeshRenderer.material.SetFloat("_Aparicion", 1);
+        //    Debug.Log(LastMeshRenderer+" Existe");
+        //}
 
     }
     public void changeLight() //cambio de color de linterna
@@ -159,6 +171,8 @@ public class RevealingEffect : MonoBehaviour
                 ; meshRenderer.materials[1].color = Color.white;
                 meshRenderer.materials[1].SetColor("_EmissionColor", Color.white);
                 this.GetComponent<Light>().color = Color.white;
+                if (LastMeshRenderer != null)
+                    LastMeshRenderer.material.SetFloat("_Aparicion", 1);
             }
             else if (meshRenderer.materials[1].color == Color.white)
             {
@@ -179,6 +193,8 @@ public class RevealingEffect : MonoBehaviour
             meshRenderer.materials[1].SetColor("_EmissionColor", Color.black);
             this.GetComponent<Light>().color = Color.black;
             OnOff = false;
+            if (LastMeshRenderer != null)
+                LastMeshRenderer.material.SetFloat("_Aparicion", 1);
         }
         else
         {
