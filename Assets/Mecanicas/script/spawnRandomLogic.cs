@@ -65,9 +65,9 @@ public class spawnRandomLogic : MonoBehaviour
                     int value = Random.Range(0, objects.Length);
                     // una vez salga el numero revisar que este no haya salido antes
                     Debug.Log("aparecio " + objects[j]+ " es "+ objects[j].name+"(Clone)");
-                    if (FindAnyObjectByType<GameObject>().name != objects[j].name)
+                    if (FindAnyObjectByType<GameObject>().name != (objects[j].name+"(Clone)"))
                     { Instantiate(objects[j], pos[i].transform); objectsTotal += 1; Debug.Log(objectsTotal + " es el total"); break; }
-                    else if(FindAnyObjectByType<GameObject>().name == objects[j].name )
+                    else if(FindAnyObjectByType<GameObject>().name == (objects[j].name+"(Clone)") )
                     {
                         Debug.Log("encontro!!!");
                     }

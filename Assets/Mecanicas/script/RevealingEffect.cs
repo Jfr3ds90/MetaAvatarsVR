@@ -79,7 +79,7 @@ public class RevealingEffect : MonoBehaviour
                         {
                             AnimalsKnown.Add(LastMaterialName, 1);
                             audioManager.FindAnimals = AnimalsKnown.Count;
-                            audioManager.NarratorLines();
+                            audioManager.NarratorLinesActivation();
                             Debug.Log("paso");
                         }
                         else

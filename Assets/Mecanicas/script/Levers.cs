@@ -39,7 +39,7 @@ public class Levers : MonoBehaviour
             OnOff = true;
             piano.partiture(orderLevel);
             Debug.Log("palanca activa");
-            FindAnyObjectByType<AudioManager>().FindLevers += 1;
+            //FindAnyObjectByType<AudioManager>().FindLevers += 1;
         }
         else if (transformThis.rotation.z! <= -0.55f && OnOff == false) //estaba abajo, suelta abajo
         {
@@ -48,13 +48,13 @@ public class Levers : MonoBehaviour
         else if (transformThis.rotation.z >= -0.55f && OnOff == true)// estaba arriba y queda arriba
         { // no ocurre nada
             Debug.Log("palanca activa");
-            FindAnyObjectByType<AudioManager>().FindLevers += 1;
+            //FindAnyObjectByType<AudioManager>().FindLevers += 1;
         }
         else if (transformThis.rotation.z! <= -0.55f && OnOff == true)// estaba arriba y queda abajo
         {
             OnOff = false;
             piano.partiture(-1);
-            FindAnyObjectByType<AudioManager>().FindLevers -= 1;
+            //FindAnyObjectByType<AudioManager>().FindLevers -= 1;
             FindAnyObjectByType<AudioManager>().FailLevers +=1;
             Debug.Log("palanca inactiva");
         }
