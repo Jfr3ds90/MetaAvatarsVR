@@ -7,11 +7,13 @@ public class AudioManager : MonoBehaviour
 {
     public AudioClip[] Narrador;
     AudioSource source;
-    public int FindAnimals = 0, /*FindLevers = 0, */FailLevers=0;
+    public int FindAnimals = 0,FailLevers=0;
     public float timer;
     //RevealingEffect revealingEffect; 
-    bool usedA= false, usedL=false, levers = false, extraNarrator= false;
-    public bool Phase1=false,Phase2=false,Phase3=false, FindLevers=false,colide=false;
+    bool extra1= false, extra2 = false, extra3= false;
+    public bool usedL = false, FindLevers=false,colide=false;
+    public int action,moreAction;//reutilizar
+    public int ActualPhase = 0;
     //int contador=0;
     float temp = 0;
     private void OnEnable()
@@ -24,7 +26,7 @@ public class AudioManager : MonoBehaviour
         
         timer = 0;
         source.clip = Narrador[objetos - 1];
-        source.Play(); //1 al 9 fase 1|10 al 15 fase 2
+        source.Play(); //1 al 9 fase 1|10 al 14 fase 2|15 al 23 fase 3|24 al 29 fase 4|30 al 35 fase 5
 
         yield return new WaitForSeconds(tiempo);
     }
@@ -64,65 +66,206 @@ public class AudioManager : MonoBehaviour
     }
     private void Update()
     {
-       if (Phase1 == false)//cada vez que pase mucho tiempo sin interacción...
+        switch(ActualPhase)//cada vez que pase mucho tiempo sin interacción...
         {
-            timer += Time.deltaTime;
-            if (timer >= 30)
-                if (FindAnimals >= 1 && levers == false)
-                    if (usedA == false)
-                    { StartCoroutine(NarratorLines(4, 2)); usedA = true; }
-                    else if (extraNarrator == false)
-                    { StartCoroutine(NarratorLines(7, 4)); extraNarrator = true; }
-                    else { }
-                else { }
+            case 0:
+                timer += Time.deltaTime;
+                if (timer >= 30)
+                    if (FindAnimals >= 1 && extra2 == false)
+                        if (extra1 == false)
+                        { StartCoroutine(NarratorLines(4, 2)); extra1 = true; timer = 0; }
+                        else if (extra3 == false)
+                        { StartCoroutine(NarratorLines(7, 4)); extra3 = true; timer = 0; }
+                        else { }
+                break;
+            case 1:
+                timer += Time.deltaTime;
+                if (timer >= 30)
+                    switch (action)
+                    {
+                        case 1: break;
+                        case 2:
+                            StartCoroutine(NarratorLines(4, 12)); timer = 0;//tras ver los libros
+                            break;
+                        case 3:
+                            StartCoroutine(NarratorLines(4, 14)); timer = 0;//Despues de ver el DO
+                            break;
+                        default: break;
+                    }
+                break;
+            case 2:
+                timer += Time.deltaTime;
+                if (timer >= 30) 
+                {
+                    StartCoroutine(NarratorLines(2, 18));//opcion a de mucho tiempo sin hacer nada
+                    StartCoroutine(NarratorLines(4, 22));//opcion b de mucho tiempo sin hacer nada
+                    StartCoroutine(NarratorLines(5, 23));//opcion c de mucho tiempo sin hacer nada
+                    timer = 0;
+                }
+                    break;
+            case 3:
+                timer += Time.deltaTime;
+                if (timer >= 30) { }
+                break;
+            case 4:
+                timer += Time.deltaTime;
+                if (timer >= 30) { }
+                break;
+            case 5:
+                timer += Time.deltaTime;
+                if (timer >= 30) { }
+                break;
+        }    
+      
+        
+            
+                
 
            
-        }
+
+
+
+        
     }
     public void calls()
     {
-        if (Phase1 == false)//interior fase 1
+        timer = 0;
+        switch (ActualPhase)
         {
-            //linea 1 y 3 los hace la linterna
-            //linea 2 y 4 los hace por inactividad
+            case 0: //interior fase 1
+                if (FailLevers == 1 && usedL == true)//equivocarse en palancas
+                    { StartCoroutine(NarratorLines(7, 6)); }
 
-            if (FailLevers == 1 && usedL == true)//equivocarse en palancas
-            { StartCoroutine(NarratorLines(7, 6)); }
+                else if (FailLevers == 6 && usedL == true)//equivocarse en palancas
+                    { StartCoroutine(NarratorLines(5, 7)); }
 
-            else if (FailLevers == 6 && usedL == true)//equivocarse en palancas
-            { StartCoroutine(NarratorLines(5, 7)); }
-
-            if (colide == false)//sin colision
-            {
+                if (colide == false)//sin colision
+                    {
                
-            }
-            else//con colision
-            {
-                if (FindLevers == true && usedL == false)//encuentra palancas
+                    }
+                else//con colision
+                    {
+                if (usedL == false)//encuentra palancas
                 { StartCoroutine(NarratorLines(6, 5)); usedL = true; }
-            }
-        }
-        else if (Phase1 == true && Phase2==false)//interior fase 2 desde que se abre la puerta
-        {
-            if (colide == false)//sin colision
-            { 
-                StartCoroutine(NarratorLines(6, 8)); //se abre la puerta
-            }
-            else//con colision
-            {
-                StartCoroutine(NarratorLines(6, 9)); // pasar a la fase 2
-            }
-        }
-        else if (Phase1 == true && Phase2 == true && Phase3 == false)//interior fase 3 desde que se abre la puerta
-        {
-            if (colide == false)//sin colision
-            {
+                    }
+                    break;
+            case 1://fase una completada e interior fase 2 desde que se abre la puerta
+                if (colide == false)//sin colision
+                {
+                    StartCoroutine(NarratorLines(6, 8)); //se abre la puerta
+                }
+                else//con colision
+                {
+                    switch (action)
+                    {
+                        case 1: StartCoroutine(NarratorLines(4, 10));/*ver arte*/break;
+                        case 2: StartCoroutine(NarratorLines(3, 11));/*acercarse a los libros*/break;
+                        case 3: StartCoroutine(NarratorLines(4, 13));/*al ver el Do*/break;
+                        case 0: StartCoroutine(NarratorLines(6, 9)); /*pasar a la fase 2*/ break;
+                        default: break;
+                    }
+                }
+                break;
+            case 2://fase 2 completada e interior fase 3 desde que se abre la puerta|15 al 23 | 18 y 19 al transicionar de fase
+                if (colide == false)//sin colision
+                {
+                    switch(moreAction)
+                    {
+                        case 0:
+                            StartCoroutine(NarratorLines(6, 17)); //accionar la palanca
+                            moreAction += 1;
+                            break;
+                        case 1:
+                            StartCoroutine(NarratorLines(6, 20)); //una vez terminado el dialogo 17
+                            moreAction += 1;
+                            break;
+                    }
+           
+                }
+                else//con colision
+                {
+                    switch (action)
+                    {
+                        case 1:
+                            StartCoroutine(NarratorLines(4, 15)); //entrar a la sala 
+                            break;
+                        case 2:
+                            StartCoroutine(NarratorLines(4, 16)); //colocarse en frente de la palanca
+                            break;
+                        case 3:
+                            StartCoroutine(NarratorLines(4, 21)); //acercarse a los baños
+                            break;
+                    }    
+                }
+                break;
+            case 3://fase 3 completada e interior fase 4 desde que se abre la puerta | 24 a 29
+                if (colide == false)//sin colision
+                {
+                    switch(moreAction)
+                    {
+                        case 0:
+                            StartCoroutine(NarratorLines(4, 24));//una vez se abren ambas puertas
+                            break;
+                        case 1:
+                            StartCoroutine(NarratorLines(4, 26));//inmediatamente depues del dialogo de entrar
+                            break;
+                        case 2:
+                            StartCoroutine(NarratorLines(3, 28));//una vez hecho la figura
+                            moreAction += 1;
+                            break;
+                        case 3:
+                            StartCoroutine(NarratorLines(4, 29));//inmediatamente depues del dialogo anterior
+                            break;
+                    }            
+                }
+                else//con colision
+                {
+                    if (action == 0)
+                    {
+                        StartCoroutine(NarratorLines(4, 25));//en cuanto entran a una de las 2 salas
+                        moreAction += 1;
+                    }
+                }
+                break;
+            case 4://fase 4 completada e interior fase 5 desde que se abre la puerta | 30 al 35
+                if (colide == false)//sin colision
+                {
+                    switch (moreAction)
+                    {
+                        case 0:
+                            StartCoroutine(NarratorLines(5, 30));//una vez abierto por completo la caja fuerte
+                            break;
+                        case 1:
+                            StartCoroutine(NarratorLines(3, 31));//ya agarrado el USB
+                            break;
+                        case 2:
+                            StartCoroutine(NarratorLines(4, 33));//al enviar el archivo por primera vez (luego toca esperar que cargue para ver si se logro o no)
+                            break;
+                        case 3:
+                            StartCoroutine(NarratorLines(5, 34));//tras lograrlo al primer intento
+                            break;
+                        case 4:
+                            StartCoroutine(NarratorLines(3, 35));//tras lograrlo habiendo fallado por lo menos 1 vez
+                            break;
+                    }             
+                }
+                else//con colision
+                {
+                    if(action == 0)
+                    StartCoroutine(NarratorLines(3, 32));//al acercarse a los computadores de nuevo (ya encendidos)
+                }
+                break;
+            case 5://fase 5 completada
+                if (colide == false)//sin colision
+                {
 
-            }
-            else//con colision
-            {
+                }
+                else//con colision
+                {
 
-            }
-        }
+                }
+                break;
+        }   
+    
     }
 }

@@ -40,7 +40,9 @@ public class Piano : MonoBehaviour
 
                         //door.OpenDoor(door.orientation);
                         door.OpenDoorAct();
-                        FindAnyObjectByType<AudioManager>().calls(true);
+
+                        FindAnyObjectByType<AudioManager>().ActualPhase = 1;
+                        FindAnyObjectByType<AudioManager>().calls();
                         break;
                     }
                 }
