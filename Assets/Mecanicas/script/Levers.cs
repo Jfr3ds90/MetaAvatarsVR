@@ -13,7 +13,7 @@ public class Levers : MonoBehaviour
     }
     private void Update()
     {
-        //z = transform.rotation.z;
+        z = transform.rotation.z;
         //Debug.Log(transformThis.rotation.z);
         //if (transformThis.rotation.z <= -0.5f && OnOff == false)
         //{
@@ -27,27 +27,35 @@ public class Levers : MonoBehaviour
         //    piano.partiture(-1);
         //    Debug.Log("palanca inactiva");
         //}
+        //Debug.Log(transformThis.rotation.x + " " + transformThis.rotation.y + " " + transformThis.rotation.z);
+        if (Input.GetKeyDown(KeyCode.E))
+            actionLever();
     }
     public void actionLever()
     {
-        if (transformThis.rotation.z <= -0.45f && OnOff == false)//estaba abajo, suelta arriba y es correcto
+        
+        if (transformThis.rotation.z >= -0.55f && OnOff == false)//estaba abajo, suelta arriba y es correcto
         {
             OnOff = true;
             piano.partiture(orderLevel);
             Debug.Log("palanca activa");
+            //FindAnyObjectByType<AudioManager>().FindLevers += 1;
         }
-        else if (transformThis.rotation.z! >= -0.45f && OnOff == false) //estaba abajo, suelta abajo
+        else if (transformThis.rotation.z! <= -0.55f && OnOff == false) //estaba abajo, suelta abajo
         {
             Debug.Log("palanca inactiva");
         }
-        else if (transformThis.rotation.z <= -0.45f && OnOff == true)// estaba arriba y queda arriba
+        else if (transformThis.rotation.z >= -0.55f && OnOff == true)// estaba arriba y queda arriba
         { // no ocurre nada
             Debug.Log("palanca activa");
+            //FindAnyObjectByType<AudioManager>().FindLevers += 1;
         }
-        else if (transformThis.rotation.z! >= -0.45f && OnOff == true)// estaba arriba y queda abajo
+        else if (transformThis.rotation.z! <= -0.55f && OnOff == true)// estaba arriba y queda abajo
         {
             OnOff = false;
             piano.partiture(-1);
+            //FindAnyObjectByType<AudioManager>().FindLevers -= 1;
+            FindAnyObjectByType<AudioManager>().FailLevers +=1;
             Debug.Log("palanca inactiva");
         }
     }

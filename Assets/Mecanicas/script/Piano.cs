@@ -5,7 +5,21 @@ public class Piano : MonoBehaviour
     public int[] notes;
     private int noteAction = 0;
     public Switch door;
-    
+
+    private void Update()
+    {
+        if(Input.GetKeyUp(KeyCode.Alpha0))
+        partiture(0);
+        if (Input.GetKeyUp(KeyCode.Alpha1))
+            partiture(1);
+        if (Input.GetKeyUp(KeyCode.Alpha2))
+            partiture(2);
+        if (Input.GetKeyUp(KeyCode.Alpha3))
+            partiture(3);
+        if (Input.GetKeyUp(KeyCode.Alpha4))
+            partiture(4);
+
+    }
     public GameObject action;
     public void partiture(int pressed)
     {
@@ -21,11 +35,15 @@ public class Piano : MonoBehaviour
                     Debug.Log("completo");
                     if (action !=null)
                     {
-                        if(door==null)
-                            door=GetComponent<Switch>();
+                        //if(door==null)
+                          //  door=GetComponent<Switch>();
 
                         //door.OpenDoor(door.orientation);
                         door.OpenDoorAct();
+
+                        FindAnyObjectByType<AudioManager>().ActualPhase = 1;
+                        FindAnyObjectByType<AudioManager>().calls();
+                        break;
                     }
                 }
                 break;
