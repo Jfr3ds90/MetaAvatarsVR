@@ -9,8 +9,13 @@ public class AreaDetectorAudio : MonoBehaviour
 
         if(other.tag=="Player")
         {
-            audio.action = extra;
+            if (/*de fase 1*/ audio.usedL == true && phase == 0 ||
+    audio.ActualPhase==phase)
+            {
+                audio.action = extra;
             audio.colide = true; audio.calls();
+            }
+
         }
         
     }
@@ -19,7 +24,8 @@ public class AreaDetectorAudio : MonoBehaviour
         var audio = FindAnyObjectByType<AudioManager>();
         if (other.tag == "Player")           
         audio.colide = false;
-        if (/*de fase 1*/ audio.usedL==true&& phase==0||/*de fase 2*/ audio.ActualPhase==1 && phase == 1 ||/*de fase 3*/audio.ActualPhase == 2 && phase == 2)
+        if (/*de fase 1*/ audio.usedL==true&& phase==0||
+            audio.ActualPhase==phase)
         this.gameObject.SetActive(false);
     }
 }

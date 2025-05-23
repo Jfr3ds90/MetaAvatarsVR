@@ -7,32 +7,39 @@ public class DetectorObjectPos : MonoBehaviour
  //cada objeto debe tener una ID para identificar en que pos va | cada objeto tendra su codigo con su bool
     public ObjectPos[] objectPos;
     public Switch door;
+    bool activated = false;
     public void orderSolution()
     {
-        int totalCorrect = 0;
-        for (int i = 0; i < objectPos.Length; i++) 
+        if(activated== false) 
         {
-            if (objectPos[i].correctPos == true)
+            int totalCorrect = 0;
+            for (int i = 0; i < objectPos.Length; i++)
             {
-                totalCorrect++;
-            }
-            else 
-            {
+                if (objectPos[i].correctPos == true)
+                {
+                    totalCorrect++;
+                }
+                else
+                {
 
+                }
+            }
+            if (totalCorrect == objectPos.Length && door != null)
+            {
+                Debug.Log("Correct placed order");
+                if (door != null)
+                    door.OpenDoorAct();
+                FindAnyObjectByType<AudioManager>().ActualPhase = 2;
+                activated = true;
+            }
+            else if (totalCorrect == objectPos.Length && door == null)
+            {
+                MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
+                meshRenderer.materials[0].SetColor("_EmissionColor", Color.green);
+                meshRenderer.materials[0].SetColor("_BaseColor", Color.green);
             }
         }
-        if (totalCorrect == objectPos.Length && door!=null)
-        {
-            Debug.Log("Correct placed order");
-            if(door!=null)
-            door.OpenDoorAct();   
-        }
-        else if(totalCorrect == objectPos.Length && door == null)
-        {
-            MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
-            meshRenderer.materials[0].SetColor("_EmissionColor", Color.green);
-            meshRenderer.materials[0].SetColor("_BaseColor", Color.green);
-        }
+        
     }
     private void Update()
     {
