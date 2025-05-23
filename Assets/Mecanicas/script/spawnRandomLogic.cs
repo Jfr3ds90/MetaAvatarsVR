@@ -9,6 +9,8 @@ public class spawnRandomLogic : MonoBehaviour
     public Vector2 TotalArea;
     public GameObject[,] squares;
     public Vector2[] Value;
+    public Material[] Arte;
+    public GameObject CuadroPos;
     private void Awake()
     {
         //squares = new GameObject[Mathf.RoundToInt(TotalArea.x),Mathf.RoundToInt(TotalArea.y)];
@@ -82,5 +84,10 @@ public class spawnRandomLogic : MonoBehaviour
             if (i == pos.Length&& objects.Length != objectsTotal)
                 i = 0;
         }
+    }
+    void changeM()
+    {
+        int randomvalue = Random.Range(0, Arte.Length);
+        CuadroPos.GetComponent<Renderer>().material = Arte[randomvalue];
     }
 }
