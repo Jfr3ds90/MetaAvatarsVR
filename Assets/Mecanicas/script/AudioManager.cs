@@ -1,3 +1,4 @@
+using Fusion.Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
@@ -116,16 +117,6 @@ public class AudioManager : MonoBehaviour
                 if (timer >= 30) { }
                 break;
         }    
-      
-        
-            
-                
-
-           
-
-
-
-        
     }
     public void calls()
     {
@@ -169,15 +160,16 @@ public class AudioManager : MonoBehaviour
             case 2://fase 2 completada e interior fase 3 desde que se abre la puerta|15 al 23 | 18 y 19 al transicionar de fase
                 if (colide == false)//sin colision
                 {
-                    switch(moreAction)
+                    switch(moreAction)//REVISAR
                     {
                         case 0:
                             StartCoroutine(NarratorLines(6, 17)); //accionar la palanca
-                            moreAction += 1;
-                            break;
-                        case 1:
+                            Debug.Log("Termino dialogo 17");
+
                             StartCoroutine(NarratorLines(6, 20)); //una vez terminado el dialogo 17
-                            moreAction += 1;
+                            ActualPhase = 3;
+                            moreAction = 0;
+                            Debug.Log("fase actual " + ActualPhase +" extra "+ moreAction);
                             break;
                     }
            
