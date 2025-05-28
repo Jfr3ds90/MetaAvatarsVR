@@ -11,7 +11,7 @@ public class BaseVideoController : MonoBehaviour
     [SerializeField] protected Texture2D _staticImage;
     [SerializeField] protected RenderTexture _videoTexture;
     [SerializeField] protected string _videoID;
-    [SerializeField] protected string _videoPath;
+    //[SerializeField] protected string _videoPath;
     //[SerializeField] protected const string URL_BASE = "https://drive.google.com/uc?export=download&id=";
     
 
@@ -19,7 +19,7 @@ public class BaseVideoController : MonoBehaviour
     {
         _videoPlayer = GetComponent<VideoPlayer>();
         //_videoPlayer.url = URL_BASE+_videoID;
-        _videoPlayer.url = Application.streamingAssetsPath + "/Video/" + _videoPath;
+        _videoPlayer.url = Application.streamingAssetsPath + "/Videos/" + _videoID;
     }
 
     protected virtual void Start()
