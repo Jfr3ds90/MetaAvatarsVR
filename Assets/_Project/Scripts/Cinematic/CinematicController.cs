@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using FadeSystem;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,8 +23,13 @@ public class CinematicController : MonoBehaviour
     [Header("PlayableDirector")]
     [SerializeField] private GameObject _playableDirector;
 
+    [Header("Fade Managre")] 
+    [SerializeField] private FadeManager _fadeManager;
+    [SerializeField] private FadeConfig _fadeConfig;
+
     private void Start()
     {
+        _fadeManager = FadeManager.Instance;
         if (_typewriterEffect != null)
         {
             WaitTexts();
@@ -41,8 +47,13 @@ public class CinematicController : MonoBehaviour
         await _typewriterEffect.StartSequence();
         await UniTask.WaitForSeconds(_delayToStart);
         _typewriterEffect.gameObject.SetActive(false);
-        Color c = new Color(0, 0, 0, 0);
-        _imageFade.color = c;
+       
+        _fadeManager.FadeImage(_imageFade, _fadeConfig, OnActivePlayable());
+    }
+
+    private FadeCallbacks OnActivePlayable()
+    {
         _playableDirector.SetActive(true);
+        return null;
     }
 }

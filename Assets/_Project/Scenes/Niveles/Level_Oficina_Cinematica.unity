@@ -68517,6 +68517,39 @@ MonoBehaviour:
   _fadeTime: 1.5
   _typewriterEffect: {fileID: 1596072836}
   _playableDirector: {fileID: 1683040031}
+  _fadeManager: {fileID: 0}
+  _fadeConfig:
+    duration: 3
+    easeType: 1
+    direction: 1
+    delay: 0
+    customCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    ignoreTimeScale: 0
+    targetAlpha: 0
+    startAlpha: 1
 --- !u!1001 &1891370421
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -78456,7 +78489,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5756349304147833491, guid: c9cef77b47806d249b55ede4a047e374, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -78478,7 +78511,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 656467876758521686, guid: 992b89bb99673fa43a553f06c2c65c3d, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3265726921418691172, guid: 992b89bb99673fa43a553f06c2c65c3d, type: 3}
       propertyPath: m_Name
@@ -78490,7 +78523,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5148647851959965722, guid: 992b89bb99673fa43a553f06c2c65c3d, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5593986837856887686, guid: 992b89bb99673fa43a553f06c2c65c3d, type: 3}
       propertyPath: m_LocalPosition.x
