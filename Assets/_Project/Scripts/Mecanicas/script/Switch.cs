@@ -45,7 +45,7 @@ public class Switch : MonoBehaviour
     public void OpenDoor(bool value)
     {
         animator.SetBool("Close_",false);
-        animator.SetBool("Right_",true);
+        animator.SetBool("Right_",value);
         animator.SetTrigger("Activation_");
 
         //if (value == true)
@@ -77,6 +77,12 @@ public class Switch : MonoBehaviour
         if (GetComponent<AudioSource>() != null)
             GetComponent<AudioSource>().Play(0);        
     }
+    public void CloseDoorAct()
+    {
+        animator.SetBool("Close_", true);
+        animator.SetBool("Right_", orientation);
+        animator.SetTrigger("Activation_");
+    }
     void orientationDoor(bool val)
     {
         if (val==true)
@@ -96,7 +102,11 @@ public class Switch : MonoBehaviour
     }
     public void changeColor()
     {
+        if (mat!=null)
+        {
         mat.materials[0].SetColor("_EmissionColor", Color.green);
-        mat.materials[0].SetColor("_BaseColor", Color.green); ;
+        mat.materials[0].SetColor("_BaseColor", Color.green); 
+        }
+       
     }
 }

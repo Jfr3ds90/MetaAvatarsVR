@@ -4,6 +4,7 @@ public class AreaDetectorAudio : MonoBehaviour
 {
     public int phase,extra;//phase sirve para saberde que fase es, es solo para lectura
     public bool keyDoor,orientation;
+    public Switch door;
     private void OnTriggerEnter(Collider other)
     {
         var audio= FindAnyObjectByType<AudioManager>();
@@ -32,6 +33,12 @@ public class AreaDetectorAudio : MonoBehaviour
             audio.colide = false;
             this.gameObject.SetActive(false);
         }
+
+        /*if (door!=null)
+        {
+            //cerrar puerta
+            door.CloseDoorAct();
+        }*/
         
     }
     //private void OnTriggerExit(Collider other)

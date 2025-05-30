@@ -8,9 +8,13 @@ public class simpleKey : MonoBehaviour
     {
       var animator = door.GetComponent<Animator>();
         //var sound = door.GetComponent<AudioSource>();
-        animator.SetBool("Close_", false);
+        if(right == true)
+        {
+    animator.SetBool("Close_", false);
         animator.SetBool("Right_", right);
         animator.SetTrigger("Activation_");
+        }
+        
         //if (sound != null)
         //    sound.Play(0);
 
