@@ -5,6 +5,8 @@ public class MainFigure : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public List<Vector3> sizeExample,realFigure;
+    //hacer una lista de los valores correctos
+    //checkear que esos valores sean iguales a los del checkR
     private void Awake()
     {
         sizeExample.Clear();
@@ -14,15 +16,15 @@ public class MainFigure : MonoBehaviour
         if (!sizeExample.Contains(new Vector3(x, y, z)))
             sizeExample.Add(new Vector3(x, y, z));
 
-        //Debug.Log(mainFigure.sizeExample.Count+" es la cantidad");
+        Debug.Log(sizeExample.Count+" es la cantidad");
         for (int i = 0; i < sizeExample.Count; i++) //reviza si la coordenada existe
         {
-            Debug.Log(sizeExample[i].ToString() + " esta en la lista");
+            //Debug.Log(sizeExample[i].ToString() + " esta en la lista");
 
-            Debug.Log("esta en: " + i);
+            //Debug.Log("esta en: " + i);
         }
     }
-    public void CheckResult()
+    /*public void CheckResult()
     {
         int completed = 0;
         for (int i = 0; i < realFigure.Count; i++)
@@ -32,5 +34,10 @@ public class MainFigure : MonoBehaviour
         }
         if (completed == realFigure.Count)
             Debug.Log("FIGURA HECHA");
+
+    }*/
+    public void CheckR(int x,int y,int z)
+    {
+        Debug.Log("La pieza esta en ("+x+","+y + "," + z +")");
     }
 }

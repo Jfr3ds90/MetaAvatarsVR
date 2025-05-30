@@ -8,9 +8,11 @@ public class CubeFigure : MonoBehaviour
 {
     //public static Transform[,,] exampleTiles;
     MainFigure mainFigure;
-    public int xValue, yValue,zValue;
+    public int xValue, yValue,zValue,mxValue,myValue,mzValue;
     int Lastvalue = 0;
     public Vector3 location;
+    public bool scanned;
+    public int scannedTimes;
     //public static int upCon, downCon, leftCon, rightCon, frontCon, backCon;
     // tecnicamente por ahora servira con cualquier cosa que se forme pero con la cantidad de conexiones correctas
     private void Awake()
@@ -28,7 +30,10 @@ public class CubeFigure : MonoBehaviour
         //GeneralCheck();
         //Check();
         if (Input.GetKeyUp(KeyCode.L))
-        { mainFigure.CheckResult(); }
+        { mainFigure.AddCoord(xValue,yValue,zValue);mainFigure.CheckR(xValue, yValue, zValue);
+            for (int i = 0; i < mainFigure.sizeExample.Count; i++)
+                Debug.Log("coordenada guardada " + mainFigure.sizeExample[i]);
+        }
         if (Input.GetKeyUp(KeyCode.R))
             Check();
     }
@@ -97,15 +102,111 @@ public class CubeFigure : MonoBehaviour
 
             if (hit.collider.GetComponent<CubeFigure>() != null)
             {
-                //hit.collider.GetComponent<CubeFigure>().Check();
-                //example[,,] = hit.collider.GetComponent<GameObject>();
-                //Vector3 detect = new Vector3(hit.point.x,hit.point.y,hit.point.z);
                 /*hit.collider.*/GetComponent<Rigidbody>().isKinematic = true;
-                hit.collider.GetComponent<CubeFigure>().CheckBase();
-                //transform.position += (detect-transform.position);
-                //Debug.Log(detect - transform.position+" diferencia");
-                //Debug.Log("cubo encontrado");
+                //if(hit.collider.GetComponent<CubeFigure>().scanned==false)
+                //hit.collider.GetComponent<CubeFigure>().CheckBase();
+                location = new Vector3(/*hit.collider.GetComponent<CubeFigure>().location.x +*/ xValue,
+/*hit.collider.GetComponent<CubeFigure>().location.y +*/ yValue,
+/*hit.collider.GetComponent<CubeFigure>().location.z +*/ zValue);
+
             }
+        }
+        Debug.DrawRay(transform.position, transform.up, Color.green, 1f);
+        Debug.DrawRay(transform.position, -transform.up, Color.red, 1f);
+        Debug.DrawRay(transform.position, transform.right, Color.blue, 1f);
+        Debug.DrawRay(transform.position, -transform.right, Color.yellow, 1f);
+        Debug.DrawRay(transform.position, transform.forward, Color.magenta, 1f);
+        Debug.DrawRay(transform.position, -transform.forward, Color.gray, 1f);
+
+        if (Physics.Raycast(transform.position, transform.up, out hit, 0.3f) && hit.collider.GetComponent<CubeFigure>() != null)
+        {   //example[0, 0, 1] = hit.collider.GetComponent<GameObject>();
+            /* Debug.Log(example[0, 0,1] + " parte de la matris");*/
+            hit.collider.GetComponent<Transform>().rotation = transform.rotation;
+            hit.collider.GetComponent<Transform>().position = transform.position + new Vector3(0f, 0.2f, 0f);
+            hit.collider.GetComponent<CubeFigure>().yValue++;
+            //hit.collider.GetComponent<CubeFigure>().location += new Vector3(0, location.y, 0);
+            location += new Vector3(0, hit.collider.GetComponent<CubeFigure>().location.y, 0);
+            hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
+
+        }
+        //else
+        //{ up = false; upCon--; }
+
+        if (Physics.Raycast(transform.position, transform.right, out hit, 0.3f) && hit.collider.GetComponent<CubeFigure>() != null)
+        {
+            // example[1, 0, 0] = hit.collider.GetComponent<GameObject>();
+            /*Debug.Log(example[1, 0, 0] + " parte de la matris");*/
+            hit.collider.GetComponent<Transform>().rotation = transform.rotation;
+            hit.collider.GetComponent<Transform>().position = transform.position + new Vector3(0.2f, 0f, 0f);
+            hit.collider.GetComponent<CubeFigure>().xValue++;
+            //hit.collider.GetComponent<CubeFigure>().location += new Vector3(location.x, 0, 0);
+             location+= new Vector3(hit.collider.GetComponent<CubeFigure>().location.x, 0, 0);
+            hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
+
+        }
+        //else
+        //{ right = false; rightCon--; }
+
+        if (Physics.Raycast(transform.position, transform.forward, out hit, 0.3f) && hit.collider.GetComponent<CubeFigure>() != null)
+        {
+            //example[0, 1, 0] = hit.collider.GetComponent<GameObject>();
+            /*Debug.Log(example[0, 1, 0] + " parte de la matris");*/
+            hit.collider.GetComponent<Transform>().rotation = transform.rotation;
+            hit.collider.GetComponent<Transform>().position = transform.position + new Vector3(0f, 0f, 0.2f);
+            hit.collider.GetComponent<CubeFigure>().zValue++;
+            //hit.collider.GetComponent<CubeFigure>().location += new Vector3(0, 0, location.z);
+            location += new Vector3(0, 0, hit.collider.GetComponent<CubeFigure>().location.z);
+            hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
+
+        }
+        //else
+        //{ front = false; frontCon--; }
+
+        if (Physics.Raycast(transform.position, -transform.up, out hit, 0.3f) && hit.collider.GetComponent<CubeFigure>() != null)
+        {
+            //example[0, 0, -1] = hit.collider.GetComponent<GameObject>(); 
+            /*Debug.Log(example[0, 0, -1] + " parte de la matris")*/
+            ;
+            hit.collider.GetComponent<Transform>().rotation = transform.rotation;
+            hit.collider.GetComponent<Transform>().position = transform.position + new Vector3(0f, -0.2f, 0f);
+            hit.collider.GetComponent<CubeFigure>().yValue--;
+            //hit.collider.GetComponent<CubeFigure>().myValue++;
+            hit.collider.GetComponent<CubeFigure>().location += new Vector3(0, location.y, 0);
+            location += new Vector3(0, hit.collider.GetComponent<CubeFigure>().location.y, 0);
+            hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
+
+        }
+        //else
+        //{ down = false; downCon--; }
+
+        if (Physics.Raycast(transform.position, -transform.right, out hit, 0.3f) && hit.collider.GetComponent<CubeFigure>() != null)
+        {
+            //example[-1, 0, 0] = hit.collider.GetComponent<GameObject>();
+            /*Debug.Log(example[-1, 0, 0] + " parte de la matris");*/
+            hit.collider.GetComponent<Transform>().rotation = transform.rotation;
+            hit.collider.GetComponent<Transform>().position = transform.position + new Vector3(-0.2f, 0f, 0f);
+            hit.collider.GetComponent<CubeFigure>().xValue--;
+            //hit.collider.GetComponent<CubeFigure>().mxValue++;
+            hit.collider.GetComponent<CubeFigure>().location += new Vector3(location.x, 0, 0);
+            location += new Vector3(hit.collider.GetComponent<CubeFigure>().location.x,0, 0);
+            hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
+
+        }
+        //else
+        //{ left = false; leftCon--; }
+
+        if (Physics.Raycast(transform.position, -transform.forward, out hit, 0.3f) && hit.collider.GetComponent<CubeFigure>() != null)
+        {
+            //example[0, -1, 0] = hit.collider.GetComponent<GameObject>();
+            /*Debug.Log(example[0,-1,0] + " parte de la matris");*/
+            hit.collider.GetComponent<Transform>().rotation = transform.rotation;
+            hit.collider.GetComponent<Transform>().position = transform.position + new Vector3(0f, 0f, -0.2f);
+            hit.collider.GetComponent<CubeFigure>().zValue--;
+            //hit.collider.GetComponent<CubeFigure>().mzValue++;
+            hit.collider.GetComponent<CubeFigure>().location += new Vector3(0, 0, location.z);
+            location += new Vector3(0, 0, hit.collider.GetComponent<CubeFigure>().location.z);
+            hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
+
         }
     }
     public void CheckBase() //revizar contacto desde el que estaba (es mejor asi para que la posicion dependa de este y no sea manipulado al rotarse)
@@ -126,7 +227,9 @@ public class CubeFigure : MonoBehaviour
             hit.collider.GetComponent<Transform>().rotation = transform.rotation ;
             hit.collider.GetComponent<Transform>().position = transform.position + new Vector3(0f,0.2f,0f) ;
             hit.collider.GetComponent<CubeFigure>().yValue++;
-            
+            hit.collider.GetComponent<CubeFigure>().location += new Vector3(0,location.y,0);
+            hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
+
         }
         //else
         //{ up = false; upCon--; }
@@ -138,6 +241,9 @@ public class CubeFigure : MonoBehaviour
             hit.collider.GetComponent<Transform>().rotation = transform.rotation;
             hit.collider.GetComponent<Transform>().position = transform.position + new Vector3(0.2f, 0f, 0f);
             hit.collider.GetComponent<CubeFigure>().xValue++;
+            hit.collider.GetComponent<CubeFigure>().location += new Vector3(location.x, 0, 0);
+            hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
+
         }
         //else
         //{ right = false; rightCon--; }
@@ -149,6 +255,9 @@ public class CubeFigure : MonoBehaviour
             hit.collider.GetComponent<Transform>().rotation = transform.rotation;
             hit.collider.GetComponent<Transform>().position = transform.position + new Vector3(0f, 0f, 0.2f);
             hit.collider.GetComponent<CubeFigure>().zValue++;
+            hit.collider.GetComponent<CubeFigure>().location += new Vector3(0, 0, location.z);
+            hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
+
         }
         //else
         //{ front = false; frontCon--; }
@@ -160,7 +269,10 @@ public class CubeFigure : MonoBehaviour
             ;
             hit.collider.GetComponent<Transform>().rotation = transform.rotation;
             hit.collider.GetComponent<Transform>().position = transform.position + new Vector3(0f, -0.2f, 0f);
-            hit.collider.GetComponent<CubeFigure>().xValue--;
+            hit.collider.GetComponent<CubeFigure>().yValue--;
+            hit.collider.GetComponent<CubeFigure>().location += new Vector3(0, location.y, 0);
+            hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
+
         }
         //else
         //{ down = false; downCon--; }
@@ -171,7 +283,10 @@ public class CubeFigure : MonoBehaviour
             /*Debug.Log(example[-1, 0, 0] + " parte de la matris");*/
             hit.collider.GetComponent<Transform>().rotation = transform.rotation;
             hit.collider.GetComponent<Transform>().position = transform.position + new Vector3(-0.2f, 0f, 0f);
-            hit.collider.GetComponent<CubeFigure>().yValue--;
+            hit.collider.GetComponent<CubeFigure>().xValue--;
+            hit.collider.GetComponent<CubeFigure>().location += new Vector3(location.x, 0, 0);
+            hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
+
         }
         //else
         //{ left = false; leftCon--; }
@@ -183,7 +298,10 @@ public class CubeFigure : MonoBehaviour
             hit.collider.GetComponent<Transform>().rotation = transform.rotation;
             hit.collider.GetComponent<Transform>().position = transform.position + new Vector3(0f, 0f, -0.2f);
             hit.collider.GetComponent<CubeFigure>().zValue--;
-        } 
+            hit.collider.GetComponent<CubeFigure>().location += new Vector3(0, 0, location.z);
+            hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
+
+        }
         /*if(xValue- hit.collider.GetComponent<CubeFigure>().location.x==0)
         { if (xValue == -1) xValue = 0;
             else hit.collider.GetComponent<CubeFigure>().location.x = 0;
@@ -196,11 +314,9 @@ public class CubeFigure : MonoBehaviour
         { if (zValue == -1) zValue = 0;
             else hit.collider.GetComponent<CubeFigure>().location.z = 0;
         }*/
-        Debug.Log(hit.collider.GetComponent<CubeFigure>().location + "ubicacion del otro");
-        location = new Vector3(/*hit.collider.GetComponent<CubeFigure>().location.x +*/ xValue,
-        /*hit.collider.GetComponent<CubeFigure>().location.y +*/ yValue, 
-        /*hit.collider.GetComponent<CubeFigure>().location.z +*/ zValue);
        
+
+        scanned = true;
         Debug.Log(this+" esta ubicacion en "+location);
 
     }
