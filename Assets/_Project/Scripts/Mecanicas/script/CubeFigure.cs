@@ -30,9 +30,10 @@ public class CubeFigure : MonoBehaviour
         //GeneralCheck();
         //Check();
         if (Input.GetKeyUp(KeyCode.L))
-        { mainFigure.AddCoord(xValue,yValue,zValue);mainFigure.CheckR(xValue, yValue, zValue);
-            for (int i = 0; i < mainFigure.sizeExample.Count; i++)
-                Debug.Log("coordenada guardada " + mainFigure.sizeExample[i]);
+        {
+            mainFigure.AddCoord(xValue,yValue,zValue, scannedTimes);mainFigure.CheckR();
+          /* for (int i = 0; i < mainFigure.sizeExample.Count; i++)
+                Debug.Log("coordenada guardada " + mainFigure.sizeExample[i]);*/
         }
         if (Input.GetKeyUp(KeyCode.R))
             Check();
@@ -108,7 +109,7 @@ public class CubeFigure : MonoBehaviour
                 location = new Vector3(/*hit.collider.GetComponent<CubeFigure>().location.x +*/ xValue,
 /*hit.collider.GetComponent<CubeFigure>().location.y +*/ yValue,
 /*hit.collider.GetComponent<CubeFigure>().location.z +*/ zValue);
-
+                mainFigure.fastSolution();
             }
         }
         Debug.DrawRay(transform.position, transform.up, Color.green, 1f);

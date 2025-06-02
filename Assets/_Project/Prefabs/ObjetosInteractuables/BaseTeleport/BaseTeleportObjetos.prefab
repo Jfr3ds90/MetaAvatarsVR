@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3811917365083466926}
   - component: {fileID: 994796358524876509}
   - component: {fileID: -5281034975436258854}
+  - component: {fileID: 8196368516757318039}
   m_Layer: 0
   m_Name: BaseTeleportObjetos
   m_TagString: Untagged
@@ -110,3 +111,17 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 5644442296682388402, guid: 702357221af4cb04998a8ca37678c47e, type: 3}
+--- !u!114 &8196368516757318039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8124637483018737106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 771816c19a9510b4a8eeae9b039fe69b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Destination: {fileID: 0}
+  door: {fileID: 0}

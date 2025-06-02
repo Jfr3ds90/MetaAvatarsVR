@@ -22,7 +22,9 @@ public class PortalObjects : MonoBehaviour
             if (door != null)
                 door.OpenDoorAct();
         }
-        activation = false;
+        else
+            activation = false;
+            activation = false;
     }
     public void InterruptorButton()
     {
