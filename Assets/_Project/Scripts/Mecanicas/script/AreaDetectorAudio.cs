@@ -3,14 +3,12 @@ using UnityEngine;
 public class AreaDetectorAudio : MonoBehaviour
 {
     public int phase,extra;//phase sirve para saberde que fase es, es solo para lectura
-    public bool keyDoor,orientation;
+    public bool orientation;
     public Switch door;
     private void OnTriggerEnter(Collider other)
     {
         var audio= FindAnyObjectByType<AudioManager>();
 
-        if(keyDoor==false)
-        {
             if(other.tag=="Player")
             {
                 if (/*de fase 1*/ audio.usedL == true && phase == 0 ||
@@ -24,15 +22,7 @@ public class AreaDetectorAudio : MonoBehaviour
                 }
 
             }
-        }
-        else
-        {
-            audio.action = extra;
-            audio.colide = true; audio.calls();
 
-            audio.colide = false;
-            this.gameObject.SetActive(false);
-        }
 
         /*if (door!=null)
         {

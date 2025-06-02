@@ -2333,7 +2333,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   phase: 1
   extra: 0
-  keyDoor: 0
   orientation: 0
   door: {fileID: 0}
 --- !u!65 &67146721
@@ -12350,7 +12349,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6081908630723628686, guid: fa6d8211b3abfd542ab2582069c6956e, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6085154737973041507, guid: fa6d8211b3abfd542ab2582069c6956e, type: 3}
       propertyPath: m_LocalPosition.y
@@ -20279,7 +20278,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   phase: 2
   extra: 1
-  keyDoor: 0
   orientation: 0
   door: {fileID: 0}
 --- !u!65 &515248925
@@ -28731,7 +28729,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   phase: 2
   extra: 2
-  keyDoor: 0
   orientation: 0
   door: {fileID: 0}
 --- !u!65 &743334363
@@ -36586,7 +36583,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   phase: 3
   extra: 0
-  keyDoor: 1
   orientation: 1
   door: {fileID: 0}
 --- !u!65 &983637353
@@ -39312,7 +39308,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   phase: 1
   extra: 3
-  keyDoor: 0
   orientation: 0
   door: {fileID: 0}
 --- !u!65 &1039708145
@@ -48722,7 +48717,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   phase: 1
   extra: 1
-  keyDoor: 0
   orientation: 0
   door: {fileID: 0}
 --- !u!65 &1228249168
@@ -48802,7 +48796,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   phase: 4
   extra: 0
-  keyDoor: 0
   orientation: 0
   door: {fileID: 0}
 --- !u!65 &1231657730
@@ -49488,7 +49481,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   phase: 0
   extra: 0
-  keyDoor: 0
   orientation: 0
   door: {fileID: 0}
 --- !u!1001 &1249394732
@@ -55112,9 +55104,12 @@ MonoBehaviour:
   sizeExample: []
   realFigure:
   - {x: 0, y: 0, z: 0}
+  - {x: -1, y: 0, z: 0}
   - {x: 1, y: 0, z: 0}
-  - {x: 1, y: 0, z: 1}
-  - {x: 1, y: 1, z: 1}
+  - {x: 0, y: 0, z: -1}
+  - {x: -1, y: 0, z: 1}
+  - {x: 0, y: -1, z: 0}
+  - {x: 0, y: 1, z: 1}
 --- !u!1001 &1380271297
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -60503,7 +60498,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   phase: 1
   extra: 2
-  keyDoor: 0
   orientation: 0
   door: {fileID: 0}
 --- !u!65 &1511557495
@@ -76155,7 +76149,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   phase: 3
   extra: 0
-  keyDoor: 1
   orientation: 0
   door: {fileID: 234456857}
 --- !u!65 &1949890851
@@ -77670,7 +77663,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   phase: 2
   extra: 3
-  keyDoor: 0
   orientation: 0
   door: {fileID: 0}
 --- !u!65 &1976609234
