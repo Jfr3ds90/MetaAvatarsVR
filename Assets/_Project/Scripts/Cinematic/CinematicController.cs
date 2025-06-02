@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using FadeSystem;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class CinematicController : MonoBehaviour
 {
@@ -55,5 +56,10 @@ public class CinematicController : MonoBehaviour
     {
         _playableDirector.SetActive(true);
         return null;
+    }
+    
+    public void OnChangeScene()
+    {
+        SceneManager.LoadScene("Level_Oficina");
     }
 }

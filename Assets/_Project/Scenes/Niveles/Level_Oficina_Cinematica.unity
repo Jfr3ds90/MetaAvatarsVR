@@ -60699,6 +60699,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1888256885}
   - component: {fileID: 1888256886}
+  - component: {fileID: 1888256887}
   m_Layer: 0
   m_Name: CinematicController
   m_TagString: Untagged
@@ -60771,6 +60772,36 @@ MonoBehaviour:
     ignoreTimeScale: 0
     targetAlpha: 0
     startAlpha: 1
+--- !u!114 &1888256887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1888256884}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e52de21a22b6dd44c9cc19f810c65059, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Events:
+    m_Signals:
+    - {fileID: 11400000, guid: dbeb475e61765284eaabf0c3e6deb672, type: 2}
+    m_Events:
+    - m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1888256886}
+          m_TargetAssemblyTypeName: CinematicController, Assembly-CSharp
+          m_MethodName: OnChangeScene
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1001 &1891370421
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -69374,7 +69405,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3985230881519421135, guid: c9cef77b47806d249b55ede4a047e374, type: 3}
       propertyPath: m_SceneBindings.Array.size
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 3985230881519421135, guid: c9cef77b47806d249b55ede4a047e374, type: 3}
       propertyPath: m_SceneBindings.Array.data[2].key
@@ -69388,6 +69419,10 @@ PrefabInstance:
       propertyPath: m_SceneBindings.Array.data[4].key
       value: 
       objectReference: {fileID: 619939618391468757, guid: a9416aade1e95894daee05709032b3e4, type: 2}
+    - target: {fileID: 3985230881519421135, guid: c9cef77b47806d249b55ede4a047e374, type: 3}
+      propertyPath: m_SceneBindings.Array.data[5].key
+      value: 
+      objectReference: {fileID: 3355409166853145392, guid: a9416aade1e95894daee05709032b3e4, type: 2}
     - target: {fileID: 3985230881519421135, guid: c9cef77b47806d249b55ede4a047e374, type: 3}
       propertyPath: m_SceneBindings.Array.data[0].value
       value: 
@@ -69411,7 +69446,7 @@ PrefabInstance:
     - target: {fileID: 3985230881519421135, guid: c9cef77b47806d249b55ede4a047e374, type: 3}
       propertyPath: m_SceneBindings.Array.data[5].value
       value: 
-      objectReference: {fileID: 1252623350}
+      objectReference: {fileID: 1888256887}
     - target: {fileID: 3985230881519421135, guid: c9cef77b47806d249b55ede4a047e374, type: 3}
       propertyPath: m_ExposedReferences.m_References.Array.data[0].second
       value: 
