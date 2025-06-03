@@ -128,7 +128,7 @@ public class CubeFigure : MonoBehaviour
             //hit.collider.GetComponent<CubeFigure>().location += new Vector3(0, location.y, 0);
             location += new Vector3(0, hit.collider.GetComponent<CubeFigure>().location.y, 0);
             hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
-
+            Debug.Log("Deteccion arriba");
         }
         //else
         //{ up = false; upCon--; }
@@ -143,7 +143,7 @@ public class CubeFigure : MonoBehaviour
             //hit.collider.GetComponent<CubeFigure>().location += new Vector3(location.x, 0, 0);
              location+= new Vector3(hit.collider.GetComponent<CubeFigure>().location.x, 0, 0);
             hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
-
+            Debug.Log("Deteccion derecha");
         }
         //else
         //{ right = false; rightCon--; }
@@ -158,7 +158,7 @@ public class CubeFigure : MonoBehaviour
             //hit.collider.GetComponent<CubeFigure>().location += new Vector3(0, 0, location.z);
             location += new Vector3(0, 0, hit.collider.GetComponent<CubeFigure>().location.z);
             hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
-
+            Debug.Log("Deteccion frente");
         }
         //else
         //{ front = false; frontCon--; }
@@ -175,7 +175,7 @@ public class CubeFigure : MonoBehaviour
             hit.collider.GetComponent<CubeFigure>().location += new Vector3(0, location.y, 0);
             location += new Vector3(0, hit.collider.GetComponent<CubeFigure>().location.y, 0);
             hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
-
+            Debug.Log("Deteccion abajo");
         }
         //else
         //{ down = false; downCon--; }
@@ -191,7 +191,7 @@ public class CubeFigure : MonoBehaviour
             hit.collider.GetComponent<CubeFigure>().location += new Vector3(location.x, 0, 0);
             location += new Vector3(hit.collider.GetComponent<CubeFigure>().location.x,0, 0);
             hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
-
+            Debug.Log("Deteccion izquierda");
         }
         //else
         //{ left = false; leftCon--; }
@@ -207,7 +207,7 @@ public class CubeFigure : MonoBehaviour
             hit.collider.GetComponent<CubeFigure>().location += new Vector3(0, 0, location.z);
             location += new Vector3(0, 0, hit.collider.GetComponent<CubeFigure>().location.z);
             hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
-
+            Debug.Log("Deteccion atras");
         }
     }
     public void CheckBase() //revizar contacto desde el que estaba (es mejor asi para que la posicion dependa de este y no sea manipulado al rotarse)
