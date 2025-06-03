@@ -22,13 +22,14 @@ public class AudioManager : MonoBehaviour
         source = GetComponent<AudioSource>();
         //revealingEffect = FindAnyObjectByType<RevealingEffect>();
     }
-    IEnumerator NarratorLines(int tiempo,int objetos)
+   IEnumerator NarratorLines(int tiempo,int objetos)
     {
         
         timer = 0;
         source.clip = Narrador[objetos - 1];
         source.Play(); //1 al 9 fase 1|10 al 14 fase 2|15 al 23 fase 3|24 al 29 fase 4|30 al 35 fase 5
-
+        //fase 4 |24 al ser agarrado una llave| 25 (ya esta) entrar a la salas separadas | 26 tiempo afk| 27 colocarse frente a la pantalla | 28 figura hecha | 29 inmediatamente tras el 28
+        //fase 5 |30 al abrirse la caja fuerte| 31 agarrar el pendrive| 32 iniciar ventana de selección (aun no implementado mecanica)| 33 tras hacer el primer envio (aun no implementado mecanica)| 34 tras lograrlo a la primer (aun no implementado mecanica)| 35 tras lograrlo habiendo fallado al menos una vez (aun no implementado mecanica)
         yield return new WaitForSeconds(tiempo);
     }
     public void NarratorLinesActivation()
@@ -196,7 +197,7 @@ public class AudioManager : MonoBehaviour
                     switch(moreAction)
                     {
                         case 0:
-                            StartCoroutine(NarratorLines(4, 24));//una vez se abren ambas puertas
+                            StartCoroutine(NarratorLines(4, 24));//una vez se agarra una llave
                             break;
                         case 1:
                             StartCoroutine(NarratorLines(4, 26));//inmediatamente depues del dialogo de entrar
@@ -215,7 +216,12 @@ public class AudioManager : MonoBehaviour
                     if (action == 0)
                     {
                         StartCoroutine(NarratorLines(4, 25));//en cuanto entran a una de las 2 salas
-                        moreAction += 1;
+                        //float timer = 0;
+                        //timer += Time.deltaTime;
+                        //Debug.Log(timer);
+                        //if(timer >= 4)
+                            moreAction = 1;
+                        
                     }
                 }
                 break;

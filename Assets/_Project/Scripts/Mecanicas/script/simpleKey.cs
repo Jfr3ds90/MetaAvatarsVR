@@ -4,7 +4,8 @@ using UnityEngine.Video;
 public class simpleKey : MonoBehaviour
 {
     public GameObject gameobjectInteractor;
-    public bool right,pendrive ;
+    public bool right,pendrive,audioHeared ;
+    public int phase, MAction;
     public void actionKey()
     {
       var animator = gameobjectInteractor.GetComponent<Animator>();
@@ -46,8 +47,24 @@ public class simpleKey : MonoBehaviour
         {
             if(other.GetComponent<AreaDetectorAudio>().phase==5)
             {
+                FindAnyObjectByType<AudioManager>().ActualPhase = 5;
+                FindAnyObjectByType<AudioManager>().moreAction = 2;
+                FindAnyObjectByType<AudioManager>().calls();
                 gameobjectInteractor.GetComponent<VideoPlayer>().Play();
+                if(!gameobjectInteractor.GetComponent<VideoPlayer>().isPlaying)
+                    { FindAnyObjectByType<AudioManager>().moreAction = 3; FindAnyObjectByType<AudioManager>().calls(); }
             }
+        }
+    }
+    public void pickUpAudio()
+    {
+        if(audioHeared==false)
+        {
+            FindAnyObjectByType<AudioManager>().moreAction = MAction;
+            FindAnyObjectByType<AudioManager>().ActualPhase = phase;
+            FindAnyObjectByType<AudioManager>().calls();
+            //if (!gameobjectInteractor.GetComponent<VideoPlayer>().isPlaying)
+                audioHeared = true;
         }
     }
 }

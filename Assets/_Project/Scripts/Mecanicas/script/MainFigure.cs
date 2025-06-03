@@ -101,6 +101,8 @@ public class MainFigure : MonoBehaviour
         if (posTimeCube.Count == realFigure.Count)
         {
             safe.GetComponent<Switch>().OpenDoorAct();
+            FindAnyObjectByType<AudioManager>().moreAction = 2;
+            FindAnyObjectByType<AudioManager>().calls();
             Debug.Log("Cantidad igual"); 
         }
 
@@ -108,5 +110,7 @@ public class MainFigure : MonoBehaviour
     public void fastSolution()
     {
         safe.GetComponent<Switch>().OpenDoorAct();
+        FindAnyObjectByType<AudioManager>().moreAction = 2;
+        FindAnyObjectByType<AudioManager>().calls();
     }
 }

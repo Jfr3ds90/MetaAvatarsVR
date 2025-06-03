@@ -10,7 +10,9 @@ public class Switch : MonoBehaviour
     public MeshRenderer mat;
     bool onOff =false;
     Animator animator;
-    
+    public int Phase;
+    public int ActualMoreAction;
+    public bool activationAudio;
 
     private void OnEnable()
     {
@@ -74,8 +76,21 @@ public class Switch : MonoBehaviour
         //else if(orientation==false)
         //    Door.rotation = Quaternion.Euler(Door.rotation.x, (Door.rotation.y + 90), Door.rotation.z);
         onOff = true;
-        if (GetComponent<AudioSource>() != null)
-            GetComponent<AudioSource>().Play(0);        
+        if (GetComponent<AudioSource>() != null)//revisar
+            GetComponent<AudioSource>().Play(0);
+        float timer=0;
+        bool activationExtra = false;
+        if(activationExtra==false)
+        timer += Time.deltaTime;
+
+        Debug.Log("EL TIMER VA EN "+timer);
+        if (timer >= 4)
+        {
+            if(activationAudio==true)
+            hearAudio();
+            activationExtra = true;
+        }
+        
     }
     public void CloseDoorAct()
     {
@@ -107,6 +122,11 @@ public class Switch : MonoBehaviour
         mat.materials[0].SetColor("_EmissionColor", Color.green);
         mat.materials[0].SetColor("_BaseColor", Color.green); 
         }
-       
+    }
+    void hearAudio()
+    {
+       var value = FindAnyObjectByType<AudioManager>();
+        value.ActualPhase = Phase;
+        value.moreAction = ActualMoreAction;
     }
 }
