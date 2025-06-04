@@ -237,7 +237,7 @@ public class AudioManager : MonoBehaviour
                             StartCoroutine(NarratorLines(3, 31));//ya agarrado el USB
                             break;
                         case 2:
-                            StartCoroutine(NarratorLines(4, 33));//al enviar el archivo por primera vez (luego toca esperar que cargue para ver si se logro o no)
+                            StartCoroutine(NarratorLines(4, 33));//al enviar eal archivo por primera vez (luego toca esperar que cargue para ver si se logro o no)
                             break;
                         case 3:
                             StartCoroutine(NarratorLines(5, 34));//tras lograrlo al primer intento

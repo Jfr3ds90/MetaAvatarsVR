@@ -45,13 +45,14 @@ public class simpleKey : MonoBehaviour
     {
         if (pendrive == true&&other.GetComponent<AreaDetectorAudio>()!=null) 
         {
-            if(other.GetComponent<AreaDetectorAudio>().phase==5)
+            if(other.GetComponent<AreaDetectorAudio>().phase==4)
             {
                 FindAnyObjectByType<AudioManager>().ActualPhase = 5;
                 FindAnyObjectByType<AudioManager>().moreAction = 2;
                 FindAnyObjectByType<AudioManager>().calls();
+                other.GetComponent<AreaDetectorAudio>().activated1 = false;
                 gameobjectInteractor.GetComponent<VideoPlayer>().Play();
-                if(!gameobjectInteractor.GetComponent<VideoPlayer>().isPlaying)
+                if(other.GetComponent<AreaDetectorAudio>().activated1 == true)
                     { FindAnyObjectByType<AudioManager>().moreAction = 3; FindAnyObjectByType<AudioManager>().calls(); }
             }
         }

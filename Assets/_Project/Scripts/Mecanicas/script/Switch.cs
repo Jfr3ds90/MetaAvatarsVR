@@ -8,7 +8,7 @@ public class Switch : MonoBehaviour
     public Transform Door;
     public bool orientation;
     public MeshRenderer mat;
-    bool onOff =false;
+    bool onOff =false,activated=false;
     Animator animator;
     public int Phase;
     public int ActualMoreAction;
@@ -86,8 +86,8 @@ public class Switch : MonoBehaviour
         Debug.Log("EL TIMER VA EN "+timer);
         if (timer >= 4)
         {
-            if(activationAudio==true)
-            hearAudio();
+            if(activationAudio==true&&activated==false)
+            { hearAudio(); activated = true; }
             activationExtra = true;
         }
         
