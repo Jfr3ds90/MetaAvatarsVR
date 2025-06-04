@@ -56,6 +56,6 @@ public class AreaDetectorAudio : MonoBehaviour
                             FindAnyObjectByType<AudioManager>().moreAction = 3; FindAnyObjectByType<AudioManager>().calls();
                             activated1 = true;
                         }
-            }
+                }
     }
 }

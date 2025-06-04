@@ -109,7 +109,8 @@ public class CubeFigure : MonoBehaviour
                 location = new Vector3(/*hit.collider.GetComponent<CubeFigure>().location.x +*/ xValue,
 /*hit.collider.GetComponent<CubeFigure>().location.y +*/ yValue,
 /*hit.collider.GetComponent<CubeFigure>().location.z +*/ zValue);
-                mainFigure.fastSolution();
+                //mainFigure.fastSolution();
+                mainFigure.CheckR();
             }
         }
         Debug.DrawRay(transform.position, transform.up, Color.green, 1f);
