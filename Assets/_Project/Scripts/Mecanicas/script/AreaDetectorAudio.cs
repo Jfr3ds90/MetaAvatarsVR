@@ -38,6 +38,6 @@ public class AreaDetectorAudio : MonoBehaviour
     //    audio.colide = false;
     //    if (/*de fase 1*/ audio.usedL==true&& phase==0||
     //        audio.ActualPhase==phase)
-    //    this.gameObject.SetActive(false);
+    //    this.gameObject .SetActive(false);
     //}
 }

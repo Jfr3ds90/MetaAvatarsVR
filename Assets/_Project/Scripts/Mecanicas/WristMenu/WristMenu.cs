@@ -27,7 +27,6 @@ public class WristMenuActivator : MonoBehaviour
 
         float dot = Vector3.Dot(headForward, wristForward);
         
-        Debug.Log($"<color=green>{dot}</color>");
 
         bool shouldShow = dot >= activationThreshold;
 
