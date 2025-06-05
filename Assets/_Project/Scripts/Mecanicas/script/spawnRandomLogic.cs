@@ -11,25 +11,17 @@ public class spawnRandomLogic : MonoBehaviour
     public Vector2[] Value;
     public Material[] Arte;
     public GameObject CuadroPos;
-    private void Awake()
-    {
-        //squares = new GameObject[Mathf.RoundToInt(TotalArea.x),Mathf.RoundToInt(TotalArea.y)];
-    }
     private void OnEnable()
     {
-        //randimInSquare();
         randomInPlaces(posObject,objectTotals);
     }
     void sorterOfPositions( int i, int j, GameObject[] objects, int v)
     {
-        int boolean = Random.Range(0, 2); for (int k = 0; k < Value.Length; k++)
-        {
-            if (Value[k].x == i && Value[k].y == j)
-            {
+        int boolean = Random.Range(0, 2); 
+        for (int k = 0; k < Value.Length; k++)     
+           if (Value[k].x == i && Value[k].y == j)           
                 boolean = 0;
-            }
-
-        }
+     
         switch (boolean)
         {
             case 0:
@@ -44,15 +36,12 @@ public class spawnRandomLogic : MonoBehaviour
     void randomInSquare()
     {
         objectsTotal = objectTotals.Length;
-        for (int i = 0; i < Mathf.RoundToInt(TotalArea.x); i++)
-        {
+        for (int i = 0; i < Mathf.RoundToInt(TotalArea.x); i++)      
             for (int j = 0; j < Mathf.RoundToInt(TotalArea.y); j++)
             {
                 int randomObject = Random.Range(0, objectsTotal);
-
                 sorterOfPositions(i, j, objectTotals, randomObject);
-            }
-        }
+            }   
     }
     void randomInPlaces(GameObject[] pos, GameObject[] objects)//se instancia de manera aleatoria solo haciendolo 1 vez, solo falta hacer que siempre seand objetos diferentes
     {
@@ -74,13 +63,11 @@ public class spawnRandomLogic : MonoBehaviour
                         Debug.Log("encontro!!!");
                     }
                     Debug.Log(FindAnyObjectByType<GameObject>().name + "(Clone)");
-
                 }
             }
-            else
-            {
+            else            
                 randomvalue = 0;
-            }//aun es posible que spawneen pero no todos los objetos
+            //aun es posible que spawneen pero no todos los objetos
             if (i == pos.Length&& objects.Length != objectsTotal)
                 i = 0;
         }

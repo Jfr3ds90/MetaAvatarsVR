@@ -4,28 +4,29 @@ using UnityEngine.Video;
 public class AreaDetectorAudio : MonoBehaviour
 {
     public int phase,extra;//phase sirve para saberde que fase es, es solo para lectura
-    public bool notPlayer;
+    public bool notPlayer,idle;
     public Switch door;
    [HideInInspector]public bool activated1 = true;
     [SerializeField]float timer = 0;
+    AudioManager manager;
     private void OnTriggerEnter(Collider other)
     {
-        var audio= FindAnyObjectByType<AudioManager>();
+        manager= FindAnyObjectByType<AudioManager>();
 
-            if(other.tag=="Player"&& notPlayer==false)
+            if(other.tag=="Player"&& notPlayer==false && idle==false)
             {
-                if (/*de fase 1*/ audio.usedL == true && phase == 0 ||
-                audio.ActualPhase==phase)
+                if (/*de fase 1*/ manager.usedL == true && phase == 0 ||
+                manager.ActualPhase==phase)
                 {
-                audio.action = extra;
-                audio.colide = true; audio.calls();
+                manager.action = extra;
+                manager.colide = true; manager.calls();
 
-                audio.colide = false;
+                manager.colide = false;
                     this.gameObject.SetActive(false);
                 }
 
             }
-        else if(notPlayer == true)
+        else if(notPlayer == true&&idle==false)
         {
             if(activated1==false)
             {
@@ -45,17 +46,9 @@ public class AreaDetectorAudio : MonoBehaviour
         }
 
     }
-    private void OnTriggerStay(Collider other)
+    private void OnTriggerExit(Collider other)
     {
-        if (notPlayer == true)
-            if (activated1 == false)
-                { 
-                    timer += Time.deltaTime;
-                    if (timer > 4)
-                        {
-                            FindAnyObjectByType<AudioManager>().moreAction = 3; FindAnyObjectByType<AudioManager>().calls();
-                            activated1 = true;
-                        }
-                }
+        if(idle==true &&  other.gameObject.CompareTag("Player"))
+            Destroy(this.gameObject);
     }
 }

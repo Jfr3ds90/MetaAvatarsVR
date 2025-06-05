@@ -11,7 +11,7 @@ public class AudioManager : MonoBehaviour
     public int FindAnimals = 0,FailLevers=0;
     public float timer;
     //RevealingEffect revealingEffect; 
-    bool extra1= false, extra2 = false, extra3= false;
+    [HideInInspector] public bool extra1= false, extra2 = false, extra3= false;
     public bool usedL = false, FindLevers=false,colide=false;
     public int action,moreAction;//reutilizar
     public int ActualPhase = 0;
@@ -20,16 +20,16 @@ public class AudioManager : MonoBehaviour
     private void OnEnable()
     {
         source = GetComponent<AudioSource>();
-        //revealingEffect = FindAnyObjectByType<RevealingEffect>();
     }
-   IEnumerator NarratorLines(int tiempo,int objetos)
+    public void NL(int tiempo, int objetos)
     {
-        
+        NarratorLines(tiempo,objetos);
+    }
+   public IEnumerator NarratorLines(int tiempo,int objetos)
+    {       
         timer = 0;
         source.clip = Narrador[objetos - 1];
-        source.Play(); //1 al 9 fase 1|10 al 14 fase 2|15 al 23 fase 3|24 al 29 fase 4|30 al 35 fase 5
-        //fase 4 |24 al ser agarrado una llave| 25 (ya esta) entrar a la salas separadas | 26 tiempo afk| 27 colocarse frente a la pantalla | 28 figura hecha | 29 inmediatamente tras el 28
-        //fase 5 |30 al abrirse la caja fuerte| 31 agarrar el pendrive| 32 iniciar ventana de selección (aun no implementado mecanica)| 33 tras hacer el primer envio (aun no implementado mecanica)| 34 tras lograrlo a la primer (aun no implementado mecanica)| 35 tras lograrlo habiendo fallado al menos una vez (aun no implementado mecanica)
+        source.Play(); //1 al 9 fase 1|10 al 14 fase 2|15 al 23 fase 3|24 al 29 fase 4|30 al 35 fase 5  //fase 4 |24 al ser agarrado una llave| 25 (ya esta) entrar a la salas separadas | 26 tiempo afk| 27 colocarse frente a la pantalla | 28 figura hecha | 29 inmediatamente tras el 28       //fase 5 |30 al abrirse la caja fuerte| 31 agarrar el pendrive| 32 iniciar ventana de selección (aun no implementado mecanica)| 33 tras hacer el primer envio (aun no implementado mecanica)| 34 tras lograrlo a la primer (aun no implementado mecanica)| 35 tras lograrlo habiendo fallado al menos una vez (aun no implementado mecanica)
         yield return new WaitForSeconds(tiempo);
     }
     public void NarratorLinesActivation()
@@ -44,16 +44,7 @@ public class AudioManager : MonoBehaviour
             case 5: break;
             default: break;
         }
-        /*//switch(FindLevers)
-        //{
-        //    case 0: break;
-        //    case 1: StartCoroutine(NarratorLines(8, 5)); break;
-        //    case 2: break;
-        //    case 3: break;
-        //    case 4: break;
-        //    case 5: break;
-        //    default: break;
-        //}*/
+
         switch (FailLevers)
         {
             case 0: break;
@@ -66,19 +57,25 @@ public class AudioManager : MonoBehaviour
             default: break;
         }
     }
-    private void Update()
+    private void FixedUpdate()
     {
-        switch(ActualPhase)//cada vez que pase mucho tiempo sin interacción...
-        {
+        if(ActualPhase<3)
+         switch(ActualPhase)//cada vez que pase mucho tiempo sin interacción...
+        {         
             case 0:
                 timer += Time.deltaTime;
                 if (timer >= 30)
-                    if (FindAnimals >= 1 && extra2 == false)
-                        if (extra1 == false)
-                        { StartCoroutine(NarratorLines(4, 2)); extra1 = true; timer = 0; }
-                        else if (extra3 == false)
-                        { StartCoroutine(NarratorLines(7, 4)); extra3 = true; timer = 0; }
-                        else { }
+                   { 
+                        if (FindAnimals >= 1 && extra2 == false)
+                        {
+                            if (extra1 == false)
+                            { StartCoroutine(NarratorLines(4, 2)); extra1 = true; timer = 0; }
+                            else if (extra3 == false)
+                            { StartCoroutine(NarratorLines(7, 4)); extra3 = true; timer = 0; }
+                            else { }                     
+                        }
+                        timer = 0;
+                    }
                 break;
             case 1:
                 timer += Time.deltaTime;
@@ -116,8 +113,8 @@ public class AudioManager : MonoBehaviour
             case 5:
                 timer += Time.deltaTime;
                 if (timer >= 30) { }
-                break;
-        }    
+                break;             
+        }     
     }
     public void calls()
     {
@@ -125,29 +122,21 @@ public class AudioManager : MonoBehaviour
         switch (ActualPhase)
         {
             case 0: //interior fase 1
-                if (FailLevers == 1 && usedL == true)//equivocarse en palancas
-                    { StartCoroutine(NarratorLines(7, 6)); }
-
+                if (FailLevers == 1 && usedL == true)//equivocarse en palancas               
+                    StartCoroutine(NarratorLines(7, 6));              
                 else if (FailLevers == 6 && usedL == true)//equivocarse en palancas
-                    { StartCoroutine(NarratorLines(5, 7)); }
+                     StartCoroutine(NarratorLines(5, 7)); 
 
-                if (colide == false)//sin colision
-                    {
-               
-                    }
-                else//con colision
-                    {
-                if (usedL == false)//encuentra palancas
-                { StartCoroutine(NarratorLines(6, 5)); usedL = true; }
-                    }
+                if(colide==true)//con colision               
+                        if (usedL == false)//encuentra palancas
+                        { StartCoroutine(NarratorLines(6, 5)); usedL = true; }
+                    
                     break;
             case 1://fase una completada e interior fase 2 desde que se abre la puerta
-                if (colide == false)//sin colision
-                {
+                if (colide == false)//sin colision               
                     StartCoroutine(NarratorLines(6, 8)); //se abre la puerta
-                }
-                else//con colision
-                {
+                
+                else//con colision                
                     switch (action)
                     {
                         case 1: StartCoroutine(NarratorLines(4, 10));/*ver arte*/break;
@@ -156,11 +145,10 @@ public class AudioManager : MonoBehaviour
                         case 0: StartCoroutine(NarratorLines(6, 9)); /*pasar a la fase 2*/ break;
                         default: break;
                     }
-                }
+                
                 break;
             case 2://fase 2 completada e interior fase 3 desde que se abre la puerta|15 al 23 | 18 y 19 al transicionar de fase
-                if (colide == false)//sin colision
-                {
+                if (colide == false)//sin colision        
                     switch(moreAction)//REVISAR
                     {
                         case 0:
@@ -172,11 +160,8 @@ public class AudioManager : MonoBehaviour
                             moreAction = 0;
                             Debug.Log("fase actual " + ActualPhase +" extra "+ moreAction);
                             break;
-                    }
-           
-                }
-                else//con colision
-                {
+                    }                      
+                else//con colision              
                     switch (action)
                     {
                         case 1:
@@ -189,11 +174,10 @@ public class AudioManager : MonoBehaviour
                             StartCoroutine(NarratorLines(4, 21)); //acercarse a los baños
                             break;
                     }    
-                }
+                
                 break;
             case 3://fase 3 completada e interior fase 4 desde que se abre la puerta | 24 a 29
-                if (colide == false)//sin colision
-                {
+                if (colide == false)//sin colision                
                     switch(moreAction)
                     {
                         case 0:
@@ -210,24 +194,17 @@ public class AudioManager : MonoBehaviour
                             StartCoroutine(NarratorLines(4, 29));//inmediatamente depues del dialogo anterior
                             break;
                     }            
-                }
-                else//con colision
-                {
+                
+                else//con colision               
                     if (action == 0)
                     {
                         StartCoroutine(NarratorLines(4, 25));//en cuanto entran a una de las 2 salas
-                        //float timer = 0;
-                        //timer += Time.deltaTime;
-                        //Debug.Log(timer);
-                        //if(timer >= 4)
-                            moreAction = 1;
-                        
+                            moreAction = 1;                      
                     }
-                }
+                
                 break;
             case 4://fase 4 completada e interior fase 5 desde que se abre la puerta | 30 al 35
-                if (colide == false)//sin colision
-                {
+                if (colide == false)//sin colision                
                     switch (moreAction)
                     {
                         case 0:
@@ -246,24 +223,13 @@ public class AudioManager : MonoBehaviour
                             StartCoroutine(NarratorLines(3, 35));//tras lograrlo habiendo fallado por lo menos 1 vez
                             break;
                     }             
-                }
+                
                 else//con colision
                 {
                     if(action == 0)
                     StartCoroutine(NarratorLines(3, 32));//al acercarse a los computadores de nuevo (ya encendidos)
                 }
                 break;
-            case 5://fase 5 completada
-                if (colide == false)//sin colision
-                {
-
-                }
-                else//con colision
-                {
-
-                }
-                break;
-        }   
-    
+        }       
     }
 }

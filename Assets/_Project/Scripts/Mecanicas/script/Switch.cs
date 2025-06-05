@@ -23,58 +23,19 @@ public class Switch : MonoBehaviour
     }
     private void Update()
     {
-       // if(orientation == true)
-        //{
-        //    if (Door.rotation.y > 0)
-        //        Door.rotation = Quaternion.Euler(Door.rotation.x,0,Door.rotation.z);
-        //    else if (Door.rotation.y > (-90))
-        //        Door.rotation = Quaternion.Euler(Door.rotation.x, -90, Door.rotation.z);
-        //}
-      //  else
-        //{
-
-        //}
-
-
         if (Input.GetKeyDown(KeyCode.S))
-        {
-            //orientation = !orientation;
-            //OpenDoor(orientation);
-            OpenDoorAct();
-        }
-        
+            OpenDoorAct();    
     }
     public void OpenDoor(bool value)
     {
         animator.SetBool("Close_",false);
         animator.SetBool("Right_",value);
         animator.SetTrigger("Activation_");
-
-        //if (value == true)
-        //{
-            
-        //    Door.rotation = Quaternion.Euler(Door.rotation.x, (Door.rotation.y - 90), Door.rotation.z);
-        //    if (GetComponent<AudioSource>() != null)
-        //        GetComponent<AudioSource>().Play();
-
-        //    //Door.rotation = Quaternion.Euler(Door.rotation.x, (Door.rotation.y + 90), Door.rotation.z);
-        //    orientationDoor(orientation);
-        //    Debug.Log("la puerta esta " + orientation);
-        //}
-        //else if (value == false)
-        //{ 
-        //    Door.rotation = Quaternion.Euler(Door.rotation.x, (Door.rotation.y - 90), Door.rotation.z);
-        //    orientationDoor(orientation);
-        //}
     }
     public void OpenDoorAct()
     {
         changeColor();
         OpenDoor(orientation);Debug.Log(orientation+" orientacion");
-        //if(orientation==true)
-        //Door.rotation = Quaternion.Euler(Door.rotation.x, (Door.rotation.y - 90), Door.rotation.z);
-        //else if(orientation==false)
-        //    Door.rotation = Quaternion.Euler(Door.rotation.x, (Door.rotation.y + 90), Door.rotation.z);
         onOff = true;
         if (GetComponent<AudioSource>() != null)//revisar
             GetComponent<AudioSource>().Play(0);

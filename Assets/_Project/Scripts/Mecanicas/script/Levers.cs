@@ -11,26 +11,6 @@ public class Levers : MonoBehaviour
     {
         transformThis=this.transform;
     }
-    private void Update()
-    {
-        z = transform.rotation.z;
-        //Debug.Log(transformThis.rotation.z);
-        //if (transformThis.rotation.z <= -0.5f && OnOff == false)
-        //{
-        //    OnOff = true;
-        //    piano.partiture(orderLevel);
-        //    Debug.Log("palanca activa");
-        //}
-        //else if (transformThis.rotation.z !<= -0.5f && OnOff == true)
-        //{
-        //    OnOff = false;
-        //    piano.partiture(-1);
-        //    Debug.Log("palanca inactiva");
-        //}
-        //Debug.Log(transformThis.rotation.x + " " + transformThis.rotation.y + " " + transformThis.rotation.z);
-        if (Input.GetKeyDown(KeyCode.E))
-            actionLever();
-    }
     public void actionLever()
     {
         
@@ -47,6 +27,7 @@ public class Levers : MonoBehaviour
         }
         else if (transformThis.rotation.z >= -0.55f && OnOff == true)// estaba arriba y queda arriba
         { // no ocurre nada
+            piano.partiture(orderLevel);
             Debug.Log("palanca activa");
             //FindAnyObjectByType<AudioManager>().FindLevers += 1;
         }
@@ -58,5 +39,6 @@ public class Levers : MonoBehaviour
             FindAnyObjectByType<AudioManager>().FailLevers +=1;
             Debug.Log("palanca inactiva");
         }
+        z = transform.rotation.z;
     }
 }
