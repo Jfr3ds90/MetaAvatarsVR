@@ -13,17 +13,10 @@ public class DetectorObjectPos : MonoBehaviour
         if(activated== false) 
         {
             int totalCorrect = 0;
-            for (int i = 0; i < objectPos.Length; i++)
-            {
-                if (objectPos[i].correctPos == true)
-                {
-                    totalCorrect++;
-                }
-                else
-                {
-
-                }
-            }
+            for (int i = 0; i < objectPos.Length; i++)          
+                if (objectPos[i].correctPos == true)                
+                    totalCorrect++;               
+            
             if (totalCorrect == objectPos.Length && door != null)
             {
                 Debug.Log("Correct placed order");
@@ -38,8 +31,7 @@ public class DetectorObjectPos : MonoBehaviour
                 meshRenderer.materials[0].SetColor("_EmissionColor", Color.green);
                 meshRenderer.materials[0].SetColor("_BaseColor", Color.green);
             }
-        }
-        
+        }        
     }
     private void Update()
     {

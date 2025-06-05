@@ -3,10 +3,10 @@ using UnityEngine;
 public class Piano : MonoBehaviour
 {
     public int[] notes;
-    private int noteAction = 0;
+    [SerializeField]private int noteAction = 0;
     public Switch door;
 
-    private void Update()
+ /*   private void Update()
     {
         if(Input.GetKeyUp(KeyCode.Alpha0))
         partiture(0);
@@ -19,7 +19,7 @@ public class Piano : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.Alpha4))
             partiture(4);
 
-    }
+    }*/
     public GameObject action;
     public void partiture(int pressed)
     {
@@ -35,12 +35,7 @@ public class Piano : MonoBehaviour
                     Debug.Log("completo");
                     if (action !=null)
                     {
-                        //if(door==null)
-                          //  door=GetComponent<Switch>();
-
-                        //door.OpenDoor(door.orientation);
                         door.OpenDoorAct();
-
                         FindAnyObjectByType<AudioManager>().ActualPhase = 1;
                         FindAnyObjectByType<AudioManager>().calls();
                         break;
@@ -53,8 +48,6 @@ public class Piano : MonoBehaviour
                 noteAction = 0;
                 break;
             }                
-                
-           
         }
     }
 }

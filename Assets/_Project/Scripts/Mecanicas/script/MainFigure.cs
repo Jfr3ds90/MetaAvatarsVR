@@ -16,91 +16,22 @@ public class MainFigure : MonoBehaviour
     }
     public void AddCoord(int x,int y,int z,int scanned)
     {
-        if (!sizeExample.Contains(new Vector3(x, y, z)))
-        {
-            switch (scanned)
-            {
-                case 0:
-                    break;
-                case 1:
-                    break;
-                case 2:
-                    break;
-                case 3:
-                    break;
-                case 4:
-                    break;
-                case 5:
-                    break;
-                case 6:
-                    break;
-            }
-            sizeExample.Add(new Vector3(x, y, z));
-
-            Debug.Log("las coordenadas ("+x+" "+y+" "+z+") han sido llamada "+scanned+" veces");
-        }
-        //else if (sizeExample.Contains(new Vector3(x, y, z)))
-        //{
-        //    sizeExample.Remove(new Vector3(x,y,z));
-        //}
-
-          //  Debug.Log(sizeExample.Count + " es la cantidad");
-        for (int i = 0; i < sizeExample.Count; i++) //reviza si la coordenada existe
-        {
-            //Debug.Log(sizeExample[i].ToString() + " esta en la lista");
-
-            //Debug.Log("esta en: " + i);
-        }
+        if (!sizeExample.Contains(new Vector3(x, y, z)))        
+            sizeExample.Add(new Vector3(x, y, z));      
     }
-    /*public void CheckResult()
-    {
-        int completed = 0;
-        for (int i = 0; i < realFigure.Count; i++)
-        {
-            if (sizeExample.Contains(realFigure[i]))
-                completed++;
-        }
-        if (completed == realFigure.Count)
-            Debug.Log("FIGURA HECHA");
-
-    }*/
     public void CheckR( )
     {
-        for (int i = 0; i < realFigure.Count; i++) 
-        {
-            for (int j = 0; j < sizeExample.Count; j++) 
-            {
-                if (realFigure[i] == sizeExample[i])
-                {
-                    Debug.Log("Esta hecho el " + sizeExample[i]);
-                    /*
-                    switch (scanned)
-                    {
-                        case 0:
-                            break;
-                        case 1:
-                            break;
-                        case 2:
-                            break;
-                        case 3:
-                            break;
-                        case 4:
-                            break;
-                        case 5:
-                            break;
-                        case 6:
-                            break;
-                    }
-                    */
+        for (int i = 0; i < realFigure.Count; i++)       
+            for (int j = 0; j < sizeExample.Count; j++)            
+                if (realFigure[i] == sizeExample[i])               
                     if (!posTimeCube.ContainsKey(sizeExample[i]))
                     posTimeCube.Add(sizeExample[i],true);
-                }
-            }
-        }
 
         if (posTimeCube.Count == realFigure.Count)
         {
             safe.GetComponent<Switch>().OpenDoorAct();
+            FindAnyObjectByType<AudioManager>().moreAction = 2;
+            FindAnyObjectByType<AudioManager>().calls();
             Debug.Log("Cantidad igual"); 
         }
 
@@ -108,5 +39,7 @@ public class MainFigure : MonoBehaviour
     public void fastSolution()
     {
         safe.GetComponent<Switch>().OpenDoorAct();
+        FindAnyObjectByType<AudioManager>().moreAction = 2;
+        FindAnyObjectByType<AudioManager>().calls();
     }
 }
