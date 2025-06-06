@@ -1,5 +1,8 @@
 using UnityEngine;
+using Meta.XR.MRUtilityKit;
 using Oculus.Interaction;
+using Oculus.Interaction.HandGrab;
+using System.Collections;
 
 namespace PuzzleCubes.Core
 {
@@ -25,6 +28,11 @@ namespace PuzzleCubes.Core
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private AudioClip snapSound;
         [SerializeField] private AudioClip releaseSound;
+        
+        [Header("Particle Effects")]
+        [SerializeField] private ParticleSystem snapParticles;
+        [SerializeField] private bool createParticlesIfMissing = true;
+        [SerializeField] private float particleDuration = 0.5f;
         
         private Rigidbody rb;
         private MeshRenderer meshRenderer;
@@ -61,6 +69,9 @@ namespace PuzzleCubes.Core
             {
                 grabbable.WhenPointerEventRaised += OnPointerEvent;
             }
+            
+            // Setup particles si no existen
+            SetupSnapParticles();
         }
         
         private void Start()
@@ -221,6 +232,9 @@ namespace PuzzleCubes.Core
                 
                 // Haptic feedback
                 TriggerHapticFeedback();
+                
+                // Particle effect
+                PlaySnapParticles();
             }
             
             // Ocultar indicador
@@ -259,6 +273,113 @@ namespace PuzzleCubes.Core
             if (OVRInput.GetActiveController() != OVRInput.Controller.None)
             {
                 OVRInput.SetControllerVibration(0.3f, 0.5f, OVRInput.GetActiveController());
+            }
+        }
+        
+        /// <summary>
+        /// Configura el sistema de partículas si no existe
+        /// </summary>
+        private void SetupSnapParticles()
+        {
+            if (!snapParticles && createParticlesIfMissing)
+            {
+                // Crear GameObject para las partículas
+                GameObject particleObj = new GameObject("SnapParticles");
+                particleObj.transform.SetParent(transform);
+                particleObj.transform.localPosition = Vector3.zero;
+                
+                // Añadir y configurar ParticleSystem
+                snapParticles = particleObj.AddComponent<ParticleSystem>();
+                
+                // Configuración principal
+                var main = snapParticles.main;
+                main.duration = particleDuration;
+                main.startLifetime = 0.5f;
+                main.startSpeed = 2f;
+                main.startSize = 0.05f;
+                main.startColor = new Color(0.5f, 0.8f, 1f, 1f);
+                main.maxParticles = 30;
+                main.playOnAwake = false;
+                main.loop = false;
+                
+                // Emisión
+                var emission = snapParticles.emission;
+                emission.enabled = true;
+                emission.SetBursts(new ParticleSystem.Burst[]
+                {
+                    new ParticleSystem.Burst(0.0f, 30)
+                });
+                
+                // Forma
+                var shape = snapParticles.shape;
+                shape.enabled = true;
+                shape.shapeType = ParticleSystemShapeType.Sphere;
+                shape.radius = 0.05f;
+                
+                // Velocidad sobre tiempo
+                var velocityOverLifetime = snapParticles.velocityOverLifetime;
+                velocityOverLifetime.enabled = true;
+                velocityOverLifetime.space = ParticleSystemSimulationSpace.Local;
+                velocityOverLifetime.radial = new ParticleSystem.MinMaxCurve(2f);
+                
+                // Tamaño sobre tiempo
+                var sizeOverLifetime = snapParticles.sizeOverLifetime;
+                sizeOverLifetime.enabled = true;
+                AnimationCurve sizeCurve = new AnimationCurve();
+                sizeCurve.AddKey(0f, 0.5f);
+                sizeCurve.AddKey(0.5f, 1f);
+                sizeCurve.AddKey(1f, 0f);
+                sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(1f, sizeCurve);
+                
+                // Color sobre tiempo (fade out)
+                var colorOverLifetime = snapParticles.colorOverLifetime;
+                colorOverLifetime.enabled = true;
+                Gradient gradient = new Gradient();
+                gradient.SetKeys(
+                    new GradientColorKey[] { 
+                        new GradientColorKey(Color.white, 0.0f), 
+                        new GradientColorKey(Color.white, 1.0f) 
+                    },
+                    new GradientAlphaKey[] { 
+                        new GradientAlphaKey(1.0f, 0.0f), 
+                        new GradientAlphaKey(0.0f, 1.0f) 
+                    }
+                );
+                colorOverLifetime.color = gradient;
+                
+                // Renderer
+                var renderer = snapParticles.GetComponent<ParticleSystemRenderer>();
+                renderer.material = new Material(Shader.Find("Sprites/Default"));
+            }
+        }
+        
+        /// <summary>
+        /// Reproduce el efecto de partículas
+        /// </summary>
+        private void PlaySnapParticles()
+        {
+            if (snapParticles)
+            {
+                snapParticles.gameObject.SetActive(true);
+                snapParticles.Stop();
+                snapParticles.Play();
+                
+                // Programar para detener después de la duración
+                StartCoroutine(StopParticlesAfterDuration());
+            }
+        }
+        
+        /// <summary>
+        /// Detiene las partículas después de su duración
+        /// </summary>
+        private IEnumerator StopParticlesAfterDuration()
+        {
+            yield return new WaitForSeconds(particleDuration);
+            
+            if (snapParticles)
+            {
+                snapParticles.Stop();
+                snapParticles.gameObject.SetActive(false);
             }
         }
         

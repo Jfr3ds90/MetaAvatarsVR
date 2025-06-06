@@ -41,6 +41,9 @@ namespace PuzzleCubes.Core
         [SerializeField] private bool autoValidate = true;
         [SerializeField] private float validationInterval = 0.5f;
         
+        [Header("Selection Puzzle")]
+        [SerializeField] private PuzzleDefinition[] puzzles;
+        
         private List<GameObject> spawnedCubes = new List<GameObject>();
         private Coroutine validationCoroutine;
         private float lastSimilarity = 0f;
@@ -53,10 +56,10 @@ namespace PuzzleCubes.Core
                 cubeGrid = FindObjectOfType<CubeGrid>();
             }
             
-            if (currentPuzzle != null)
-            {
+                currentPuzzle = puzzles[Random.Range(0, puzzles.Length)];
+            
                 LoadPuzzle(currentPuzzle);
-            }
+            
         }
         
         /// <summary>
