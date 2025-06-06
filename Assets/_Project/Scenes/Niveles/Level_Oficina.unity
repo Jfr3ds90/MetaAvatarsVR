@@ -23022,6 +23022,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2579416269751706797, guid: 29061d51751cc7a4aba67c1a7eea911d, type: 3}
   m_PrefabInstance: {fileID: 583216058}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &585746518 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7042244785519696749, guid: fd1313a2b252ff149b3ab727194c1bdb, type: 3}
+  m_PrefabInstance: {fileID: 1258302321}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &586965071
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -50514,6 +50519,10 @@ PrefabInstance:
       value: MesaReuniones
       objectReference: {fileID: 0}
     - target: {fileID: 7042244785519696749, guid: fd1313a2b252ff149b3ab727194c1bdb, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7042244785519696749, guid: fd1313a2b252ff149b3ab727194c1bdb, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
@@ -54693,6 +54702,34 @@ PrefabInstance:
     - target: {fileID: 5610109227777088101, guid: a45e71a4de6cedb42a3fd677de02bcc6, type: 3}
       propertyPath: m_Name
       value: PuzzleManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 6709116448257728616, guid: a45e71a4de6cedb42a3fd677de02bcc6, type: 3}
+      propertyPath: OnFinishPuzzle.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6709116448257728616, guid: a45e71a4de6cedb42a3fd677de02bcc6, type: 3}
+      propertyPath: OnFinishPuzzle.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6709116448257728616, guid: a45e71a4de6cedb42a3fd677de02bcc6, type: 3}
+      propertyPath: OnFinishPuzzle.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 585746518}
+    - target: {fileID: 6709116448257728616, guid: a45e71a4de6cedb42a3fd677de02bcc6, type: 3}
+      propertyPath: OnFinishPuzzle.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6709116448257728616, guid: a45e71a4de6cedb42a3fd677de02bcc6, type: 3}
+      propertyPath: OnFinishPuzzle.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: SetActive
+      objectReference: {fileID: 0}
+    - target: {fileID: 6709116448257728616, guid: a45e71a4de6cedb42a3fd677de02bcc6, type: 3}
+      propertyPath: OnFinishPuzzle.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: UnityEngine.GameObject, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 6709116448257728616, guid: a45e71a4de6cedb42a3fd677de02bcc6, type: 3}
+      propertyPath: OnFinishPuzzle.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 7942043868293323688, guid: a45e71a4de6cedb42a3fd677de02bcc6, type: 3}
       propertyPath: m_LocalPosition.x

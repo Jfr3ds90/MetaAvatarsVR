@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEngine.Events;
 
 namespace PuzzleCubes.Core
 {
@@ -48,6 +49,9 @@ namespace PuzzleCubes.Core
         private Coroutine validationCoroutine;
         private float lastSimilarity = 0f;
         private bool isCompleted = false;
+        
+        [Header("Eavents")]
+        public UnityEvent OnFinishPuzzle;
         
         private void Start()
         {
@@ -316,6 +320,7 @@ namespace PuzzleCubes.Core
             OVRInput.SetControllerVibration(1f, 1f, OVRInput.Controller.RTouch);
             
             Debug.Log($"Puzzle '{currentPuzzle.PuzzleData.PuzzleName}' completed!");
+            OnFinishPuzzle?.Invoke();
         }
         
         /// <summary>
