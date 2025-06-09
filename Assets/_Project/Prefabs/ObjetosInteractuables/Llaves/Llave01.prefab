@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4873457345965970157}
   - component: {fileID: 2357177309965175204}
   - component: {fileID: 8641896022838106272}
+  - component: {fileID: 7395314191564957702}
   - component: {fileID: 9176880089366686632}
   - component: {fileID: 1730080644599441256}
   - component: {fileID: 2868081744590669148}
@@ -34,7 +35,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.0077318, y: 0.61896837, z: 1.24872}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -113,6 +114,28 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.058415353, y: 0.14138603, z: 0.008918189}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!64 &7395314191564957702
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1811715159230066835}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 5548127265434617452, guid: bcaa7a1543dd20f42a1dac3312c84fa7, type: 3}
 --- !u!54 &9176880089366686632
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -160,7 +183,7 @@ MonoBehaviour:
   _targetTransform: {fileID: 0}
   _maxGrabPoints: -1
   _rigidbody: {fileID: 9176880089366686632}
-  _kinematicWhileSelected: 1
+  _kinematicWhileSelected: 0
   _throwWhenUnselected: 1
 --- !u!114 &2868081744590669148
 MonoBehaviour:
@@ -186,7 +209,19 @@ MonoBehaviour:
       m_Calls: []
   _whenSelect:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 7716409266351239043}
+        m_TargetAssemblyTypeName: simpleKey, Assembly-CSharp
+        m_MethodName: pickUpAudio
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   _whenUnselect:
     m_PersistentCalls:
       m_Calls: []
@@ -249,5 +284,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ec2b5aa888afed429d87ed10178ed7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  door: {fileID: 0}
+  gameobjectInteractor: {fileID: 0}
   right: 0
+  pendrive: 0
+  audioHeared: 0
+  phase: 3
+  MAction: 0
