@@ -57,7 +57,7 @@ namespace PuzzleCubes.Core
         {
             if (!cubeGrid)
             {
-                cubeGrid = FindObjectOfType<CubeGrid>();
+                cubeGrid = FindAnyObjectByType<CubeGrid>();
             }
             
                 currentPuzzle = puzzles[Random.Range(0, puzzles.Length)];

@@ -17,12 +17,15 @@ public class spawnRandomLogic : MonoBehaviour
     List<int> PosUsed = new List<int>();//lista de objetos ya usados
     private void OnEnable()
     {   
-        randomInPlaces(posObject,objectTotals); 
+        randomInPlaces(posObject,objectTotals);
         
+
     }
     private void Start()
     {
         changeMaterial();
+        if (objectsUsed.Count != objectTotals.Length + 1)
+            randomInPlaces(posObject, objectTotals);
     }
     //private void Update()
     //{if(Input.GetKeyUp(KeyCode.V))
@@ -85,9 +88,11 @@ public class spawnRandomLogic : MonoBehaviour
             }
             //Debug.Log(i+" esta en la lista? "+PosUsed.Contains(i));
         }
-        if (objects.Length != PosUsed.Count)
-            randomInPlaces(pos, objects);
-   
+        /*if (objects.Length+1 != PosUsed.Count)
+            randomInPlaces(pos, objects);*/
+
+        if (objectsUsed.Count != objectTotals.Length + 1)
+            randomInPlaces(posObject, objectTotals);
         //Debug.Log(PosUsed);
 
         //int value = Random.Range(0, pos.Length);
@@ -111,7 +116,7 @@ public class spawnRandomLogic : MonoBehaviour
     void randomObjects(GameObject[] pos, GameObject[] objects,int i)
     {
 
-        int value = Random.Range(0, objects.Length);
+        int value = Random.Range(0, objects.Length+1);
 
         // una vez salga el numero revisar que este no haya salido antes
         //Debug.Log("aparecio " + objects[j] + " es " + objects[j].name + "(Clone)");

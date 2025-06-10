@@ -76,7 +76,7 @@ namespace PuzzleCubes.Core
         
         private void Start()
         {
-            cubeGrid = FindObjectOfType<CubeGrid>();
+            cubeGrid = FindAnyObjectByType<CubeGrid>();
             if (!cubeGrid)
             {
                 Debug.LogError("CubeGrid not found in scene!");
