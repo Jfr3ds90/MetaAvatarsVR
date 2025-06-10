@@ -11,33 +11,41 @@ public class spawnRandomLogic : MonoBehaviour
    // public GameObject[,] squares;
    // public Vector2[] Value;
     public Material[] Arte;
-    public Renderer[] CuadroPos;
+    public GameObject[] CuadroPos;
 
     List<int> objectsUsed = new List<int>();//lista de objetos ya usados
     List<int> PosUsed = new List<int>();//lista de objetos ya usados
     private void OnEnable()
-    {
+    {   
         randomInPlaces(posObject,objectTotals); 
-        changeM();
+        
     }
-   /* void sorterOfPositions( int i, int j, GameObject[] objects, int v)
+    private void Start()
     {
-        int boolean = Random.Range(0, 2); 
-        for (int k = 0; k < Value.Length; k++)     
-           if (Value[k].x == i && Value[k].y == j)           
-                boolean = 0;
-     
-        switch (boolean)
-        {
-            case 0:
-                Debug.Log("los valores "+i+","+j+" son vacios");
-                break;
-            case 1:
-                if(tablePos!=null)
-                squares[i, j] = Instantiate(objects[v], tablePos.position + new Vector3(i, 0, j), Quaternion.identity);
-                break;
-        }
-    }*/
+        changeMaterial();
+    }
+    //private void Update()
+    //{if(Input.GetKeyUp(KeyCode.V))
+    //        changeMaterial();
+    //}
+    /* void sorterOfPositions( int i, int j, GameObject[] objects, int v)
+     {
+         int boolean = Random.Range(0, 2); 
+         for (int k = 0; k < Value.Length; k++)     
+            if (Value[k].x == i && Value[k].y == j)           
+                 boolean = 0;
+
+         switch (boolean)
+         {
+             case 0:
+                 Debug.Log("los valores "+i+","+j+" son vacios");
+                 break;
+             case 1:
+                 if(tablePos!=null)
+                 squares[i, j] = Instantiate(objects[v], tablePos.position + new Vector3(i, 0, j), Quaternion.identity);
+                 break;
+         }
+     }*/
     /*void randomInSquare()
     {
         objectsTotal = objectTotals.Length;
@@ -56,7 +64,7 @@ public class spawnRandomLogic : MonoBehaviour
         for (int i = 0; i <= pos.Length; i++) //posicion aleatoria
         {
             int randomvalue = Random.Range(0,2);
-            Debug.Log("spawneara "+randomvalue);
+            //Debug.Log("spawneara "+randomvalue);
             switch(randomvalue)
             {
                 case 0:
@@ -66,19 +74,21 @@ public class spawnRandomLogic : MonoBehaviour
                     {
                         //for (int j = 0; j < objects.Length; j++)                   
                             randomObjects(pos, objects, i);//objeto aleatorio
-                        PosUsed.Add(i);Debug.Log("Fue agregado " + i);
+                        PosUsed.Add(i);//Debug.Log("Fue agregado " + i);
                         break;
                     }
                     else if (PosUsed.Contains(i))
-                        { i++; Debug.Log("Ya estaba " + i); break;};                        
+                        { i++;
+                        //Debug.Log("Ya estaba " + i);
+                        break;};                        
                     break;
             }
-            Debug.Log(i+" esta en la lista? "+PosUsed.Contains(i));
+            //Debug.Log(i+" esta en la lista? "+PosUsed.Contains(i));
         }
         if (objects.Length != PosUsed.Count)
             randomInPlaces(pos, objects);
    
-        Debug.Log(PosUsed);
+        //Debug.Log(PosUsed);
 
         //int value = Random.Range(0, pos.Length);
 
@@ -120,18 +130,12 @@ public class spawnRandomLogic : MonoBehaviour
         }
 
     }
-    void randomPos()
+   public void changeMaterial()
     {
-
-    }
-   public void changeM()
-    {
-        Debug.Log("Cambio de cuadro");
-        for(int i = 0; i<= CuadroPos.Length;i++)
+        for(int i = 0; i< CuadroPos.Length;i++)
         {
             int randomvalue = Random.Range(0, Arte.Length);
-            CuadroPos[i].materials[1] = Arte[randomvalue];
-            Debug.Log(CuadroPos[i].name+" es el objeto y se escogio como material "+ CuadroPos[i]);
+            CuadroPos[i].GetComponent<MeshRenderer>().materials[1].mainTexture = Arte[randomvalue].mainTexture;
         }
     }
 }
