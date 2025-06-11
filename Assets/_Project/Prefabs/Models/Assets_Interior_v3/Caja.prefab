@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5303182039442184479}
   - component: {fileID: 6124415056995493823}
   - component: {fileID: 3868240749096473084}
+  - component: {fileID: 6551462148528224325}
   - component: {fileID: 242657271906847999}
   m_Layer: 0
   m_Name: Caja
@@ -87,6 +88,28 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &6551462148528224325
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8642825200206276635}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -7269173089721441667, guid: d0a66d899d07a0c4694190f6139a7bc0, type: 3}
 --- !u!65 &242657271906847999
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -104,7 +127,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 0.40000105, y: 0.283613, z: 0.25000003}
   m_Center: {x: -0.000087834866, y: 0.14178832, z: -0.00014654535}
