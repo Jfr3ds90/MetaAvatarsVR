@@ -22,7 +22,12 @@ namespace PuzzleCubes.Core
             public Color gradientTop = new Color(0.4f, 0.6f, 0.9f, 1f);
             public Color gradientBottom = new Color(0.1f, 0.15f, 0.3f, 1f);
             
+            // Material settings
+            public enum MaterialMode { Color, CustomMaterial }
+            public MaterialMode materialMode = MaterialMode.Color;
+            public Material customMaterial;
             public Color cubeColor = new Color(0.9f, 0.9f, 0.9f, 1f);
+            
             public Color ambientLight = new Color(0.4f, 0.45f, 0.5f, 1f);
             
             public bool addShadows = true;
@@ -167,7 +172,36 @@ namespace PuzzleCubes.Core
             
             settings.gradientTop = EditorGUILayout.ColorField("Gradient Top", settings.gradientTop);
             settings.gradientBottom = EditorGUILayout.ColorField("Gradient Bottom", settings.gradientBottom);
-            settings.cubeColor = EditorGUILayout.ColorField("Cube Color", settings.cubeColor);
+            
+            EditorGUILayout.Space();
+            
+            // Material settings
+            EditorGUILayout.LabelField("Cube Material", EditorStyles.boldLabel);
+            settings.materialMode = (RenderSettings.MaterialMode)EditorGUILayout.EnumPopup("Material Mode", settings.materialMode);
+            
+            switch (settings.materialMode)
+            {
+                case RenderSettings.MaterialMode.Color:
+                    settings.cubeColor = EditorGUILayout.ColorField("Cube Color", settings.cubeColor);
+                    break;
+                    
+                case RenderSettings.MaterialMode.CustomMaterial:
+                    settings.customMaterial = (Material)EditorGUILayout.ObjectField("Custom Material", 
+                        settings.customMaterial, typeof(Material), false);
+                    
+                    if (settings.customMaterial == null)
+                    {
+                        EditorGUILayout.HelpBox("Please assign a material from your project.", MessageType.Warning);
+                    }
+                    else
+                    {
+                        EditorGUILayout.HelpBox($"Using: {settings.customMaterial.name}", MessageType.Info);
+                    }
+                    break;
+            }
+            
+            EditorGUILayout.Space();
+            
             settings.ambientLight = EditorGUILayout.ColorField("Ambient Light", settings.ambientLight);
             settings.addShadows = EditorGUILayout.Toggle("Add Shadows", settings.addShadows);
             
@@ -287,13 +321,42 @@ namespace PuzzleCubes.Core
             cube.transform.position = position;
             cube.transform.localScale = Vector3.one * 0.1f;
             
-            // Apply material
-            MeshRenderer renderer = cube.GetComponent<MeshRenderer>();
-            Material mat = new Material(Shader.Find("Standard"));
-            mat.color = settings.cubeColor;
-            renderer.material = mat;
+            // Apply material based on mode
+            ApplyMaterialToCube(cube);
             
             currentCubes.Add(cube);
+        }
+        
+        private void ApplyMaterialToCube(GameObject cube)
+        {
+            MeshRenderer renderer = cube.GetComponent<MeshRenderer>();
+            if (!renderer) return;
+            
+            switch (settings.materialMode)
+            {
+                case RenderSettings.MaterialMode.Color:
+                    // Create a new material with color
+                    Material mat = new Material(Shader.Find("Standard"));
+                    mat.color = settings.cubeColor;
+                    renderer.material = mat;
+                    break;
+                    
+                case RenderSettings.MaterialMode.CustomMaterial:
+                    // Use custom material
+                    if (settings.customMaterial != null)
+                    {
+                        // Create instance to avoid modifying the original
+                        renderer.material = new Material(settings.customMaterial);
+                    }
+                    else
+                    {
+                        // Fallback to default material with color
+                        Material fallbackMat = new Material(Shader.Find("Standard"));
+                        fallbackMat.color = settings.cubeColor;
+                        renderer.material = fallbackMat;
+                    }
+                    break;
+            }
         }
         
         private void ClearAllCubes()
@@ -336,11 +399,7 @@ namespace PuzzleCubes.Core
             {
                 if (cube)
                 {
-                    MeshRenderer renderer = cube.GetComponent<MeshRenderer>();
-                    if (renderer && renderer.sharedMaterial)
-                    {
-                        renderer.sharedMaterial.color = settings.cubeColor;
-                    }
+                    ApplyMaterialToCube(cube);
                 }
             }
             
