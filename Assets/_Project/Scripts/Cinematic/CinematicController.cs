@@ -5,6 +5,7 @@ using FadeSystem;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class CinematicController : MonoBehaviour
 {
@@ -28,6 +29,8 @@ public class CinematicController : MonoBehaviour
     [SerializeField] private FadeManager _fadeManager;
     [SerializeField] private FadeConfig _fadeConfig;
 
+    [Header("Debug Text")]
+    [SerializeField] private TMP_Text _Text;
     private void Start()
     {
         _fadeManager = FadeManager.Instance;
@@ -60,6 +63,8 @@ public class CinematicController : MonoBehaviour
     
     public void OnChangeScene()
     {
+        _Text.text += "Cambio de escena";
         SceneManager.LoadScene("Level_Oficina");
+        _Text.text += "Cambio de escena ejecutado";
     }
 }
