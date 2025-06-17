@@ -1,12 +1,13 @@
 using System;
 using System.Threading;
+using System.IO;
+using System.Text;
 using Cysharp.Threading.Tasks;
 using FadeSystem;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
-using Oculus.Platform.Models;
 
 public class CinematicController : MonoBehaviour
 {
@@ -65,13 +66,13 @@ public class CinematicController : MonoBehaviour
     public void OnChangeScene()
     {
         _Text.text += "Cambio de escena ";
-        _Text.text += (" "+Console.Error+" ");
+        _Text.text += (" "+ LogType.Assert + " la cantidad de escenas total es "+SceneManager.sceneCount);
         SceneManager.LoadScene("Level_Oficina");
-        _Text.text += (" " + Console.Error + " ");
+        _Text.text += (" " + LogType.Assert + " y la cantidad de escenas cargadas es "+SceneManager.loadedSceneCount+" tambien como extra escenas en build "+SceneManager.sceneCountInBuildSettings);
         _Text.text += " Cambio de escena ejecutado";
     }
-    //private void Update()
-    //{
-    //    _Text.text += Console.Error;
-    //}
+    private void Update()
+    {
+        // Application.logMessageReceived += _Text.text;
+    }
 }

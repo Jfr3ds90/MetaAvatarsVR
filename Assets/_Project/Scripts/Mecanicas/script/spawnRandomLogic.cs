@@ -17,14 +17,14 @@ public class spawnRandomLogic : MonoBehaviour
     List<int> PosUsed = new List<int>();//lista de objetos ya usados
     private void OnEnable()
     {   
+        if(posObject.Length>0)
         randomInPlaces(posObject,objectTotals);
-        
-
     }
     private void Start()
     {
-        changeMaterial();
-        if (objectsUsed.Count != objectTotals.Length + 1)
+        if (CuadroPos.Length > 0)
+            changeMaterial();
+        if (objectsUsed.Count > 0 && objectsUsed.Count != objectTotals.Length + 1)
             randomInPlaces(posObject, objectTotals);
     }
     //private void Update()
