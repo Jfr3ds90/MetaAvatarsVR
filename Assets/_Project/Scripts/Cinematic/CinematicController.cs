@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using Oculus.Platform.Models;
 
 public class CinematicController : MonoBehaviour
 {
@@ -63,8 +64,14 @@ public class CinematicController : MonoBehaviour
     
     public void OnChangeScene()
     {
-        _Text.text += "Cambio de escena";
+        _Text.text += "Cambio de escena ";
+        _Text.text += (" "+Console.Error+" ");
         SceneManager.LoadScene("Level_Oficina");
-        _Text.text += "Cambio de escena ejecutado";
+        _Text.text += (" " + Console.Error + " ");
+        _Text.text += " Cambio de escena ejecutado";
     }
+    //private void Update()
+    //{
+    //    _Text.text += Console.Error;
+    //}
 }
