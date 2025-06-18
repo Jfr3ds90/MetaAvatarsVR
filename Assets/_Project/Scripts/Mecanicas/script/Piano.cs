@@ -4,7 +4,7 @@ public class Piano : MonoBehaviour
 {
     public int[] notes;
     [SerializeField]private int noteAction = 0;
-    public Switch door;
+    [SerializeField]private Switch door;
 
  /*   private void Update()
     {
@@ -25,8 +25,7 @@ public class Piano : MonoBehaviour
     {
         for (int i = noteAction; i < notes.Length;) 
         {
-            Debug.Log("Esta en la nota que suena "+ pressed +" Esta es la nota correcta "+ notes[i]);
-
+       //     Debug.Log("Esta en la nota que suena "+ pressed +" Esta es la nota correcta "+ notes[i]);
             if (notes[i] == pressed)
             {
                 noteAction += 1;

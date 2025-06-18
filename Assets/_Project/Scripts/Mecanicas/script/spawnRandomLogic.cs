@@ -5,11 +5,11 @@ using UnityEngine;
 
 public class spawnRandomLogic : MonoBehaviour
 {
-    public GameObject[] objectTotals;
-    public Transform[] posObject;
+    [SerializeField]private GameObject[] objectTotals;
+    [SerializeField] private Transform[] posObject;
 
-    public Material[] Arte;
-    public GameObject[] CuadroPos;
+    [SerializeField] private Material[] Arte;
+    [SerializeField] private GameObject[] CuadroPos;
 
     List<int> objectsUsed = new List<int>();//lista de objetos ya usados
     List<int> PosUsed = new List<int>();//lista de objetos ya usados

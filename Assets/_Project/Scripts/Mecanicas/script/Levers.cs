@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class Levers : MonoBehaviour
 {
-    public Piano piano;
-    public int orderLevel;
-    bool OnOff = false;
-    Transform transformThis;
-    public float z;
+    [SerializeField]private Piano piano;
+    [SerializeField] private int orderLevel;
+    private bool OnOff = false;
+    private Transform transformThis;
+    [SerializeField] private float z;
     private void OnEnable()
     {
         transformThis=this.transform;

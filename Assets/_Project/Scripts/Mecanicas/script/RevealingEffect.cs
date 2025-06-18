@@ -6,18 +6,18 @@ using UnityEngine;
 public class RevealingEffect : MonoBehaviour
 {
 
-    public bool detectado;
-    public bool OnOff = false;
-    public AudioManager audioManager;
+    [SerializeField] private bool detectado;
+    [SerializeField] private bool OnOff = false;
+    [SerializeField] private AudioManager audioManager;
 
-    public MeshRenderer LastMeshRenderer;
-    Dictionary<string, int> AnimalsKnown = new Dictionary<string,int>();
-    int animal;
+    [SerializeField] private MeshRenderer LastMeshRenderer;
+    private Dictionary<string, int> AnimalsKnown = new Dictionary<string,int>();
+    private Light light;
     private void Update()
     {
         if (OnOff== true)
-        Appear();
-
+        Appear();//tiene que volverse una corrutina
+        /*
         if (Input.GetKeyUp(KeyCode.Q))
         {
             changeLight();
@@ -26,16 +26,17 @@ public class RevealingEffect : MonoBehaviour
         
         if (Input.GetKeyUp(KeyCode.R)) 
             OnOffLight();
+        */
+    }
+    private void Start()
+    {
+        light = GetComponent<Light>();
     }
 
-    
     public void Appear()
     {
-        
-        Light light;
-        light = GetComponent<Light>();
-
-        if (GetComponentInParent<MeshRenderer>().materials[1].color == Color.magenta)
+        if (OnOff == true)
+            if (GetComponentInParent<MeshRenderer>().materials[1].color == Color.magenta)
         for (float i = 0; i < 15; i++)
         {
             var currentPointPosition = Quaternion.AngleAxis(i, transform.forward) * transform.forward;
@@ -75,7 +76,7 @@ public class RevealingEffect : MonoBehaviour
                         meshRenderer.material.SetFloat("_Aparicion", 1);
 
                         string LastMaterialName = hit.collider.GetComponent<MeshRenderer>().material.name;
-                     if(!AnimalsKnown.ContainsKey(LastMaterialName))
+                        if (!AnimalsKnown.ContainsKey(LastMaterialName))
                         {
                             AnimalsKnown.Add(LastMaterialName, 1);
                             audioManager.FindAnimals = AnimalsKnown.Count;
@@ -86,28 +87,6 @@ public class RevealingEffect : MonoBehaviour
                         {
                             Debug.Log("no paso");
                         }
-                            //switch (hit.collider.GetComponent<MeshRenderer>().material.name)
-                            //{
-                            //    case "M_PistaUV_Delfin":animal = 0; break;
-                            //    case "M_PistaUV_Delfin (Instance)": animal = 0; break;
-                            //    case "M_PistaUV_Aguila":animal = 1; break;
-                            //    case "M_PistaUV_Aguila (Instance)": animal = 1; break;
-                            //    case "M_PistaUV_Tigre": animal = 2; break;
-                            //    case "M_PistaUV_Tigre (Instance)": animal = 2; break;
-                            //    case "M_PistaUV_Oso": animal = 3; break;
-                            //    case "M_PistaUV_Oso (Instance)": animal = 3; break;
-                            //    case "M_PistaUV_Sapo": animal = 4; break;
-                            //    case "M_PistaUV_Sapo (Instance)": animal = 4; break;
-                            //    default:break;
-                            //}
-
-                            //if (Physics.Raycast(transform.position, currentPointPosition, out hit, light.range))
-                            //{
-                            //   // Debug.Log(hit.point+" posicion en el objeto?");
-                            //}
-
-
-
                             LastMeshRenderer = meshRenderer;
                 }
 
@@ -122,40 +101,9 @@ public class RevealingEffect : MonoBehaviour
                             Debug.Log(LastMeshRenderer + " Existe");
                         }
                     }
-                        //else if (hit.collider.GetComponent<MeshRenderer>().material.name != "M_PistaUV" && hit.collider.GetComponent<MeshRenderer>().material.name != "M_PistaUV (Instance)")
-                        //{
-                        //    //Debug.Log("no choca y es "+LastMeshRenderer);
-
-                        //    if(LastMeshRenderer!=null)
-                        //    {
-                        //           // float floatGetter = LastMeshRenderer.material.GetFloat("_Aparicion");
-                        //        LastMeshRenderer.material.SetFloat("_Aparicion",light.intensity);
-                        //            //if (LastMeshRenderer.material.GetFloat("_Aparicion") <= floatGetter)
-                        //            //    LastMeshRenderer.material.SetFloat("_Aparicion",floatGetter);
-
-                        //            if (LastMeshRenderer.material.GetFloat("_Aparicion") <= 0)
-                        //            LastMeshRenderer.material.SetFloat("_Aparicion", 0);
-                        //    }
-
-
-                        //}
-
             }
 
-             //Debug.DrawRay(transform.position, currentPointPosition, Color.green, light.range);
-             //  Debug.DrawRay(transform.position, currentPointPositionRight + currentPointPositionUp, Color.green,light.range);
-             //   Debug.DrawRay(transform.position, currentPointPositionLeft + currentPointPositionUp, Color.green, light.range);
-             //   Debug.DrawRay(transform.position, currentPointPositionRight + currentPointPositionDown, Color.green, light.range);
-             //   Debug.DrawRay(transform.position, currentPointPositionLeft + currentPointPositionDown, Color.green, light.range);
-
             }
-        //else if (LastMeshRenderer != null)
-        //{
-        //    LastMeshRenderer.material.SetFloat("_Aparicion", -light.intensity);
-        //    if (LastMeshRenderer.material.GetFloat("_Aparicion") >= 1)
-        //        LastMeshRenderer.material.SetFloat("_Aparicion", 1);
-        //    Debug.Log(LastMeshRenderer+" Existe");
-        //}
 
     }
     public void changeLight() //cambio de color de linterna
@@ -204,6 +152,4 @@ public class RevealingEffect : MonoBehaviour
             OnOff = true;
         }
     }
-
-
 }

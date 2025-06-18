@@ -3,7 +3,7 @@ using UnityEngine;
 public class ObjectKeyOrder : MonoBehaviour
 {
     [SerializeField] private int id;// id objeto tiene que ser igual al idpos
-    Transform otherPos;
+    private Transform otherPos;
     private void OnTriggerEnter(Collider other)
     {
         if(id == other.GetComponent<ObjectPos>().IdPos)
