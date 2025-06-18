@@ -1,15 +1,13 @@
 
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class spawnRandomLogic : MonoBehaviour
 {
-    public GameObject[] objectTotals,posObject;
-   // private int objectsTotal; 
-   // public Transform tablePos;
-   // public Vector2 TotalArea;
-   // public GameObject[,] squares;
-   // public Vector2[] Value;
+    public GameObject[] objectTotals;
+    public Transform[] posObject;
+
     public Material[] Arte;
     public GameObject[] CuadroPos;
 
@@ -17,54 +15,25 @@ public class spawnRandomLogic : MonoBehaviour
     List<int> PosUsed = new List<int>();//lista de objetos ya usados
     private void OnEnable()
     {   
-        if(posObject.Length>0)
-        randomInPlaces(posObject,objectTotals);
+        /*if(posObject.Length>0)
+        randomInPlaces(posObject,objectTotals);*/
     }
     private void Start()
     {
-        if (CuadroPos.Length > 0)
-            changeMaterial();
-        if (objectsUsed.Count > 0 && objectsUsed.Count != objectTotals.Length + 1)
-            randomInPlaces(posObject, objectTotals);
-    }
-    //private void Update()
-    //{if(Input.GetKeyUp(KeyCode.V))
-    //        changeMaterial();
-    //}
-    /* void sorterOfPositions( int i, int j, GameObject[] objects, int v)
-     {
-         int boolean = Random.Range(0, 2); 
-         for (int k = 0; k < Value.Length; k++)     
-            if (Value[k].x == i && Value[k].y == j)           
-                 boolean = 0;
+        changeMaterial();
+        MixElements();
 
-         switch (boolean)
-         {
-             case 0:
-                 Debug.Log("los valores "+i+","+j+" son vacios");
-                 break;
-             case 1:
-                 if(tablePos!=null)
-                 squares[i, j] = Instantiate(objects[v], tablePos.position + new Vector3(i, 0, j), Quaternion.identity);
-                 break;
-         }
-     }*/
-    /*void randomInSquare()
-    {
-        objectsTotal = objectTotals.Length;
-        for (int i = 0; i < Mathf.RoundToInt(TotalArea.x); i++)      
-            for (int j = 0; j < Mathf.RoundToInt(TotalArea.y); j++)
-            {
-                int randomObject = Random.Range(0, objectsTotal);
-                sorterOfPositions(i, j, objectTotals, randomObject);
-            }   
-    }*/
+        /* if (CuadroPos.Length > 0)
+              changeMaterial();
+          if (objectsUsed.Count > 0 && objectsUsed.Count != objectTotals.Length + 1)
+              randomInPlaces(posObject, objectTotals);*/
+    }
     void randomInPlaces(GameObject[] pos, GameObject[] objects)//se instancia de manera aleatoria solo haciendolo 1 vez, solo falta hacer que siempre seand objetos diferentes
     {// se instancia objeto y se saca de la array
         //la posicion donde fue instanciado tambien se saca de la array
         //aleatoriedad de objetos disponibles y posiciones disponibles
 
-        for (int i = 0; i <= pos.Length; i++) //posicion aleatoria
+        for (int i = 0; i < pos.Length; i++) //posicion aleatoria
         {
             int randomvalue = Random.Range(0,2);
             //Debug.Log("spawneara "+randomvalue);
@@ -77,7 +46,7 @@ public class spawnRandomLogic : MonoBehaviour
                     {
                         //for (int j = 0; j < objects.Length; j++)                   
                             randomObjects(pos, objects, i);//objeto aleatorio
-                        PosUsed.Add(i);//Debug.Log("Fue agregado " + i);
+                        //PosUsed.Add(i);//Debug.Log("Fue agregado " + i);
                         break;
                     }
                     else if (PosUsed.Contains(i))
@@ -91,47 +60,31 @@ public class spawnRandomLogic : MonoBehaviour
         /*if (objects.Length+1 != PosUsed.Count)
             randomInPlaces(pos, objects);*/
 
+        /*
         if (objectsUsed.Count != objectTotals.Length + 1)
             randomInPlaces(posObject, objectTotals);
-        //Debug.Log(PosUsed);
-
-        //int value = Random.Range(0, pos.Length);
-
-        //// una vez salga el numero revisar que este no haya salido antes
-        //if (!objectsUsed.Contains(value))// si no contiene el valor la lista, entonces se agrega
-        //{
-        //    objectsUsed.Add(value);
-        //    PosUsed.Add(i);
-        //    Instantiate(objects[value], pos[i].transform);
-
-        //}
-        //else if (objectsUsed.Contains(value))// si ya lo contiene, se hace de nuevo
-        //{
-        //    if (PosUsed.Contains(i))
-        //    { randomInPlaces(pos, objects); }
-        //    else
-        //        randomObjects(pos, objects, i, j);
-        //}
+        */
     }
     void randomObjects(GameObject[] pos, GameObject[] objects,int i)
     {
 
-        int value = Random.Range(0, objects.Length+1);
+        int value = Random.Range(0, objects.Length);
 
         // una vez salga el numero revisar que este no haya salido antes
         //Debug.Log("aparecio " + objects[j] + " es " + objects[j].name + "(Clone)");
         if (!objectsUsed.Contains(value))// si no contiene el valor la lista, entonces se agrega
-        {objectsUsed.Add(value);
+        {
+            objectsUsed.Add(value);
             PosUsed.Add(i);
-            Instantiate(objects[value], pos[i].transform);           
-            
+            Instantiate(objects[value], pos[i].transform);
+            Debug.Log("el objeto es "+ objects[value]+" y la posicion es "+ pos[i].transform+" tambien esto esta en: "+this.gameObject.name);
         }
         else if (objectsUsed.Contains(value))// si ya lo contiene, se hace de nuevo
         {
             if (PosUsed.Contains(i))
                {randomInPlaces(pos, objects);}
-            else if (!PosUsed.Contains(i))
-            randomObjects(pos, objects,i);
+            /*else if (!PosUsed.Contains(i))
+            randomObjects(pos, objects,i);*/
         }
 
     }
@@ -141,6 +94,24 @@ public class spawnRandomLogic : MonoBehaviour
         {
             int randomvalue = Random.Range(0, Arte.Length);
             CuadroPos[i].GetComponent<MeshRenderer>().materials[1].mainTexture = Arte[randomvalue].mainTexture;
+        }
+    }
+    void MixElements()
+    {
+        if (posObject.Length >= objectTotals.Length)
+        {
+            objectTotals = objectTotals.OrderBy(go => Random.value).ToArray();
+            posObject = posObject.OrderBy(tr => Random.value).ToArray();
+
+            for (int i = 0; i < objectTotals.Length; i++)
+            {
+                GameObject go = Instantiate(objectTotals[i], posObject[i].transform.position, posObject[i].transform.rotation);
+                go.name = objectTotals[i].name;
+            }
+        }
+        else
+        {
+            Debug.LogError("Deben existir mas pocisiones que elementos");
         }
     }
 }

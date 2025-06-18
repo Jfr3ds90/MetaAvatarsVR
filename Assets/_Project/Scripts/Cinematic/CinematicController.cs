@@ -68,8 +68,20 @@ public class CinematicController : MonoBehaviour
         _Text.text += "Cambio de escena ";
         _Text.text += (" "+ LogType.Assert + " la cantidad de escenas total es "+SceneManager.sceneCount);
         SceneManager.LoadScene("Level_Oficina");
+        //SceneManager.LoadSceneAsync("Level_Oficina");
         _Text.text += (" " + LogType.Assert + " y la cantidad de escenas cargadas es "+SceneManager.loadedSceneCount+" tambien como extra escenas en build "+SceneManager.sceneCountInBuildSettings);
         _Text.text += " Cambio de escena ejecutado";
+        SceneManager.activeSceneChanged += SceneManager_activeSceneChanged; ;
+    }
+
+    private void SceneManager_activeSceneChanged(Scene arg0, Scene arg1)
+    {
+        Debug.Log(arg0.name +" paso a la escena "+ arg1.name);
+    }
+
+    private void OnSceneUnloaded(Scene current)
+    {
+        Debug.Log("OnSceneUnloaded: " + current);
     }
     private void Update()
     {

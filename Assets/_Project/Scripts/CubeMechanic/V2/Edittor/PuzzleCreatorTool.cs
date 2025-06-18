@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
@@ -8,7 +7,7 @@ namespace PuzzleCubes.Core
     /// <summary>
     /// Herramienta del editor para crear puzzles fácilmente
     /// </summary>
-    
+    #if UNITY_EDITOR
     public class PuzzleCreatorTool : EditorWindow
     {
         private string puzzleName = "NewPuzzle";
@@ -355,5 +354,5 @@ namespace PuzzleCubes.Core
             puzzleName = "NewPuzzle";
         }
     }
-}
 #endif
+}
