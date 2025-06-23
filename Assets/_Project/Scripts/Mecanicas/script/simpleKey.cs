@@ -6,6 +6,7 @@ public class simpleKey : MonoBehaviour
     public GameObject gameobjectInteractor;
     public bool right,pendrive,audioHeared ;
     public int phase, MAction;
+    [HideInInspector]public bool videoCorrect = false;
     public void actionKey()
     {
       var animator = gameobjectInteractor.GetComponent<Animator>();
@@ -38,13 +39,9 @@ public class simpleKey : MonoBehaviour
         if (pendrive == true&&other.GetComponent<AreaDetectorAudio>()!=null)        
             if(other.GetComponent<AreaDetectorAudio>().phase==4)
             {
-                FindAnyObjectByType<AudioManager>().ActualPhase = 5;
-                FindAnyObjectByType<AudioManager>().moreAction = 2;
-                FindAnyObjectByType<AudioManager>().calls();
-                other.GetComponent<AreaDetectorAudio>().activated1 = false;
-                gameobjectInteractor.GetComponent<VideoPlayer>().Play();
-                if(other.GetComponent<AreaDetectorAudio>().activated1 == true)
-                    { FindAnyObjectByType<AudioManager>().moreAction = 3; FindAnyObjectByType<AudioManager>().calls(); }
+                FindAnyObjectByType<OfficeStaff>().activationPc();
+                if(videoCorrect==true)
+                videoActivation(other);
             }      
     }
     public void pickUpAudio()
@@ -56,5 +53,15 @@ public class simpleKey : MonoBehaviour
             FindAnyObjectByType<AudioManager>().calls();
                 audioHeared = true;
         }
+    }
+    void videoActivation(Collider other)
+    {
+        FindAnyObjectByType<AudioManager>().ActualPhase = 5;
+        FindAnyObjectByType<AudioManager>().moreAction = 2;
+        FindAnyObjectByType<AudioManager>().calls();
+        other.GetComponent<AreaDetectorAudio>().activated1 = false;
+        gameobjectInteractor.GetComponent<VideoPlayer>().Play();
+        if (other.GetComponent<AreaDetectorAudio>().activated1 == true)
+        { FindAnyObjectByType<AudioManager>().moreAction = 3; FindAnyObjectByType<AudioManager>().calls(); }
     }
 }

@@ -2,9 +2,10 @@ using UnityEngine;
 
 public class OfficeStaff : MonoBehaviour
 {
-    bool lightsOn = true;
-    public GameObject lightsObjects, emergencyLights;
+    bool lightsOn = false;
+    public GameObject lightsObjects, emergencyLights,CanvasPc,pendrive;
     public GameObject[] leversObject;
+
     public void CoffeMachine()
     {
         lightsOn = false;
@@ -18,15 +19,17 @@ public class OfficeStaff : MonoBehaviour
         lightsObjects.SetActive(true);
         emergencyLights.SetActive(true);
     }
-    //public void kitchenShelf()
-    //{
-    //    var shelf = ShelfKitchen.GetComponent<Switch>();
-    //    shelf.orientation = !shelf.orientation;
-    //    shelf.OpenDoor(shelf.orientation);
-    //}
-    //public void kitchenLever() //misma lógica que el piano asi que se reutiliza
-    //{
-    //    var leverOrder = GetComponent<Piano>();
-    //   // leverOrder.partiture(leversObject.);
-    //}
+    public void activationPc()
+    {
+        CanvasPc.SetActive(true);
+    }
+    public void CorrectOption()
+    {
+        pendrive.GetComponent<simpleKey>().videoCorrect = true;
+        Debug.Log("opcion correcta");
+    }
+    public void IncorrectOption()
+    {
+        Debug.Log("opcion incorrecta");
+    }
 }
