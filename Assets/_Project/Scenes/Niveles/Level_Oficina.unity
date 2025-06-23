@@ -12412,6 +12412,10 @@ PrefabInstance:
       propertyPath: _avatarEntity
       value: 
       objectReference: {fileID: 1683914691}
+    - target: {fileID: 2847633868725169754, guid: fa6d8211b3abfd542ab2582069c6956e, type: 3}
+      propertyPath: m_RenderPostProcessing
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3103033829356910571, guid: fa6d8211b3abfd542ab2582069c6956e, type: 3}
       propertyPath: m_LocalScale.x
       value: 1.1
@@ -68332,6 +68336,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1727159838}
+  - component: {fileID: 1727159839}
   m_Layer: 0
   m_Name: Techos
   m_TagString: Untagged
@@ -68360,6 +68365,27 @@ Transform:
   - {fileID: 707405012}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1727159839
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1727159837}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e86ba485baa9c8e449ae4dde3b502227, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  materialLight: {fileID: 2100000, guid: 5feb6ddd716fcd44a8de6ca454f38a5f, type: 2}
+  materialDark: {fileID: 2100000, guid: 37dba3c4ed5a5a0429c345772beba85f, type: 2}
+  roof:
+  - {fileID: 2069973788}
+  - {fileID: 160369989}
+  - {fileID: 1920514942}
+  - {fileID: 858886724}
+  - {fileID: 2021737395}
+  - {fileID: 707405008}
 --- !u!1001 &1728581471
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -79538,6 +79564,30 @@ MonoBehaviour:
       - m_Target: {fileID: 1337136789}
         m_TargetAssemblyTypeName: Switch, Assembly-CSharp
         m_MethodName: OpenDoorAct
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1160234425}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1727159839}
+        m_TargetAssemblyTypeName: lightsRoof, Assembly-CSharp
+        m_MethodName: changeMaterialRoof
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
