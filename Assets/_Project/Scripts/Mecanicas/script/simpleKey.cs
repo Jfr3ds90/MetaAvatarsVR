@@ -34,7 +34,7 @@ public class simpleKey : MonoBehaviour
             }
               
     }
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         if (pendrive == true&&other.GetComponent<AreaDetectorAudio>()!=null)        
             if(other.GetComponent<AreaDetectorAudio>().phase==4)

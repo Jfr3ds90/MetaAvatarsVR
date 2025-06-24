@@ -26,6 +26,7 @@ public class OfficeStaff : MonoBehaviour
     public void CorrectOption()
     {
         pendrive.GetComponent<simpleKey>().videoCorrect = true;
+        CanvasPc.SetActive(false);
         Debug.Log("opcion correcta");
     }
     public void IncorrectOption()
