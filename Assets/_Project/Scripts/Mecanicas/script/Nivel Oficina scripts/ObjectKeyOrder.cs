@@ -6,7 +6,7 @@ public class ObjectKeyOrder : MonoBehaviour
     private Transform otherPos;
     private void OnTriggerEnter(Collider other)
     {
-        if(id == other.GetComponent<ObjectPos>().IdPos)
+        if(other.GetComponent<ObjectPos>()!=null && id == other.GetComponent<ObjectPos>().IdPos)
         other.GetComponent<ObjectPos>().correctPos = true;
         FindAnyObjectByType<DetectorObjectPos>().orderSolution();
         otherPos = other.transform;
