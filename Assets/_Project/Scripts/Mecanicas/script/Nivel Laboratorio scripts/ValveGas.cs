@@ -14,7 +14,7 @@ public class ValveGas : MonoBehaviour
     public void OpenClose()
     {
 
-        if (transform.eulerAngles.y ==359.99f)
+        if (transform.eulerAngles.y ==359f)
         {
             manager.activatedValves[gasType] = true;
             manager.MixtureGas(gasType);

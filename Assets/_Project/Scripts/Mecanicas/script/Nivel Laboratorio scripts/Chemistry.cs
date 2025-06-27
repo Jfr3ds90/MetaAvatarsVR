@@ -67,6 +67,23 @@ public class Chemistry : MonoBehaviour
                 }
         }
     }
+    private void OnParticleCollision(GameObject other)
+    {
+        if (other != null)
+            Debug.Log(other.name + " es la particula que choco");
+        Color color = other.GetComponent<ParticleSystem>().main.startColor.color;
+        this.GetComponent<MeshRenderer>().materials[0].color = color;
+
+    }
+    private void OnParticleTrigger()
+    {
+        Debug.Log(name+" es quien detecto");
+    }
+    private void OnEnable()
+    {
+        FindAnyObjectByType<ParticleSystem>().Play();
+        Debug.Log(FindAnyObjectByType<ParticleSystem>().name+" es la particula encontrada");
+    }
     public void onGrab()
     {
         Debug.Log(isSelected);
