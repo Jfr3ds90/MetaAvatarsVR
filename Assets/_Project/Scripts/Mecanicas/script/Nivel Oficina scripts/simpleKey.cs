@@ -35,10 +35,11 @@ public class simpleKey : MonoBehaviour
               
     }
     private void OnTriggerStay(Collider other)
-    {
-        if (pendrive == true&&other.GetComponent<AreaDetectorAudio>()!=null)        
-            if(other.GetComponent<AreaDetectorAudio>().phase==4)
+    {           
+        if (this.pendrive == true&&other.GetComponent<AreaDetectorAudio>().phase==4 && other.GetComponent<AreaDetectorAudio>().extra== 2)//arreglar        
+            if (other.GetComponent<AreaDetectorAudio>().phase==4)
             {
+                Debug.Log(name+" detecto al objeto "+other.name);
                 FindAnyObjectByType<OfficeStaff>().activationPc();
                 if(videoCorrect==true)
                 videoActivation(other);
