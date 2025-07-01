@@ -8,6 +8,7 @@ namespace PuzzleCubes.Core
     /// <summary>
     /// Herramienta del editor para crear renders profesionales de puzzles
     /// </summary>
+#if UNITY_EDITOR
     public class PuzzleRenderer : EditorWindow
     {
         [System.Serializable]
@@ -546,4 +547,5 @@ namespace PuzzleCubes.Core
             settings.imageHeight = height;
         }
     }
+#endif
 }

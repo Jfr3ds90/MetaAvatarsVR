@@ -1,10 +1,13 @@
 using System;
 using System.Threading;
+using System.IO;
+using System.Text;
 using Cysharp.Threading.Tasks;
 using FadeSystem;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class CinematicController : MonoBehaviour
 {
@@ -61,5 +64,9 @@ public class CinematicController : MonoBehaviour
     public void OnChangeScene()
     {
         SceneManager.LoadScene("Level_Oficina");
+    }
+    private void Update()
+    {
+        // Application.logMessageReceived += _Text.text;
     }
 }
