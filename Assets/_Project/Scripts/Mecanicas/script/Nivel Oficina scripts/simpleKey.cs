@@ -1,9 +1,10 @@
+using System;
 using UnityEngine;
 using UnityEngine.Video;
 
 public class simpleKey : MonoBehaviour
 {
-    public GameObject gameobjectInteractor;
+    public GameObject gameobjectInteractor,creditsEnd;
     public bool right,pendrive,audioHeared ;
     public int phase, MAction;
     [HideInInspector]public bool videoCorrect = false;
@@ -43,6 +44,9 @@ public class simpleKey : MonoBehaviour
                 FindAnyObjectByType<OfficeStaff>().activationPc();
                 if(videoCorrect==true)
                 videoActivation(other);
+
+                if (gameobjectInteractor.GetComponent<VideoPlayer>().frame >= Convert.ToInt64(gameobjectInteractor.GetComponent<VideoPlayer>().frameCount))
+                    creditsEnd.SetActive(true);
             }      
     }
     public void pickUpAudio()
