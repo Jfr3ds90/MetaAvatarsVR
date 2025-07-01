@@ -1,5 +1,6 @@
 using Unity.Mathematics;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 
 public class ValveGas : MonoBehaviour
@@ -13,20 +14,24 @@ public class ValveGas : MonoBehaviour
     }
     public void OpenClose()
     {
-
-        if (transform.eulerAngles.y ==359f)
+        RenderSettings.fog = true;
+       
+        if (transform.eulerAngles.y >=350f)
         {
             manager.activatedValves[gasType] = true;
             manager.MixtureGas(gasType);
             Debug.Log("maximo");
+            RenderSettings.fogDensity = 1;
         }
-        else if (transform.eulerAngles.y == 0)
+        else if (transform.eulerAngles.y <= 1)
         {
             manager.activatedValves[gasType] = false;
             manager.MixtureGas(gasType);
             Debug.Log("minimo");
+            RenderSettings.fogDensity = 1;
         }
-            y = transform.eulerAngles.y;
+        Debug.Log(RenderSettings.fogDensity);
+        y = transform.eulerAngles.y;
     }
     private void Update()
     {

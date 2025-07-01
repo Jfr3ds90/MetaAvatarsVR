@@ -1,9 +1,10 @@
+using System;
 using UnityEngine;
 using UnityEngine.Video;
 
 public class simpleKey : MonoBehaviour
 {
-    public GameObject gameobjectInteractor;
+    public GameObject gameobjectInteractor,creditsEnd;
     public bool right,pendrive,audioHeared ;
     public int phase, MAction;
     [HideInInspector]public bool videoCorrect = false;
@@ -35,13 +36,17 @@ public class simpleKey : MonoBehaviour
               
     }
     private void OnTriggerStay(Collider other)
-    {
-        if (pendrive == true&&other.GetComponent<AreaDetectorAudio>()!=null)        
-            if(other.GetComponent<AreaDetectorAudio>().phase==4)
+    {           
+        if (this.pendrive == true&&other.GetComponent<AreaDetectorAudio>().phase==4 && other.GetComponent<AreaDetectorAudio>().extra== 2)//arreglar        
+            if (other.GetComponent<AreaDetectorAudio>().phase==4)
             {
+                Debug.Log(name+" detecto al objeto "+other.name);
                 FindAnyObjectByType<OfficeStaff>().activationPc();
                 if(videoCorrect==true)
                 videoActivation(other);
+
+                if (gameobjectInteractor.GetComponent<VideoPlayer>().frame >= Convert.ToInt64(gameobjectInteractor.GetComponent<VideoPlayer>().frameCount))
+                    creditsEnd.SetActive(true);
             }      
     }
     public void pickUpAudio()
