@@ -511,21 +511,21 @@ namespace HackMonkeys.UI.Spatial
         
         #region Gizmos
         
-        private void OnDrawGizmosSelected()
-        {
-            // Visualizar área de interacción
-            Gizmos.color = Color.green;
+        //private void OnDrawGizmosSelected()
+        //{
+        //    // Visualizar área de interacción
+        //    Gizmos.color = Color.green;
             
-            BoxCollider boxCollider = GetComponent<BoxCollider>();
-            if (boxCollider != null)
-            {
-                Gizmos.DrawWireCube(transform.position + boxCollider.center, boxCollider.size);
-            }
+        //    BoxCollider boxCollider = GetComponent<BoxCollider>();
+        //    if (boxCollider != null)
+        //    {
+        //        Gizmos.DrawWireCube(transform.position + boxCollider.center, boxCollider.size);
+        //    }
             
-            // Visualizar radio de superficie
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawWireSphere(transform.position, surfaceRadius);
-        }
+        //    // Visualizar radio de superficie
+        //    Gizmos.color = Color.cyan;
+        //    Gizmos.DrawWireSphere(transform.position, surfaceRadius);
+        //}
         
         #endregion
         
