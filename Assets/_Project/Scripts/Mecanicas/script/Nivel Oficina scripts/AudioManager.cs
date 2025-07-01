@@ -12,7 +12,7 @@ public class AudioManager : MonoBehaviour
     public float timer;
     //RevealingEffect revealingEffect; 
     [HideInInspector] public bool extra1= false, extra2 = false, extra3= false;
-    public bool usedL = false, FindLevers=false,colide=false;
+    public bool usedL = false, FindLevers=false,colide=false, intro1 = false, intro2 = false, intro3 = false;
     public int action,moreAction;//reutilizar
     public int ActualPhase = 0;
     //int contador=0;
@@ -59,11 +59,22 @@ public class AudioManager : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        if(ActualPhase<3)
-         switch(ActualPhase)//cada vez que pase mucho tiempo sin interacción...
-        {         
-            case 0:
-                timer += Time.deltaTime;
+        if (ActualPhase<3)
+            switch (ActualPhase)//cada vez que pase mucho tiempo sin interacción...
+            {
+                case 0:
+                      
+                    timer += Time.deltaTime;
+
+                    if (timer >= 2 && intro1 == false)
+                        { StartCoroutine(NarratorLines(9, 36));intro1 = true; }
+                    else if (timer >= 11&& intro2 == false)
+                        { StartCoroutine(NarratorLines(8, 37)); intro2 = true; }
+                    else if (timer >= 19 && intro3 == false)
+                        { StartCoroutine(NarratorLines(12, 38)); intro3 = true; }
+                    
+
+                    
                 if (timer >= 30)
                    { 
                         if (FindAnimals >= 1 && extra2 == false)
