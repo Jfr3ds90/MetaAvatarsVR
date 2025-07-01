@@ -248,6 +248,8 @@ PrefabInstance:
     - {fileID: 3865213302065429617, guid: cc7b12e9cc79fe44583e09d4f29f1eb6, type: 3}
     - {fileID: -7276778602595379103, guid: cc7b12e9cc79fe44583e09d4f29f1eb6, type: 3}
     - {fileID: -6800708039763829815, guid: cc7b12e9cc79fe44583e09d4f29f1eb6, type: 3}
+    - {fileID: 5310788071237903861, guid: cc7b12e9cc79fe44583e09d4f29f1eb6, type: 3}
+    - {fileID: -3423480503231475342, guid: cc7b12e9cc79fe44583e09d4f29f1eb6, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 6807186431601843694, guid: cc7b12e9cc79fe44583e09d4f29f1eb6, type: 3}
@@ -306,6 +308,10 @@ PrefabInstance:
       propertyPath: m_HorizontalAlignment
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5310788071237903861, guid: cc7b12e9cc79fe44583e09d4f29f1eb6, type: 3}
+      propertyPath: _selectSurface
+      value: 
+      objectReference: {fileID: 824162981007865196}
     - target: {fileID: 6807186431601843694, guid: cc7b12e9cc79fe44583e09d4f29f1eb6, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -402,6 +408,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 6807186431601843694, guid: cc7b12e9cc79fe44583e09d4f29f1eb6, type: 3}
   m_PrefabInstance: {fileID: 6560998379624178718}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &824162981007865196 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: -3423480503231475342, guid: cc7b12e9cc79fe44583e09d4f29f1eb6, type: 3}
+  m_PrefabInstance: {fileID: 6560998379624178718}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7205352010929216941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2140d2b457bea84881488302059889b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1770833682203896313 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4872361094337187303, guid: cc7b12e9cc79fe44583e09d4f29f1eb6, type: 3}

@@ -1,15 +1,20 @@
+using System.Collections;
+using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.XR.Interaction.Toolkit;
+using Oculus.Interaction;
 using TMPro;
 using DG.Tweening;
+using Oculus.Interaction.Surfaces;
 
 namespace HackMonkeys.UI.Spatial
 {
     /// <summary>
-    /// Botón 3D interactuable optimizado para VR con feedback visual y háptico
+    /// Botón 3D interactuable optimizado para VR usando Meta Interaction SDK
+    /// Incluye control de repetición para evitar activaciones múltiples no deseadas
     /// </summary>
-    [RequireComponent(typeof(UnityEngine.XR.Interaction.Toolkit.Interactables.XRSimpleInteractable))]
+    [RequireComponent(typeof(RayInteractable))]
     public class InteractableButton3D : MonoBehaviour
     {
         [Header("Visual Components")]
@@ -36,24 +41,54 @@ namespace HackMonkeys.UI.Spatial
         [SerializeField] private bool isInteractable = true;
         [SerializeField] private bool playSound = true;
         
+        [Header("Interaction Control")]
+        [SerializeField] private bool allowRepeatOnHold = false;
+        [SerializeField] private float repeatDelay = 0.5f; // Tiempo antes de empezar a repetir
+        [SerializeField] private float repeatInterval = 0.1f; // Intervalo entre repeticiones
+        [SerializeField] private bool requireFullRelease = true; // Requiere soltar completamente el gatillo
+        
+        [Header("Ray Interaction")]
+        [SerializeField] private ColliderSurface buttonSurface;
+        [SerializeField] private float surfaceRadius = 0.1f;
+        
         [Header("Events")]
         public UnityEvent OnButtonPressed;
         public UnityEvent OnButtonHovered;
         public UnityEvent OnButtonUnhovered;
+        public UnityEvent OnButtonHeld; // Nuevo evento para cuando se mantiene presionado
         
-        private UnityEngine.XR.Interaction.Toolkit.Interactables.XRSimpleInteractable _interactable;
+        private RayInteractable _rayInteractable;
         private Vector3 _originalScale;
         private Tweener _currentTween;
         private bool _isHovered = false;
         private bool _isPressed = false;
+        private bool _canTrigger = true; // Control para evitar activaciones múltiples
+        private float _lastTriggerTime = 0f;
+        private Coroutine _repeatCoroutine;
+        
+        // Tracking de interactores para control preciso
+        private Dictionary<RayInteractor, InteractorState> _interactorStates = new Dictionary<RayInteractor, InteractorState>();
+        private RayInteractor _activeInteractor;
         
         // Cache de materiales para evitar instancias
         private MaterialPropertyBlock _propBlock;
         
         private void Awake()
         {
-            _interactable = GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRSimpleInteractable>();
-            _originalScale = buttonTransform.localScale;
+            // Obtener o crear RayInteractable
+            _rayInteractable = GetComponent<RayInteractable>();
+            if (_rayInteractable == null)
+            {
+                _rayInteractable = gameObject.AddComponent<RayInteractable>();
+            }
+            
+            // Configurar superficie de colisión si no existe
+            if (buttonSurface == null)
+            {
+                CreateDefaultSurface();
+            }
+            
+            _originalScale = buttonTransform != null ? buttonTransform.localScale : transform.localScale;
             _propBlock = new MaterialPropertyBlock();
             
             // Configurar texto del botón
@@ -70,27 +105,130 @@ namespace HackMonkeys.UI.Spatial
             UpdateButtonMaterial(normalMaterial);
         }
         
+        private void CreateDefaultSurface()
+        {
+            // Crear collider si no existe
+            BoxCollider collider = GetComponent<BoxCollider>();
+            if (collider == null)
+            {
+                collider = gameObject.AddComponent<BoxCollider>();
+                collider.size = new Vector3(1f, 0.2f, 0.1f);
+                collider.isTrigger = true;
+            }
+            
+            // Crear ColliderSurface
+            buttonSurface = gameObject.AddComponent<ColliderSurface>();
+        }
+        
         private void OnEnable()
         {
-            // Suscribirse a eventos del interactable
-            _interactable.hoverEntered  .AddListener(HandleHoverEntered);
-            _interactable.hoverExited.AddListener(HandleHoverExited);
-            _interactable.selectEntered.AddListener(HandleSelectEntered);
-            _interactable.selectExited.AddListener(HandleSelectExited);
+            // Configurar el RayInteractable
+            if (_rayInteractable != null)
+            {
+                _rayInteractable.InjectSurface(buttonSurface);
+            }
             
             UpdateInteractability();
+            _canTrigger = true;
+            _interactorStates.Clear();
         }
         
         private void OnDisable()
         {
-            // Desuscribirse de eventos
-            _interactable.hoverEntered.RemoveListener(HandleHoverEntered);
-            _interactable.hoverExited.RemoveListener(HandleHoverExited);
-            _interactable.selectEntered.RemoveListener(HandleSelectEntered);
-            _interactable.selectExited.RemoveListener(HandleSelectExited);
-            
             // Cancelar animaciones activas
             _currentTween?.Kill();
+            
+            // Detener repetición si está activa
+            if (_repeatCoroutine != null)
+            {
+                StopCoroutine(_repeatCoroutine);
+                _repeatCoroutine = null;
+            }
+            
+            // Reset estado
+            _isHovered = false;
+            _isPressed = false;
+            _canTrigger = true;
+            _activeInteractor = null;
+            _interactorStates.Clear();
+        }
+        
+        private void Update()
+        {
+            CheckForInteractions();
+        }
+        
+        private void CheckForInteractions()
+        {
+            if (!isInteractable) return;
+            
+            // Obtener todos los ray interactors
+            var rayInteractors = FindObjectsOfType<RayInteractor>();
+            
+            foreach (var interactor in rayInteractors)
+            {
+                bool isHoveringThis = false;
+                
+                // Verificar si este interactor está apuntando a este botón
+                if (interactor.HasCandidate && 
+                    interactor.CandidateProperties is RayInteractor.RayCandidateProperties props &&
+                    props.ClosestInteractable == _rayInteractable)
+                {
+                    isHoveringThis = true;
+                }
+                
+                // Actualizar estado del interactor
+                UpdateInteractorState(interactor, isHoveringThis);
+            }
+        }
+        
+        private void UpdateInteractorState(RayInteractor interactor, bool isHovering)
+        {
+            InteractorState previousState = InteractorState.Normal;
+            if (_interactorStates.ContainsKey(interactor))
+            {
+                previousState = _interactorStates[interactor];
+            }
+            
+            InteractorState currentState = interactor.State;
+            _interactorStates[interactor] = currentState;
+            
+            // Manejar hover
+            if (isHovering)
+            {
+                if (!_isHovered && _activeInteractor == null)
+                {
+                    _activeInteractor = interactor;
+                    OnHoverEnter();
+                }
+                
+                // Manejar selección (presionar gatillo)
+                if (currentState == InteractorState.Select && previousState != InteractorState.Select)
+                {
+                    // Gatillo recién presionado
+                    if (_canTrigger || !requireFullRelease)
+                    {
+                        OnSelectStart();
+                    }
+                }
+                else if (currentState != InteractorState.Select && previousState == InteractorState.Select)
+                {
+                    // Gatillo recién soltado
+                    OnSelectEnd();
+                }
+            }
+            else if (_activeInteractor == interactor)
+            {
+                // Este interactor ya no está apuntando al botón
+                OnHoverExit();
+                _activeInteractor = null;
+                
+                // Si estaba presionado, finalizar la presión
+                if (_isPressed)
+                {
+                    OnSelectEnd();
+                }
+            }
         }
         
         #region Public Methods
@@ -110,9 +248,29 @@ namespace HackMonkeys.UI.Spatial
             UpdateInteractability();
         }
         
+        public void SetAllowRepeatOnHold(bool allow)
+        {
+            allowRepeatOnHold = allow;
+            if (!allow && _repeatCoroutine != null)
+            {
+                StopCoroutine(_repeatCoroutine);
+                _repeatCoroutine = null;
+            }
+        }
+        
+        public void SetRepeatParameters(float delay, float interval)
+        {
+            repeatDelay = Mathf.Max(0.1f, delay);
+            repeatInterval = Mathf.Max(0.05f, interval);
+        }
+        
+        #endregion
+        
+        #region Interaction Handlers
+        
         public void OnHoverEnter()
         {
-            if (!isInteractable) return;
+            if (!isInteractable || _isHovered) return;
             
             _isHovered = true;
             
@@ -134,7 +292,7 @@ namespace HackMonkeys.UI.Spatial
         
         public void OnHoverExit()
         {
-            if (!isInteractable) return;
+            if (!isInteractable || !_isHovered) return;
             
             _isHovered = false;
             
@@ -156,11 +314,12 @@ namespace HackMonkeys.UI.Spatial
             OnButtonUnhovered?.Invoke();
         }
         
-        public void OnSelect()
+        public void OnSelectStart()
         {
-            if (!isInteractable) return;
+            if (!isInteractable || _isPressed) return;
             
             _isPressed = true;
+            _canTrigger = false; // Prevenir activaciones múltiples hasta que se suelte
             
             // Animación de presión
             AnimateScale(pressScale);
@@ -176,34 +335,27 @@ namespace HackMonkeys.UI.Spatial
             }
             
             // Ejecutar acción del botón
-            OnButtonPressed?.Invoke();
+            ExecuteButtonAction();
             
-            // Feedback adicional
-            StartCoroutine(ButtonPressRoutine());
+            // Si está habilitada la repetición, iniciar corrutina
+            if (allowRepeatOnHold)
+            {
+                _repeatCoroutine = StartCoroutine(RepeatActionCoroutine());
+            }
         }
         
-        #endregion
-        
-        #region Private Methods
-        
-        private void HandleHoverEntered(HoverEnterEventArgs args)
+        private void OnSelectEnd()
         {
-            // Manejado por OnHoverEnter desde SpatialUIManager
-        }
-        
-        private void HandleHoverExited(HoverExitEventArgs args)
-        {
-            // Manejado por OnHoverExit desde SpatialUIManager
-        }
-        
-        private void HandleSelectEntered(SelectEnterEventArgs args)
-        {
-            // Manejado por OnSelect desde SpatialUIManager
-        }
-        
-        private void HandleSelectExited(SelectExitEventArgs args)
-        {
+            if (!_isPressed) return;
+            
             _isPressed = false;
+            
+            // Detener repetición si está activa
+            if (_repeatCoroutine != null)
+            {
+                StopCoroutine(_repeatCoroutine);
+                _repeatCoroutine = null;
+            }
             
             // Restaurar estado visual
             if (_isHovered)
@@ -217,16 +369,60 @@ namespace HackMonkeys.UI.Spatial
                 UpdateButtonMaterial(normalMaterial);
             }
             
-            // Ocultar efecto de presión
-            if (pressEffect != null)
+            // Permitir nueva activación
+            if (requireFullRelease)
             {
-                pressEffect.SetActive(false);
+                _canTrigger = true;
+            }
+        }
+        
+        // Método público para compatibilidad con versiones anteriores
+        /*public async void OnSelect()
+        {
+            if (!isInteractable) return;
+            
+            // Si no hay un interactor activo, simular una pulsación completa
+            if (_activeInteractor == null)
+            {
+                OnSelectStart();
+                await UniTask.Delay(100);
+                OnSelectEnd();
+            }
+        }*/
+        
+        #endregion
+        
+        #region Private Methods
+        
+        private void ExecuteButtonAction()
+        {
+            _lastTriggerTime = Time.time;
+            OnButtonPressed?.Invoke();
+            
+            // Feedback adicional
+            ButtonPressRoutine().Forget();
+        }
+        
+        private IEnumerator RepeatActionCoroutine()
+        {
+            // Esperar el delay inicial
+            yield return new WaitForSeconds(repeatDelay);
+            
+            // Mientras el botón esté presionado, repetir la acción
+            while (_isPressed && allowRepeatOnHold)
+            {
+                OnButtonHeld?.Invoke();
+                ExecuteButtonAction();
+                yield return new WaitForSeconds(repeatInterval);
             }
         }
         
         private void UpdateInteractability()
         {
-            _interactable.enabled = isInteractable;
+            if (_rayInteractable != null)
+            {
+                _rayInteractable.enabled = isInteractable;
+            }
             
             if (!isInteractable)
             {
@@ -239,6 +435,13 @@ namespace HackMonkeys.UI.Spatial
                     Color textColor = buttonText.color;
                     textColor.a = 0.5f;
                     buttonText.color = textColor;
+                }
+                
+                // Detener cualquier corrutina de repetición
+                if (_repeatCoroutine != null)
+                {
+                    StopCoroutine(_repeatCoroutine);
+                    _repeatCoroutine = null;
                 }
             }
             else
@@ -267,8 +470,10 @@ namespace HackMonkeys.UI.Spatial
         {
             _currentTween?.Kill();
             
+            Transform targetTransform = buttonTransform != null ? buttonTransform : transform;
             Vector3 target = _originalScale * targetScale;
-            _currentTween = buttonTransform.DOScale(target, animationDuration)
+            
+            _currentTween = targetTransform.DOScale(target, animationDuration)
                 .SetEase(scaleEase);
         }
         
@@ -296,25 +501,10 @@ namespace HackMonkeys.UI.Spatial
                 });
         }
         
-        private System.Collections.IEnumerator ButtonPressRoutine()
+        private async UniTask ButtonPressRoutine()
         {
             // Esperar un frame para el feedback
-            yield return new WaitForSeconds(0.1f);
-            
-            // Si el botón sigue presionado, mantener el estado
-            if (!_isPressed)
-            {
-                if (_isHovered)
-                {
-                    AnimateScale(hoverScale);
-                    UpdateButtonMaterial(hoverMaterial);
-                }
-                else
-                {
-                    AnimateScale(1f);
-                    UpdateButtonMaterial(normalMaterial);
-                }
-            }
+            await UniTask.Delay(100);
         }
         
         #endregion
@@ -325,9 +515,28 @@ namespace HackMonkeys.UI.Spatial
         {
             // Visualizar área de interacción
             Gizmos.color = Color.green;
-            Gizmos.DrawWireCube(transform.position, GetComponent<BoxCollider>().size);
+            
+            BoxCollider boxCollider = GetComponent<BoxCollider>();
+            if (boxCollider != null)
+            {
+                Gizmos.DrawWireCube(transform.position + boxCollider.center, boxCollider.size);
+            }
+            
+            // Visualizar radio de superficie
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(transform.position, surfaceRadius);
         }
         
         #endregion
+        
+        private void OnDestroy()
+        {
+            _currentTween?.Kill();
+            if (_repeatCoroutine != null)
+            {
+                StopCoroutine(_repeatCoroutine);
+            }
+            _interactorStates.Clear();
+        }
     }
 }

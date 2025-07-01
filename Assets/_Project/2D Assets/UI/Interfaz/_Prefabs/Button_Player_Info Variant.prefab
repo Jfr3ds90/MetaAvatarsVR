@@ -626,6 +626,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1350777382170903019, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}
+      propertyPath: _selectSurface
+      value: 
+      objectReference: {fileID: 7306193003801306324}
     - target: {fileID: 5381193315181059969, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}
       propertyPath: m_text
       value: In Lobby
@@ -650,7 +654,9 @@ PrefabInstance:
       propertyPath: m_Name
       value: Button_Player_Info Variant
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4647848725714073491, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}
+    - {fileID: 6435246704959521556, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}
     m_RemovedGameObjects:
     - {fileID: 8014781684415328265, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}
     m_AddedGameObjects:
@@ -662,6 +668,17 @@ PrefabInstance:
       addedObject: {fileID: 3090274433577289768}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}
+--- !u!114 &7306193003801306324 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 824162981007865196, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}
+  m_PrefabInstance: {fileID: 7932189208033448376}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2140d2b457bea84881488302059889b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &7741246524810618952 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 394806853908118000, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}

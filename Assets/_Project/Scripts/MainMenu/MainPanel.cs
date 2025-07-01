@@ -18,6 +18,7 @@ namespace HackMonkeys.UI.Panels
         [SerializeField] private InteractableButton3D hostButton;
         [SerializeField] private InteractableButton3D friendsButton;
         [SerializeField] private InteractableButton3D settingsButton;
+        [SerializeField] private InteractableButton3D optionsButton;
         [SerializeField] private InteractableButton3D exitButton;
         
         [Header("Player Info")]
@@ -41,18 +42,17 @@ namespace HackMonkeys.UI.Panels
             _prefsManager = PlayerPrefsManager.Instance;
             _networkBootstrapper = NetworkBootstrapper.Instance;
             
-            // Configurar botones
-            ConfigureButtons();
-            
             // Actualizar información del jugador
             UpdatePlayerInfo();
             
             // Animar logo
             AnimateLogo();
         }
-        
-        private void ConfigureButtons()
+
+        protected override void ConfigureButtons()
         {
+            base.ConfigureButtons();
+            
             // Botón Play - Buscar partidas
             if (playButton != null)
             {
@@ -67,7 +67,7 @@ namespace HackMonkeys.UI.Panels
             {
                 hostButton.OnButtonPressed.AddListener(() => 
                 {
-                    _uiManager.ShowPanel(PanelID.CreateRoom);
+                    _uiManager.ShowPanel(PanelID.CreateLobby);
                 });
             }
             
@@ -89,12 +89,21 @@ namespace HackMonkeys.UI.Panels
                 });
             }
             
+            //Options Button
+            if (optionsButton != null)
+            {
+                optionsButton.OnButtonPressed.AddListener(() =>
+                {
+                    _uiManager.ShowPanel(PanelID.Options);
+                });
+            }
+            
             // Botón Exit
             if (exitButton != null)
             {
                 exitButton.OnButtonPressed.AddListener(() => 
                 {
-                    ShowExitConfirmation();
+                    _uiManager.ShowPanel(PanelID.ExitPanel);
                 });
             }
         }
@@ -188,7 +197,7 @@ namespace HackMonkeys.UI.Panels
             // Suscribirse a eventos de conexión
             if (_networkBootstrapper != null)
             {
-                _networkBootstrapper.OnConnectedToServer_event.AddListener(OnConnected);
+                _networkBootstrapper.OnConnectedToServerEvent.AddListener(OnConnected);
                 _networkBootstrapper.OnConnectionFailed.AddListener(OnConnectionFailed);
             }
             
@@ -209,7 +218,7 @@ namespace HackMonkeys.UI.Panels
             // Desuscribirse de eventos
             if (_networkBootstrapper != null)
             {
-                _networkBootstrapper.OnConnectedToServer_event.RemoveListener(OnConnected);
+                _networkBootstrapper.OnConnectedToServerEvent.RemoveListener(OnConnected);
                 _networkBootstrapper.OnConnectionFailed.RemoveListener(OnConnectionFailed);
             }
         }
@@ -229,18 +238,7 @@ namespace HackMonkeys.UI.Panels
             // Mostrar notificación de error
             ShowNotification($"Connection failed: {error}", NotificationType.Error);
         }
-        
-        private void ShowExitConfirmation()
-        {
-            // Aquí se mostraría un diálogo de confirmación
-            // Por ahora, salir directamente
-            #if UNITY_EDITOR
-                UnityEditor.EditorApplication.isPlaying = false;
-            #else
-                Application.Quit();
-            #endif
-        }
-        
+          
         private void ShowNotification(string message, NotificationType type)
         {
             // Sistema de notificaciones flotantes

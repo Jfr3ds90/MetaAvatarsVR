@@ -18,7 +18,6 @@ namespace HackMonkeys.UI.Panels
         [SerializeField] private Transform roomListContainer;
         [SerializeField] private GameObject roomItemPrefab;
         [SerializeField] private InteractableButton3D refreshButton;
-        [SerializeField] private InteractableButton3D backButton;
         [SerializeField] private InteractableButton3D createRoomButton;
         
         [Header("Room Info Display")]
@@ -88,14 +87,9 @@ namespace HackMonkeys.UI.Panels
                 refreshButton.OnButtonPressed.AddListener(RefreshRoomList);
             }
             
-            if (backButton != null)
-            {
-                backButton.OnButtonPressed.AddListener(() => _uiManager.GoBack());
-            }
-            
             if (createRoomButton != null)
             {
-                createRoomButton.OnButtonPressed.AddListener(() => _uiManager.ShowPanel(PanelID.CreateRoom));
+                createRoomButton.OnButtonPressed.AddListener(() => _uiManager.ShowPanel(PanelID.CreateLobby));
             }
             
             if (joinButton != null)
@@ -164,7 +158,7 @@ namespace HackMonkeys.UI.Panels
             // Suscribirse a eventos
             if (_networkBootstrapper != null)
             {
-                _networkBootstrapper.OnSessionListUpdated_event.AddListener(OnSessionListUpdated);
+                _networkBootstrapper.OnSessionListUpdatedEvent.AddListener(OnSessionListUpdated);
             }
             
             // Refrescar lista automáticamente
@@ -178,7 +172,7 @@ namespace HackMonkeys.UI.Panels
             // Desuscribirse de eventos
             if (_networkBootstrapper != null)
             {
-                _networkBootstrapper.OnSessionListUpdated_event.RemoveListener(OnSessionListUpdated);
+                _networkBootstrapper.OnSessionListUpdatedEvent.RemoveListener(OnSessionListUpdated);
             }
         }
         

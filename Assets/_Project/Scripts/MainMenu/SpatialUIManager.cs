@@ -1,38 +1,41 @@
 using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
-using Meta.XR.MRUtilityKit;
+using Oculus.Interaction;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine.XR.Interaction.Toolkit.Interactors;
+using DG.Tweening;
 
 namespace HackMonkeys.UI.Spatial
 {
     /// <summary>
-    /// Gestiona el sistema de UI espacial 3D para VR con optimizaciones para Quest 2
+    /// Gestiona el sistema de UI espacial 3D para VR usando Meta Interaction SDK
     /// </summary>
     public class SpatialUIManager : MonoBehaviour
     {
-        [Header("UI Configuration")] [SerializeField]
-        private float defaultPanelDistance = 2f;
-
+        [Header("UI Configuration")]
+        [SerializeField] private float defaultPanelDistance = 2f;
         [SerializeField] private float panelHeight = 1.5f;
         [SerializeField] private float panelSpacing = 0.8f;
         [SerializeField] private AnimationCurve scaleCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
-        [Header("Interaction")] [SerializeField]
-        private XRRayInteractor leftHandRay;
+        [Header("Meta Ray Interactors")]
+        [SerializeField] private RayInteractor leftHandRayInteractor;
+        [SerializeField] private RayInteractor rightHandRayInteractor;
+        
+        [Header("Visual Feedback")]
+        [SerializeField] private LineRenderer leftRayVisual;
+        [SerializeField] private LineRenderer rightRayVisual;
+        [SerializeField] private GameObject reticle;
+        [SerializeField] private float rayWidth = 0.01f;
+        [SerializeField] private Gradient rayGradient;
+        [SerializeField] private Gradient rayHoverGradient;
 
-        [SerializeField] private XRRayInteractor rightHandRay;
-        [SerializeField] private LineRenderer rayLineRenderer;
-        [SerializeField] private float rayMaxDistance = 10f;
-
-        [Header("Haptic Feedback")] [SerializeField]
-        private float hoverHapticStrength = 0.1f;
-
+        [Header("Haptic Feedback")]
+        [SerializeField] private float hoverHapticStrength = 0.1f;
         [SerializeField] private float selectHapticStrength = 0.3f;
         [SerializeField] private float hapticDuration = 0.1f;
 
-        [Header("Audio")] [SerializeField] private AudioSource uiAudioSource;
+        [Header("Audio")]
+        [SerializeField] private AudioSource uiAudioSource;
         [SerializeField] private AudioClip hoverSound;
         [SerializeField] private AudioClip selectSound;
         [SerializeField] private AudioClip backSound;
@@ -42,6 +45,12 @@ namespace HackMonkeys.UI.Spatial
         private Stack<MenuPanel> _navigationStack = new Stack<MenuPanel>();
         private Transform _playerTransform;
         private bool _isTransitioning = false;
+        
+        // Ray interaction tracking
+        private RayInteractable _currentHoveredInteractable;
+        private Dictionary<RayInteractor, RayInteractable> _hoveredInteractables = new Dictionary<RayInteractor, RayInteractable>();
+        private Dictionary<RayInteractor, InteractorState> _previousInteractorStates = new Dictionary<RayInteractor, InteractorState>();
+
 
         public static SpatialUIManager Instance { get; private set; }
 
@@ -54,8 +63,6 @@ namespace HackMonkeys.UI.Spatial
             }
 
             Instance = this;
-
-            // Configurar ray interactors
             ConfigureRayInteractors();
         }
 
@@ -67,28 +74,220 @@ namespace HackMonkeys.UI.Spatial
             // Registrar todos los paneles hijos
             RegisterChildPanels();
 
+            // Configurar visuales de los rayos
+            SetupRayVisuals();
+
             // Mostrar panel principal
             ShowPanel(PanelID.MainPanel);
         }
 
+        private void Update()
+        {
+            UpdateRayVisuals();
+            CheckForInteractions();
+        }
+
         private void ConfigureRayInteractors()
         {
-            // Configurar ray de mano izquierda
-            if (leftHandRay != null)
+            // Los RayInteractors de Meta no usan eventos de Unity como XRRayInteractor
+            // En su lugar, debemos checkear su estado en Update
+            if (leftHandRayInteractor != null)
             {
-                leftHandRay.maxRaycastDistance = rayMaxDistance;
-                leftHandRay.hoverEntered.AddListener(OnHoverEnter);
-                leftHandRay.hoverExited.AddListener(OnHoverExit);
-                leftHandRay.selectEntered.AddListener(OnSelect);
+                leftHandRayInteractor.MaxRayLength = 10f;
             }
 
-            // Configurar ray de mano derecha
-            if (rightHandRay != null)
+            if (rightHandRayInteractor != null)
             {
-                rightHandRay.maxRaycastDistance = rayMaxDistance;
-                rightHandRay.hoverEntered.AddListener(OnHoverEnter);
-                rightHandRay.hoverExited.AddListener(OnHoverExit);
-                rightHandRay.selectEntered.AddListener(OnSelect);
+                rightHandRayInteractor.MaxRayLength = 10f;
+            }
+        }
+
+        private void SetupRayVisuals()
+        {
+            // Configurar LineRenderers para visualización de rayos
+            if (leftRayVisual != null)
+            {
+                leftRayVisual.startWidth = rayWidth;
+                leftRayVisual.endWidth = rayWidth * 0.5f;
+                leftRayVisual.colorGradient = rayGradient;
+                leftRayVisual.positionCount = 2;
+            }
+
+            if (rightRayVisual != null)
+            {
+                rightRayVisual.startWidth = rayWidth;
+                rightRayVisual.endWidth = rayWidth * 0.5f;
+                rightRayVisual.colorGradient = rayGradient;
+                rightRayVisual.positionCount = 2;
+            }
+
+            // Crear reticle si no existe
+            if (reticle == null)
+            {
+                reticle = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                reticle.transform.localScale = Vector3.one * 0.02f;
+                reticle.GetComponent<Renderer>().material.color = Color.white;
+                Destroy(reticle.GetComponent<Collider>());
+            }
+        }
+
+        private void UpdateRayVisuals()
+        {
+            // Actualizar visual del rayo izquierdo
+            UpdateSingleRayVisual(leftHandRayInteractor, leftRayVisual, true);
+            
+            // Actualizar visual del rayo derecho
+            UpdateSingleRayVisual(rightHandRayInteractor, rightRayVisual, false);
+        }
+
+        private void UpdateSingleRayVisual(RayInteractor rayInteractor, LineRenderer rayVisual, bool isLeft)
+        {
+            if (rayInteractor == null || rayVisual == null) return;
+
+            // Obtener el estado actual del interactor
+            bool isInteracting = rayInteractor.State == InteractorState.Select;
+            bool hasCandidate = rayInteractor.HasCandidate;
+            
+            // Mostrar/ocultar rayo basado en el estado
+            rayVisual.enabled = rayInteractor.enabled && (hasCandidate || isInteracting);
+
+            if (rayVisual.enabled)
+            {
+                // Configurar posiciones del rayo
+                rayVisual.SetPosition(0, rayInteractor.Origin);
+                rayVisual.SetPosition(1, rayInteractor.End);
+
+                // Cambiar color si está hovering
+                if (hasCandidate)
+                {
+                    rayVisual.colorGradient = rayHoverGradient;
+                    
+                    // Posicionar reticle en el punto de colisión
+                    if (rayInteractor.CollisionInfo.HasValue && reticle != null)
+                    {
+                        reticle.SetActive(true);
+                        reticle.transform.position = rayInteractor.CollisionInfo.Value.Point;
+                        reticle.transform.rotation = Quaternion.LookRotation(rayInteractor.CollisionInfo.Value.Normal);
+                    }
+                }
+                else
+                {
+                    rayVisual.colorGradient = rayGradient;
+                    if (reticle != null) reticle.SetActive(false);
+                }
+            }
+            else
+            {
+                if (reticle != null) reticle.SetActive(false);
+            }
+        }
+
+        private void CheckForInteractions()
+        {
+            // Chequear interacciones para ambas manos
+            CheckHandInteraction(leftHandRayInteractor);
+            CheckHandInteraction(rightHandRayInteractor);
+        }
+
+        private void CheckHandInteraction(RayInteractor rayInteractor)
+        {
+            if (rayInteractor == null) return;
+
+            // Obtener el interactable actual si existe
+            RayInteractable currentInteractable = null;
+            if (rayInteractor.HasCandidate && rayInteractor.CandidateProperties is RayInteractor.RayCandidateProperties props)
+            {
+                currentInteractable = props.ClosestInteractable;
+            }
+
+            // Verificar si cambió el hover
+            if (_hoveredInteractables.TryGetValue(rayInteractor, out RayInteractable previousInteractable))
+            {
+                if (previousInteractable != currentInteractable)
+                {
+                    // Salió del hover anterior
+                    if (previousInteractable != null)
+                    {
+                        OnRayHoverExit(previousInteractable);
+                    }
+
+                    // Entró a un nuevo hover
+                    if (currentInteractable != null)
+                    {
+                        OnRayHoverEnter(currentInteractable, rayInteractor);
+                    }
+                }
+            }
+            else if (currentInteractable != null)
+            {
+                // Primera vez que hoverea algo
+                OnRayHoverEnter(currentInteractable, rayInteractor);
+            }
+
+            // Actualizar el diccionario
+            _hoveredInteractables[rayInteractor] = currentInteractable;
+
+            // Obtener estados para detectar transiciones
+            InteractorState previousState = _previousInteractorStates.ContainsKey(rayInteractor) 
+                ? _previousInteractorStates[rayInteractor] 
+                : InteractorState.Normal;
+            InteractorState currentState = rayInteractor.State;
+
+            // Chequear selección - solo en transición de no-seleccionado a seleccionado
+            if (currentState == InteractorState.Select && 
+                previousState != InteractorState.Select && 
+                currentInteractable != null)
+            {
+                OnRaySelect(currentInteractable, rayInteractor);
+            }
+
+            // Actualizar el estado previo
+            _previousInteractorStates[rayInteractor] = currentState;
+        }
+
+        private void OnRayHoverEnter(RayInteractable interactable, RayInteractor interactor)
+        {
+            // Buscar el botón 3D asociado
+            var button = interactable.GetComponentInParent<InteractableButton3D>();
+            if (button != null)
+            {
+                button.OnHoverEnter();
+        
+                // Verificar si el botón pertenece a un teclado virtual
+                VirtualKeyboard3D keyboard = button.GetComponentInParent<VirtualKeyboard3D>();
+        
+                // Solo reproducir sonido y haptics si NO es parte del teclado
+                if (keyboard == null)
+                {
+                    TriggerHapticFeedback(interactor, hoverHapticStrength);
+                    PlayUISound(hoverSound, 0.5f);
+                }
+            }
+        }
+
+        private void OnRayHoverExit(RayInteractable interactable)
+        {
+            // Buscar el botón 3D asociado
+            var button = interactable.GetComponentInParent<InteractableButton3D>();
+            if (button != null)
+            {
+                button.OnHoverExit();
+            }
+        }
+
+        private void OnRaySelect(RayInteractable interactable, RayInteractor interactor)
+        {
+            // Buscar el botón 3D asociado
+            var button = interactable.GetComponentInParent<InteractableButton3D>();
+            if (button != null)
+            {
+                button.OnSelectStart();
+                TriggerHapticFeedback(interactor, selectHapticStrength);
+                VirtualKeyboard3D keyboard = button.GetComponentInParent<VirtualKeyboard3D>();
+                if (keyboard == null)
+                {
+                    PlayUISound(selectSound);
+                }
             }
         }
 
@@ -224,52 +423,22 @@ namespace HackMonkeys.UI.Spatial
             panel.CanvasGroup.alpha = 0f;
         }
 
-        #region Interaction Callbacks
-
-        private void OnHoverEnter(HoverEnterEventArgs args)
-        {
-            var button = args.interactableObject.transform.GetComponent<InteractableButton3D>();
-            if (button != null)
-            {
-                button.OnHoverEnter();
-                TriggerHapticFeedback(args.interactorObject, hoverHapticStrength);
-                PlayUISound(hoverSound, 0.5f);
-            }
-        }
-
-        private void OnHoverExit(HoverExitEventArgs args)
-        {
-            var button = args.interactableObject.transform.GetComponent<InteractableButton3D>();
-            if (button != null)
-            {
-                button.OnHoverExit();
-            }
-        }
-
-        private void OnSelect(SelectEnterEventArgs args)
-        {
-            var button = args.interactableObject.transform.GetComponent<InteractableButton3D>();
-            if (button != null)
-            {
-                button.OnSelect();
-                TriggerHapticFeedback(args.interactorObject, selectHapticStrength);
-                PlayUISound(selectSound);
-            }
-        }
-
-        #endregion
-
         #region Haptic Feedback
 
-        private void TriggerHapticFeedback(IXRInteractor interactor, float intensity)
+        private void TriggerHapticFeedback(RayInteractor interactor, float intensity)
         {
-            if (interactor is XRBaseInputInteractor controllerInteractor)
+            // Para Meta Interaction SDK, necesitamos acceder al OVRInput
+            if (interactor == leftHandRayInteractor)
             {
-                var controller = controllerInteractor.xrController;
-                if (controller != null)
-                {
-                    controller.SendHapticImpulse(intensity, hapticDuration);
-                }
+                OVRInput.SetControllerVibration(1, intensity, OVRInput.Controller.LTouch);
+                DOVirtual.DelayedCall(hapticDuration, () => 
+                    OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.LTouch));
+            }
+            else if (interactor == rightHandRayInteractor)
+            {
+                OVRInput.SetControllerVibration(1, intensity, OVRInput.Controller.RTouch);
+                DOVirtual.DelayedCall(hapticDuration, () => 
+                    OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.RTouch));
             }
         }
 
@@ -314,14 +483,26 @@ namespace HackMonkeys.UI.Spatial
         }
 
         #endregion
+
+        private void OnDestroy()
+        {
+            // Limpiar referencias
+            _hoveredInteractables.Clear();
+            _previousInteractorStates.Clear();
+
+        }
     }
 
     public enum PanelID
     {
         MainPanel,
         LobbyBrowser,
-        CreateRoom,
+        CreateLobby,
+        Lobby,
+        LobbyRoom,
         Friends,
-        Settings
+        Settings,
+        Options,
+        ExitPanel,
     }
 }

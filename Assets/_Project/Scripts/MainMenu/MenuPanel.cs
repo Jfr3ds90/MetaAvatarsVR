@@ -10,6 +10,8 @@ public abstract class MenuPanel : MonoBehaviour
     private CanvasGroup _canvasGroup;
     protected SpatialUIManager _uiManager;
     public PanelID panelID;
+    public InteractableButton3D backButton;
+
         
     public CanvasGroup CanvasGroup
     {
@@ -29,6 +31,7 @@ public abstract class MenuPanel : MonoBehaviour
         
     protected virtual void SetupPanel()
     {
+        ConfigureButtons();
         // Override en clases derivadas para configuración específica
     }
         
@@ -40,5 +43,13 @@ public abstract class MenuPanel : MonoBehaviour
     public virtual void OnPanelHidden()
     {
         // Override para lógica cuando el panel se oculta
+    }
+
+    protected virtual void ConfigureButtons()
+    {
+        if (backButton != null)
+        {
+            backButton.OnButtonPressed.AddListener(() => _uiManager.GoBack());
+        }
     }
 }
