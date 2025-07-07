@@ -4,6 +4,8 @@ public class ValveManager : MonoBehaviour
 {
     public bool[] activatedValves;
     int lastValveActived;
+    public float gasFog;
+    public Color colorGas;
     public void MixtureGas(int value)
     {
         int n = 0;
@@ -15,7 +17,10 @@ public class ValveManager : MonoBehaviour
                // n--;
         }
         if (n > 2)
-            Debug.Log("más de 2 valvulas abiertas");
+        {
+            gasFog += Time.deltaTime * 0.01f*n;//hacer corrutina para esto
+            Debug.Log("más de 2 valvulas abiertas"); 
+        }
 
         else
         {
@@ -38,9 +43,11 @@ public class ValveManager : MonoBehaviour
                             Debug.Log("valvula activa " + value);
                             break;
                         default:
+                            gasFog += Time.deltaTime*0.01f;
                             break;
                     }
                     lastValveActived = n;
+                    //RenderSettings.fogDensity = gasFog;//vincularlo al valor y de las valvulas
                 }
                 else
                 {
@@ -69,6 +76,7 @@ public class ValveManager : MonoBehaviour
                         Debug.Log("valvula activa " + value + " y tambien " + lastValveActived);
                         break;
                     default:
+                        gasFog += Time.deltaTime * 0.02f;
                         break;
                 }
                 lastValveActived = -1;

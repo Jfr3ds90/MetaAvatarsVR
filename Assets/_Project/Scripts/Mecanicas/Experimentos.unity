@@ -588,6 +588,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gasType: 1
   y: 0
+  colorGas: {r: 0, g: 1, b: 0, a: 0}
 --- !u!1 &112679138
 GameObject:
   m_ObjectHideFlags: 0
@@ -760,6 +761,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   activatedValves: 00000000
+  gasFog: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
 --- !u!1 &154925140
 GameObject:
   m_ObjectHideFlags: 0
@@ -1122,6 +1125,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gasType: 3
   y: 0
+  colorGas: {r: 0.98490566, g: 0, b: 0.9730266, a: 0}
 --- !u!1 &241383212
 GameObject:
   m_ObjectHideFlags: 0
@@ -1157,6 +1161,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   activatedValves: 00000000
+  gasFog: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
 --- !u!114 &241383214
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1717,6 +1723,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   activatedValves: 00000000
+  gasFog: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
 --- !u!114 &294836191
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3918,6 +3926,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   activatedValves: 00000000
+  gasFog: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
 --- !u!114 &807593427
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4524,7 +4534,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7187300976833471648, guid: d11b1ee6baaf922448658a652b00f26d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1.105
       objectReference: {fileID: 0}
     - target: {fileID: 7187300976833471648, guid: d11b1ee6baaf922448658a652b00f26d, type: 3}
       propertyPath: m_LocalPosition.z
@@ -4582,6 +4592,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gasType: 0
   y: 0
+  colorGas: {r: 1, g: 0, b: 0, a: 0}
 --- !u!1 &991962258
 GameObject:
   m_ObjectHideFlags: 0
@@ -4857,6 +4868,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gasType: 2
   y: 0
+  colorGas: {r: 0, g: 0, b: 1, a: 0}
 --- !u!1 &1171879033
 GameObject:
   m_ObjectHideFlags: 0
@@ -5046,6 +5058,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   activatedValves: 00000000
+  gasFog: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
 --- !u!114 &1258915226
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6053,6 +6067,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   activatedValves: 00000000
+  gasFog: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
 --- !u!114 &1638404421
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6296,7 +6312,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7719734794154050704, guid: 4a7044e0c2604094fbed7dd6d02dcefe, type: 3}
       propertyPath: _constraints.MaxAngle.Value
-      value: 359
+      value: 358
       objectReference: {fileID: 0}
     - target: {fileID: 7719734794154050704, guid: 4a7044e0c2604094fbed7dd6d02dcefe, type: 3}
       propertyPath: _constraints.MinAngle.Value
@@ -8511,7 +8527,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2531508475039807347, guid: c54d0e189b9a50a4aa44e898ddff5781, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.4069
+      value: 1.5119
       objectReference: {fileID: 0}
     - target: {fileID: 2531508475039807347, guid: c54d0e189b9a50a4aa44e898ddff5781, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

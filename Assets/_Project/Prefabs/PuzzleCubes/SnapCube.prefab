@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 2125059600749498382}
   - component: {fileID: 6808079895516424617}
   - component: {fileID: 7990140170955024020}
-  - component: {fileID: 7233534781662437835}
   - component: {fileID: 6918706736939047756}
   - component: {fileID: 2424443056548562331}
   - component: {fileID: 1873758225174922714}
@@ -142,29 +141,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &7233534781662437835
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4958641478023541303}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36dc0e3c70ff1494280e6b316cc0dacb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  magneticCube: {fileID: 0}
-  grabbable: {fileID: 6918706736939047756}
-  enableHapticFeedback: 1
-  snapHapticIntensity: 0.8
-  snapHapticDuration: 0.05
-  grabHapticIntensity: 0.3
-  grabHapticDuration: 0.05
-  enablePositionalAudio: 1
-  audioRange: 5
-  enableGrabVisualFeedback: 1
-  grabScaleMultiplier: 1.1
 --- !u!114 &6918706736939047756
 MonoBehaviour:
   m_ObjectHideFlags: 0
