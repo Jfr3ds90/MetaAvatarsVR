@@ -61,7 +61,7 @@ namespace HackMonkeys.UI.Spatial
         private Vector3 _originalScale;
         private Tweener _currentTween;
         private bool _isHovered = false;
-        private bool _isPressed = false;
+        [SerializeField] private bool _isPressed = false;
         private bool _canTrigger = true; // Control para evitar activaciones múltiples
         private float _lastTriggerTime = 0f;
         private Coroutine _repeatCoroutine;

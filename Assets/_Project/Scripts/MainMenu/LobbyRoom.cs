@@ -11,6 +11,7 @@ using HackMonkeys.UI.Spatial;
 namespace HackMonkeys.UI.Panels
 {
     /// <summary>
+    /// LobbyRoom ACTUALIZADO - Usa LobbyState + LobbyController (arquitectura limpia)
     /// Panel del lobby donde se muestran los jugadores conectados y se gestiona el estado antes de iniciar partida
     /// </summary>
     public class LobbyRoom : MenuPanel
@@ -59,12 +60,11 @@ namespace HackMonkeys.UI.Panels
         [SerializeField] private Color hostColor = new Color(1f, 0.8f, 0f); // Gold
         [SerializeField] private Color localPlayerColor = Color.cyan;
 
-        // Private state
-        private LobbyManager _lobbyManager;
-        private NetworkBootstrapper _networkBootstrapper;
+        // ✅ CAMBIO: Referencias a nuevos componentes
+        private LobbyState _lobbyState;
+        private LobbyController _lobbyController;
         private List<LobbyPlayerItem> _playerItems = new List<LobbyPlayerItem>();
         private bool _isLocalPlayerReady = false;
-        private bool _isHost = false;
         private LobbyPlayer _selectedPlayer; // Para kick functionality
 
         // Animation tweeners
@@ -75,32 +75,54 @@ namespace HackMonkeys.UI.Panels
         {
             base.SetupPanel();
 
-            // Obtener referencias
-            _lobbyManager = LobbyManager.Instance;
-            _networkBootstrapper = NetworkBootstrapper.Instance;
+            Debug.Log("🧪 [LOBBYROOM] Setting up panel...");
 
-            // Configurar botones
+            // ✅ CAMBIO: Obtener nuevas referencias
+            _lobbyState = LobbyState.Instance;
+            _lobbyController = LobbyController.Instance;
+
+            // Debug de referencias
+            Debug.Log($"🧪 [LOBBYROOM] LobbyState: {_lobbyState != null}");
+            Debug.Log($"🧪 [LOBBYROOM] LobbyController: {_lobbyController != null}");
+
+            if (_lobbyState == null)
+            {
+                Debug.LogError("🧪 [LOBBYROOM] ❌ LobbyState.Instance is NULL!");
+            }
+
+            if (_lobbyController == null)
+            {
+                Debug.LogError("🧪 [LOBBYROOM] ❌ LobbyController.Instance is NULL!");
+            }
+
             ConfigureLobbyButtons();
-
-            // Inicializar pool de player items
             InitializePlayerItemPool();
-
-            // Configurar estado inicial
             UpdateHostControls();
+
+            Debug.Log("🧪 [LOBBYROOM] ✅ Panel setup completed");
         }
 
         private void ConfigureLobbyButtons()
         {
-            // Botón Ready/Unready
+            Debug.Log("🧪 [LOBBYROOM] Configuring lobby buttons...");
+
+            // ✅ CAMBIO: Usar LobbyController para acciones
             if (readyButton != null)
             {
-                readyButton.OnButtonPressed.AddListener(ToggleReady);
+                readyButton.OnButtonPressed.AddListener(() =>
+                {
+                    Debug.Log("🧪 [LOBBYROOM] Ready button pressed");
+                    _lobbyController?.ToggleReady();
+                });
             }
 
-            // Botón Start Game (solo host)
             if (startGameButton != null)
             {
-                startGameButton.OnButtonPressed.AddListener(StartGame);
+                startGameButton.OnButtonPressed.AddListener(() =>
+                {
+                    Debug.Log("🧪 [LOBBYROOM] Start game button pressed");
+                    _lobbyController?.StartGame();
+                });
             }
 
             // Botón Settings
@@ -132,10 +154,14 @@ namespace HackMonkeys.UI.Panels
             {
                 difficultySlider.OnValueChanged.AddListener(OnDifficultyChanged);
             }
+
+            Debug.Log("🧪 [LOBBYROOM] ✅ Buttons configured");
         }
 
         private void InitializePlayerItemPool()
         {
+            Debug.Log("🧪 [LOBBYROOM] Initializing player item pool...");
+
             // Pre-crear items de jugador para mejor performance
             for (int i = 0; i < maxVisiblePlayers; i++)
             {
@@ -149,47 +175,116 @@ namespace HackMonkeys.UI.Panels
                     _playerItems.Add(playerItem);
                 }
             }
+
+            Debug.Log($"🧪 [LOBBYROOM] ✅ Created {_playerItems.Count} player items");
         }
 
         public override void OnPanelShown()
         {
             base.OnPanelShown();
 
-            // Suscribirse a eventos del LobbyManager
-            if (_lobbyManager != null)
+            Debug.Log("🧪 [LOBBYROOM] Panel shown, setting up events...");
+
+            // Suscribirse a LobbyState
+            if (_lobbyState != null)
             {
-                _lobbyManager.OnPlayerJoined.AddListener(OnPlayerJoined);
-                _lobbyManager.OnPlayerLeft.AddListener(OnPlayerLeft);
-                _lobbyManager.OnPlayerUpdated.AddListener(OnPlayerUpdated);
-                _lobbyManager.OnPlayerCountChanged.AddListener(OnPlayerCountChanged);
-                _lobbyManager.OnAllPlayersReady.AddListener(OnAllPlayersReadyChanged);
+                _lobbyState.OnPlayerJoined.AddListener(OnPlayerJoined);
+                _lobbyState.OnPlayerLeft.AddListener(OnPlayerLeft);
+                _lobbyState.OnPlayerUpdated.AddListener(OnPlayerUpdated);
+                _lobbyState.OnPlayerCountChanged.AddListener(OnPlayerCountChanged);
+                _lobbyState.OnAllPlayersReady.AddListener(OnAllPlayersReadyChanged);
+
+                Debug.Log("🧪 [LOBBYROOM] ✅ Subscribed to LobbyState events");
+            }
+            else
+            {
+                Debug.LogError("🧪 [LOBBYROOM] ❌ Cannot subscribe to events - LobbyState is null");
+            }
+
+            // Suscribirse a eventos del controller
+            if (_lobbyController != null)
+            {
+                _lobbyController.OnGameStarting.AddListener(() =>
+                {
+                    ShowStatusMessage("Starting game...", MessageType.Info);
+                });
+
+                _lobbyController.OnGameStartFailed.AddListener(() =>
+                {
+                    ShowStatusMessage("Failed to start game", MessageType.Error);
+                });
+
+                _lobbyController.OnActionFailed.AddListener((error) =>
+                {
+                    ShowStatusMessage(error, MessageType.Error);
+                });
+
+                Debug.Log("🧪 [LOBBYROOM] ✅ Subscribed to LobbyController events");
             }
 
             // Actualizar información de la sala
             UpdateRoomInfo();
 
-            // Actualizar lista de jugadores
-            RefreshPlayersList();
+            // CORRECCIÓN CRÍTICA: Esperar un frame antes de refrescar
+            // Esto asegura que LobbyPlayer ya se haya registrado
+            StartCoroutine(DelayedRefresh());
 
             // Verificar si somos el host
             UpdateHostControls();
 
             // Animación de entrada
             AnimateRoomEntry();
+
+            Debug.Log("🧪 [LOBBYROOM] ✅ Panel fully initialized");
         }
 
         public override void OnPanelHidden()
         {
             base.OnPanelHidden();
 
-            // Desuscribirse de eventos
-            if (_lobbyManager != null)
+            Debug.Log("🧪 [LOBBYROOM] Panel hidden, cleaning up events...");
+
+            // ✅ CAMBIO: Desuscribirse de LobbyState
+            if (_lobbyState != null)
             {
-                _lobbyManager.OnPlayerJoined.RemoveListener(OnPlayerJoined);
-                _lobbyManager.OnPlayerLeft.RemoveListener(OnPlayerLeft);
-                _lobbyManager.OnPlayerUpdated.RemoveListener(OnPlayerUpdated);
-                _lobbyManager.OnPlayerCountChanged.RemoveListener(OnPlayerCountChanged);
-                _lobbyManager.OnAllPlayersReady.RemoveListener(OnAllPlayersReadyChanged);
+                _lobbyState.OnPlayerJoined.RemoveListener(OnPlayerJoined);
+                _lobbyState.OnPlayerLeft.RemoveListener(OnPlayerLeft);
+                _lobbyState.OnPlayerUpdated.RemoveListener(OnPlayerUpdated);
+                _lobbyState.OnPlayerCountChanged.RemoveListener(OnPlayerCountChanged);
+                _lobbyState.OnAllPlayersReady.RemoveListener(OnAllPlayersReadyChanged);
+
+                Debug.Log("🧪 [LOBBYROOM] ✅ Unsubscribed from LobbyState events");
+            }
+
+            // Desuscribirse del controller
+            if (_lobbyController != null)
+            {
+                _lobbyController.OnGameStarting.RemoveAllListeners();
+                _lobbyController.OnGameStartFailed.RemoveAllListeners();
+                _lobbyController.OnActionFailed.RemoveAllListeners();
+
+                Debug.Log("🧪 [LOBBYROOM] ✅ Unsubscribed from LobbyController events");
+            }
+        }
+
+        private System.Collections.IEnumerator DelayedRefresh()
+        {
+            Debug.Log("🧪 [LOBBYROOM] Waiting before refresh...");
+
+            // Esperar 2 frames para asegurar que todo esté inicializado
+            yield return null;
+            yield return null;
+
+            // Ahora sí refrescar
+            Debug.Log("🧪 [LOBBYROOM] Executing delayed refresh...");
+            RefreshPlayersList();
+
+            // Si aún no hay jugadores, intentar de nuevo
+            if (_lobbyState != null && _lobbyState.PlayerCount == 0)
+            {
+                Debug.LogWarning("🧪 [LOBBYROOM] No players found, retrying in 0.5s...");
+                yield return new WaitForSeconds(0.5f);
+                RefreshPlayersList();
             }
         }
 
@@ -197,7 +292,7 @@ namespace HackMonkeys.UI.Panels
 
         private void OnPlayerJoined(LobbyPlayer player)
         {
-            Debug.Log($"[LobbyRoom] Player joined: {player.GetDisplayName()}");
+            Debug.Log($"🧪 [LOBBYROOM] 🎉 Player joined: {player.GetDisplayName()}");
 
             RefreshPlayersList();
             ShowStatusMessage($"{player.PlayerName} joined the lobby", MessageType.Info);
@@ -208,7 +303,7 @@ namespace HackMonkeys.UI.Panels
 
         private void OnPlayerLeft(LobbyPlayer player)
         {
-            Debug.Log($"[LobbyRoom] Player left: {player.GetDisplayName()}");
+            Debug.Log($"🧪 [LOBBYROOM] 👋 Player left: {player.GetDisplayName()}");
 
             RefreshPlayersList();
             ShowStatusMessage($"{player.PlayerName} left the lobby", MessageType.Warning);
@@ -216,6 +311,8 @@ namespace HackMonkeys.UI.Panels
 
         private void OnPlayerUpdated(LobbyPlayer player)
         {
+            Debug.Log($"🧪 [LOBBYROOM] 🔄 Player updated: {player.GetDisplayName()} - Ready: {player.IsReady}");
+
             // Actualizar solo el item específico del jugador
             var playerItem = _playerItems.FirstOrDefault(item =>
                 item.gameObject.activeSelf && item.GetPlayerRef() == player.PlayerRef);
@@ -238,15 +335,19 @@ namespace HackMonkeys.UI.Panels
 
         private void OnPlayerCountChanged(int current, int max)
         {
+            Debug.Log($"🧪 [LOBBYROOM] 📊 Player count changed: {current}/{max}");
+
             UpdatePlayerCount();
             UpdateStartButton();
         }
 
         private void OnAllPlayersReadyChanged(bool allReady)
         {
+            Debug.Log($"🧪 [LOBBYROOM] 🎯 All players ready changed: {allReady}");
+
             UpdateStartButton();
 
-            if (allReady && _lobbyManager.PlayerCount > 1)
+            if (allReady && _lobbyState != null && _lobbyState.PlayerCount > 1)
             {
                 ShowStatusMessage("All players ready! Host can start the game.", MessageType.Success);
 
@@ -264,46 +365,86 @@ namespace HackMonkeys.UI.Panels
 
         private void UpdateRoomInfo()
         {
-            if (_networkBootstrapper == null) return;
+            Debug.Log("🧪 [LOBBYROOM] Updating room info...");
+
+            var lobbyInfo = _lobbyController?.GetLobbyInfo();
+            if (lobbyInfo == null)
+            {
+                Debug.LogWarning("🧪 [LOBBYROOM] ⚠️ Cannot update room info - LobbyController returned null");
+                return;
+            }
 
             // Nombre de la sala
             if (roomNameText != null)
             {
-                roomNameText.text = _networkBootstrapper.CurrentRoomName ?? "Room";
+                roomNameText.text = lobbyInfo.RoomName ?? "Room";
             }
 
             // Código de sala (simplificado)
             if (roomCodeText != null)
             {
-                string roomCode = _networkBootstrapper.CurrentRoomName?.GetHashCode().ToString("X6") ?? "------";
-                roomCodeText.text = $"#{roomCode}";
+                roomCodeText.text = $"#{lobbyInfo.RoomCode}";
             }
 
             // Estado de la sala
             if (roomStatusIndicator != null)
             {
-                roomStatusIndicator.color = _networkBootstrapper.IsInRoom ? readyColor : notReadyColor;
+                roomStatusIndicator.color = lobbyInfo.IsInLobby ? readyColor : notReadyColor;
             }
+
+            Debug.Log($"🧪 [LOBBYROOM] ✅ Room info updated - {lobbyInfo.RoomName}");
         }
 
         private void RefreshPlayersList()
         {
-            if (_lobbyManager == null) return;
+            if (_lobbyState == null)
+            {
+                Debug.LogWarning("🧪 [LOBBYROOM] ⚠️ Cannot refresh players list - LobbyState is null");
+                return;
+            }
 
-            // Ocultar todos los items
+            Debug.Log("🧪 [LOBBYROOM] Refreshing players list...");
+
+            // Ocultar todos los items primero
             foreach (var item in _playerItems)
             {
                 item.gameObject.SetActive(false);
             }
 
-            // Mostrar jugadores actuales
-            var players = _lobbyManager.Players.Values.ToList();
+            // Obtener jugadores REALES de la red
+            var players = _lobbyState.GetPlayersList(hostFirst: true);
+
+            Debug.Log($"🧪 [LOBBYROOM] Found {players.Count} players to display");
+
+            // CORRECCIÓN CRÍTICA: Verificar que tenemos jugadores reales
+            if (players.Count == 0)
+            {
+                Debug.LogWarning("🧪 [LOBBYROOM] ⚠️ No players found in LobbyState!");
+                return;
+            }
 
             for (int i = 0; i < players.Count && i < _playerItems.Count; i++)
             {
                 LobbyPlayerItem item = _playerItems[i];
                 LobbyPlayer player = players[i];
 
+                // CORRECCIÓN: Verificar que el player no sea null
+                if (player == null)
+                {
+                    Debug.LogError($"🧪 [LOBBYROOM] ❌ Player at index {i} is null!");
+                    continue;
+                }
+
+                // DEBUG: Log detallado del jugador
+                Debug.Log($"🧪 [LOBBYROOM] Displaying player {i}:");
+                Debug.Log($"  - Name: {player.PlayerName.ToString()}");
+                Debug.Log($"  - Display Name: {player.GetDisplayName()}");
+                Debug.Log($"  - Is Host: {player.IsHost}");
+                Debug.Log($"  - Is Local: {player.IsLocalPlayer}");
+                Debug.Log($"  - Is Ready: {player.IsReady}");
+                Debug.Log($"  - Player Ref: {player.PlayerRef}");
+
+                // Actualizar el item con datos del jugador real
                 item.UpdatePlayerData(player);
                 item.gameObject.SetActive(true);
 
@@ -316,39 +457,38 @@ namespace HackMonkeys.UI.Panels
             }
 
             UpdatePlayerCount();
+
+            Debug.Log("🧪 [LOBBYROOM] ✅ Players list refreshed");
         }
 
         private void UpdatePlayerCount()
         {
-            if (playerCountText != null && _lobbyManager != null)
-            {
-                int current = _lobbyManager.PlayerCount;
-                int max = _lobbyManager.MaxPlayers;
+            if (playerCountText == null) return;
 
-                playerCountText.text = $"Players: {current}/{max}";
+            var lobbyInfo = _lobbyController?.GetLobbyInfo();
+            if (lobbyInfo == null) return;
 
-                // Cambiar color según ocupación
-                if (current == max)
-                    playerCountText.color = notReadyColor;
-                else if (current > max * 0.75f)
-                    playerCountText.color = Color.yellow;
-                else
-                    playerCountText.color = readyColor;
-            }
+            playerCountText.text = $"Players: {lobbyInfo.CurrentPlayers}/{lobbyInfo.MaxPlayers}";
+
+            // Cambiar color según ocupación
+            if (lobbyInfo.CurrentPlayers == lobbyInfo.MaxPlayers)
+                playerCountText.color = notReadyColor;
+            else if (lobbyInfo.CurrentPlayers > lobbyInfo.MaxPlayers * 0.75f)
+                playerCountText.color = Color.yellow;
+            else
+                playerCountText.color = readyColor;
         }
 
         private void UpdateLocalPlayerControls(LobbyPlayer localPlayer)
         {
             _isLocalPlayerReady = localPlayer.IsReady;
 
+            Debug.Log($"🧪 [LOBBYROOM] Updating local player controls - Ready: {_isLocalPlayerReady}");
+
             // Actualizar botón ready
             if (readyButton != null && readyButtonText != null)
             {
                 readyButtonText.text = _isLocalPlayerReady ? "Not Ready" : "Ready";
-
-                // Cambiar material del botón
-                Color buttonColor = _isLocalPlayerReady ? readyColor : notReadyColor;
-                // Aquí podrías cambiar el material del botón según el estado
             }
 
             // Actualizar indicador
@@ -373,22 +513,25 @@ namespace HackMonkeys.UI.Panels
 
         private void UpdateHostControls()
         {
-            _isHost = _networkBootstrapper != null && _networkBootstrapper.IsHost;
+            var lobbyInfo = _lobbyController?.GetLobbyInfo();
+            bool isHost = lobbyInfo?.IsHost ?? false;
+
+            Debug.Log($"🧪 [LOBBYROOM] Updating host controls - Is Host: {isHost}");
 
             // Mostrar/ocultar controles de host
             if (hostControlsPanel != null)
             {
-                hostControlsPanel.SetActive(_isHost);
+                hostControlsPanel.SetActive(isHost);
             }
 
             // Configurar controles si somos host
-            if (_isHost)
+            if (isHost && lobbyInfo != null)
             {
                 // Configurar slider de max players
-                if (maxPlayersSlider != null && _lobbyManager != null)
+                if (maxPlayersSlider != null)
                 {
                     maxPlayersSlider.SetMinMax(2, 8);
-                    maxPlayersSlider.SetValue(_lobbyManager.MaxPlayers);
+                    maxPlayersSlider.SetValue(lobbyInfo.MaxPlayers);
                 }
             }
 
@@ -397,13 +540,12 @@ namespace HackMonkeys.UI.Panels
 
         private void UpdateStartButton()
         {
-            if (startGameButton == null || _lobbyManager == null) return;
+            if (startGameButton == null || _lobbyController == null) return;
 
-            bool canStart = _isHost &&
-                            _lobbyManager.AllPlayersReady &&
-                            _lobbyManager.PlayerCount >= 2;
-
+            bool canStart = _lobbyController.CanStartGame;
             startGameButton.SetInteractable(canStart);
+
+            Debug.Log($"🧪 [LOBBYROOM] Start button - Can start: {canStart}");
 
             // Efecto visual en el botón cuando puede iniciar
             if (canStart)
@@ -422,36 +564,6 @@ namespace HackMonkeys.UI.Panels
         #endregion
 
         #region Button Actions
-
-        private void ToggleReady()
-        {
-            if (_lobbyManager != null)
-            {
-                _lobbyManager.ToggleLocalPlayerReady();
-
-                // Feedback háptico
-                OVRInput.SetControllerVibration(1, 0.3f, OVRInput.Controller.Touch);
-                DOVirtual.DelayedCall(0.1f, () => OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.Touch));
-
-                // Efecto visual del botón
-                if (_readyButtonTween != null) _readyButtonTween.Kill();
-                _readyButtonTween = readyButton.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 5, 0.5f);
-            }
-        }
-
-        private void StartGame()
-        {
-            if (!_isHost || _lobbyManager == null) return;
-
-            ShowStatusMessage("Starting game...", MessageType.Info);
-
-            // Deshabilitar botón temporalmente
-            if (startGameButton != null)
-                startGameButton.SetInteractable(false);
-
-            // Iniciar partida
-            _lobbyManager.StartGame();
-        }
 
         private void ToggleRoomSettings()
         {
@@ -473,8 +585,11 @@ namespace HackMonkeys.UI.Panels
         {
             _selectedPlayer = player;
 
+            Debug.Log($"🧪 [LOBBYROOM] Player item clicked: {player.GetDisplayName()}");
+
             // Solo el host puede kickear jugadores (excepto a sí mismo)
-            if (_isHost && !player.IsLocalPlayer && kickPlayerButton != null)
+            var lobbyInfo = _lobbyController?.GetLobbyInfo();
+            if (lobbyInfo?.IsHost == true && !player.IsLocalPlayer && kickPlayerButton != null)
             {
                 kickPlayerButton.SetInteractable(true);
                 ShowStatusMessage($"Selected: {player.GetDisplayName()}", MessageType.Info);
@@ -487,35 +602,39 @@ namespace HackMonkeys.UI.Panels
 
         private void OnMaxPlayersChanged(float value)
         {
-            if (!_isHost) return;
+            var lobbyInfo = _lobbyController?.GetLobbyInfo();
+            if (lobbyInfo?.IsHost != true) return;
 
             int maxPlayers = Mathf.RoundToInt(value);
             // TODO: Implementar RPC para cambiar max players
-            Debug.Log($"[LobbyRoom] Max players changed to: {maxPlayers}");
+            Debug.Log($"🧪 [LOBBYROOM] Max players changed to: {maxPlayers}");
         }
 
         private void OnRoomOpenChanged(bool isOpen)
         {
-            if (!_isHost) return;
+            var lobbyInfo = _lobbyController?.GetLobbyInfo();
+            if (lobbyInfo?.IsHost != true) return;
 
             // TODO: Implementar RPC para cambiar visibilidad de sala
-            Debug.Log($"[LobbyRoom] Room open changed to: {isOpen}");
+            Debug.Log($"🧪 [LOBBYROOM] Room open changed to: {isOpen}");
         }
 
         private void OnPrivateRoomChanged(bool isPrivate)
         {
-            if (!_isHost) return;
+            var lobbyInfo = _lobbyController?.GetLobbyInfo();
+            if (lobbyInfo?.IsHost != true) return;
 
             // TODO: Implementar RPC para cambiar privacidad
-            Debug.Log($"[LobbyRoom] Private room changed to: {isPrivate}");
+            Debug.Log($"🧪 [LOBBYROOM] Private room changed to: {isPrivate}");
         }
 
         private void OnDifficultyChanged(float value)
         {
-            if (!_isHost) return;
+            var lobbyInfo = _lobbyController?.GetLobbyInfo();
+            if (lobbyInfo?.IsHost != true) return;
 
             // TODO: Implementar configuración de dificultad
-            Debug.Log($"[LobbyRoom] Difficulty changed to: {value}");
+            Debug.Log($"🧪 [LOBBYROOM] Difficulty changed to: {value}");
         }
 
         #endregion
@@ -593,22 +712,101 @@ namespace HackMonkeys.UI.Panels
         {
             base.ConfigureButtons();
 
-            // El back button debería abandonar la sala
+            // ✅ CAMBIO: El back button usa LobbyController
             if (backButton != null)
             {
                 backButton.OnButtonPressed.RemoveAllListeners();
-                backButton.OnButtonPressed.AddListener(LeaveRoom);
+                backButton.OnButtonPressed.AddListener(async () =>
+                {
+                    ShowStatusMessage("Leaving room...", MessageType.Info);
+                    _lobbyController?.LeaveLobby();
+
+                    // Pequeño delay para que se procese la salida
+                    await System.Threading.Tasks.Task.Delay(500);
+                    _uiManager.ShowPanel(PanelID.LobbyBrowser);
+                });
             }
         }
 
-        private async void LeaveRoom()
+        #endregion
+
+        #region Debug Methods
+
+        [ContextMenu("Debug: Room Status")]
+        private void DebugRoomStatus()
         {
-            if (_networkBootstrapper != null)
+            Debug.Log("=== LobbyRoom Debug Status ===");
+            Debug.Log($"LobbyState: {_lobbyState != null}");
+            Debug.Log($"LobbyController: {_lobbyController != null}");
+
+            if (_lobbyState != null)
             {
-                ShowStatusMessage("Leaving room...", MessageType.Info);
-                await _networkBootstrapper.LeaveRoom();
-                _uiManager.ShowPanel(PanelID.LobbyBrowser);
+                var stats = _lobbyState.GetLobbyStats();
+                Debug.Log($"Players: {stats.TotalPlayers}/{stats.MaxPlayers}");
+                Debug.Log($"Ready: {stats.ReadyPlayers}/{stats.TotalPlayers}");
+                Debug.Log($"All Ready: {stats.AllReady}");
+                Debug.Log($"Host: {stats.HostName}");
+                Debug.Log($"Local: {stats.LocalPlayerName}");
             }
+
+            if (_lobbyController != null)
+            {
+                var info = _lobbyController.GetLobbyInfo();
+                if (info != null)
+                {
+                    Debug.Log($"Room: {info.RoomName}");
+                    Debug.Log($"Is Host: {info.IsHost}");
+                    Debug.Log($"Can Start: {info.CanStart}");
+                    Debug.Log($"Status: {info.StatusText}");
+                }
+            }
+
+            Debug.Log("================================");
+        }
+
+        [ContextMenu("Debug: Force Refresh")]
+        private void DebugForceRefresh()
+        {
+            Debug.Log("🧪 [DEBUG] Forcing refresh...");
+            RefreshPlayersList();
+            UpdateRoomInfo();
+            UpdateHostControls();
+        }
+
+        [ContextMenu("Debug: Force Refresh Players")]
+        private void DebugForceRefreshPlayers()
+        {
+            Debug.Log("🧪 [DEBUG] === FORCE REFRESH PLAYERS ===");
+
+            if (_lobbyState == null)
+            {
+                Debug.LogError("🧪 [DEBUG] LobbyState is null!");
+                _lobbyState = LobbyState.Instance;
+                if (_lobbyState == null)
+                {
+                    Debug.LogError("🧪 [DEBUG] LobbyState.Instance is also null!");
+                    return;
+                }
+            }
+
+            var players = _lobbyState.GetPlayersList(hostFirst: true);
+            Debug.Log($"🧪 [DEBUG] Players in LobbyState: {players.Count}");
+
+            foreach (var player in players)
+            {
+                if (player != null)
+                {
+                    Debug.Log($"🧪 [DEBUG] - {player.GetDisplayName()} (Ref: {player.PlayerRef})");
+                }
+                else
+                {
+                    Debug.LogError("🧪 [DEBUG] - NULL PLAYER!");
+                }
+            }
+
+            RefreshPlayersList();
+
+            Debug.Log("🧪 [DEBUG] === END FORCE REFRESH ===");
         }
 
         #endregion

@@ -38,6 +38,7 @@ public class Create : MenuPanel
         
         if (success)
         {
+            await System.Threading.Tasks.Task.Delay(1000); 
             // Transición al panel del lobby
             _uiManager.ShowPanel(PanelID.LobbyRoom);
         }

@@ -78,10 +78,16 @@ namespace HackMonkeys.UI.Panels
 
             if (playerData == null)
             {
+                Debug.LogWarning("[LobbyPlayerItem] UpdatePlayerData called with null player");
                 gameObject.SetActive(false);
                 return;
             }
-            
+    
+            Debug.Log($"[LobbyPlayerItem] Updating display for: {playerData.GetDisplayName()}");
+    
+            // Asegurar que el gameObject esté activo
+            gameObject.SetActive(true);
+    
             // Actualizar nombre
             UpdatePlayerName();
 
@@ -106,21 +112,34 @@ namespace HackMonkeys.UI.Panels
             if (playerNameText != null && _playerData != null)
             {
                 string displayName = _playerData.GetDisplayName();
+        
+                // CORRECCIÓN: Verificar que el nombre no esté vacío
+                if (string.IsNullOrEmpty(displayName))
+                {
+                    displayName = $"Player {_playerData.PlayerRef.PlayerId}";
+                }
+        
                 playerNameText.text = displayName;
 
                 // Color especial para jugador local
                 if (_playerData.IsLocalPlayer)
                 {
                     playerNameText.color = localPlayerColor;
+                    Debug.Log($"[LobbyPlayerItem] Setting local player color for: {displayName}");
                 }
                 else if (_playerData.IsHost)
                 {
                     playerNameText.color = hostColor;
+                    Debug.Log($"[LobbyPlayerItem] Setting host color for: {displayName}");
                 }
                 else
                 {
                     playerNameText.color = Color.white;
                 }
+            }
+            else
+            {
+                Debug.LogWarning("[LobbyPlayerItem] playerNameText or _playerData is null in UpdatePlayerName");
             }
         }
 
@@ -460,10 +479,6 @@ namespace HackMonkeys.UI.Panels
         {
             if (_playerData == null || _playerData.IsLocalPlayer) return;
 
-            // Verificar si el jugador local es host
-            var localPlayer = LobbyManager.Instance?.GetLocalPlayer();
-            if (localPlayer == null || !localPlayer.IsHost) return;
-
             // TODO: Implementar menú contextual
             Debug.Log($"[LobbyPlayerItem] Showing options for {_playerData.GetDisplayName()}");
 
@@ -519,6 +534,23 @@ namespace HackMonkeys.UI.Panels
         private void DebugLeaveEffect()
         {
             PlayLeaveEffect();
+        }
+        
+        [ContextMenu("Debug Components")]
+        public void VerifyComponents()
+        {
+            Debug.Log("[LobbyPlayerItem] === Component Verification ===");
+            Debug.Log($"  - playerNameText: {playerNameText != null}");
+            Debug.Log($"  - playerStatusText: {playerStatusText != null}");
+            Debug.Log($"  - playerAvatar: {playerAvatar != null}");
+            Debug.Log($"  - readyIndicator: {readyIndicator != null}");
+            Debug.Log($"  - backgroundPanel: {backgroundPanel != null}");
+            Debug.Log($"  - selectButton: {selectButton != null}");
+    
+            if (playerNameText == null)
+                Debug.LogError("[LobbyPlayerItem] ❌ playerNameText is not assigned!");
+            if (playerStatusText == null)
+                Debug.LogError("[LobbyPlayerItem] ❌ playerStatusText is not assigned!");
         }
 
         #endregion

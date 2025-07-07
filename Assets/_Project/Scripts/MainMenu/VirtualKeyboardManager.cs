@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using DG.Tweening;
 
@@ -49,12 +50,20 @@ namespace HackMonkeys.UI.Spatial
             // Crear instancia única del teclado
             CreateKeyboardInstance();
         }
-        
+
+        private void Update()
+        {
+            if (_currentActiveField != null)
+            {
+                PositionKeyboard(_currentActiveField.transform);
+            }
+        }
+
         private void CreateKeyboardInstance()
         {
             if (keyboardPrefab == null)
             {
-                Debug.LogError("VirtualKeyboardManager: No keyboard prefab assigned!");
+                UnityEngine.Debug.LogError("VirtualKeyboardManager: No keyboard prefab assigned!");
                 return;
             }
             

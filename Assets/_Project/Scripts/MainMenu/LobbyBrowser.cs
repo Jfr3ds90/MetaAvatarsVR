@@ -154,21 +154,27 @@ namespace HackMonkeys.UI.Panels
         public override void OnPanelShown()
         {
             base.OnPanelShown();
-            
+    
             // Suscribirse a eventos
             if (_networkBootstrapper != null)
             {
                 _networkBootstrapper.OnSessionListUpdatedEvent.AddListener(OnSessionListUpdated);
             }
-            
+    
             // Refrescar lista automáticamente
             RefreshRoomList();
+    
+            // NUEVO: Auto-refresh cada 5 segundos mientras el panel esté visible
+            InvokeRepeating(nameof(RefreshRoomList), 5f, 5f);
         }
         
         public override void OnPanelHidden()
         {
             base.OnPanelHidden();
-            
+    
+            // NUEVO: Detener auto-refresh
+            CancelInvoke(nameof(RefreshRoomList));
+    
             // Desuscribirse de eventos
             if (_networkBootstrapper != null)
             {
@@ -176,11 +182,43 @@ namespace HackMonkeys.UI.Panels
             }
         }
         
-        private void RefreshRoomList()
+        private async void RefreshRoomList()
         {
             if (_isRefreshing) return;
-            
-            StartCoroutine(RefreshRoutine());
+    
+            _isRefreshing = true;
+    
+            // Mostrar estado de carga
+            ShowLoadingState();
+    
+            // Animar botón de refresh
+            if (refreshButton != null)
+            {
+                refreshButton.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360)
+                    .SetEase(Ease.Linear);
+            }
+    
+            try
+            {
+                Debug.Log("[LobbyBrowser] 🔍 Requesting session list from NetworkBootstrapper...");
+        
+                // NUEVO: Obtener sesiones activamente
+                var sessions = await _networkBootstrapper.GetAvailableSessions();
+        
+                Debug.Log($"[LobbyBrowser] 📋 Received {sessions?.Count ?? 0} sessions");
+        
+                // Actualizar la lista
+                OnSessionListUpdated(sessions ?? new List<SessionInfo>());
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[LobbyBrowser] ❌ Error getting sessions: {e.Message}");
+                UpdateStatusText("Error loading rooms");
+            }
+            finally
+            {
+                _isRefreshing = false;
+            }
         }
         
         private System.Collections.IEnumerator RefreshRoutine()
