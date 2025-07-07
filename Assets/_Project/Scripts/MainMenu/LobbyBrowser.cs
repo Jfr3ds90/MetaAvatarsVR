@@ -372,28 +372,52 @@ namespace HackMonkeys.UI.Panels
         private async void JoinSelectedRoom()
         {
             if (_selectedSession == null || _networkBootstrapper == null) return;
-            
+    
+            Debug.Log($"[LobbyBrowser] 🎮 Attempting to join room: {_selectedSession.Name}");
+    
             // Deshabilitar botón
             if (joinButton != null)
                 joinButton.SetInteractable(false);
-                
+        
             // Mostrar estado de conexión
             UpdateStatusText("Joining room...");
-            
-            // Intentar unirse
-            bool success = await _networkBootstrapper.JoinRoom(_selectedSession);
-            
-            if (success)
+    
+            try
             {
-                UpdateStatusText("Connected! Loading game...");
-                // La transición a la escena del juego se maneja en NetworkBootstrapper
+                // Intentar unirse
+                bool success = await _networkBootstrapper.JoinRoom(_selectedSession);
+        
+                Debug.Log($"[LobbyBrowser] Join result: {success}");
+        
+                if (success)
+                {
+                    UpdateStatusText("Connected! Loading lobby...");
+            
+                    // IMPORTANTE: Esperar un poco más para asegurar que el player se spawne
+                    Debug.Log("[LobbyBrowser] ⏳ Waiting for player spawn...");
+                    await System.Threading.Tasks.Task.Delay(1000);
+            
+                    // TRANSICIÓN AL LOBBY ROOM
+                    Debug.Log("[LobbyBrowser] 🚀 Transitioning to LobbyRoom panel");
+                    _uiManager.ShowPanel(PanelID.LobbyRoom);
+                }
+                else
+                {
+                    UpdateStatusText("Failed to join room");
+                    Debug.LogError("[LobbyBrowser] ❌ Failed to join room");
+            
+                    // Rehabilitar botón después de un momento
+                    await System.Threading.Tasks.Task.Delay(2000);
+                    if (joinButton != null)
+                        joinButton.SetInteractable(true);
+                }
             }
-            else
+            catch (System.Exception e)
             {
-                UpdateStatusText("Failed to join room");
-                
-                // Rehabilitar botón después de un momento
-                await System.Threading.Tasks.Task.Delay(2000);
+                Debug.LogError($"[LobbyBrowser] ❌ Exception joining room: {e.Message}");
+                UpdateStatusText("Error joining room");
+        
+                // Rehabilitar botón
                 if (joinButton != null)
                     joinButton.SetInteractable(true);
             }

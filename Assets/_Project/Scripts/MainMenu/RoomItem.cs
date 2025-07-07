@@ -19,7 +19,9 @@ public class RoomItem : MonoBehaviour
     [SerializeField] private InteractableButton3D selectButton;
     [SerializeField] private Image backgroundImage;
 
-    [Header("Colors")] [SerializeField] private Color openColor = Color.green;
+    [Header("Colors")] 
+    [SerializeField] private Color normalColor; 
+    [SerializeField] private Color openColor = Color.green;
     [SerializeField] private Color closedColor = Color.yellow;
     [SerializeField] private Color fullColor = Color.red;
     [SerializeField] private Color selectedColor = new Color(0.2f, 0.4f, 0.8f, 0.5f);
@@ -94,7 +96,7 @@ public class RoomItem : MonoBehaviour
 
         if (backgroundImage != null)
         {
-            Color targetColor = selected ? selectedColor : Color.clear;
+            Color targetColor = selected ? selectedColor : normalColor;
             backgroundImage.DOColor(targetColor, 0.2f);
         }
     }

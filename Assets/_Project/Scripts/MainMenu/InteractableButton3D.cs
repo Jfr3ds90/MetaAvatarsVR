@@ -72,9 +72,17 @@ namespace HackMonkeys.UI.Spatial
         
         // Cache de materiales para evitar instancias
         private MaterialPropertyBlock _propBlock;
-        
+
+        public bool CanDebug = false;
+        private bool _scaleInitialize;
+
         private void Awake()
         {
+            if (CanDebug)
+            {
+                Debug.Log(this.name);
+            }
+            
             // Obtener o crear RayInteractable
             _rayInteractable = GetComponent<RayInteractable>();
             if (_rayInteractable == null)
@@ -89,6 +97,7 @@ namespace HackMonkeys.UI.Spatial
             }
             
             _originalScale = buttonTransform != null ? buttonTransform.localScale : transform.localScale;
+            _scaleInitialize = true;
             _propBlock = new MaterialPropertyBlock();
             
             // Configurar texto del botón
@@ -131,6 +140,9 @@ namespace HackMonkeys.UI.Spatial
             UpdateInteractability();
             _canTrigger = true;
             _interactorStates.Clear();
+            
+            _originalScale = buttonTransform != null ? buttonTransform.localScale : transform.localScale;
+            _scaleInitialize = true;
         }
         
         private void OnDisable()
@@ -468,13 +480,26 @@ namespace HackMonkeys.UI.Spatial
         
         private void AnimateScale(float targetScale)
         {
+            if (!_scaleInitialize)
+            {
+                if (gameObject.activeInHierarchy)
+                {
+                    _originalScale = transform.localScale;
+                    _scaleInitialize = true;
+                }
+                else
+                {
+                    Debug.LogError($"❌[{name}] this can not be animated, because its not active");
+                    return;
+                }
+            }
+            
             _currentTween?.Kill();
             
             Transform targetTransform = buttonTransform != null ? buttonTransform : transform;
             Vector3 target = _originalScale * targetScale;
             
-            _currentTween = targetTransform.DOScale(target, animationDuration)
-                .SetEase(scaleEase);
+            _currentTween = targetTransform.DOScale(target, animationDuration).SetEase(scaleEase);
         }
         
         private void AnimateHoverEffect()
