@@ -4,6 +4,7 @@ using Fusion.Sockets;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Fusion.Photon.Realtime;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 

@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 8706835355368634269}
   - component: {fileID: 4562035358086432006}
   - component: {fileID: 1489689776857325090}
-  - component: {fileID: -4687017777830229489}
   m_Layer: 0
   m_Name: LobyPlayer
   m_TagString: Untagged
@@ -74,32 +73,3 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 4562035358086432006}
   ForceRemoteRenderTimeframe: 0
---- !u!114 &-4687017777830229489
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 682734629479364659}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db5f4b98cb6f3a94786f3b358cc5f933, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  selectButton: {fileID: 0}
-  playerNameText: {fileID: 0}
-  playerStatusText: {fileID: 0}
-  playerAvatar: {fileID: 0}
-  readyIndicator: {fileID: 0}
-  backgroundPanel: {fileID: 0}
-  hostIcon: {fileID: 0}
-  localPlayerIcon: {fileID: 0}
-  pingIndicator: {fileID: 0}
-  pingText: {fileID: 0}
-  readyColor: {r: 0, g: 1, b: 0, a: 1}
-  notReadyColor: {r: 1, g: 0, b: 0, a: 1}
-  hostColor: {r: 1, g: 0.8, b: 0, a: 1}
-  localPlayerColor: {r: 0, g: 1, b: 1, a: 1}
-  selectedColor: {r: 0.2, g: 0.4, b: 0.8, a: 0.3}
-  hoverScale: 1.05
-  animationDuration: 0.2
