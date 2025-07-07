@@ -9,39 +9,56 @@ public class ValveGas : MonoBehaviour
     [SerializeField] private float y;
     ValveManager manager;
     public Color colorGas;
+
+    public bool action;
     private void OnEnable()
     {
         manager = FindAnyObjectByType<ValveManager>();
     }
     public void OpenClose()
     {
-        RenderSettings.fog = true;
-       // RenderSettings.fogDensity = (manager.gasFog/350);
-       // RenderSettings.fogDensity = transform.eulerAngles.y / 350;
-        if (transform.eulerAngles.y >=350f)
+        RenderSettings.fog = true;         
+         //RenderSettings.fogDensity = transform.eulerAngles.y / 350;
+        y = transform.eulerAngles.y;
+        if (y >=350f)
         {
             manager.activatedValves[gasType] = true;
-            manager.MixtureGas(gasType);
+          //  manager.MixtureGas(gasType);
             Debug.Log("maximo");
-            //RenderSettings.fogDensity = 1;
+          // RenderSettings.fogDensity = 1;
         }
-        else if (transform.eulerAngles.y <= 1)
+        else if (y <= 1)
         {
             manager.activatedValves[gasType] = false;
-            manager.MixtureGas(gasType);
+            //  manager.MixtureGas(gasType);
+            StopCoroutine(ValveManager.GasActivated());
             Debug.Log("minimo");
-            //RenderSettings.fogDensity = 0;
+          //  RenderSettings.fogDensity = 0;
         }
 
-        if (transform.eulerAngles.y >= 1)
+        if (y >= 1)
         {
             manager.colorGas += colorGas;
+            //manager.gasFog = y;
         }
-
-        Debug.Log(RenderSettings.fogDensity);
-        y = transform.eulerAngles.y;
+        manager.MixtureGas(gasType);
+        manager.GasAction();
+        //Debug.Log(RenderSettings.fogDensity+" es la densidad "+ manager.gasFog / 350);
+       
     }
     private void Update()
     {
+        if(action==true)
+       { if(Input.GetKey(KeyCode.RightArrow))
+        {
+            transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y+Time.deltaTime*20, 0);
+            OpenClose();
+        }
+            if (Input.GetKey(KeyCode.LeftArrow))
+            {
+                transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y - Time.deltaTime*20, 0);
+                OpenClose();
+            }
+        }
     }
 }

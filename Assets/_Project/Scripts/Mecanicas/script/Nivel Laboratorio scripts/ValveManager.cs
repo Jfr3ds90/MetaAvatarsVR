@@ -1,10 +1,11 @@
+using System.Collections;
 using UnityEngine;
 
 public class ValveManager : MonoBehaviour
 {
     public bool[] activatedValves;
     int lastValveActived;
-    public float gasFog;
+    public static float gasFog;
     public Color colorGas;
     public void MixtureGas(int value)
     {
@@ -43,7 +44,7 @@ public class ValveManager : MonoBehaviour
                             Debug.Log("valvula activa " + value);
                             break;
                         default:
-                            gasFog += Time.deltaTime*0.01f;
+                            gasFog += Time.deltaTime*10f;
                             break;
                     }
                     lastValveActived = n;
@@ -76,7 +77,7 @@ public class ValveManager : MonoBehaviour
                         Debug.Log("valvula activa " + value + " y tambien " + lastValveActived);
                         break;
                     default:
-                        gasFog += Time.deltaTime * 0.02f;
+                        gasFog += Time.deltaTime * 20f;
                         break;
                 }
                 lastValveActived = -1;
@@ -86,5 +87,19 @@ public class ValveManager : MonoBehaviour
         }
 
         
+    }
+    public void GasAction()
+    {
+        RenderSettings.fogDensity = gasFog / 350;
+        StartCoroutine(GasActivated());
+    }
+    public static IEnumerator GasActivated()
+    {while (true) 
+        {
+            gasFog += Time.deltaTime * 0.1f;
+            RenderSettings.fogDensity = gasFog / 350;
+            Debug.Log(RenderSettings.fogDensity + " es la densidad ");
+            yield return null;
+        }
     }
 }
