@@ -144,11 +144,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.008726558
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -1
+      value: -0.999962
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.z
@@ -164,7 +164,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_Name
@@ -189,6 +189,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 30532192}
+    - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 30532200}
   m_SourcePrefab: {fileID: 100100000, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
 --- !u!4 &30532190 stripped
 Transform:
@@ -222,8 +225,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -244,7 +247,7 @@ MonoBehaviour:
   _maxSelectingInteractors: -1
   _data: {fileID: 0}
   _pointableElement: {fileID: 30532195}
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 30532192}
   _physicsGrabbable: {fileID: 0}
   _resetGrabOnGrabsUpdated: 1
   _scoringModifier:
@@ -281,14 +284,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pivotTransform: {fileID: 0}
-  _rotationAxis: 1
+  _rotationAxis: 2
   _constraints:
     MinAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 1
     MaxAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 359
 --- !u!114 &30532195
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -304,11 +307,11 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _oneGrabTransformer: {fileID: 0}
+  _oneGrabTransformer: {fileID: 30532194}
   _twoGrabTransformer: {fileID: 0}
   _targetTransform: {fileID: 0}
   _maxGrabPoints: -1
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 30532192}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
 --- !u!114 &30532196
@@ -345,6 +348,22 @@ MonoBehaviour:
   _whenCancel:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &30532200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 30532191}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c911df8d9c0a28e4698fd06b25bc4d02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gasType: 0
+  y: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
+  action: 0
 --- !u!1 &83887746
 GameObject:
   m_ObjectHideFlags: 0
@@ -838,11 +857,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.008726558
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -1
+      value: -0.999962
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.z
@@ -858,7 +877,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_Name
@@ -883,6 +902,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 248253049}
+    - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 248253057}
   m_SourcePrefab: {fileID: 100100000, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
 --- !u!4 &248253047 stripped
 Transform:
@@ -916,8 +938,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -938,7 +960,7 @@ MonoBehaviour:
   _maxSelectingInteractors: -1
   _data: {fileID: 0}
   _pointableElement: {fileID: 248253052}
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 248253049}
   _physicsGrabbable: {fileID: 0}
   _resetGrabOnGrabsUpdated: 1
   _scoringModifier:
@@ -975,14 +997,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pivotTransform: {fileID: 0}
-  _rotationAxis: 1
+  _rotationAxis: 2
   _constraints:
     MinAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 1
     MaxAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 359
 --- !u!114 &248253052
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -998,11 +1020,11 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _oneGrabTransformer: {fileID: 0}
+  _oneGrabTransformer: {fileID: 248253051}
   _twoGrabTransformer: {fileID: 0}
   _targetTransform: {fileID: 0}
   _maxGrabPoints: -1
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 248253049}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
 --- !u!114 &248253053
@@ -1039,6 +1061,22 @@ MonoBehaviour:
   _whenCancel:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &248253057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 248253048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c911df8d9c0a28e4698fd06b25bc4d02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gasType: 0
+  y: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
+  action: 0
 --- !u!1 &262921663
 GameObject:
   m_ObjectHideFlags: 0
@@ -1152,11 +1190,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.008726558
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -1
+      value: -0.999962
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.z
@@ -1172,7 +1210,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_Name
@@ -1197,6 +1235,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 274710380}
+    - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 274710388}
   m_SourcePrefab: {fileID: 100100000, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
 --- !u!4 &274710378 stripped
 Transform:
@@ -1230,8 +1271,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -1252,7 +1293,7 @@ MonoBehaviour:
   _maxSelectingInteractors: -1
   _data: {fileID: 0}
   _pointableElement: {fileID: 274710383}
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 274710380}
   _physicsGrabbable: {fileID: 0}
   _resetGrabOnGrabsUpdated: 1
   _scoringModifier:
@@ -1289,14 +1330,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pivotTransform: {fileID: 0}
-  _rotationAxis: 1
+  _rotationAxis: 2
   _constraints:
     MinAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 1
     MaxAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 359
 --- !u!114 &274710383
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1312,11 +1353,11 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _oneGrabTransformer: {fileID: 0}
+  _oneGrabTransformer: {fileID: 274710382}
   _twoGrabTransformer: {fileID: 0}
   _targetTransform: {fileID: 0}
   _maxGrabPoints: -1
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 274710380}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
 --- !u!114 &274710384
@@ -1353,6 +1394,22 @@ MonoBehaviour:
   _whenCancel:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &274710388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 274710379}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c911df8d9c0a28e4698fd06b25bc4d02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gasType: 0
+  y: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
+  action: 0
 --- !u!1001 &277719583
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1379,11 +1436,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.008726558
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -1
+      value: -0.999962
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.z
@@ -1399,7 +1456,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_Name
@@ -1424,6 +1481,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 277719586}
+    - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 277719594}
   m_SourcePrefab: {fileID: 100100000, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
 --- !u!4 &277719584 stripped
 Transform:
@@ -1457,8 +1517,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -1479,7 +1539,7 @@ MonoBehaviour:
   _maxSelectingInteractors: -1
   _data: {fileID: 0}
   _pointableElement: {fileID: 277719589}
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 277719586}
   _physicsGrabbable: {fileID: 0}
   _resetGrabOnGrabsUpdated: 1
   _scoringModifier:
@@ -1516,14 +1576,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pivotTransform: {fileID: 0}
-  _rotationAxis: 1
+  _rotationAxis: 2
   _constraints:
     MinAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 1
     MaxAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 359
 --- !u!114 &277719589
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1539,11 +1599,11 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _oneGrabTransformer: {fileID: 0}
+  _oneGrabTransformer: {fileID: 277719588}
   _twoGrabTransformer: {fileID: 0}
   _targetTransform: {fileID: 0}
   _maxGrabPoints: -1
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 277719586}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
 --- !u!114 &277719590
@@ -1580,6 +1640,22 @@ MonoBehaviour:
   _whenCancel:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &277719594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 277719585}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c911df8d9c0a28e4698fd06b25bc4d02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gasType: 0
+  y: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
+  action: 0
 --- !u!1001 &289062229
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1778,11 +1854,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.008726558
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -1
+      value: -0.999962
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.z
@@ -1798,7 +1874,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_Name
@@ -1823,6 +1899,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 319873575}
+    - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 319873583}
   m_SourcePrefab: {fileID: 100100000, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
 --- !u!4 &319873573 stripped
 Transform:
@@ -1856,8 +1935,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -1878,7 +1957,7 @@ MonoBehaviour:
   _maxSelectingInteractors: -1
   _data: {fileID: 0}
   _pointableElement: {fileID: 319873578}
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 319873575}
   _physicsGrabbable: {fileID: 0}
   _resetGrabOnGrabsUpdated: 1
   _scoringModifier:
@@ -1915,14 +1994,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pivotTransform: {fileID: 0}
-  _rotationAxis: 1
+  _rotationAxis: 2
   _constraints:
     MinAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 1
     MaxAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 359
 --- !u!114 &319873578
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1938,11 +2017,11 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _oneGrabTransformer: {fileID: 0}
+  _oneGrabTransformer: {fileID: 319873577}
   _twoGrabTransformer: {fileID: 0}
   _targetTransform: {fileID: 0}
   _maxGrabPoints: -1
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 319873575}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
 --- !u!114 &319873579
@@ -1979,6 +2058,22 @@ MonoBehaviour:
   _whenCancel:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &319873583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 319873574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c911df8d9c0a28e4698fd06b25bc4d02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gasType: 0
+  y: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
+  action: 0
 --- !u!1001 &325696362
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2067,11 +2162,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.008726558
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -1
+      value: -0.999962
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.z
@@ -2087,7 +2182,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_Name
@@ -2112,6 +2207,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 328576866}
+    - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 328576874}
   m_SourcePrefab: {fileID: 100100000, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
 --- !u!4 &328576864 stripped
 Transform:
@@ -2145,8 +2243,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -2167,7 +2265,7 @@ MonoBehaviour:
   _maxSelectingInteractors: -1
   _data: {fileID: 0}
   _pointableElement: {fileID: 328576869}
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 328576866}
   _physicsGrabbable: {fileID: 0}
   _resetGrabOnGrabsUpdated: 1
   _scoringModifier:
@@ -2204,14 +2302,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pivotTransform: {fileID: 0}
-  _rotationAxis: 1
+  _rotationAxis: 2
   _constraints:
     MinAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 1
     MaxAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 359
 --- !u!114 &328576869
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2227,11 +2325,11 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _oneGrabTransformer: {fileID: 0}
+  _oneGrabTransformer: {fileID: 328576868}
   _twoGrabTransformer: {fileID: 0}
   _targetTransform: {fileID: 0}
   _maxGrabPoints: -1
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 328576866}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
 --- !u!114 &328576870
@@ -2268,6 +2366,22 @@ MonoBehaviour:
   _whenCancel:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &328576874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 328576865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c911df8d9c0a28e4698fd06b25bc4d02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gasType: 0
+  y: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
+  action: 0
 --- !u!1 &346439338
 GameObject:
   m_ObjectHideFlags: 0
@@ -2380,11 +2494,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.008726558
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -1
+      value: -0.999962
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.z
@@ -2400,7 +2514,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_Name
@@ -2425,6 +2539,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 356790660}
+    - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 356790668}
   m_SourcePrefab: {fileID: 100100000, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
 --- !u!4 &356790658 stripped
 Transform:
@@ -2458,8 +2575,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -2480,7 +2597,7 @@ MonoBehaviour:
   _maxSelectingInteractors: -1
   _data: {fileID: 0}
   _pointableElement: {fileID: 356790663}
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 356790660}
   _physicsGrabbable: {fileID: 0}
   _resetGrabOnGrabsUpdated: 1
   _scoringModifier:
@@ -2517,14 +2634,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pivotTransform: {fileID: 0}
-  _rotationAxis: 1
+  _rotationAxis: 2
   _constraints:
     MinAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 1
     MaxAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 359
 --- !u!114 &356790663
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2540,11 +2657,11 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _oneGrabTransformer: {fileID: 0}
+  _oneGrabTransformer: {fileID: 356790662}
   _twoGrabTransformer: {fileID: 0}
   _targetTransform: {fileID: 0}
   _maxGrabPoints: -1
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 356790660}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
 --- !u!114 &356790664
@@ -2581,6 +2698,22 @@ MonoBehaviour:
   _whenCancel:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &356790668
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 356790659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c911df8d9c0a28e4698fd06b25bc4d02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gasType: 0
+  y: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
+  action: 0
 --- !u!1001 &365571723
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2906,11 +3039,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.008726558
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -1
+      value: -0.999962
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.z
@@ -2926,7 +3059,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_Name
@@ -2951,6 +3084,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 507539587}
+    - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 507539595}
   m_SourcePrefab: {fileID: 100100000, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
 --- !u!4 &507539585 stripped
 Transform:
@@ -2984,8 +3120,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -3006,7 +3142,7 @@ MonoBehaviour:
   _maxSelectingInteractors: -1
   _data: {fileID: 0}
   _pointableElement: {fileID: 507539590}
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 507539587}
   _physicsGrabbable: {fileID: 0}
   _resetGrabOnGrabsUpdated: 1
   _scoringModifier:
@@ -3043,14 +3179,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pivotTransform: {fileID: 0}
-  _rotationAxis: 1
+  _rotationAxis: 2
   _constraints:
     MinAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 1
     MaxAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 359
 --- !u!114 &507539590
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3066,11 +3202,11 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _oneGrabTransformer: {fileID: 0}
+  _oneGrabTransformer: {fileID: 507539589}
   _twoGrabTransformer: {fileID: 0}
   _targetTransform: {fileID: 0}
   _maxGrabPoints: -1
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 507539587}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
 --- !u!114 &507539591
@@ -3107,6 +3243,22 @@ MonoBehaviour:
   _whenCancel:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &507539595
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 507539586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c911df8d9c0a28e4698fd06b25bc4d02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gasType: 0
+  y: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
+  action: 0
 --- !u!1001 &547301053
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3432,11 +3584,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.008726558
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -1
+      value: -0.999962
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.z
@@ -3452,7 +3604,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_Name
@@ -3477,6 +3629,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 611404217}
+    - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 611404225}
   m_SourcePrefab: {fileID: 100100000, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
 --- !u!4 &611404215 stripped
 Transform:
@@ -3510,8 +3665,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -3532,7 +3687,7 @@ MonoBehaviour:
   _maxSelectingInteractors: -1
   _data: {fileID: 0}
   _pointableElement: {fileID: 611404220}
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 611404217}
   _physicsGrabbable: {fileID: 0}
   _resetGrabOnGrabsUpdated: 1
   _scoringModifier:
@@ -3569,14 +3724,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pivotTransform: {fileID: 0}
-  _rotationAxis: 1
+  _rotationAxis: 2
   _constraints:
     MinAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 1
     MaxAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 359
 --- !u!114 &611404220
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3592,11 +3747,11 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _oneGrabTransformer: {fileID: 0}
+  _oneGrabTransformer: {fileID: 611404219}
   _twoGrabTransformer: {fileID: 0}
   _targetTransform: {fileID: 0}
   _maxGrabPoints: -1
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 611404217}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
 --- !u!114 &611404221
@@ -3633,6 +3788,22 @@ MonoBehaviour:
   _whenCancel:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &611404225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 611404216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c911df8d9c0a28e4698fd06b25bc4d02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gasType: 0
+  y: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
+  action: 0
 --- !u!1 &663327232
 GameObject:
   m_ObjectHideFlags: 0
@@ -3954,11 +4125,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.008726558
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -1
+      value: -0.999962
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.z
@@ -3974,7 +4145,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_Name
@@ -3999,6 +4170,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 924037265}
+    - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 924037273}
   m_SourcePrefab: {fileID: 100100000, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
 --- !u!4 &924037263 stripped
 Transform:
@@ -4032,8 +4206,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -4054,7 +4228,7 @@ MonoBehaviour:
   _maxSelectingInteractors: -1
   _data: {fileID: 0}
   _pointableElement: {fileID: 924037268}
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 924037265}
   _physicsGrabbable: {fileID: 0}
   _resetGrabOnGrabsUpdated: 1
   _scoringModifier:
@@ -4091,14 +4265,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pivotTransform: {fileID: 0}
-  _rotationAxis: 1
+  _rotationAxis: 2
   _constraints:
     MinAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 1
     MaxAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 359
 --- !u!114 &924037268
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4114,11 +4288,11 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _oneGrabTransformer: {fileID: 0}
+  _oneGrabTransformer: {fileID: 924037267}
   _twoGrabTransformer: {fileID: 0}
   _targetTransform: {fileID: 0}
   _maxGrabPoints: -1
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 924037265}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
 --- !u!114 &924037269
@@ -4155,6 +4329,22 @@ MonoBehaviour:
   _whenCancel:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &924037273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 924037264}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c911df8d9c0a28e4698fd06b25bc4d02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gasType: 0
+  y: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
+  action: 0
 --- !u!1001 &960107065
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4309,11 +4499,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.008726558
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -1
+      value: -0.999962
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.z
@@ -4329,7 +4519,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_Name
@@ -4354,6 +4544,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1023672020}
+    - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1023672028}
   m_SourcePrefab: {fileID: 100100000, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
 --- !u!4 &1023672018 stripped
 Transform:
@@ -4387,8 +4580,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -4409,7 +4602,7 @@ MonoBehaviour:
   _maxSelectingInteractors: -1
   _data: {fileID: 0}
   _pointableElement: {fileID: 1023672023}
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 1023672020}
   _physicsGrabbable: {fileID: 0}
   _resetGrabOnGrabsUpdated: 1
   _scoringModifier:
@@ -4446,14 +4639,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pivotTransform: {fileID: 0}
-  _rotationAxis: 1
+  _rotationAxis: 2
   _constraints:
     MinAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 1
     MaxAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 359
 --- !u!114 &1023672023
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4469,11 +4662,11 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _oneGrabTransformer: {fileID: 0}
+  _oneGrabTransformer: {fileID: 1023672022}
   _twoGrabTransformer: {fileID: 0}
   _targetTransform: {fileID: 0}
   _maxGrabPoints: -1
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 1023672020}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
 --- !u!114 &1023672024
@@ -4510,6 +4703,22 @@ MonoBehaviour:
   _whenCancel:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1023672028
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1023672019}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c911df8d9c0a28e4698fd06b25bc4d02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gasType: 0
+  y: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
+  action: 0
 --- !u!1001 &1082687037
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4602,11 +4811,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.008726558
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -1
+      value: -0.999962
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.z
@@ -4622,7 +4831,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_Name
@@ -4647,6 +4856,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1084750588}
+    - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1084750596}
   m_SourcePrefab: {fileID: 100100000, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
 --- !u!4 &1084750586 stripped
 Transform:
@@ -4680,8 +4892,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -4702,7 +4914,7 @@ MonoBehaviour:
   _maxSelectingInteractors: -1
   _data: {fileID: 0}
   _pointableElement: {fileID: 1084750591}
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 1084750588}
   _physicsGrabbable: {fileID: 0}
   _resetGrabOnGrabsUpdated: 1
   _scoringModifier:
@@ -4739,14 +4951,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pivotTransform: {fileID: 0}
-  _rotationAxis: 1
+  _rotationAxis: 2
   _constraints:
     MinAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 1
     MaxAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 359
 --- !u!114 &1084750591
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4762,11 +4974,11 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _oneGrabTransformer: {fileID: 0}
+  _oneGrabTransformer: {fileID: 1084750590}
   _twoGrabTransformer: {fileID: 0}
   _targetTransform: {fileID: 0}
   _maxGrabPoints: -1
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 1084750588}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
 --- !u!114 &1084750592
@@ -4803,6 +5015,22 @@ MonoBehaviour:
   _whenCancel:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1084750596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1084750587}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c911df8d9c0a28e4698fd06b25bc4d02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gasType: 0
+  y: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
+  action: 0
 --- !u!1 &1160234425
 GameObject:
   m_ObjectHideFlags: 0
@@ -5250,11 +5478,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.008726558
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -1
+      value: -0.999962
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.z
@@ -5270,7 +5498,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_Name
@@ -5295,6 +5523,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1320419137}
+    - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1320419145}
   m_SourcePrefab: {fileID: 100100000, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
 --- !u!4 &1320419135 stripped
 Transform:
@@ -5328,8 +5559,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -5350,7 +5581,7 @@ MonoBehaviour:
   _maxSelectingInteractors: -1
   _data: {fileID: 0}
   _pointableElement: {fileID: 1320419140}
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 1320419137}
   _physicsGrabbable: {fileID: 0}
   _resetGrabOnGrabsUpdated: 1
   _scoringModifier:
@@ -5387,14 +5618,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pivotTransform: {fileID: 0}
-  _rotationAxis: 1
+  _rotationAxis: 2
   _constraints:
     MinAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 1
     MaxAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 359
 --- !u!114 &1320419140
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5410,11 +5641,11 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _oneGrabTransformer: {fileID: 0}
+  _oneGrabTransformer: {fileID: 1320419139}
   _twoGrabTransformer: {fileID: 0}
   _targetTransform: {fileID: 0}
   _maxGrabPoints: -1
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 1320419137}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
 --- !u!114 &1320419141
@@ -5451,6 +5682,22 @@ MonoBehaviour:
   _whenCancel:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1320419145
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1320419136}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c911df8d9c0a28e4698fd06b25bc4d02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gasType: 0
+  y: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
+  action: 0
 --- !u!1001 &1331932697
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6508,11 +6755,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.008726558
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -1
+      value: -0.999962
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.z
@@ -6528,7 +6775,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_Name
@@ -6553,6 +6800,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1813556291}
+    - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1813556299}
   m_SourcePrefab: {fileID: 100100000, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
 --- !u!4 &1813556289 stripped
 Transform:
@@ -6586,8 +6836,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -6608,7 +6858,7 @@ MonoBehaviour:
   _maxSelectingInteractors: -1
   _data: {fileID: 0}
   _pointableElement: {fileID: 1813556294}
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 1813556291}
   _physicsGrabbable: {fileID: 0}
   _resetGrabOnGrabsUpdated: 1
   _scoringModifier:
@@ -6645,14 +6895,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pivotTransform: {fileID: 0}
-  _rotationAxis: 1
+  _rotationAxis: 2
   _constraints:
     MinAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 1
     MaxAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 359
 --- !u!114 &1813556294
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6668,11 +6918,11 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _oneGrabTransformer: {fileID: 0}
+  _oneGrabTransformer: {fileID: 1813556293}
   _twoGrabTransformer: {fileID: 0}
   _targetTransform: {fileID: 0}
   _maxGrabPoints: -1
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 1813556291}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
 --- !u!114 &1813556295
@@ -6709,6 +6959,22 @@ MonoBehaviour:
   _whenCancel:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1813556299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1813556290}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c911df8d9c0a28e4698fd06b25bc4d02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gasType: 0
+  y: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
+  action: 0
 --- !u!1001 &1816350948
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6812,11 +7078,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.008726558
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -1
+      value: -0.999962
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.z
@@ -6832,7 +7098,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_Name
@@ -6857,6 +7123,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1857364579}
+    - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1857364587}
   m_SourcePrefab: {fileID: 100100000, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
 --- !u!4 &1857364577 stripped
 Transform:
@@ -6890,8 +7159,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -6912,7 +7181,7 @@ MonoBehaviour:
   _maxSelectingInteractors: -1
   _data: {fileID: 0}
   _pointableElement: {fileID: 1857364582}
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 1857364579}
   _physicsGrabbable: {fileID: 0}
   _resetGrabOnGrabsUpdated: 1
   _scoringModifier:
@@ -6949,14 +7218,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pivotTransform: {fileID: 0}
-  _rotationAxis: 1
+  _rotationAxis: 2
   _constraints:
     MinAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 1
     MaxAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 359
 --- !u!114 &1857364582
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6972,11 +7241,11 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _oneGrabTransformer: {fileID: 0}
+  _oneGrabTransformer: {fileID: 1857364581}
   _twoGrabTransformer: {fileID: 0}
   _targetTransform: {fileID: 0}
   _maxGrabPoints: -1
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 1857364579}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
 --- !u!114 &1857364583
@@ -7013,6 +7282,22 @@ MonoBehaviour:
   _whenCancel:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1857364587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1857364578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c911df8d9c0a28e4698fd06b25bc4d02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gasType: 0
+  y: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
+  action: 0
 --- !u!1001 &1863130664
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8421,11 +8706,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.008726558
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -1
+      value: -0.999962
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalRotation.z
@@ -8441,7 +8726,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3934718914927523674, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       propertyPath: m_Name
@@ -8466,6 +8751,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4391233424085280521}
+    - targetCorrespondingSourceObject: {fileID: 6435609247311569713, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4391233424085280529}
   m_SourcePrefab: {fileID: 100100000, guid: 307e6cbce036c604bb3c24168b0efbc7, type: 3}
 --- !u!1 &778261130322368360 stripped
 GameObject:
@@ -9264,6 +9552,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2354753025471469967}
+  - component: {fileID: 3163237546774790967}
+  - component: {fileID: 3163237546774790966}
   m_Layer: 0
   m_Name: Quimicos
   m_TagString: Untagged
@@ -9271,6 +9561,34 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &3163237546774790966
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3163237546774790965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf82d8edcedf53c41bdab836f1fc792c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  element: 0
+  isSelected: 0
+--- !u!114 &3163237546774790967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3163237546774790965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a38df0d8ce8b9d04aa0bbcaff6035a9a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  activatedValves: 
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
 --- !u!1 &3169653012387248971
 GameObject:
   m_ObjectHideFlags: 0
@@ -9936,8 +10254,8 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -9958,7 +10276,7 @@ MonoBehaviour:
   _maxSelectingInteractors: -1
   _data: {fileID: 0}
   _pointableElement: {fileID: 4391233424085280524}
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 4391233424085280521}
   _physicsGrabbable: {fileID: 0}
   _resetGrabOnGrabsUpdated: 1
   _scoringModifier:
@@ -9995,14 +10313,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pivotTransform: {fileID: 0}
-  _rotationAxis: 1
+  _rotationAxis: 2
   _constraints:
     MinAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 1
     MaxAngle:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 359
 --- !u!114 &4391233424085280524
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10018,11 +10336,11 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _oneGrabTransformer: {fileID: 0}
+  _oneGrabTransformer: {fileID: 4391233424085280523}
   _twoGrabTransformer: {fileID: 0}
   _targetTransform: {fileID: 0}
   _maxGrabPoints: -1
-  _rigidbody: {fileID: 0}
+  _rigidbody: {fileID: 4391233424085280521}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
 --- !u!114 &4391233424085280525
@@ -10059,6 +10377,22 @@ MonoBehaviour:
   _whenCancel:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &4391233424085280529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 778261130322368360}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c911df8d9c0a28e4698fd06b25bc4d02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gasType: 0
+  y: 0
+  colorGas: {r: 0, g: 0, b: 0, a: 0}
+  action: 0
 --- !u!1001 &4453394262465125783
 PrefabInstance:
   m_ObjectHideFlags: 0
