@@ -93,11 +93,12 @@ public class ValveManager : MonoBehaviour
         RenderSettings.fogDensity = gasFog / 350;
         StartCoroutine(GasActivated());
     }
-    public static IEnumerator GasActivated()
+    public IEnumerator GasActivated()
     {while (true) 
         {
             gasFog += Time.deltaTime * 0.1f;
             RenderSettings.fogDensity = gasFog / 350;
+            RenderSettings.fogColor += colorGas;
             Debug.Log(RenderSettings.fogDensity + " es la densidad ");
             yield return null;
         }

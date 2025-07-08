@@ -31,7 +31,7 @@ public class ValveGas : MonoBehaviour
         {
             manager.activatedValves[gasType] = false;
             //  manager.MixtureGas(gasType);
-            StopCoroutine(ValveManager.GasActivated());
+            StopCoroutine(manager.GasActivated());
             Debug.Log("minimo");
           //  RenderSettings.fogDensity = 0;
         }
