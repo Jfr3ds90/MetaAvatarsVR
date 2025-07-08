@@ -98,8 +98,15 @@ public class ValveManager : MonoBehaviour
         {
             gasFog += Time.deltaTime * 0.1f;
             RenderSettings.fogDensity = gasFog / 350;
-            RenderSettings.fogColor += colorGas;
-            Debug.Log(RenderSettings.fogDensity + " es la densidad ");
+
+            RenderSettings.fogColor = new Vector4(colorGas.r* RenderSettings.fogDensity,
+                colorGas.g* RenderSettings.fogDensity, 
+                colorGas.b* RenderSettings.fogDensity, 
+                1);
+            if(colorGas.r>255) colorGas.r = 255;
+            if(colorGas.g>255) colorGas.g = 255;
+            if(colorGas.b>255) colorGas.b = 255;
+            Debug.Log(RenderSettings.fogDensity + " es la densidad y el color es "+ RenderSettings.fogColor);
             yield return null;
         }
     }

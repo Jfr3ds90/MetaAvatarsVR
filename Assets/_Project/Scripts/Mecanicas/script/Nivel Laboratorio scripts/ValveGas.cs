@@ -6,7 +6,7 @@ using UnityEngine;
 public class ValveGas : MonoBehaviour
 {
     public int gasType;
-    [SerializeField] private float y;
+    [SerializeField] private float z;
     ValveManager manager;
     public Color colorGas;
 
@@ -19,15 +19,15 @@ public class ValveGas : MonoBehaviour
     {
         RenderSettings.fog = true;         
          //RenderSettings.fogDensity = transform.eulerAngles.y / 350;
-        y = transform.eulerAngles.y;
-        if (y >=350f)
+        z = transform.eulerAngles.z;
+        if (z >=350f)
         {
             manager.activatedValves[gasType] = true;
           //  manager.MixtureGas(gasType);
             Debug.Log("maximo");
           // RenderSettings.fogDensity = 1;
         }
-        else if (y <= 1)
+        else if (z <= 1)
         {
             manager.activatedValves[gasType] = false;
             //  manager.MixtureGas(gasType);
@@ -36,9 +36,9 @@ public class ValveGas : MonoBehaviour
           //  RenderSettings.fogDensity = 0;
         }
 
-        if (y >= 1)
+        if (z >= 1)
         {
-            manager.colorGas += colorGas;
+            manager.colorGas += (z)*(colorGas);
             //manager.gasFog = y;
         }
         manager.MixtureGas(gasType);
@@ -51,12 +51,12 @@ public class ValveGas : MonoBehaviour
         if(action==true)
        { if(Input.GetKey(KeyCode.RightArrow))
         {
-            transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y+Time.deltaTime*20, 0);
+            transform.rotation = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z + Time.deltaTime * 20);
             OpenClose();
         }
             if (Input.GetKey(KeyCode.LeftArrow))
             {
-                transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y - Time.deltaTime*20, 0);
+                transform.rotation = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z - Time.deltaTime * 20);
                 OpenClose();
             }
         }
