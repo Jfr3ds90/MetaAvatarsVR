@@ -7,6 +7,11 @@ public class ValveManager : MonoBehaviour
     int lastValveActived;
     public static float gasFog;
     public Color colorGas;
+    Chemistry chemstry;
+    private void OnEnable()
+    {
+        chemstry = FindAnyObjectByType<Chemistry>();
+    }
     public void MixtureGas(int value)
     {
         int n = 0;
@@ -106,7 +111,17 @@ public class ValveManager : MonoBehaviour
             if(colorGas.r>255) colorGas.r = 255;
             if(colorGas.g>255) colorGas.g = 255;
             if(colorGas.b>255) colorGas.b = 255;
-            Debug.Log(RenderSettings.fogDensity + " es la densidad y el color es "+ RenderSettings.fogColor);
+            for(int i = 0;i<chemstry.particleSystems.Length;i++)
+            {
+                //chemstry.particleSystems[i].main.startColor = colorGas;
+                ParticleSystem.ColorOverLifetimeModule COL =chemstry.particleSystems[i].colorOverLifetime ;
+                COL.color = new ParticleSystem.MinMaxGradient(colorGas).color;
+              //  COL.color = new ParticleSystem.MinMaxGradient(new Vector4(0,0,0,0)).gradientMax;
+                Debug.Log(COL+" es el color");
+                if (!chemstry.particleSystems[i].isPlaying)
+                    chemstry.particleSystems[i].Play();
+            }
+          //  Debug.Log(RenderSettings.fogDensity + " es la densidad y el color es "+ RenderSettings.fogColor);
             yield return null;
         }
     }
