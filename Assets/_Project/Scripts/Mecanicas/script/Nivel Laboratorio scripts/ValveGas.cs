@@ -17,8 +17,8 @@ public class ValveGas : MonoBehaviour
     }
     public void OpenClose()
     {
-        RenderSettings.fog = true;         
-         //RenderSettings.fogDensity = transform.eulerAngles.y / 350;
+        RenderSettings.fog = true;
+        //RenderSettings.fogDensity = transform.eulerAngles.y / 350;
         z = transform.eulerAngles.z;
         if (z >=350f)
         {
@@ -48,7 +48,8 @@ public class ValveGas : MonoBehaviour
     }
     private void Update()
     {
-        if(action==true)
+        Debug.Log(transform.eulerAngles + " es la rotacion");
+        if (action==true)
        { if(Input.GetKey(KeyCode.RightArrow))
         {
             transform.rotation = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z + Time.deltaTime * 20);

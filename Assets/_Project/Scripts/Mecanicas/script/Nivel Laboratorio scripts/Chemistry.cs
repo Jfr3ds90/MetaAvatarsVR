@@ -5,7 +5,6 @@ public class Chemistry : MonoBehaviour
 {
     public int element;
     public bool isSelected;
-    public ParticleSystem[] particleSystems;
     private void OnTriggerEnter(Collider collision)
     {
         if(collision.gameObject.GetComponent<Chemistry>()!=null)
@@ -65,6 +64,10 @@ public class Chemistry : MonoBehaviour
                     default:
                         break;
                 }
+        }
+        else if (collision.gameObject.tag=="cubePuzzle")
+        {
+            Debug.LogWarning("Ahora debería de dar el evento");
         }
     }
     private void OnParticleCollision(GameObject other)
