@@ -3971,6 +3971,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7478838439677301592, guid: d856c27420d044646ac86addb7b88cee, type: 3}
+      propertyPath: matVideo
+      value: 
+      objectReference: {fileID: 2100000, guid: 3d76ca303e80d78469b35493518547c5, type: 2}
+    - target: {fileID: 7478838439677301592, guid: d856c27420d044646ac86addb7b88cee, type: 3}
       propertyPath: creditsEnd
       value: 
       objectReference: {fileID: 2031617427}
@@ -10572,6 +10576,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4096839085843612044, guid: 3f987b86b27b5764ab46a1ce9a56d487, type: 3}
   m_PrefabInstance: {fileID: 890976264}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &897667554 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6272140653460582302, guid: c54d0e189b9a50a4aa44e898ddff5781, type: 3}
+  m_PrefabInstance: {fileID: 1187151451}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &898503205
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14759,6 +14768,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 273383707855153119, guid: c54d0e189b9a50a4aa44e898ddff5781, type: 3}
+      propertyPath: OnButtonPressed.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 1582998491791007208, guid: c54d0e189b9a50a4aa44e898ddff5781, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -14847,6 +14860,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2662529960083247507, guid: c54d0e189b9a50a4aa44e898ddff5781, type: 3}
+      propertyPath: OnButtonPressed.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 2436991661558721468}
+    - target: {fileID: 2662529960083247507, guid: c54d0e189b9a50a4aa44e898ddff5781, type: 3}
+      propertyPath: OnButtonPressed.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: CorrectOption
+      objectReference: {fileID: 0}
     - target: {fileID: 3561697797352068719, guid: c54d0e189b9a50a4aa44e898ddff5781, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -14870,6 +14891,14 @@ PrefabInstance:
     - target: {fileID: 6272140653460582302, guid: c54d0e189b9a50a4aa44e898ddff5781, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6712839030783617407, guid: c54d0e189b9a50a4aa44e898ddff5781, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 2436991661558721468}
+    - target: {fileID: 6712839030783617407, guid: c54d0e189b9a50a4aa44e898ddff5781, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: IncorrectOption
       objectReference: {fileID: 0}
     - target: {fileID: 8741379643386652365, guid: c54d0e189b9a50a4aa44e898ddff5781, type: 3}
       propertyPath: m_PresetInfoIsWorld
@@ -15150,6 +15179,11 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 4096839085843612044, guid: 3f987b86b27b5764ab46a1ce9a56d487, type: 3}
   m_PrefabInstance: {fileID: 1203565099}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1211621435 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1748105202834119701, guid: d856c27420d044646ac86addb7b88cee, type: 3}
+  m_PrefabInstance: {fileID: 273838252}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1213369290
 GameObject:
@@ -22101,7 +22135,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7478838439677301592, guid: d856c27420d044646ac86addb7b88cee, type: 3}
   m_PrefabInstance: {fileID: 273838252}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1211621435}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3ec2b5aa888afed429d87ed10178ed7f, type: 3}
@@ -43980,8 +44014,8 @@ MonoBehaviour:
   lightsObjects: {fileID: 0}
   emergencyLights: {fileID: 0}
   CanvasPc: {fileID: 2031114364}
-  pendrive: {fileID: 0}
-  leversObject: []
+  ButtonsCanvas: {fileID: 897667554}
+  pendrive: {fileID: 1211621435}
 --- !u!1001 &2438301617218601518
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -98647,7 +98681,7 @@ PrefabInstance:
     - target: {fileID: 1025145397794170381, guid: d11b1ee6baaf922448658a652b00f26d, type: 3}
       propertyPath: 'm_Materials.Array.data[1]'
       value: 
-      objectReference: {fileID: 2100000, guid: 3d76ca303e80d78469b35493518547c5, type: 2}
+      objectReference: {fileID: 2100000, guid: cd26de54435479e448894271beb96a63, type: 2}
     - target: {fileID: 1187445864993970157, guid: d11b1ee6baaf922448658a652b00f26d, type: 3}
       propertyPath: m_Name
       value: PC_Monitor
