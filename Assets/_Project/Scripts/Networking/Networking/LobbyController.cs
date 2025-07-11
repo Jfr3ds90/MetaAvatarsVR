@@ -97,7 +97,6 @@ namespace HackMonkeys.Core
                 Debug.Log("[LobbyController] ✅ Validation passed, starting game...");
                 OnGameStarting?.Invoke();
                 
-                // ✅ DELEGAR A NETWORKBOOTSTRAPPER
                 bool success = await _networkBootstrapper.StartGame();
                 
                 if (success)

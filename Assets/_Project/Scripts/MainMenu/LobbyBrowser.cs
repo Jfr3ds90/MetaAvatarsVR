@@ -194,8 +194,7 @@ namespace HackMonkeys.UI.Panels
             // Animar botón de refresh
             if (refreshButton != null)
             {
-                refreshButton.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360)
-                    .SetEase(Ease.Linear);
+                refreshButton.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360).SetEase(Ease.Linear);
             }
     
             try
@@ -317,19 +316,16 @@ namespace HackMonkeys.UI.Panels
                 roomItem.gameObject.SetActive(true);
                 
                 // Posicionar con animación
-                float targetY = -i * roomItemSpacing;
-                roomItem.transform.localPosition = new Vector3(0, targetY + 0.5f, 0);
-                roomItem.transform.DOLocalMoveY(targetY, 0.3f)
-                    .SetDelay(i * 0.05f)
-                    .SetEase(Ease.OutBack);
+                // float targetY = -i * roomItemSpacing;
+                // roomItem.transform.localPosition = new Vector3(0, targetY + 0.5f, 0);
+                // roomItem.transform.DOLocalMoveY(targetY, 0.3f).SetDelay(i * 0.05f).SetEase(Ease.OutBack);
             }
             
             // Actualizar altura del contenedor para scroll
             if (roomListContainer != null)
             {
                 float containerHeight = displayCount * roomItemSpacing;
-                roomListContainer.GetComponent<RectTransform>().sizeDelta = 
-                    new Vector2(roomListContainer.GetComponent<RectTransform>().sizeDelta.x, containerHeight);
+                roomListContainer.GetComponent<RectTransform>().sizeDelta = new Vector2(roomListContainer.GetComponent<RectTransform>().sizeDelta.x, containerHeight);
             }
         }
         

@@ -16,53 +16,62 @@ namespace HackMonkeys.UI.Panels
     /// </summary>
     public class LobbyRoom : MenuPanel
     {
-        [Header("Room Info")] [SerializeField] private TextMeshProUGUI roomNameText;
+        [Header("Room Info")] 
+        [SerializeField] private TextMeshProUGUI roomNameText;
         [SerializeField] private TextMeshProUGUI playerCountText;
         [SerializeField] private TextMeshProUGUI roomCodeText;
         [SerializeField] private Image roomStatusIndicator;
 
-        [Header("Players List")] [SerializeField]
-        private Transform playersContainer;
-
+        [Header("Players List")] 
+        [SerializeField] private Transform playersContainer;
         [SerializeField] private GameObject playerItemPrefab; // Prefab con LobbyPlayerItem
         [SerializeField] private ScrollRect playersScrollView;
         [SerializeField] private int maxVisiblePlayers = 4;
 
-        [Header("Local Player Controls")] [SerializeField]
-        private InteractableButton3D readyButton;
-
+        [Header("Local Player Controls")] 
+        [SerializeField] private InteractableButton3D readyButton;
         [SerializeField] private TextMeshProUGUI readyButtonText;
         [SerializeField] private Image readyStatusIndicator;
 
-        [Header("Host Controls")] [SerializeField]
-        private GameObject hostControlsPanel;
-
+        [Header("Host Controls")] 
+        [SerializeField] private GameObject hostControlsPanel;
         [SerializeField] private InteractableButton3D startGameButton;
         [SerializeField] private InteractableButton3D kickPlayerButton;
         [SerializeField] private InteractableSlider3D maxPlayersSlider;
         [SerializeField] private Toggle isOpenToggle;
+        
+        [Header("Map Selection (Host Only)")]
+        [SerializeField] private GameObject mapSelectionPanel;
+        [SerializeField] private Transform mapButtonsContainer;
+        [SerializeField] private GameObject mapButtonPrefab;
+        [SerializeField] private TextMeshProUGUI currentMapText;
+        [SerializeField] private Image currentMapPreview;
+        [SerializeField] private InteractableButton3D changeMapButton;
 
-        [Header("Room Settings")] [SerializeField]
-        private GameObject roomSettingsPanel;
+        private string _selectedMapName;
+        private List<GameObject> _mapButtons = new List<GameObject>();
 
+        [Header("Room Settings")] 
+        [SerializeField] private GameObject roomSettingsPanel;
         [SerializeField] private InteractableButton3D settingsButton;
         [SerializeField] private InteractableSlider3D difficultySlider;
         [SerializeField] private Toggle privateRoomToggle;
 
-        [Header("Status & Feedback")] [SerializeField]
-        private TextMeshProUGUI statusText;
-
+        [Header("Status & Feedback")] 
+        [SerializeField] private TextMeshProUGUI statusText;
         [SerializeField] private GameObject loadingIndicator;
         [SerializeField] private ParticleSystem confettiEffect;
 
-        [Header("Colors")] [SerializeField] private Color readyColor = Color.green;
+        [Header("Colors")] 
+        [SerializeField] private Color readyColor = Color.green;
         [SerializeField] private Color notReadyColor = Color.red;
         [SerializeField] private Color hostColor = new Color(1f, 0.8f, 0f); // Gold
         [SerializeField] private Color localPlayerColor = Color.cyan;
 
-        // ✅ CAMBIO: Referencias a nuevos componentes
+        // Referencias a nuevos componentes
         private LobbyState _lobbyState;
         private LobbyController _lobbyController;
+        private NetworkBootstrapper _networkBootstrapper;
         private List<LobbyPlayerItem> _playerItems = new List<LobbyPlayerItem>();
         private bool _isLocalPlayerReady = false;
         private LobbyPlayer _selectedPlayer; // Para kick functionality
@@ -77,9 +86,9 @@ namespace HackMonkeys.UI.Panels
 
             Debug.Log("🧪 [LOBBYROOM] Setting up panel...");
 
-            // ✅ CAMBIO: Obtener nuevas referencias
             _lobbyState = LobbyState.Instance;
             _lobbyController = LobbyController.Instance;
+            _networkBootstrapper = NetworkBootstrapper.Instance;
 
             // Debug de referencias
             Debug.Log($"🧪 [LOBBYROOM] LobbyState: {_lobbyState != null}");
@@ -106,7 +115,6 @@ namespace HackMonkeys.UI.Panels
         {
             Debug.Log("🧪 [LOBBYROOM] Configuring lobby buttons...");
 
-            // ✅ CAMBIO: Usar LobbyController para acciones
             if (readyButton != null)
             {
                 readyButton.OnButtonPressed.AddListener(() =>
@@ -121,8 +129,13 @@ namespace HackMonkeys.UI.Panels
                 startGameButton.OnButtonPressed.AddListener(() =>
                 {
                     Debug.Log("🧪 [LOBBYROOM] Start game button pressed");
-                    _lobbyController?.StartGame();
+                    StartGameWithSelectedMap();
                 });
+            }
+            
+            if (changeMapButton != null)
+            {
+                changeMapButton.OnButtonPressed.AddListener(ToggleMapSelection);
             }
 
             // Botón Settings
@@ -193,6 +206,8 @@ namespace HackMonkeys.UI.Panels
                 _lobbyState.OnPlayerUpdated.AddListener(OnPlayerUpdated);
                 _lobbyState.OnPlayerCountChanged.AddListener(OnPlayerCountChanged);
                 _lobbyState.OnAllPlayersReady.AddListener(OnAllPlayersReadyChanged);
+                _lobbyState.OnMapChanged.AddListener(OnMapChangedByHost);
+
 
                 Debug.Log("🧪 [LOBBYROOM] ✅ Subscribed to LobbyState events");
             }
@@ -238,6 +253,7 @@ namespace HackMonkeys.UI.Panels
             Debug.Log("🧪 [LOBBYROOM] ✅ Panel fully initialized");
         }
 
+
         public override void OnPanelHidden()
         {
             base.OnPanelHidden();
@@ -252,6 +268,7 @@ namespace HackMonkeys.UI.Panels
                 _lobbyState.OnPlayerUpdated.RemoveListener(OnPlayerUpdated);
                 _lobbyState.OnPlayerCountChanged.RemoveListener(OnPlayerCountChanged);
                 _lobbyState.OnAllPlayersReady.RemoveListener(OnAllPlayersReadyChanged);
+                _lobbyState.OnMapChanged.RemoveListener(OnMapChangedByHost);
 
                 Debug.Log("🧪 [LOBBYROOM] ✅ Unsubscribed from LobbyState events");
             }
@@ -270,15 +287,15 @@ namespace HackMonkeys.UI.Panels
         private System.Collections.IEnumerator DelayedRefresh()
         {
             Debug.Log("🧪 [LOBBYROOM] Waiting before refresh...");
-
+    
             // Esperar 2 frames para asegurar que todo esté inicializado
             yield return null;
             yield return null;
-
+    
             // Ahora sí refrescar
             Debug.Log("🧪 [LOBBYROOM] Executing delayed refresh...");
             RefreshPlayersList();
-
+    
             // Si aún no hay jugadores, intentar de nuevo
             if (_lobbyState != null && _lobbyState.PlayerCount == 0)
             {
@@ -287,6 +304,173 @@ namespace HackMonkeys.UI.Panels
                 RefreshPlayersList();
             }
         }
+
+        #region  Map Selection
+
+        private void StartGameWithSelectedMap()
+        {
+            if (_lobbyController == null || _networkBootstrapper == null)
+            {
+                Debug.LogError("🧪 [LOBBYROOM] Controller or Bootstrapper not available");
+                return;
+            }
+    
+            // Establecer el mapa seleccionado antes de iniciar
+            if (!string.IsNullOrEmpty(_selectedMapName))
+            {
+                _networkBootstrapper.SelectedSceneName = _selectedMapName;
+            }
+    
+            // Iniciar el juego
+            _lobbyController.StartGame();
+        }
+        
+        private void ToggleMapSelection()
+        {
+            if (mapSelectionPanel == null) return;
+    
+            bool isActive = mapSelectionPanel.activeSelf;
+            mapSelectionPanel.SetActive(!isActive);
+    
+            if (!isActive)
+            {
+                // Mostrar mapas disponibles
+                PopulateMapSelection();
+        
+                // Animación de entrada
+                mapSelectionPanel.transform.localScale = Vector3.zero;
+                mapSelectionPanel.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack);
+            }
+        }
+        
+        private void PopulateMapSelection()
+        {
+            if (_networkBootstrapper == null || mapButtonsContainer == null || mapButtonPrefab == null)
+                return;
+        
+            // Limpiar botones anteriores
+            foreach (var btn in _mapButtons)
+            {
+                if (btn != null) Destroy(btn);
+            }
+            _mapButtons.Clear();
+    
+            // Obtener mapas disponibles
+            var availableScenes = _networkBootstrapper.GetAvailableScenes();
+    
+            Debug.Log($"🧪 [LOBBYROOM] Populating {availableScenes.Count} maps");
+    
+            // Crear botón para cada mapa
+            for (int i = 0; i < availableScenes.Count; i++)
+            {
+                var sceneInfo = availableScenes[i];
+                GameObject mapBtn = Instantiate(mapButtonPrefab, mapButtonsContainer);
+        
+                // Configurar visual del botón
+                var nameText = mapBtn.GetComponentInChildren<TextMeshProUGUI>();
+                if (nameText != null)
+                {
+                    nameText.text = sceneInfo.displayName;
+                }
+        
+                // Configurar imagen preview si existe
+                var previewImage = mapBtn.GetComponentInChildren<Image>();
+                if (previewImage != null && sceneInfo.previewImage != null)
+                {
+                    previewImage.sprite = sceneInfo.previewImage;
+                }
+        
+                // Configurar botón
+                var button = mapBtn.GetComponent<InteractableButton3D>();
+                if (button != null)
+                {
+                    string sceneName = sceneInfo.sceneName; // Captura para closure
+                    button.OnButtonPressed.AddListener(() => SelectMap(sceneName));
+                }
+        
+                _mapButtons.Add(mapBtn);
+        
+                // Animación escalonada
+                mapBtn.transform.localScale = Vector3.zero;
+                mapBtn.transform.DOScale(Vector3.one, 0.3f)
+                    .SetDelay(i * 0.1f)
+                    .SetEase(Ease.OutBack);
+            }
+        }
+        
+        private void SelectMap(string mapName)
+        {
+            Debug.Log($"🧪 [LOBBYROOM] === SELECT MAP START ===");
+            Debug.Log($"🧪 [LOBBYROOM] Map to select: {mapName}");
+    
+            var lobbyInfo = _lobbyController?.GetLobbyInfo();
+            Debug.Log($"🧪 [LOBBYROOM] Is Host: {lobbyInfo?.IsHost}");
+    
+            if (lobbyInfo?.IsHost != true)
+            {
+                ShowStatusMessage("Only host can change map", MessageType.Warning);
+                Debug.Log($"🧪 [LOBBYROOM] Not host, cannot change map");
+                return;
+            }
+
+            // Validar que el mapa existe
+            if (!_networkBootstrapper.IsValidScene(mapName))
+            {
+                ShowStatusMessage("Invalid map selection", MessageType.Error);
+                Debug.LogError($"🧪 [LOBBYROOM] Invalid scene: {mapName}");
+                return;
+            }
+
+            _selectedMapName = mapName;
+            Debug.Log($"🧪 [LOBBYROOM] Local map name set to: {_selectedMapName}");
+
+            // Sincronizar con la red via RPC
+            var localPlayer = _lobbyState?.LocalPlayer;
+            Debug.Log($"🧪 [LOBBYROOM] Local player exists: {localPlayer != null}");
+            Debug.Log($"🧪 [LOBBYROOM] Local player is host: {localPlayer?.IsHost}");
+    
+            if (localPlayer != null && localPlayer.IsHost)
+            {
+                Debug.Log($"🧪 [LOBBYROOM] 📡 Calling RPC_ChangeMap with: {mapName}");
+                localPlayer.RPC_ChangeMap(mapName);
+            }
+            else
+            {
+                Debug.LogError($"🧪 [LOBBYROOM] ❌ Cannot call RPC - player not host or null");
+            }
+
+            // Actualizar UI localmente primero
+            UpdateMapDisplay();
+
+            // Cerrar panel de selección
+            if (mapSelectionPanel != null)
+            {
+                mapSelectionPanel.transform.DOScale(Vector3.zero, 0.2f)
+                    .SetEase(Ease.InBack)
+                    .OnComplete(() => mapSelectionPanel.SetActive(false));
+            }
+
+            ShowStatusMessage($"Map changed to: {mapName}", MessageType.Info);
+            Debug.Log($"🧪 [LOBBYROOM] === SELECT MAP END ===");
+        }
+
+        
+        private void OnMapChangedByHost(string newMapName)
+        {
+            if (string.IsNullOrEmpty(newMapName)) return;
+    
+            _selectedMapName = newMapName;
+            UpdateMapDisplay();
+    
+            // Mostrar notificación solo si no somos el host
+            var lobbyInfo = _lobbyController?.GetLobbyInfo();
+            if (lobbyInfo?.IsHost == false)
+            {
+                ShowStatusMessage($"Host changed map to: {newMapName}", MessageType.Info);
+            }
+        }
+
+        #endregion
 
         #region Event Handlers
 
@@ -405,60 +589,108 @@ namespace HackMonkeys.UI.Panels
 
             Debug.Log("🧪 [LOBBYROOM] Refreshing players list...");
 
-            // Ocultar todos los items primero
-            foreach (var item in _playerItems)
+            try
             {
-                item.gameObject.SetActive(false);
-            }
-
-            // Obtener jugadores REALES de la red
-            var players = _lobbyState.GetPlayersList(hostFirst: true);
-
-            Debug.Log($"🧪 [LOBBYROOM] Found {players.Count} players to display");
-
-            // CORRECCIÓN CRÍTICA: Verificar que tenemos jugadores reales
-            if (players.Count == 0)
-            {
-                Debug.LogWarning("🧪 [LOBBYROOM] ⚠️ No players found in LobbyState!");
-                return;
-            }
-
-            for (int i = 0; i < players.Count && i < _playerItems.Count; i++)
-            {
-                LobbyPlayerItem item = _playerItems[i];
-                LobbyPlayer player = players[i];
-
-                // CORRECCIÓN: Verificar que el player no sea null
-                if (player == null)
+                // Ocultar todos los items primero
+                foreach (var item in _playerItems)
                 {
-                    Debug.LogError($"🧪 [LOBBYROOM] ❌ Player at index {i} is null!");
-                    continue;
+                    if (item != null && item.gameObject != null)
+                        item.gameObject.SetActive(false);
                 }
 
-                // DEBUG: Log detallado del jugador
-                Debug.Log($"🧪 [LOBBYROOM] Displaying player {i}:");
-                Debug.Log($"  - Name: {player.PlayerName.ToString()}");
-                Debug.Log($"  - Display Name: {player.GetDisplayName()}");
-                Debug.Log($"  - Is Host: {player.IsHost}");
-                Debug.Log($"  - Is Local: {player.IsLocalPlayer}");
-                Debug.Log($"  - Is Ready: {player.IsReady}");
-                Debug.Log($"  - Player Ref: {player.PlayerRef}");
+                // Obtener jugadores REALES de la red con manejo de errores
+                List<LobbyPlayer> players = null;
+                try
+                {
+                    players = _lobbyState.GetPlayersList(hostFirst: true);
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"🧪 [LOBBYROOM] ❌ Error getting players list: {e.Message}");
+                    return;
+                }
 
-                // Actualizar el item con datos del jugador real
-                item.UpdatePlayerData(player);
-                item.gameObject.SetActive(true);
+                Debug.Log($"🧪 [LOBBYROOM] Found {players?.Count ?? 0} players to display");
 
-                // Posicionar con animación escalonada
-                float targetY = -i * 0.15f; // Espaciado entre items
-                item.transform.localPosition = new Vector3(0, targetY + 0.3f, 0);
-                item.transform.DOLocalMoveY(targetY, 0.4f)
-                    .SetDelay(i * 0.1f)
-                    .SetEase(Ease.OutBack);
+                // Verificar que tenemos jugadores reales
+                if (players == null || players.Count == 0)
+                {
+                    Debug.LogWarning("🧪 [LOBBYROOM] ⚠️ No players found in LobbyState!");
+                    return;
+                }
+
+                // Mostrar jugadores
+                for (int i = 0; i < players.Count && i < _playerItems.Count; i++)
+                {
+                    LobbyPlayerItem item = _playerItems[i];
+                    LobbyPlayer player = players[i];
+
+                    //Verificar que el player no sea null
+                    if (player == null)
+                    {
+                        Debug.LogError($"🧪 [LOBBYROOM] ❌ Player at index {i} is null!");
+                        continue;
+                    }
+
+                    //Log detallado del jugador
+                    Debug.Log($"🧪 [LOBBYROOM] Displaying player {i}:");
+                    Debug.Log($"  - Name: {player.PlayerName.ToString()}");
+                    Debug.Log($"  - Display Name: {player.GetDisplayName()}");
+                    Debug.Log($"  - Is Host: {player.IsHost}");
+                    Debug.Log($"  - Is Local: {player.IsLocalPlayer}");
+                    Debug.Log($"  - Is Ready: {player.IsReady}");
+                    Debug.Log($"  - Player Ref: {player.PlayerRef}");
+
+                    // Actualizar el item con datos del jugador real
+                    item.UpdatePlayerData(player);
+                    item.gameObject.SetActive(true);
+
+                    // Posicionar con animación escalonada
+                    //float targetY = -i * 0.15f; // Espaciado entre items
+                    //item.transform.localPosition = new Vector3(0, targetY + 0.3f, 0);
+
+                    // Animación con manejo de errores
+                    /*try
+                    {
+                        item.transform.DOLocalMoveY(targetY, 0.4f)
+                            .SetDelay(i * 0.1f)
+                            .SetEase(Ease.OutBack);
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogError($"🧪 [LOBBYROOM] Animation error: {e.Message}");
+                        item.transform.localPosition = new Vector3(0, targetY, 0);
+                    }*/
+                }
+
+                UpdatePlayerCount();
+                Debug.Log("🧪 [LOBBYROOM] ✅ Players list refreshed successfully");
             }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"🧪 [LOBBYROOM] ❌ Critical error in RefreshPlayersList: {e.Message}\n{e.StackTrace}");
 
-            UpdatePlayerCount();
-
-            Debug.Log("🧪 [LOBBYROOM] ✅ Players list refreshed");
+                // Intentar mostrar al menos algo
+                ShowErrorInPlayerList("Error loading players");
+            }
+        }
+        
+        private void ShowErrorInPlayerList(string errorMessage)
+        {
+            // Mostrar al menos un item con el error
+            if (_playerItems.Count > 0 && _playerItems[0] != null)
+            {
+                var firstItem = _playerItems[0];
+                firstItem.gameObject.SetActive(true);
+        
+                // Buscar el text component y mostrar error
+                var nameText = firstItem.GetComponentInChildren<TextMeshProUGUI>();
+                if (nameText != null)
+                {
+                    nameText.text = errorMessage;
+                    nameText.color = Color.red;
+                }
+            }
         }
 
         private void UpdatePlayerCount()
@@ -510,6 +742,31 @@ namespace HackMonkeys.UI.Panels
                 }
             }
         }
+        
+        private void UpdateMapDisplay()
+        {
+            if (_networkBootstrapper == null) return;
+    
+            string currentMap = !string.IsNullOrEmpty(_selectedMapName) 
+                ? _selectedMapName 
+                : _networkBootstrapper.SelectedSceneName;
+        
+            var sceneInfo = _networkBootstrapper.GetSceneInfo(currentMap);
+    
+            if (sceneInfo != null)
+            {
+                if (currentMapText != null)
+                    currentMapText.text = sceneInfo.displayName;
+            
+                if (currentMapPreview != null && sceneInfo.previewImage != null)
+                    currentMapPreview.sprite = sceneInfo.previewImage;
+            }
+            else
+            {
+                if (currentMapText != null)
+                    currentMapText.text = "Default Map";
+            }
+        }
 
         private void UpdateHostControls()
         {
@@ -523,16 +780,18 @@ namespace HackMonkeys.UI.Panels
             {
                 hostControlsPanel.SetActive(isHost);
             }
+    
+            // Mostrar/ocultar botón de cambiar mapa
+            if (changeMapButton != null)
+            {
+                changeMapButton.gameObject.SetActive(isHost);
+            }
 
             // Configurar controles si somos host
             if (isHost && lobbyInfo != null)
             {
-                // Configurar slider de max players
-                if (maxPlayersSlider != null)
-                {
-                    maxPlayersSlider.SetMinMax(2, 8);
-                    maxPlayersSlider.SetValue(lobbyInfo.MaxPlayers);
-                }
+                // Actualizar display del mapa
+                UpdateMapDisplay();
             }
 
             UpdateStartButton();
@@ -636,6 +895,8 @@ namespace HackMonkeys.UI.Panels
             // TODO: Implementar configuración de dificultad
             Debug.Log($"🧪 [LOBBYROOM] Difficulty changed to: {value}");
         }
+        
+        
 
         #endregion
 
@@ -777,7 +1038,7 @@ namespace HackMonkeys.UI.Panels
         private void DebugForceRefreshPlayers()
         {
             Debug.Log("🧪 [DEBUG] === FORCE REFRESH PLAYERS ===");
-
+    
             if (_lobbyState == null)
             {
                 Debug.LogError("🧪 [DEBUG] LobbyState is null!");
@@ -788,10 +1049,10 @@ namespace HackMonkeys.UI.Panels
                     return;
                 }
             }
-
+    
             var players = _lobbyState.GetPlayersList(hostFirst: true);
             Debug.Log($"🧪 [DEBUG] Players in LobbyState: {players.Count}");
-
+    
             foreach (var player in players)
             {
                 if (player != null)
@@ -803,9 +1064,9 @@ namespace HackMonkeys.UI.Panels
                     Debug.LogError("🧪 [DEBUG] - NULL PLAYER!");
                 }
             }
-
+    
             RefreshPlayersList();
-
+    
             Debug.Log("🧪 [DEBUG] === END FORCE REFRESH ===");
         }
 

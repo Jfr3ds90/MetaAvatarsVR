@@ -16,6 +16,7 @@ namespace HackMonkeys.Core
         public UnityEvent<LobbyPlayer> OnPlayerJoined;
         public UnityEvent<LobbyPlayer> OnPlayerLeft;
         public UnityEvent<LobbyPlayer> OnPlayerUpdated;
+        public UnityEvent<string> OnMapChanged;
         public UnityEvent<int, int> OnPlayerCountChanged; // current, max
         public UnityEvent<bool> OnAllPlayersReady;
         
@@ -32,7 +33,7 @@ namespace HackMonkeys.Core
         // ✅ COMPUTED PROPERTIES - Calculadas en tiempo real
         public LobbyPlayer HostPlayer => _players.Values.FirstOrDefault(p => p.IsHost);
         public LobbyPlayer LocalPlayer => _players.Values.FirstOrDefault(p => p.IsLocalPlayer);
-        
+        private string _lastKnownMap = "";
         private void Awake()
         {
             // ✅ SINGLETON PATTERN SIMPLE
@@ -134,6 +135,27 @@ namespace HackMonkeys.Core
             // ✅ DISPARAR EVENTOS
             OnPlayerUpdated?.Invoke(player);
             CheckAllPlayersReady();
+            
+            if (player.IsHost)
+            {
+                CheckHostMapChange();
+            }
+        }
+        
+        public void UpdateMapSelection(string mapName)
+        {
+            Debug.Log($"[LobbyState] 🗺️ Map selection updated: {mapName}");
+            OnMapChanged?.Invoke(mapName);
+        }
+        
+        public string GetSelectedMap()
+        {
+            var host = HostPlayer;
+            if (host != null)
+            {
+                return host.SelectedMap.ToString();
+            }
+            return "";
         }
         
         /// <summary>
@@ -164,18 +186,27 @@ namespace HackMonkeys.Core
         /// </summary>
         public List<LobbyPlayer> GetPlayersList(bool hostFirst = true)
         {
-            var playersList = _players.Values.ToList();
-            
+            var playersList = _players.Values.Where(p => p != null).ToList();
+    
+            if (playersList.Count == 0)
+                return new List<LobbyPlayer>();
+    
             if (hostFirst)
             {
-                // Host primero, luego jugador local, luego otros
-                return playersList.OrderByDescending(p => p.IsHost)
-                                 .ThenByDescending(p => p.IsLocalPlayer)
-                                 .ThenBy(p => p.PlayerName.ToString())
-                                 .ToList();
+                // Ordenar con manejo seguro de nombres
+                return playersList.OrderByDescending(p => p.IsHost ? 1 : 0)
+                    .ThenByDescending(p => p.IsLocalPlayer ? 1 : 0)
+                    .ThenBy(p => {
+                        string name = p.PlayerName.ToString();
+                        return string.IsNullOrEmpty(name) ? "Unknown" : name;
+                    })
+                    .ToList();
             }
-            
-            return playersList.OrderBy(p => p.PlayerName.ToString()).ToList();
+    
+            return playersList.OrderBy(p => {
+                string name = p.PlayerName.ToString();
+                return string.IsNullOrEmpty(name) ? "Unknown" : name;
+            }).ToList();
         }
         
         /// <summary>
@@ -204,6 +235,21 @@ namespace HackMonkeys.Core
             bool allReady = AllPlayersReady;
             Debug.Log($"[LobbyState] 🎯 All players ready check: {allReady} ({PlayerCount} players)");
             OnAllPlayersReady?.Invoke(allReady);
+        }
+        
+        public void CheckHostMapChange()
+        {
+            var host = HostPlayer;
+            if (host != null)
+            {
+                string currentMap = host.SelectedMap.ToString();
+                if (!string.IsNullOrEmpty(currentMap) && currentMap != _lastKnownMap)
+                {
+                    _lastKnownMap = currentMap;
+                    Debug.Log($"[LobbyState] 🗺️ Detected host map change to: {currentMap}");
+                    OnMapChanged?.Invoke(currentMap);
+                }
+            }
         }
         
         private int GetMaxPlayers()

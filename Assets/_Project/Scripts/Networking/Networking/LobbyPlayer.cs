@@ -18,6 +18,8 @@ namespace HackMonkeys.Core
         [Networked] public NetworkBool IsHost { get; set; }
 
         [Networked] public Color PlayerColor { get; set; }
+        
+        [property: Networked] public NetworkString<_64> SelectedMap { get; set; }
 
         // Referencias locales (no sincronizadas)
         private PlayerPrefsManager _prefsManager;
@@ -212,27 +214,61 @@ namespace HackMonkeys.Core
 
             Debug.Log($"🧪 [LOBBYPLAYER] ✅ Ready state set via RPC");
         }
+        
+        // RPC para cambiar el mapa (solo el host puede llamarlo)
+        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+        public void RPC_ChangeMap(NetworkString<_64> mapName)
+        {
+            Debug.Log($"🧪 [LOBBYPLAYER] 📡 RPC_ChangeMap called");
+            Debug.Log($"🧪 [LOBBYPLAYER] 📡 Map parameter: {mapName}");
+            Debug.Log($"🧪 [LOBBYPLAYER] 📡 Called by player: {Object.InputAuthority}");
+            Debug.Log($"🧪 [LOBBYPLAYER] 📡 This player IsHost: {IsHost}");
+    
+            // Solo el host puede cambiar el mapa
+            if (!IsHost)
+            {
+                Debug.LogWarning($"🧪 [LOBBYPLAYER] ❌ Non-host tried to change map!");
+                return;
+            }
+    
+            Debug.Log($"🧪 [LOBBYPLAYER] 📡 Setting SelectedMap from '{SelectedMap}' to '{mapName}'");
+            SelectedMap = mapName;
+            Debug.Log($"🧪 [LOBBYPLAYER] ✅ Map changed successfully to: {SelectedMap}");
+        }
 
         public override void FixedUpdateNetwork()
         {
-            // Detectar cambios usando ChangeDetector
-            foreach (var change in _changeDetector.DetectChanges(this))
+            // Solo ejecutar en el cliente local
+            if (HasStateAuthority || HasInputAuthority)
             {
-                switch (change)
+                // Detectar cambios en NUESTRO jugador
+                foreach (var change in _changeDetector.DetectChanges(this))
                 {
-                    case nameof(PlayerName):
-                        OnNameChangedCallback();
-                        break;
-                    case nameof(IsReady):
-                        OnReadyChangedCallback();
-                        break;
-                    case nameof(PlayerColor):
-                        OnColorChangedCallback();
-                        break;
-                    case nameof(IsHost):
-                        OnHostChangedCallback();
-                        break;
+                    switch (change)
+                    {
+                        case nameof(PlayerName):
+                            OnNameChangedCallback();
+                            break;
+                        case nameof(IsReady):
+                            OnReadyChangedCallback();
+                            break;
+                        case nameof(PlayerColor):
+                            OnColorChangedCallback();
+                            break;
+                        case nameof(IsHost):
+                            OnHostChangedCallback();
+                            break;
+                        case nameof(SelectedMap):
+                            OnMapChangedCallback();
+                            break;
+                    }
                 }
+            }
+    
+            // NUEVO: En TODOS los clientes, monitorear cambios del host
+            if (!IsHost && LobbyState.Instance != null)
+            {
+                LobbyState.Instance.CheckHostMapChange();
             }
         }
 
@@ -283,6 +319,21 @@ namespace HackMonkeys.Core
             if (LobbyState.Instance != null)
             {
                 LobbyState.Instance.UpdatePlayerDisplay(this);
+            }
+        }
+        
+        private void OnMapChangedCallback()
+        {
+            Debug.Log($"🧪 [LOBBYPLAYER] 🗺️ Map changed to: {SelectedMap.ToString()}");
+            Debug.Log($"🧪 [LOBBYPLAYER] 🗺️ This player IsHost: {IsHost}, IsLocal: {IsLocalPlayer}");
+    
+            // Notificar cuando CUALQUIER jugador que sea host cambie el mapa
+            // No solo cuando sea nuestro jugador local
+            if (IsHost && LobbyState.Instance != null)
+            {
+                Debug.Log($"🧪 [LOBBYPLAYER] 🗺️ Host player map changed, notifying all clients!");
+                // Notificar a la UI que el mapa cambió
+                LobbyState.Instance.UpdateMapSelection(SelectedMap.ToString());
             }
         }
 
