@@ -22,7 +22,7 @@ namespace HackMonkeys.Core
         [property: Networked] public NetworkString<_64> SelectedMap { get; set; }
 
         // Referencias locales (no sincronizadas)
-        private PlayerPrefsManager _prefsManager;
+        private PlayerDataManager _dataManager;
         private ChangeDetector _changeDetector;
 
         // Cache de valores anteriores para detectar cambios
@@ -47,9 +47,9 @@ namespace HackMonkeys.Core
             {
                 Debug.Log("🧪 [LOBBYPLAYER] Configuring local player data...");
 
-                _prefsManager = PlayerPrefsManager.Instance;
+                _dataManager = PlayerDataManager.Instance;
 
-                if (_prefsManager == null)
+                if (_dataManager == null)
                 {
                     Debug.LogError("🧪 [LOBBYPLAYER] ❌ PlayerPrefsManager.Instance is NULL!");
                     // Usar valores por defecto
@@ -63,14 +63,14 @@ namespace HackMonkeys.Core
                 {
                     // Configurar datos iniciales
                     RPC_SetPlayerData(
-                        _prefsManager.GetPlayerName(),
-                        _prefsManager.GetPlayerColor(),
+                        _dataManager.GetPlayerName(),
+                        _dataManager.GetPlayerColor(),
                         Runner.IsServer // Es host si es el servidor
                     );
 
-                    Debug.Log($"🧪 [LOBBYPLAYER] Player name: {_prefsManager.GetPlayerName()}");
+                    Debug.Log($"🧪 [LOBBYPLAYER] Player name: {_dataManager.GetPlayerName()}");
                     Debug.Log($"🧪 [LOBBYPLAYER] Is host: {Runner.IsServer}");
-                    Debug.Log($"🧪 [LOBBYPLAYER] Player color: {_prefsManager.GetPlayerColor()}");
+                    Debug.Log($"🧪 [LOBBYPLAYER] Player color: {_dataManager.GetPlayerColor()}");
                 }
             }
 

@@ -82,6 +82,11 @@ namespace HackMonkeys.Core
         {
             Debug.Log("[LobbyController] 🚀 Attempting to start game...");
             
+            PlayerDataManager.Instance.UpdateSessionPlayers(_lobbyState);
+                
+            // El mapa seleccionado ya está en LobbyPlayer.SelectedMap (sincronizado)
+            PlayerDataManager.Instance.SetSelectedMap(_lobbyState.GetSelectedMap());
+            
             // ✅ VALIDACIÓN PREVIA
             if (!ValidateCanStartGame())
             {
@@ -96,6 +101,7 @@ namespace HackMonkeys.Core
             {
                 Debug.Log("[LobbyController] ✅ Validation passed, starting game...");
                 OnGameStarting?.Invoke();
+                
                 
                 bool success = await _networkBootstrapper.StartGame();
                 

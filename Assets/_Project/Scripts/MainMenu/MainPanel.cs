@@ -31,7 +31,7 @@ namespace HackMonkeys.UI.Panels
         [SerializeField] private TextMeshProUGUI gameTitle;
         [SerializeField] private ParticleSystem logoParticles;
         
-        private PlayerPrefsManager _prefsManager;
+        private PlayerDataManager _dataManager;
         private NetworkBootstrapper _networkBootstrapper;
         
         protected override void SetupPanel()
@@ -39,7 +39,7 @@ namespace HackMonkeys.UI.Panels
             base.SetupPanel();
             
             // Obtener referencias
-            _prefsManager = PlayerPrefsManager.Instance;
+            _dataManager = PlayerDataManager.Instance;
             _networkBootstrapper = NetworkBootstrapper.Instance;
             
             // Actualizar información del jugador
@@ -111,9 +111,9 @@ namespace HackMonkeys.UI.Panels
         private void UpdatePlayerInfo()
         {
             // Nombre del jugador
-            if (playerNameText != null && _prefsManager != null)
+            if (playerNameText != null && _dataManager != null)
             {
-                string playerName = _prefsManager.GetPlayerName();
+                string playerName = _dataManager.GetPlayerName();
                 playerNameText.text = string.IsNullOrEmpty(playerName) ? "Guest Player" : playerName;
             }
             
@@ -155,7 +155,7 @@ namespace HackMonkeys.UI.Panels
         private Color GetPlayerColor()
         {
             // Generar color basado en el nombre del jugador
-            string playerName = _prefsManager?.GetPlayerName() ?? "Guest";
+            string playerName = _dataManager?.GetPlayerName() ?? "Guest";
             int hash = playerName.GetHashCode();
             Random.InitState(hash);
             

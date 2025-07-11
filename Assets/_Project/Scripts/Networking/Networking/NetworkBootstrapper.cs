@@ -133,6 +133,18 @@ namespace HackMonkeys.Core
                 if (result.Ok)
                 {
                     Debug.Log("[NetworkBootstrapper] ✅ Room created successfully!");
+                    
+                    //Registrar datos de sesión
+                    PlayerDataManager.Instance.SetSessionData(Runner.LocalPlayer, true, roomName);
+                    
+                    // Actualizar LocalPlayerRef para el HOST
+                    // OnConnectedToServer no se llama para el host, así que lo hacemos aquí
+                    if (PlayerDataManager.Instance != null && Runner.LocalPlayer.IsRealPlayer)
+                    {
+                        PlayerDataManager.Instance.UpdateLocalPlayerRef(Runner.LocalPlayer);
+                        Debug.Log($"[NetworkBootstrapper] ✅ Host LocalPlayerRef updated: {Runner.LocalPlayer}");
+                    }
+                    
                     _isInRoom = true;
                     OnConnectedToServerEvent?.Invoke();
                     return true;
@@ -242,6 +254,10 @@ namespace HackMonkeys.Core
                     Debug.Log("[NetworkBootstrapper] ✅ Callbacks configured - ready for player spawning");
                     _isInRoom = true;
                     OnConnectedToServerEvent?.Invoke();
+                    
+                    // Cliente registra su info básica
+                    PlayerDataManager.Instance.SetSessionData(PlayerRef.None, false, session.Name);
+                    
                     return true;
                 }
                 else
@@ -488,6 +504,13 @@ namespace HackMonkeys.Core
         public void OnConnectedToServer(NetworkRunner runner)
         {
             Debug.Log("[NetworkBootstrapper] 🌐 Connected to Photon Cloud");
+    
+            // AQUÍ sí tenemos el PlayerRef correcto
+            if (PlayerDataManager.Instance != null)
+            {
+                PlayerDataManager.Instance.UpdateLocalPlayerRef(runner.LocalPlayer);
+                Debug.Log($"[NetworkBootstrapper] ✅ LocalPlayerRef updated: {runner.LocalPlayer}");
+            }
         }
 
         public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
@@ -502,6 +525,121 @@ namespace HackMonkeys.Core
             OnConnectionFailed?.Invoke(reason.ToString());
         }
 
+        public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
+        {
+            // Solo procesar si es el runner temporal de búsqueda
+            if (runner.name == "NetworkRunner_SessionFinder")
+            {
+                Debug.Log($"[NetworkBootstrapper] 📋 Session list updated: {sessionList.Count} sessions");
+                _receivedSessions = new List<SessionInfo>(sessionList);
+                _sessionListTcs?.TrySetResult(_receivedSessions);
+            }
+
+            // Notificar a LobbyBrowser
+            OnSessionListUpdatedEvent?.Invoke(sessionList);
+        }
+
+        // Implementación vacía de otros callbacks
+        public void OnInput(NetworkRunner runner, NetworkInput input)
+        {
+        }
+
+        public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)
+        {
+        }
+
+        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
+        {
+            Debug.Log($"[NetworkBootstrapper] 🔄 Runner shutdown: {shutdownReason}");
+        }
+
+        public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request,
+            byte[] token)
+        {
+        }
+
+        public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message)
+        {
+        }
+
+        public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key,
+            ArraySegment<byte> data)
+        {
+        }
+
+        public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress)
+        {
+        }
+
+        public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data)
+        {
+        }
+
+        public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)
+        {
+        }
+
+        public void OnSceneLoadDone(NetworkRunner runner)
+        {
+        }
+
+        public void OnSceneLoadStart(NetworkRunner runner)
+        {
+            Debug.Log("[NetworkBootstrapper] 🎬 Scene load starting...");
+    
+            // Asegurar que todos tengan el mapa correcto antes de cargar
+            PlayerDataManager.Instance.UpdateSelectedMapFromLobbyPlayer();
+        }
+
+        public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
+        {
+        }
+
+        public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
+        {
+        }
+
+        private void OnDestroy()
+        {
+            if (_runner != null)
+            {
+                Debug.Log("[NetworkBootstrapper] 🧹 Destroying - final cleanup");
+                _runner.RemoveCallbacks(this);
+                _runner.Shutdown();
+            }
+        }
+
+        // ========================================
+        // ✅ VALIDACIÓN PARA DEBUGGING
+        // ========================================
+
+        [ContextMenu("Debug: Validate Configuration")]
+        private void ValidateConfiguration()
+        {
+            Debug.Log("=== NetworkBootstrapper Validation ===");
+
+            if (runnerPrefab == null)
+                Debug.LogError("❌ Runner Prefab not assigned!");
+            else
+                Debug.Log("✅ Runner Prefab assigned");
+
+            if (sceneManagerPrefab == null)
+                Debug.LogError("❌ Scene Manager Prefab not assigned!");
+            else
+                Debug.Log("✅ Scene Manager Prefab assigned");
+
+            if (lobbyPlayerPrefab == null)
+                Debug.LogError("❌ LobbyPlayer Prefab not assigned!");
+            else
+                Debug.Log("✅ LobbyPlayer Prefab assigned");
+
+            Debug.Log($"Default Max Players: {defaultMaxPlayers}");
+            Debug.Log($"Current Room: {CurrentRoomName ?? "None"}");
+            Debug.Log($"Is In Room: {IsInRoom}");
+            Debug.Log($"Is Host: {IsHost}");
+            Debug.Log("================================");
+        }
+        
         private class SessionListCallback : INetworkRunnerCallbacks
         {
             private List<SessionInfo> _sessions = new List<SessionInfo>();
@@ -579,6 +717,7 @@ namespace HackMonkeys.Core
 
             public void OnSceneLoadStart(NetworkRunner runner)
             {
+               
             }
 
             public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
@@ -589,119 +728,8 @@ namespace HackMonkeys.Core
             {
             }
         }
-
-        public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
-        {
-            // Solo procesar si es el runner temporal de búsqueda
-            if (runner.name == "NetworkRunner_SessionFinder")
-            {
-                Debug.Log($"[NetworkBootstrapper] 📋 Session list updated: {sessionList.Count} sessions");
-                _receivedSessions = new List<SessionInfo>(sessionList);
-                _sessionListTcs?.TrySetResult(_receivedSessions);
-            }
-
-            // Notificar a LobbyBrowser
-            OnSessionListUpdatedEvent?.Invoke(sessionList);
-        }
-
-        // Implementación vacía de otros callbacks
-        public void OnInput(NetworkRunner runner, NetworkInput input)
-        {
-        }
-
-        public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)
-        {
-        }
-
-        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
-        {
-            Debug.Log($"[NetworkBootstrapper] 🔄 Runner shutdown: {shutdownReason}");
-        }
-
-        public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request,
-            byte[] token)
-        {
-        }
-
-        public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message)
-        {
-        }
-
-        public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key,
-            ArraySegment<byte> data)
-        {
-        }
-
-        public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress)
-        {
-        }
-
-        public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data)
-        {
-        }
-
-        public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)
-        {
-        }
-
-        public void OnSceneLoadDone(NetworkRunner runner)
-        {
-        }
-
-        public void OnSceneLoadStart(NetworkRunner runner)
-        {
-        }
-
-        public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
-        {
-        }
-
-        public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
-        {
-        }
-
-        private void OnDestroy()
-        {
-            if (_runner != null)
-            {
-                Debug.Log("[NetworkBootstrapper] 🧹 Destroying - final cleanup");
-                _runner.RemoveCallbacks(this);
-                _runner.Shutdown();
-            }
-        }
-
-        // ========================================
-        // ✅ VALIDACIÓN PARA DEBUGGING
-        // ========================================
-
-        [ContextMenu("Debug: Validate Configuration")]
-        private void ValidateConfiguration()
-        {
-            Debug.Log("=== NetworkBootstrapper Validation ===");
-
-            if (runnerPrefab == null)
-                Debug.LogError("❌ Runner Prefab not assigned!");
-            else
-                Debug.Log("✅ Runner Prefab assigned");
-
-            if (sceneManagerPrefab == null)
-                Debug.LogError("❌ Scene Manager Prefab not assigned!");
-            else
-                Debug.Log("✅ Scene Manager Prefab assigned");
-
-            if (lobbyPlayerPrefab == null)
-                Debug.LogError("❌ LobbyPlayer Prefab not assigned!");
-            else
-                Debug.Log("✅ LobbyPlayer Prefab assigned");
-
-            Debug.Log($"Default Max Players: {defaultMaxPlayers}");
-            Debug.Log($"Current Room: {CurrentRoomName ?? "None"}");
-            Debug.Log($"Is In Room: {IsInRoom}");
-            Debug.Log($"Is Host: {IsHost}");
-            Debug.Log("================================");
-        }
     }
-
+    
     [System.Serializable]
     public class SceneInfo
     {

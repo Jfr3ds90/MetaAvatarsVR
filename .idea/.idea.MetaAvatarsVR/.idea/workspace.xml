@@ -6,14 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="7dff0c71-b160-42d0-b10d-cebacd1be9cc" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.MetaAvatarsVR/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MetaAvatarsVR/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/2D Assets/UI/Interfaz/_Prefabs/Button.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/2D Assets/UI/Interfaz/_Prefabs/Button.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/2D Assets/UI/Interfaz/_Prefabs/Button_Room_Item Variant.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/2D Assets/UI/Interfaz/_Prefabs/Button_Room_Item Variant.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scenes/Desarrollo/MainMenu.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scenes/Desarrollo/MainMenu.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/MainMenu/LobbyBrowser.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/MainMenu/LobbyBrowser.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/MainMenu/LobbyRoom.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/MainMenu/LobbyRoom.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/MainMenu/MainPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/MainMenu/MainPanel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/MainMenu/PlayerPrefsManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/MainMenu/PlayerDataManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/MainMenu/PlayerPrefsManager.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/MainMenu/PlayerDataManager.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Networking/Networking/LobbyController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Networking/Networking/LobbyController.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Networking/Networking/LobbyPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Networking/Networking/LobbyPlayer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Networking/Networking/LobbyState.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Networking/Networking/LobbyState.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Networking/Networking/NetworkBootstrapper.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Networking/Networking/NetworkBootstrapper.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -36,6 +34,8 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/a8dbfcead97c40aabc191fa10f8bc4ea1dba00/3a/e5eee7b0/Assert.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/a8dbfcead97c40aabc191fa10f8bc4ea1dba00/65/590e50c6/Object.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/a8dbfcead97c40aabc191fa10f8bc4ea1dba00/8f/987c1178/SceneManager.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/a8dbfcead97c40aabc191fa10f8bc4ea1dba00/9c/fee91fa9/Light.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d012868c0b9943c7bc3faef3a9135f2bc0000/1b/ac098555/PlayerRef.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d012868c0b9943c7bc3faef3a9135f2bc0000/39/e31bddaa/StartGameArgs.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d012868c0b9943c7bc3faef3a9135f2bc0000/42/7fbd4e60/NetworkObject.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d012868c0b9943c7bc3faef3a9135f2bc0000/63/8be8800c/NetworkRunner.cs" root0="FORCE_HIGHLIGHTING" />
@@ -106,6 +106,7 @@
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.xr.interaction.toolkit/Runtime/Interaction/Interactors/XRRayInteractor.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../MetaAvatarsVR_clone_0/Assets/_Project/Scripts/MainMenu/LobbyBrowser.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../MetaAvatarsVR_clone_0/Assets/_Project/Scripts/MainMenu/LobbyRoom.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../MetaAvatarsVR_clone_0/Assets/_Project/Scripts/MainMenu/PlayerDataManager.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -170,15 +171,13 @@
       <option name="useMixedMode" value="false" />
       <method v="2" />
     </configuration>
-    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" ignored-value-for-modified-check="16940">
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
       <option name="allowRunningInParallel" value="false" />
       <option name="listenPortForConnections" value="false" />
-      <option name="pid" value="16940" />
+      <option name="pid" />
       <option name="projectPathOnTarget" />
       <option name="runtimes">
-        <list>
-          <MonoRuntime />
-        </list>
+        <list />
       </option>
       <option name="selectedOptions">
         <list />
@@ -232,6 +231,7 @@
       <workItem from="1752006262495" duration="18092000" />
       <workItem from="1752168502978" duration="9243000" />
       <workItem from="1752197638110" duration="11535000" />
+      <workItem from="1752251075100" duration="8623000" />
     </task>
     <servers />
   </component>
@@ -278,29 +278,16 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/Assets/_Project/Scripts/Networking/Networking/LobbyController.cs</url>
-          <line>86</line>
+          <line>91</line>
           <properties documentPath="D:\Unity\HackMonkeys\MetaAvatarsVR\Assets\_Project\Scripts\Networking\Networking\LobbyController.cs" containingFunctionPresentation="Method 'StartGame'">
             <startOffsets>
-              <option value="3298" />
+              <option value="3573" />
             </startOffsets>
             <endOffsets>
-              <option value="3299" />
+              <option value="3574" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="21" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/Assets/_Project/Scripts/Networking/Networking/NetworkBootstrapper.cs</url>
-          <line>429</line>
-          <properties documentPath="D:\Unity\HackMonkeys\MetaAvatarsVR\Assets\_Project\Scripts\Networking\Networking\NetworkBootstrapper.cs" containingFunctionPresentation="Method 'GetSceneIndex'">
-            <startOffsets>
-              <option value="15503" />
-            </startOffsets>
-            <endOffsets>
-              <option value="15504" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="22" />
         </line-breakpoint>
         <breakpoint type="DotNet_Exception_Breakpoints">
           <properties exception="System.OperationCanceledException" breakIfHandledByOtherCode="false" displayValue="System.OperationCanceledException" />
