@@ -1,11 +1,20 @@
+using System.Collections;
 using UnityEngine;
 
 public class ValveManager : MonoBehaviour
 {
     public bool[] activatedValves;
     int lastValveActived;
-    public float gasFog;
+    public static float gasFog;
     public Color colorGas;
+    private Color trueColor;
+    [SerializeField]ParticleSystem[] PS_Gas;
+
+    private void Awake()
+    {
+        trueColor = Random.ColorHSV();
+        Debug.Log(trueColor+" es el color correcto");
+    }
     public void MixtureGas(int value)
     {
         int n = 0;
@@ -43,7 +52,7 @@ public class ValveManager : MonoBehaviour
                             Debug.Log("valvula activa " + value);
                             break;
                         default:
-                            gasFog += Time.deltaTime*0.01f;
+                            gasFog += Time.deltaTime*10f;
                             break;
                     }
                     lastValveActived = n;
@@ -76,7 +85,7 @@ public class ValveManager : MonoBehaviour
                         Debug.Log("valvula activa " + value + " y tambien " + lastValveActived);
                         break;
                     default:
-                        gasFog += Time.deltaTime * 0.02f;
+                        gasFog += Time.deltaTime * 20f;
                         break;
                 }
                 lastValveActived = -1;
@@ -84,7 +93,37 @@ public class ValveManager : MonoBehaviour
             else
                 lastValveActived = -1;
         }
+    }
+    public void GasAction()
+    {
+        RenderSettings.fogDensity = gasFog / 350;
+        StartCoroutine(GasActivated());
+    }
+    public IEnumerator GasActivated()
+    {while (true) 
+        {
+            gasFog += Time.deltaTime * 0.1f;
+            RenderSettings.fogDensity = gasFog / 350;
 
-        
+            RenderSettings.fogColor = new Vector4(colorGas.r* RenderSettings.fogDensity,
+                colorGas.g* RenderSettings.fogDensity, 
+                colorGas.b* RenderSettings.fogDensity, 
+                1);
+            if(colorGas.r>255) colorGas.r = 255;
+            if(colorGas.g>255) colorGas.g = 255;
+            if(colorGas.b>255) colorGas.b = 255;
+            for(int i = 0;i<PS_Gas.Length;i++)
+            {
+                //chemstry.particleSystems[i].main.startColor = colorGas;
+                ParticleSystem.ColorOverLifetimeModule COL =PS_Gas[i].colorOverLifetime ;
+                COL.color = new ParticleSystem.MinMaxGradient(colorGas).color;
+              //  COL.color = new ParticleSystem.MinMaxGradient(new Vector4(0,0,0,0)).gradientMax;
+                Debug.Log(COL+" es el color");
+                if (!PS_Gas[i].isPlaying)
+                    PS_Gas[i].Play();
+            }
+          //  Debug.Log(RenderSettings.fogDensity + " es la densidad y el color es "+ RenderSettings.fogColor);
+            yield return null;
+        }
     }
 }
