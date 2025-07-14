@@ -52,7 +52,7 @@ public class simpleKey : MonoBehaviour
                 videoActivation(other);
 
               // if (gameobjectInteractor.GetComponent<VideoPlayer>().frame >= Convert.ToInt64(gameobjectInteractor.GetComponent<VideoPlayer>().frameCount))
-                    creditsEnd.SetActive(true);
+                   // creditsEnd.SetActive(true);
             }      
     }
     public void pickUpAudio()

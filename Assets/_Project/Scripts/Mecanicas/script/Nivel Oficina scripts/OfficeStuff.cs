@@ -3,7 +3,7 @@ using UnityEngine;
 public class OfficeStaff : MonoBehaviour
 {
     bool lightsOn = false;
-    public GameObject lightsObjects, emergencyLights,CanvasPc,ButtonsCanvas,pendrive;
+    public GameObject lightsObjects, emergencyLights,CanvasPc,ButtonsCanvas,pendrive,creditsEnd;
 
     public void CoffeMachine()
     {
@@ -24,7 +24,8 @@ public class OfficeStaff : MonoBehaviour
     }
     public void CorrectOption()
     {
-        pendrive.GetComponent<simpleKey>().videoCorrect = true;
+        creditsEnd.SetActive(true);//sacar cuando el video funcione
+        pendrive.GetComponent<simpleKey>().videoCorrect = true;       
         ButtonsCanvas.SetActive(false);
         Debug.Log("opcion correcta");
     }
