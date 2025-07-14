@@ -51,7 +51,6 @@ public class Switch : MonoBehaviour
             { hearAudio(); activated = true; }
             activationExtra = true;
         }
-        
     }
     public void CloseDoorAct()
     {

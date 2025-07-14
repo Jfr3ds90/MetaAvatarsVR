@@ -5,6 +5,11 @@ public class OfficeStaff : MonoBehaviour
     bool lightsOn = false;
     public GameObject lightsObjects, emergencyLights,CanvasPc,ButtonsCanvas,pendrive,creditsEnd;
 
+    private void OnEnable()
+    {
+        CanvasTasksShow.level = "oficina";
+    }
+
     public void CoffeMachine()
     {
         lightsOn = false;
