@@ -44,11 +44,14 @@ public class Switch : MonoBehaviour
         if(activationExtra==false)
         timer += Time.deltaTime;
 
-        Debug.Log("EL TIMER VA EN "+timer);
+        //Debug.Log("EL TIMER VA EN "+timer);
         if (timer >= 4)
         {
             if(activationAudio==true&&activated==false)
-            { hearAudio(); activated = true; }
+            {
+                if(FindAnyObjectByType<AudioManager>()!=null)
+                hearAudio(); 
+                activated = true; }
             activationExtra = true;
         }
     }

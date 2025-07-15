@@ -51,8 +51,11 @@ public class simpleKey : MonoBehaviour
                 if (videoCorrect==true)
                 videoActivation(other);
 
-              // if (gameobjectInteractor.GetComponent<VideoPlayer>().frame >= Convert.ToInt64(gameobjectInteractor.GetComponent<VideoPlayer>().frameCount))
-                   // creditsEnd.SetActive(true);
+                if (gameobjectInteractor.GetComponent<VideoPlayer>().clip .frameRate>= gameobjectInteractor.GetComponent<VideoPlayer>().clip.length)//revisar
+                {  FindAnyObjectByType<AudioManager>().moreAction = 3; FindAnyObjectByType<AudioManager>().calls();FindAnyObjectByType<OfficeStaff>().creditsEnd.SetActive(true); }
+
+                // if (gameobjectInteractor.GetComponent<VideoPlayer>().frame >= Convert.ToInt64(gameobjectInteractor.GetComponent<VideoPlayer>().frameCount))
+                // creditsEnd.SetActive(true);
             }      
     }
     public void pickUpAudio()
@@ -71,8 +74,7 @@ public class simpleKey : MonoBehaviour
         FindAnyObjectByType<AudioManager>().moreAction = 2;
         FindAnyObjectByType<AudioManager>().calls();
         other.GetComponent<AreaDetectorAudio>().activated1 = false;
-        gameobjectInteractor.GetComponent<VideoPlayer>().Play();
-        if (other.GetComponent<AreaDetectorAudio>().activated1 == true)
-        { FindAnyObjectByType<AudioManager>().moreAction = 3; FindAnyObjectByType<AudioManager>().calls(); }
+        //gameobjectInteractor.GetComponent<VideoPlayer>().Play();
+        
     }
 }

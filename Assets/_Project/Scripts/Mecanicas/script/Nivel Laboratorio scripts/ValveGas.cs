@@ -48,7 +48,7 @@ public class ValveGas : MonoBehaviour
     }
     private void Update()
     {
-        Debug.Log(transform.eulerAngles + " es la rotacion");
+        //Debug.Log(transform.eulerAngles + " es la rotacion");
         if (action==true)
        { if(Input.GetKey(KeyCode.RightArrow))
         {

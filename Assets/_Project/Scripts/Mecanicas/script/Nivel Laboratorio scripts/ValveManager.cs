@@ -15,6 +15,11 @@ public class ValveManager : MonoBehaviour
         trueColor = Random.ColorHSV();
         Debug.Log(trueColor+" es el color correcto");
     }
+    private void OnEnable()
+    {
+       for (int i = 0; i < PS_Gas.Length; i++)
+            PS_Gas[i].Stop(); 
+    }
     public void MixtureGas(int value)
     {
         int n = 0;
@@ -118,7 +123,7 @@ public class ValveManager : MonoBehaviour
                 ParticleSystem.ColorOverLifetimeModule COL =PS_Gas[i].colorOverLifetime ;
                 COL.color = new ParticleSystem.MinMaxGradient(colorGas).color;
               //  COL.color = new ParticleSystem.MinMaxGradient(new Vector4(0,0,0,0)).gradientMax;
-                Debug.Log(COL+" es el color");
+           //     Debug.Log(COL+" es el color");
                 if (!PS_Gas[i].isPlaying)
                     PS_Gas[i].Play();
             }

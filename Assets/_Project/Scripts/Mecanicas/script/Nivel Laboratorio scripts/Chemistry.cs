@@ -5,12 +5,14 @@ public class Chemistry : MonoBehaviour
 {
     public int element;
     public bool isSelected;
+    [SerializeField] private Switch LeftDoor,RightDoor;
+    [SerializeField] private MeshRenderer Chem;
     private void OnTriggerEnter(Collider collision)
     {
         if(collision.gameObject.GetComponent<Chemistry>()!=null)
        { 
             var otherElement= collision.gameObject.GetComponent<Chemistry>().element;
-        if(isSelected==true)
+            if(isSelected==true)
                 switch (this.element)
                 {
                     case 0:
@@ -67,7 +69,8 @@ public class Chemistry : MonoBehaviour
         }
         else if (collision.gameObject.tag=="cubePuzzle")
         {
-            Debug.LogWarning("Ahora debería de dar el evento");
+            LeftDoor.OpenDoorAct();
+            RightDoor.CloseDoorAct();
         }
     }
     private void OnParticleCollision(GameObject other)
@@ -75,7 +78,7 @@ public class Chemistry : MonoBehaviour
         if (other != null)
             Debug.Log(other.name + " es la particula que choco");
         Color color = other.GetComponent<ParticleSystem>().main.startColor.color;
-        this.GetComponent<MeshRenderer>().materials[0].color = color;
+        Chem.material.color = color;
 
     }
     private void OnParticleTrigger()
@@ -84,7 +87,7 @@ public class Chemistry : MonoBehaviour
     }
     private void OnEnable()
     {
-        FindAnyObjectByType<ParticleSystem>().Play();
+        //FindAnyObjectByType<ParticleSystem>().Play();
         Debug.Log(FindAnyObjectByType<ParticleSystem>().name+" es la particula encontrada");
     }
     public void onGrab()
