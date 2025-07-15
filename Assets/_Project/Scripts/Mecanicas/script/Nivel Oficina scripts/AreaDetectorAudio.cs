@@ -24,7 +24,8 @@ public class AreaDetectorAudio : MonoBehaviour
                 manager.colide = false;
                     this.gameObject.SetActive(false);
                 }
-
+                if(phase > CanvasTasksShow.phase)
+                CanvasTasksShow.phase = phase;
             }
         else if(notPlayer == true&&idle==false)
         {

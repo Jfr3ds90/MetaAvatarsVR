@@ -8,6 +8,9 @@ public class simpleKey : MonoBehaviour
     public bool right,pendrive,audioHeared ;
     public int phase, MAction;
     [HideInInspector]public bool videoCorrect = false;
+    [SerializeField] Material matVideo;
+
+    bool canvasActivated = false;
     public void actionKey()
     {
       var animator = gameobjectInteractor.GetComponent<Animator>();
@@ -37,16 +40,19 @@ public class simpleKey : MonoBehaviour
     }
     private void OnTriggerStay(Collider other)
     {           
-        if (this.pendrive == true&&other.GetComponent<AreaDetectorAudio>().phase==4 && other.GetComponent<AreaDetectorAudio>().extra== 2)//arreglar        
+        if (pendrive == true&&other.GetComponent<AreaDetectorAudio>().phase==4 && other.GetComponent<AreaDetectorAudio>().extra== 2)//arreglar        
             if (other.GetComponent<AreaDetectorAudio>().phase==4)
             {
                 Debug.Log(name+" detecto al objeto "+other.name);
-                FindAnyObjectByType<OfficeStaff>().activationPc();
-                if(videoCorrect==true)
+                if(canvasActivated==false)
+                { FindAnyObjectByType<OfficeStaff>().activationPc(); canvasActivated = true; }
+                gameobjectInteractor.GetComponent<MeshRenderer>().materials[1].mainTexture = matVideo.mainTexture;
+
+                if (videoCorrect==true)
                 videoActivation(other);
 
-                if (gameobjectInteractor.GetComponent<VideoPlayer>().frame >= Convert.ToInt64(gameobjectInteractor.GetComponent<VideoPlayer>().frameCount))
-                    creditsEnd.SetActive(true);
+              // if (gameobjectInteractor.GetComponent<VideoPlayer>().frame >= Convert.ToInt64(gameobjectInteractor.GetComponent<VideoPlayer>().frameCount))
+                   // creditsEnd.SetActive(true);
             }      
     }
     public void pickUpAudio()
