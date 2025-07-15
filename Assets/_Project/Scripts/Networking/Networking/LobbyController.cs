@@ -21,7 +21,6 @@ namespace HackMonkeys.Core
         
         public static LobbyController Instance { get; private set; }
         
-        // ✅ PROPERTIES - Estado derivado para UI
         public bool IsHost => _networkBootstrapper?.IsHost ?? false;
         public bool IsInLobby => _networkBootstrapper?.IsInRoom ?? false;
         public bool CanStartGame => ValidateCanStartGame();
@@ -29,7 +28,6 @@ namespace HackMonkeys.Core
         
         private void Awake()
         {
-            // ✅ SINGLETON PATTERN
             if (Instance != null)
             {
                 Debug.LogWarning("[LobbyController] Multiple instances detected. Destroying duplicate.");
@@ -43,13 +41,11 @@ namespace HackMonkeys.Core
         
         private void Start()
         {
-            // ✅ OBTENER REFERENCIAS DESPUÉS DE QUE TODOS LOS SINGLETONS ESTÉN LISTOS
             StartCoroutine(InitializeReferences());
         }
         
         private System.Collections.IEnumerator InitializeReferences()
         {
-            // Esperar hasta que las referencias estén disponibles
             while (_lobbyState == null || _networkBootstrapper == null)
             {
                 _lobbyState = LobbyState.Instance;
@@ -76,7 +72,7 @@ namespace HackMonkeys.Core
         // ========================================
         
         /// <summary>
-        /// ✅ ACCIÓN: Iniciar partida (solo host)
+        /// ✅ Iniciar partida (solo host)
         /// </summary>
         public async void StartGame()
         {
@@ -84,10 +80,9 @@ namespace HackMonkeys.Core
             
             PlayerDataManager.Instance.UpdateSessionPlayers(_lobbyState);
                 
-            // El mapa seleccionado ya está en LobbyPlayer.SelectedMap (sincronizado)
             PlayerDataManager.Instance.SetSelectedMap(_lobbyState.GetSelectedMap());
             
-            // ✅ VALIDACIÓN PREVIA
+            // VALIDACIÓN Fail Fast
             if (!ValidateCanStartGame())
             {
                 string reason = GetStartGameValidationError();
@@ -125,7 +120,7 @@ namespace HackMonkeys.Core
         }
         
         /// <summary>
-        /// ✅ ACCIÓN: Abandonar lobby
+        /// Abandonar lobby
         /// </summary>
         public async void LeaveLobby()
         {
@@ -142,12 +137,10 @@ namespace HackMonkeys.Core
             {
                 OnLeavingLobby?.Invoke();
                 
-                // ✅ DELEGAR A NETWORKBOOTSTRAPPER
                 await _networkBootstrapper.LeaveRoom();
                 
                 Debug.Log("[LobbyController] ✅ Left lobby successfully");
                 
-                // ✅ LIMPIAR ESTADO LOCAL
                 _lobbyState?.ClearAllPlayers();
             }
             catch (System.Exception e)
@@ -158,7 +151,7 @@ namespace HackMonkeys.Core
         }
         
         /// <summary>
-        /// ✅ ACCIÓN: Toggle ready del jugador local
+        /// Toggle ready del jugador local
         /// </summary>
         public void ToggleReady()
         {
@@ -179,12 +172,11 @@ namespace HackMonkeys.Core
             
             Debug.Log($"[LobbyController] 🔄 Toggling ready state for: {localPlayer.GetDisplayName()}");
             
-            // ✅ DELEGAR A LOBBYSTATE
             _lobbyState.ToggleLocalPlayerReady();
         }
         
         /// <summary>
-        /// ✅ ACCIÓN: Kick player (solo host)
+        /// Kick player (solo host)
         /// </summary>
         public void KickPlayer(LobbyPlayer playerToKick)
         {
@@ -222,7 +214,7 @@ namespace HackMonkeys.Core
         // ========================================
         
         /// <summary>
-        /// ✅ QUERY: ¿Puede iniciar el juego?
+        /// ¿Puede iniciar el juego?
         /// </summary>
         private bool ValidateCanStartGame()
         {
@@ -235,7 +227,7 @@ namespace HackMonkeys.Core
         }
         
         /// <summary>
-        /// ✅ QUERY: Razón por la que no puede iniciar
+        /// Razón por la que no puede iniciar
         /// </summary>
         private string GetStartGameValidationError()
         {
@@ -251,7 +243,7 @@ namespace HackMonkeys.Core
         }
         
         /// <summary>
-        /// ✅ QUERY: Obtener información completa del lobby para UI
+        /// Obtener información completa del lobby para UI
         /// </summary>
         public LobbyInfo GetLobbyInfo()
         {
@@ -279,7 +271,7 @@ namespace HackMonkeys.Core
         }
         
         /// <summary>
-        /// ✅ QUERY: ¿Es el jugador local el host?
+        /// ¿Es el jugador local el host?
         /// </summary>
         public bool IsLocalPlayerHost()
         {
@@ -287,7 +279,7 @@ namespace HackMonkeys.Core
         }
         
         /// <summary>
-        /// ✅ QUERY: Obtener jugador local
+        /// Obtener jugador local
         /// </summary>
         public LobbyPlayer GetLocalPlayer()
         {
@@ -295,7 +287,7 @@ namespace HackMonkeys.Core
         }
         
         /// <summary>
-        /// ✅ QUERY: Obtener lista de jugadores
+        /// Obtener lista de jugadores
         /// </summary>
         public System.Collections.Generic.List<LobbyPlayer> GetPlayersList(bool hostFirst = true)
         {
@@ -303,7 +295,7 @@ namespace HackMonkeys.Core
         }
         
         // ========================================
-        // ✅ DEBUG & VALIDATION
+        // DEBUG & VALIDATION
         // ========================================
         
         [ContextMenu("Debug: Controller Status")]
@@ -359,7 +351,7 @@ namespace HackMonkeys.Core
     }
     
     /// <summary>
-    /// ✅ DTO: Información completa del lobby para UI
+    /// Información completa del lobby para UI
     /// </summary>
     [System.Serializable]
     public class LobbyInfo
@@ -378,7 +370,7 @@ namespace HackMonkeys.Core
         public float ReadyPercentage;
         public int SlotsRemaining;
         
-        // ✅ COMPUTED PROPERTIES
+        //COMPUTED PROPERTIES
         public bool IsFull => CurrentPlayers >= MaxPlayers;
         public string StatusText => AllReady ? "All Ready!" : $"{ReadyPlayers}/{CurrentPlayers} Ready";
         public string RoomCode => RoomName?.GetHashCode().ToString("X6") ?? "------";

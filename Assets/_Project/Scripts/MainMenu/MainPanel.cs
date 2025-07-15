@@ -38,14 +38,11 @@ namespace HackMonkeys.UI.Panels
         {
             base.SetupPanel();
             
-            // Obtener referencias
             _dataManager = PlayerDataManager.Instance;
             _networkBootstrapper = NetworkBootstrapper.Instance;
             
-            // Actualizar información del jugador
             UpdatePlayerInfo();
             
-            // Animar logo
             AnimateLogo();
         }
 
@@ -53,7 +50,6 @@ namespace HackMonkeys.UI.Panels
         {
             base.ConfigureButtons();
             
-            // Botón Play - Buscar partidas
             if (playButton != null)
             {
                 playButton.OnButtonPressed.AddListener(() => 
@@ -62,7 +58,6 @@ namespace HackMonkeys.UI.Panels
                 });
             }
             
-            // Botón Host - Crear sala
             if (hostButton != null)
             {
                 hostButton.OnButtonPressed.AddListener(() => 
@@ -71,7 +66,6 @@ namespace HackMonkeys.UI.Panels
                 });
             }
             
-            // Botón Friends
             if (friendsButton != null)
             {
                 friendsButton.OnButtonPressed.AddListener(() =>
@@ -80,7 +74,6 @@ namespace HackMonkeys.UI.Panels
                 });
             }
             
-            // Botón Settings
             if (settingsButton != null)
             {
                 settingsButton.OnButtonPressed.AddListener(() => 
@@ -89,7 +82,6 @@ namespace HackMonkeys.UI.Panels
                 });
             }
             
-            //Options Button
             if (optionsButton != null)
             {
                 optionsButton.OnButtonPressed.AddListener(() =>
@@ -98,7 +90,6 @@ namespace HackMonkeys.UI.Panels
                 });
             }
             
-            // Botón Exit
             if (exitButton != null)
             {
                 exitButton.OnButtonPressed.AddListener(() => 
@@ -110,21 +101,16 @@ namespace HackMonkeys.UI.Panels
         
         private void UpdatePlayerInfo()
         {
-            // Nombre del jugador
             if (playerNameText != null && _dataManager != null)
             {
                 string playerName = _dataManager.GetPlayerName();
                 playerNameText.text = string.IsNullOrEmpty(playerName) ? "Guest Player" : playerName;
             }
             
-            // Estado de conexión
             UpdateConnectionStatus();
             
-            // Avatar (placeholder por ahora)
             if (playerAvatar != null)
             {
-                // Aquí se integraría con Meta Avatar SDK
-                // Por ahora usar un color aleatorio como placeholder
                 Color avatarColor = GetPlayerColor();
                 playerAvatar.color = avatarColor;
             }
@@ -138,7 +124,6 @@ namespace HackMonkeys.UI.Panels
             {
                 connectionStatusText.text = "<color=green>● Connected</color>";
                 
-                // Habilitar botones de red
                 if (playButton != null) playButton.SetInteractable(true);
                 if (hostButton != null) hostButton.SetInteractable(true);
             }
@@ -146,7 +131,6 @@ namespace HackMonkeys.UI.Panels
             {
                 connectionStatusText.text = "<color=red>● Connecting...</color>";
                 
-                // Deshabilitar botones de red
                 if (playButton != null) playButton.SetInteractable(false);
                 if (hostButton != null) hostButton.SetInteractable(false);
             }
@@ -154,7 +138,6 @@ namespace HackMonkeys.UI.Panels
         
         private Color GetPlayerColor()
         {
-            // Generar color basado en el nombre del jugador
             string playerName = _dataManager?.GetPlayerName() ?? "Guest";
             int hash = playerName.GetHashCode();
             Random.InitState(hash);
@@ -170,17 +153,14 @@ namespace HackMonkeys.UI.Panels
         {
             if (logoTransform == null) return;
             
-            // Rotación continua del logo
             logoTransform.DORotate(new Vector3(0, 360, 0), 20f, RotateMode.FastBeyond360)
                 .SetLoops(-1, LoopType.Restart)
                 .SetEase(Ease.Linear);
             
-            // Efecto de flotación
             logoTransform.DOLocalMoveY(logoTransform.localPosition.y + 0.1f, 2f)
                 .SetLoops(-1, LoopType.Yoyo)
                 .SetEase(Ease.InOutSine);
             
-            // Activar partículas si existen
             if (logoParticles != null)
             {
                 logoParticles.Play();
@@ -191,17 +171,14 @@ namespace HackMonkeys.UI.Panels
         {
             base.OnPanelShown();
             
-            // Actualizar estado de conexión
             UpdateConnectionStatus();
             
-            // Suscribirse a eventos de conexión
             if (_networkBootstrapper != null)
             {
                 _networkBootstrapper.OnConnectedToServerEvent.AddListener(OnConnected);
                 _networkBootstrapper.OnConnectionFailed.AddListener(OnConnectionFailed);
             }
             
-            // Efecto de entrada del título
             if (gameTitle != null)
             {
                 gameTitle.transform.localScale = Vector3.zero;
@@ -215,7 +192,6 @@ namespace HackMonkeys.UI.Panels
         {
             base.OnPanelHidden();
             
-            // Desuscribirse de eventos
             if (_networkBootstrapper != null)
             {
                 _networkBootstrapper.OnConnectedToServerEvent.RemoveListener(OnConnected);
@@ -227,7 +203,6 @@ namespace HackMonkeys.UI.Panels
         {
             UpdateConnectionStatus();
             
-            // Mostrar notificación de conexión exitosa
             ShowNotification("Connected to server!", NotificationType.Success);
         }
         
@@ -235,13 +210,11 @@ namespace HackMonkeys.UI.Panels
         {
             UpdateConnectionStatus();
             
-            // Mostrar notificación de error
             ShowNotification($"Connection failed: {error}", NotificationType.Error);
         }
           
         private void ShowNotification(string message, NotificationType type)
         {
-            // Sistema de notificaciones flotantes
             // TODO: Implementar NotificationManager
             Debug.Log($"[Notification] {type}: {message}");
         }

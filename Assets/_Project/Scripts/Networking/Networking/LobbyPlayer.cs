@@ -6,7 +6,6 @@ using TMPro;
 namespace HackMonkeys.Core
 {
     /// <summary>
-    /// LobbyPlayer ACTUALIZADO - Usa LobbyState en lugar de LobbyManager
     /// Representa a un jugador en el lobby con datos sincronizados en red
     /// </summary>
     public class LobbyPlayer : NetworkBehaviour
@@ -21,11 +20,9 @@ namespace HackMonkeys.Core
         
         [property: Networked] public NetworkString<_64> SelectedMap { get; set; }
 
-        // Referencias locales (no sincronizadas)
         private PlayerDataManager _dataManager;
         private ChangeDetector _changeDetector;
 
-        // Cache de valores anteriores para detectar cambios
         private NetworkString<_32> _previousName;
         private NetworkBool _previousReady;
 
@@ -39,10 +36,8 @@ namespace HackMonkeys.Core
             Debug.Log($"🧪 [LOBBYPLAYER] Is local player: {HasInputAuthority}");
             Debug.Log($"🧪 [LOBBYPLAYER] Frame: {Time.frameCount}");
 
-            // Inicializar el ChangeDetector
             _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
 
-            // Si es nuestro jugador local
             if (HasInputAuthority)
             {
                 Debug.Log("🧪 [LOBBYPLAYER] Configuring local player data...");
@@ -52,7 +47,6 @@ namespace HackMonkeys.Core
                 if (_dataManager == null)
                 {
                     Debug.LogError("🧪 [LOBBYPLAYER] ❌ PlayerPrefsManager.Instance is NULL!");
-                    // Usar valores por defecto
                     RPC_SetPlayerData(
                         $"Player {Object.InputAuthority.PlayerId}",
                         Color.HSVToRGB(Random.Range(0f, 1f), 0.8f, 1f),
@@ -61,11 +55,10 @@ namespace HackMonkeys.Core
                 }
                 else
                 {
-                    // Configurar datos iniciales
                     RPC_SetPlayerData(
                         _dataManager.GetPlayerName(),
                         _dataManager.GetPlayerColor(),
-                        Runner.IsServer // Es host si es el servidor
+                        Runner.IsServer 
                     );
 
                     Debug.Log($"🧪 [LOBBYPLAYER] Player name: {_dataManager.GetPlayerName()}");
@@ -74,10 +67,8 @@ namespace HackMonkeys.Core
                 }
             }
 
-            // CORRECCIÓN: Intentar registrar inmediatamente Y con fallback
             TryRegisterInLobbyState();
 
-            // Guardar valores iniciales
             _previousName = PlayerName;
             _previousReady = IsReady;
 
@@ -114,8 +105,7 @@ namespace HackMonkeys.Core
                 attempts++;
                 Debug.Log($"🧪 [LOBBYPLAYER] Attempt {attempts} - Waiting for LobbyState... (elapsed: {elapsed:F1}s)");
 
-                // Buscar en la escena también
-                if (attempts % 5 == 0) // Cada 5 intentos
+                if (attempts % 5 == 0) 
                 {
                     var lobbyStateInScene = FindObjectOfType<LobbyState>();
                     if (lobbyStateInScene != null)
@@ -134,12 +124,10 @@ namespace HackMonkeys.Core
                 LobbyState.Instance.RegisterPlayer(this);
                 Debug.Log("🧪 [LOBBYPLAYER] ✅ Player registered successfully via coroutine");
 
-                // NUEVO: Forzar un refresh en LobbyRoom si está activo
                 var lobbyRoom = FindObjectOfType<LobbyRoom>();
                 if (lobbyRoom != null && lobbyRoom.gameObject.activeInHierarchy)
                 {
                     Debug.Log("🧪 [LOBBYPLAYER] Triggering LobbyRoom refresh...");
-                    // Usar reflection para llamar RefreshPlayersList si es privado
                     var method = lobbyRoom.GetType().GetMethod("RefreshPlayersList",
                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                     method?.Invoke(lobbyRoom, null);
@@ -150,7 +138,6 @@ namespace HackMonkeys.Core
                 Debug.LogError($"🧪 [LOBBYPLAYER] ❌ CRITICAL: LobbyState never initialized after {timeout}s!");
                 Debug.LogError("🧪 [LOBBYPLAYER] ❌ Player will not appear in lobby UI!");
 
-                // Último intento desesperado
                 var lobbyState = FindObjectOfType<LobbyState>();
                 if (lobbyState != null)
                 {
@@ -167,7 +154,6 @@ namespace HackMonkeys.Core
         {
             Debug.Log($"🧪 [LOBBYPLAYER] Player despawned: {Object.InputAuthority}");
 
-            // ✅ CAMBIO: Usar LobbyState en lugar de LobbyManager
             if (LobbyState.Instance != null)
             {
                 Debug.Log("🧪 [LOBBYPLAYER] 👋 Unregistering player from LobbyState...");
@@ -188,7 +174,6 @@ namespace HackMonkeys.Core
             Debug.Log($"  - IsHost: {isHost}");
             Debug.Log($"  - Color: {color}");
     
-            // Validar nombre
             if (string.IsNullOrEmpty(name.ToString()))
             {
                 Debug.LogWarning("🧪 [LOBBYPLAYER] Empty name received, using default");
@@ -224,7 +209,6 @@ namespace HackMonkeys.Core
             Debug.Log($"🧪 [LOBBYPLAYER] 📡 Called by player: {Object.InputAuthority}");
             Debug.Log($"🧪 [LOBBYPLAYER] 📡 This player IsHost: {IsHost}");
     
-            // Solo el host puede cambiar el mapa
             if (!IsHost)
             {
                 Debug.LogWarning($"🧪 [LOBBYPLAYER] ❌ Non-host tried to change map!");
@@ -238,10 +222,8 @@ namespace HackMonkeys.Core
 
         public override void FixedUpdateNetwork()
         {
-            // Solo ejecutar en el cliente local
             if (HasStateAuthority || HasInputAuthority)
             {
-                // Detectar cambios en NUESTRO jugador
                 foreach (var change in _changeDetector.DetectChanges(this))
                 {
                     switch (change)
@@ -265,7 +247,6 @@ namespace HackMonkeys.Core
                 }
             }
     
-            // NUEVO: En TODOS los clientes, monitorear cambios del host
             if (!IsHost && LobbyState.Instance != null)
             {
                 LobbyState.Instance.CheckHostMapChange();
@@ -276,7 +257,6 @@ namespace HackMonkeys.Core
         {
             Debug.Log($"🧪 [LOBBYPLAYER] 🔄 Name changed to: {PlayerName.ToString()}");
 
-            // ✅ CAMBIO: Usar LobbyState en lugar de LobbyManager
             if (LobbyState.Instance != null)
             {
                 LobbyState.Instance.UpdatePlayerDisplay(this);
@@ -291,7 +271,6 @@ namespace HackMonkeys.Core
         {
             Debug.Log($"🧪 [LOBBYPLAYER] 🔄 Ready state changed to: {IsReady} for player: {PlayerName}");
 
-            // ✅ CAMBIO: Usar LobbyState en lugar de LobbyManager
             if (LobbyState.Instance != null)
             {
                 LobbyState.Instance.UpdatePlayerDisplay(this);
@@ -326,9 +305,7 @@ namespace HackMonkeys.Core
         {
             Debug.Log($"🧪 [LOBBYPLAYER] 🗺️ Map changed to: {SelectedMap.ToString()}");
             Debug.Log($"🧪 [LOBBYPLAYER] 🗺️ This player IsHost: {IsHost}, IsLocal: {IsLocalPlayer}");
-    
-            // Notificar cuando CUALQUIER jugador que sea host cambie el mapa
-            // No solo cuando sea nuestro jugador local
+            
             if (IsHost && LobbyState.Instance != null)
             {
                 Debug.Log($"🧪 [LOBBYPLAYER] 🗺️ Host player map changed, notifying all clients!");
@@ -337,7 +314,6 @@ namespace HackMonkeys.Core
             }
         }
 
-        // Métodos públicos para el UI
         public void ToggleReady()
         {
             if (!HasInputAuthority)
@@ -369,10 +345,8 @@ namespace HackMonkeys.Core
             return $"#{ColorUtility.ToHtmlStringRGB(PlayerColor)}";
         }
 
-        // ✅ NUEVOS MÉTODOS ÚTILES PARA UI
         public bool CanBeKicked()
         {
-            // No se puede kickear al host ni al jugador local
             return !IsHost && !IsLocalPlayer;
         }
 
@@ -457,7 +431,6 @@ namespace HackMonkeys.Core
             if (!Application.isEditor) return;
             if (!HasInputAuthority) return;
 
-            // Solo mostrar para el jugador local
             GUILayout.BeginArea(new Rect(10, 10, 300, 100));
             GUILayout.Label($"Local Player: {PlayerName} - Ready: {IsReady}");
             GUILayout.Label($"Host: {IsHost} | Authority: {HasInputAuthority}");

@@ -25,13 +25,11 @@ namespace HackMonkeys.Core
         #region Sesion Data
 
         [Header("Session Data")]
-        // Datos de sesión actual (no persistidos)
         [SerializeField] private bool _isHost = false;
         [SerializeField] private PlayerRef _localPlayerRef;
         [SerializeField] private string _currentRoomName;
         [SerializeField] private string _selectedMap;
 
-        // Datos de otros jugadores en la sesión
         private Dictionary<PlayerRef, SessionPlayerData> _sessionPlayers;
 
         [Serializable]
@@ -91,8 +89,6 @@ namespace HackMonkeys.Core
 
         private void LoadOrCreateData()
         {
-            // NOMBRE DEL JUGADOR
-            // Prioridad: 1) Override del inspector, 2) PlayerPrefs, 3) Aleatorio
             if (!string.IsNullOrEmpty(overridePlayerName))
             {
                 _playerName = overridePlayerName;
@@ -109,9 +105,7 @@ namespace HackMonkeys.Core
                 Debug.Log($"[PlayerPrefsManager] Generated new name: {_playerName}");
                 SavePlayerName();
             }
-
-            // COLOR DEL JUGADOR
-            // Prioridad: 1) Override del inspector, 2) PlayerPrefs, 3) Aleatorio
+            
             if (overridePlayerColor != Color.clear && overridePlayerColor.a > 0)
             {
                 _playerColor = overridePlayerColor;
@@ -137,7 +131,6 @@ namespace HackMonkeys.Core
 
         private string GenerateRandomName()
         {
-            // Para desarrollo: generar nombres únicos basados en tiempo + random
             if (useRandomNameIfEmpty)
             {
                 int timestamp = DateTime.Now.Second * 1000 + DateTime.Now.Millisecond;
@@ -151,7 +144,6 @@ namespace HackMonkeys.Core
 
         private Color GenerateRandomColor()
         {
-            // Generar colores vibrantes con buena saturación
             float hue = UnityEngine.Random.Range(0f, 1f);
             float saturation = UnityEngine.Random.Range(0.6f, 1f);
             float value = UnityEngine.Random.Range(0.7f, 1f);
@@ -249,7 +241,6 @@ namespace HackMonkeys.Core
             Debug.Log("[PlayerPrefsManager] Session data cleared");
         }
 
-        // Getters
         public bool IsHost => _isHost;
         public PlayerRef LocalPlayerRef => _localPlayerRef;
         public string CurrentRoomName => _currentRoomName;
@@ -265,14 +256,12 @@ namespace HackMonkeys.Core
             return new Dictionary<PlayerRef, SessionPlayerData>(_sessionPlayers ?? new Dictionary<PlayerRef, SessionPlayerData>());
         }
         
-        // Agregar método para actualizar PlayerRef
         public void UpdateLocalPlayerRef(PlayerRef playerRef)
         {
             _localPlayerRef = playerRef;
             Debug.Log($"[PlayerDataManager] Updated LocalPlayerRef: {playerRef}");
         }
     
-        // Agregar método para actualizar info de sesión
         public void UpdateSessionInfo(string selectedMap, string roomName = null)
         {
             _selectedMap = selectedMap;
@@ -282,7 +271,6 @@ namespace HackMonkeys.Core
             Debug.Log($"[PlayerDataManager] Updated session info - Map: {selectedMap}");
         }
     
-        // Método separado para el mapa
         public void SetSelectedMap(string mapName)
         {
             _selectedMap = mapName;
@@ -291,7 +279,6 @@ namespace HackMonkeys.Core
         
         public void UpdateSelectedMapFromLobbyPlayer()
         {
-            // Buscar el host player y obtener su mapa seleccionado
             if (LobbyState.Instance != null)
             {
                 var hostPlayer = LobbyState.Instance.HostPlayer;
@@ -326,7 +313,7 @@ namespace HackMonkeys.Core
         #region Utility Methods
 
         /// <summary>
-        /// Fuerza un nuevo nombre aleatorio (útil para testing)
+        /// Fuerza un nuevo nombre aleatorio
         /// </summary>
         public void ForceRandomName()
         {

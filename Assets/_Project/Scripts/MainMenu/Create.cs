@@ -22,32 +22,27 @@ public class Create : MenuPanel
 
     private async void CreateRoom()
     {
-        // Validar entrada
         if (string.IsNullOrEmpty(roomNameField.text))
         {
             Debug.LogWarning("Room name cannot be empty!");
             return;
         }
         
-        // Deshabilitar el botón mientras se crea
         if (createRoomButton != null)
             createRoomButton.SetInteractable(false);
         
-        // Crear la sala
-        bool success = await networkBootstrapper.CreateRoom(roomNameField.text, 4); // Max 4 jugadores
+        //Todo: Actualizar el maxPlayers 
+        bool success = await networkBootstrapper.CreateRoom(roomNameField.text, 4); 
         
         if (success)
         {
             await System.Threading.Tasks.Task.Delay(1000); 
-            // Transición al panel del lobby
             _uiManager.ShowPanel(PanelID.LobbyRoom);
         }
         else
         {
-            // Error al crear sala
             Debug.LogError("Failed to create room!");
             
-            // Rehabilitar el botón
             if (createRoomButton != null)
                 createRoomButton.SetInteractable(true);
         }
@@ -58,6 +53,5 @@ public class Create : MenuPanel
         base.OnPanelShown();
         roomNameField.text = string.Empty;
         roomPasswordField.text = string.Empty;
-        //createRoomButton.SetInteractable(false);
     }
 }

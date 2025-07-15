@@ -46,7 +46,6 @@ public class RoomItem : MonoBehaviour
     {
         _sessionInfo = session;
 
-        // Actualizar textos
         if (roomNameText != null)
             roomNameText.text = session.Name;
 
@@ -54,7 +53,6 @@ public class RoomItem : MonoBehaviour
         {
             playerCountText.text = $"{session.PlayerCount}/{session.MaxPlayers}";
 
-            // Cambiar color según capacidad
             if (session.PlayerCount >= session.MaxPlayers)
                 playerCountText.color = fullColor;
             else if (session.PlayerCount > session.MaxPlayers * 0.75f)
@@ -69,7 +67,6 @@ public class RoomItem : MonoBehaviour
             pingText.text = "---ms";
         }
 
-        // Actualizar indicador de estado
         if (statusIndicator != null)
         {
             if (!session.IsOpen)
@@ -80,7 +77,6 @@ public class RoomItem : MonoBehaviour
                 statusIndicator.color = openColor;
         }
 
-        // Reset selección
         SetSelected(false);
     }
 

@@ -32,17 +32,14 @@ public abstract class MenuPanel : MonoBehaviour
     protected virtual void SetupPanel()
     {
         ConfigureButtons();
-        // Override en clases derivadas para configuración específica
     }
         
     public virtual void OnPanelShown()
     {
-        // Override para lógica cuando el panel se muestra
     }
         
     public virtual void OnPanelHidden()
     {
-        // Override para lógica cuando el panel se oculta
     }
 
     protected virtual void ConfigureButtons()

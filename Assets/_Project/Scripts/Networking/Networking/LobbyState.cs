@@ -17,26 +17,22 @@ namespace HackMonkeys.Core
         public UnityEvent<LobbyPlayer> OnPlayerLeft;
         public UnityEvent<LobbyPlayer> OnPlayerUpdated;
         public UnityEvent<string> OnMapChanged;
-        public UnityEvent<int, int> OnPlayerCountChanged; // current, max
+        public UnityEvent<int, int> OnPlayerCountChanged; 
         public UnityEvent<bool> OnAllPlayersReady;
         
-        // ✅ ESTADO DEL LOBBY - Solo datos
         private Dictionary<PlayerRef, LobbyPlayer> _players = new Dictionary<PlayerRef, LobbyPlayer>();
         
         public static LobbyState Instance { get; private set; }
         
-        // ✅ PROPERTIES READ-ONLY - Acceso controlado a los datos
         public IReadOnlyDictionary<PlayerRef, LobbyPlayer> Players => _players;
         public int PlayerCount => _players.Count;
         public bool AllPlayersReady => _players.Count > 0 && _players.Values.All(p => p.IsReady);
         
-        // ✅ COMPUTED PROPERTIES - Calculadas en tiempo real
         public LobbyPlayer HostPlayer => _players.Values.FirstOrDefault(p => p.IsHost);
         public LobbyPlayer LocalPlayer => _players.Values.FirstOrDefault(p => p.IsLocalPlayer);
         private string _lastKnownMap = "";
         private void Awake()
         {
-            // ✅ SINGLETON PATTERN SIMPLE
             if (Instance != null)
             {
                 Debug.LogWarning("[LobbyState] Multiple instances detected. Destroying duplicate.");
@@ -49,7 +45,7 @@ namespace HackMonkeys.Core
         }
         
         /// <summary>
-        /// ✅ REGISTRO DE JUGADOR - Llamado desde LobbyPlayer.Spawned()
+        /// REGISTRO DE JUGADOR - Llamado desde LobbyPlayer.Spawned()
         /// </summary>
         public void RegisterPlayer(LobbyPlayer player)
         {
@@ -68,22 +64,19 @@ namespace HackMonkeys.Core
                 return;
             }
             
-            // ✅ AÑADIR JUGADOR
             _players[playerRef] = player;
             
             Debug.Log($"[LobbyState] ✅ Player registered: {player.GetDisplayName()} (Total: {PlayerCount})");
             
-            // ✅ DISPARAR EVENTOS
             OnPlayerJoined?.Invoke(player);
             OnPlayerCountChanged?.Invoke(PlayerCount, GetMaxPlayers());
             CheckAllPlayersReady();
             
-            // 🧪 DEBUG LOG
             Debug.Log($"🧪 [LOBBYSTATE] Events fired for player join: {player.GetDisplayName()}");
         }
         
         /// <summary>
-        /// ✅ DESREGISTRO DE JUGADOR - Llamado desde LobbyPlayer.Despawned()
+        /// DESREGISTRO DE JUGADOR - Llamado desde LobbyPlayer.Despawned()
         /// </summary>
         public void UnregisterPlayer(LobbyPlayer player)
         {
@@ -101,19 +94,17 @@ namespace HackMonkeys.Core
                 return;
             }
             
-            // ✅ REMOVER JUGADOR
             _players.Remove(playerRef);
             
             Debug.Log($"[LobbyState] 👋 Player unregistered: {player.GetDisplayName()} (Remaining: {PlayerCount})");
             
-            // ✅ DISPARAR EVENTOS
             OnPlayerLeft?.Invoke(player);
             OnPlayerCountChanged?.Invoke(PlayerCount, GetMaxPlayers());
             CheckAllPlayersReady();
         }
         
         /// <summary>
-        /// ✅ ACTUALIZACIÓN DE JUGADOR - Llamado desde LobbyPlayer change detection
+        /// ACTUALIZACIÓN DE JUGADOR - Llamado desde LobbyPlayer change detection
         /// </summary>
         public void UpdatePlayerDisplay(LobbyPlayer player)
         {
@@ -123,7 +114,6 @@ namespace HackMonkeys.Core
                 return;
             }
             
-            // Verificar que el jugador está registrado
             if (!_players.ContainsKey(player.PlayerRef))
             {
                 Debug.LogWarning($"[LobbyState] Player {player.PlayerRef} not registered, cannot update");
@@ -132,7 +122,6 @@ namespace HackMonkeys.Core
             
             Debug.Log($"[LobbyState] 🔄 Player updated: {player.GetDisplayName()} - Ready: {player.IsReady}");
             
-            // ✅ DISPARAR EVENTOS
             OnPlayerUpdated?.Invoke(player);
             CheckAllPlayersReady();
             
@@ -159,7 +148,7 @@ namespace HackMonkeys.Core
         }
         
         /// <summary>
-        /// ✅ OBTENER JUGADOR ESPECÍFICO
+        /// OBTENER JUGADOR ESPECÍFICO
         /// </summary>
         public LobbyPlayer GetPlayer(PlayerRef playerRef)
         {
@@ -167,7 +156,7 @@ namespace HackMonkeys.Core
         }
         
         /// <summary>
-        /// ✅ TOGGLE READY STATE - Solo para jugador local
+        /// TOGGLE READY STATE - Solo para jugador local
         /// </summary>
         public void ToggleLocalPlayerReady()
         {
@@ -182,7 +171,7 @@ namespace HackMonkeys.Core
         }
         
         /// <summary>
-        /// ✅ OBTENER LISTA DE JUGADORES ORDENADA
+        /// OBTENER LISTA DE JUGADORES ORDENADA
         /// </summary>
         public List<LobbyPlayer> GetPlayersList(bool hostFirst = true)
         {
@@ -193,7 +182,6 @@ namespace HackMonkeys.Core
     
             if (hostFirst)
             {
-                // Ordenar con manejo seguro de nombres
                 return playersList.OrderByDescending(p => p.IsHost ? 1 : 0)
                     .ThenByDescending(p => p.IsLocalPlayer ? 1 : 0)
                     .ThenBy(p => {
@@ -210,7 +198,7 @@ namespace HackMonkeys.Core
         }
         
         /// <summary>
-        /// ✅ LIMPIAR TODOS LOS JUGADORES
+        /// LIMPIAR TODOS LOS JUGADORES
         /// </summary>
         public void ClearAllPlayers()
         {
@@ -219,7 +207,6 @@ namespace HackMonkeys.Core
             var playersToRemove = _players.Values.ToList();
             _players.Clear();
             
-            // Notificar que cada jugador se fue
             foreach (var player in playersToRemove)
             {
                 OnPlayerLeft?.Invoke(player);
@@ -229,7 +216,7 @@ namespace HackMonkeys.Core
             CheckAllPlayersReady();
         }
         
-        // ✅ MÉTODOS AUXILIARES PRIVADOS
+        // MÉTODOS AUXILIARES PRIVADOS
         private void CheckAllPlayersReady()
         {
             bool allReady = AllPlayersReady;
@@ -257,7 +244,7 @@ namespace HackMonkeys.Core
             return NetworkBootstrapper.Instance?.CurrentMaxPlayers ?? 4;
         }
         
-        // ✅ DEBUG & VALIDATION
+        // DEBUG & VALIDATION
         [ContextMenu("Debug: List All Players")]
         private void DebugListPlayers()
         {
@@ -290,7 +277,6 @@ namespace HackMonkeys.Core
         {
             Debug.Log("=== LobbyState Validation ===");
             
-            // Verificar integridad de datos
             int nullPlayers = _players.Values.Count(p => p == null);
             if (nullPlayers > 0)
             {
@@ -301,7 +287,6 @@ namespace HackMonkeys.Core
                 Debug.Log("✅ No null players found");
             }
             
-            // Verificar host único
             var hosts = _players.Values.Where(p => p.IsHost).ToList();
             if (hosts.Count > 1)
             {
@@ -316,7 +301,6 @@ namespace HackMonkeys.Core
                 Debug.LogWarning("⚠️ No host found");
             }
             
-            // Verificar local player único
             var localPlayers = _players.Values.Where(p => p.IsLocalPlayer).ToList();
             if (localPlayers.Count > 1)
             {
@@ -334,7 +318,6 @@ namespace HackMonkeys.Core
             Debug.Log("================================");
         }
         
-        // ✅ CLEANUP
         private void OnDestroy()
         {
             if (Instance == this)
@@ -344,7 +327,6 @@ namespace HackMonkeys.Core
             }
         }
         
-        // ✅ ESTADÍSTICAS PARA UI
         public LobbyStats GetLobbyStats()
         {
             return new LobbyStats
@@ -361,9 +343,7 @@ namespace HackMonkeys.Core
         }
     }
     
-    /// <summary>
-    /// ✅ DTO: Estadísticas del lobby para debugging y UI
-    /// </summary>
+ 
     [System.Serializable]
     public struct LobbyStats
     {

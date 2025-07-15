@@ -24,7 +24,7 @@ namespace HackMonkeys.UI.Panels
 
         [Header("Players List")] 
         [SerializeField] private Transform playersContainer;
-        [SerializeField] private GameObject playerItemPrefab; // Prefab con LobbyPlayerItem
+        [SerializeField] private GameObject playerItemPrefab; 
         [SerializeField] private ScrollRect playersScrollView;
         [SerializeField] private int maxVisiblePlayers = 4;
 
@@ -68,7 +68,6 @@ namespace HackMonkeys.UI.Panels
         [SerializeField] private Color hostColor = new Color(1f, 0.8f, 0f); // Gold
         [SerializeField] private Color localPlayerColor = Color.cyan;
 
-        // Referencias a nuevos componentes
         private LobbyState _lobbyState;
         private LobbyController _lobbyController;
         private NetworkBootstrapper _networkBootstrapper;
@@ -76,7 +75,6 @@ namespace HackMonkeys.UI.Panels
         private bool _isLocalPlayerReady = false;
         private LobbyPlayer _selectedPlayer; // Para kick functionality
 
-        // Animation tweeners
         private Tween _statusTextTween;
         private Tween _readyButtonTween;
 
@@ -90,7 +88,6 @@ namespace HackMonkeys.UI.Panels
             _lobbyController = LobbyController.Instance;
             _networkBootstrapper = NetworkBootstrapper.Instance;
 
-            // Debug de referencias
             Debug.Log($"🧪 [LOBBYROOM] LobbyState: {_lobbyState != null}");
             Debug.Log($"🧪 [LOBBYROOM] LobbyController: {_lobbyController != null}");
 
@@ -138,31 +135,26 @@ namespace HackMonkeys.UI.Panels
                 changeMapButton.OnButtonPressed.AddListener(ToggleMapSelection);
             }
 
-            // Botón Settings
             if (settingsButton != null)
             {
                 settingsButton.OnButtonPressed.AddListener(ToggleRoomSettings);
             }
 
-            // Slider de max players (solo host)
             if (maxPlayersSlider != null)
             {
                 maxPlayersSlider.OnValueChanged.AddListener(OnMaxPlayersChanged);
             }
 
-            // Toggle room visibility
             if (isOpenToggle != null)
             {
                 isOpenToggle.onValueChanged.AddListener(OnRoomOpenChanged);
             }
 
-            // Room privacy toggle
             if (privateRoomToggle != null)
             {
                 privateRoomToggle.onValueChanged.AddListener(OnPrivateRoomChanged);
             }
 
-            // Difficulty slider
             if (difficultySlider != null)
             {
                 difficultySlider.OnValueChanged.AddListener(OnDifficultyChanged);
@@ -175,7 +167,6 @@ namespace HackMonkeys.UI.Panels
         {
             Debug.Log("🧪 [LOBBYROOM] Initializing player item pool...");
 
-            // Pre-crear items de jugador para mejor performance
             for (int i = 0; i < maxVisiblePlayers; i++)
             {
                 GameObject playerObj = Instantiate(playerItemPrefab, playersContainer);
@@ -198,7 +189,6 @@ namespace HackMonkeys.UI.Panels
 
             Debug.Log("🧪 [LOBBYROOM] Panel shown, setting up events...");
 
-            // Suscribirse a LobbyState
             if (_lobbyState != null)
             {
                 _lobbyState.OnPlayerJoined.AddListener(OnPlayerJoined);
@@ -216,7 +206,6 @@ namespace HackMonkeys.UI.Panels
                 Debug.LogError("🧪 [LOBBYROOM] ❌ Cannot subscribe to events - LobbyState is null");
             }
 
-            // Suscribirse a eventos del controller
             if (_lobbyController != null)
             {
                 _lobbyController.OnGameStarting.AddListener(() =>
@@ -237,17 +226,13 @@ namespace HackMonkeys.UI.Panels
                 Debug.Log("🧪 [LOBBYROOM] ✅ Subscribed to LobbyController events");
             }
 
-            // Actualizar información de la sala
             UpdateRoomInfo();
 
-            // CORRECCIÓN CRÍTICA: Esperar un frame antes de refrescar
-            // Esto asegura que LobbyPlayer ya se haya registrado
+            
             StartCoroutine(DelayedRefresh());
 
-            // Verificar si somos el host
             UpdateHostControls();
 
-            // Animación de entrada
             AnimateRoomEntry();
 
             Debug.Log("🧪 [LOBBYROOM] ✅ Panel fully initialized");
@@ -260,7 +245,6 @@ namespace HackMonkeys.UI.Panels
 
             Debug.Log("🧪 [LOBBYROOM] Panel hidden, cleaning up events...");
 
-            // ✅ CAMBIO: Desuscribirse de LobbyState
             if (_lobbyState != null)
             {
                 _lobbyState.OnPlayerJoined.RemoveListener(OnPlayerJoined);
@@ -273,7 +257,6 @@ namespace HackMonkeys.UI.Panels
                 Debug.Log("🧪 [LOBBYROOM] ✅ Unsubscribed from LobbyState events");
             }
 
-            // Desuscribirse del controller
             if (_lobbyController != null)
             {
                 _lobbyController.OnGameStarting.RemoveAllListeners();
@@ -315,13 +298,11 @@ namespace HackMonkeys.UI.Panels
                 return;
             }
     
-            // Establecer el mapa seleccionado antes de iniciar
             if (!string.IsNullOrEmpty(_selectedMapName))
             {
                 _networkBootstrapper.SelectedSceneName = _selectedMapName;
             }
     
-            // Iniciar el juego
             _lobbyController.StartGame();
         }
         
@@ -334,10 +315,8 @@ namespace HackMonkeys.UI.Panels
     
             if (!isActive)
             {
-                // Mostrar mapas disponibles
                 PopulateMapSelection();
         
-                // Animación de entrada
                 mapSelectionPanel.transform.localScale = Vector3.zero;
                 mapSelectionPanel.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack);
             }
@@ -348,53 +327,45 @@ namespace HackMonkeys.UI.Panels
             if (_networkBootstrapper == null || mapButtonsContainer == null || mapButtonPrefab == null)
                 return;
         
-            // Limpiar botones anteriores
             foreach (var btn in _mapButtons)
             {
                 if (btn != null) Destroy(btn);
             }
             _mapButtons.Clear();
     
-            // Obtener mapas disponibles
             var availableScenes = _networkBootstrapper.GetAvailableScenes();
     
             Debug.Log($"🧪 [LOBBYROOM] Populating {availableScenes.Count} maps");
     
-            // Crear botón para cada mapa
             for (int i = 0; i < availableScenes.Count; i++)
             {
                 var sceneInfo = availableScenes[i];
                 GameObject mapBtn = Instantiate(mapButtonPrefab, mapButtonsContainer);
         
-                // Configurar visual del botón
                 var nameText = mapBtn.GetComponentInChildren<TextMeshProUGUI>();
                 if (nameText != null)
                 {
                     nameText.text = sceneInfo.displayName;
                 }
         
-                // Configurar imagen preview si existe
                 var previewImage = mapBtn.GetComponentInChildren<Image>();
                 if (previewImage != null && sceneInfo.previewImage != null)
                 {
                     previewImage.sprite = sceneInfo.previewImage;
                 }
         
-                // Configurar botón
+                
                 var button = mapBtn.GetComponent<InteractableButton3D>();
                 if (button != null)
                 {
-                    string sceneName = sceneInfo.sceneName; // Captura para closure
+                    string sceneName = sceneInfo.sceneName;
                     button.OnButtonPressed.AddListener(() => SelectMap(sceneName));
                 }
         
                 _mapButtons.Add(mapBtn);
         
-                // Animación escalonada
                 mapBtn.transform.localScale = Vector3.zero;
-                mapBtn.transform.DOScale(Vector3.one, 0.3f)
-                    .SetDelay(i * 0.1f)
-                    .SetEase(Ease.OutBack);
+                mapBtn.transform.DOScale(Vector3.one, 0.3f).SetDelay(i * 0.1f).SetEase(Ease.OutBack);
             }
         }
         
@@ -413,7 +384,6 @@ namespace HackMonkeys.UI.Panels
                 return;
             }
 
-            // Validar que el mapa existe
             if (!_networkBootstrapper.IsValidScene(mapName))
             {
                 ShowStatusMessage("Invalid map selection", MessageType.Error);
@@ -424,7 +394,6 @@ namespace HackMonkeys.UI.Panels
             _selectedMapName = mapName;
             Debug.Log($"🧪 [LOBBYROOM] Local map name set to: {_selectedMapName}");
 
-            // Sincronizar con la red via RPC
             var localPlayer = _lobbyState?.LocalPlayer;
             Debug.Log($"🧪 [LOBBYROOM] Local player exists: {localPlayer != null}");
             Debug.Log($"🧪 [LOBBYROOM] Local player is host: {localPlayer?.IsHost}");
@@ -439,15 +408,11 @@ namespace HackMonkeys.UI.Panels
                 Debug.LogError($"🧪 [LOBBYROOM] ❌ Cannot call RPC - player not host or null");
             }
 
-            // Actualizar UI localmente primero
             UpdateMapDisplay();
 
-            // Cerrar panel de selección
             if (mapSelectionPanel != null)
             {
-                mapSelectionPanel.transform.DOScale(Vector3.zero, 0.2f)
-                    .SetEase(Ease.InBack)
-                    .OnComplete(() => mapSelectionPanel.SetActive(false));
+                mapSelectionPanel.transform.DOScale(Vector3.zero, 0.2f).SetEase(Ease.InBack).OnComplete(() => mapSelectionPanel.SetActive(false));
             }
 
             ShowStatusMessage($"Map changed to: {mapName}", MessageType.Info);
@@ -462,7 +427,6 @@ namespace HackMonkeys.UI.Panels
             _selectedMapName = newMapName;
             UpdateMapDisplay();
     
-            // Mostrar notificación solo si no somos el host
             var lobbyInfo = _lobbyController?.GetLobbyInfo();
             if (lobbyInfo?.IsHost == false)
             {
@@ -481,7 +445,6 @@ namespace HackMonkeys.UI.Panels
             RefreshPlayersList();
             ShowStatusMessage($"{player.PlayerName} joined the lobby", MessageType.Info);
 
-            // Efecto visual de entrada
             PlayJoinEffect();
         }
 
@@ -497,7 +460,6 @@ namespace HackMonkeys.UI.Panels
         {
             Debug.Log($"🧪 [LOBBYROOM] 🔄 Player updated: {player.GetDisplayName()} - Ready: {player.IsReady}");
 
-            // Actualizar solo el item específico del jugador
             var playerItem = _playerItems.FirstOrDefault(item =>
                 item.gameObject.activeSelf && item.GetPlayerRef() == player.PlayerRef);
 
@@ -506,13 +468,11 @@ namespace HackMonkeys.UI.Panels
                 playerItem.UpdatePlayerData(player);
             }
 
-            // Si es el jugador local, actualizar controles
             if (player.IsLocalPlayer)
             {
                 UpdateLocalPlayerControls(player);
             }
 
-            // Actualizar contador y botón de start
             UpdatePlayerCount();
             UpdateStartButton();
         }
@@ -535,7 +495,6 @@ namespace HackMonkeys.UI.Panels
             {
                 ShowStatusMessage("All players ready! Host can start the game.", MessageType.Success);
 
-                // Efecto de confetti si todos están listos
                 if (confettiEffect != null)
                 {
                     confettiEffect.Play();
@@ -558,19 +517,16 @@ namespace HackMonkeys.UI.Panels
                 return;
             }
 
-            // Nombre de la sala
             if (roomNameText != null)
             {
                 roomNameText.text = lobbyInfo.RoomName ?? "Room";
             }
 
-            // Código de sala (simplificado)
             if (roomCodeText != null)
             {
                 roomCodeText.text = $"#{lobbyInfo.RoomCode}";
             }
 
-            // Estado de la sala
             if (roomStatusIndicator != null)
             {
                 roomStatusIndicator.color = lobbyInfo.IsInLobby ? readyColor : notReadyColor;
@@ -591,14 +547,12 @@ namespace HackMonkeys.UI.Panels
 
             try
             {
-                // Ocultar todos los items primero
                 foreach (var item in _playerItems)
                 {
                     if (item != null && item.gameObject != null)
                         item.gameObject.SetActive(false);
                 }
 
-                // Obtener jugadores REALES de la red con manejo de errores
                 List<LobbyPlayer> players = null;
                 try
                 {
@@ -612,27 +566,23 @@ namespace HackMonkeys.UI.Panels
 
                 Debug.Log($"🧪 [LOBBYROOM] Found {players?.Count ?? 0} players to display");
 
-                // Verificar que tenemos jugadores reales
                 if (players == null || players.Count == 0)
                 {
                     Debug.LogWarning("🧪 [LOBBYROOM] ⚠️ No players found in LobbyState!");
                     return;
                 }
 
-                // Mostrar jugadores
                 for (int i = 0; i < players.Count && i < _playerItems.Count; i++)
                 {
                     LobbyPlayerItem item = _playerItems[i];
                     LobbyPlayer player = players[i];
 
-                    //Verificar que el player no sea null
                     if (player == null)
                     {
                         Debug.LogError($"🧪 [LOBBYROOM] ❌ Player at index {i} is null!");
                         continue;
                     }
 
-                    //Log detallado del jugador
                     Debug.Log($"🧪 [LOBBYROOM] Displaying player {i}:");
                     Debug.Log($"  - Name: {player.PlayerName.ToString()}");
                     Debug.Log($"  - Display Name: {player.GetDisplayName()}");
@@ -641,15 +591,12 @@ namespace HackMonkeys.UI.Panels
                     Debug.Log($"  - Is Ready: {player.IsReady}");
                     Debug.Log($"  - Player Ref: {player.PlayerRef}");
 
-                    // Actualizar el item con datos del jugador real
                     item.UpdatePlayerData(player);
                     item.gameObject.SetActive(true);
 
-                    // Posicionar con animación escalonada
                     //float targetY = -i * 0.15f; // Espaciado entre items
                     //item.transform.localPosition = new Vector3(0, targetY + 0.3f, 0);
 
-                    // Animación con manejo de errores
                     /*try
                     {
                         item.transform.DOLocalMoveY(targetY, 0.4f)
@@ -670,20 +617,17 @@ namespace HackMonkeys.UI.Panels
             {
                 Debug.LogError($"🧪 [LOBBYROOM] ❌ Critical error in RefreshPlayersList: {e.Message}\n{e.StackTrace}");
 
-                // Intentar mostrar al menos algo
                 ShowErrorInPlayerList("Error loading players");
             }
         }
         
         private void ShowErrorInPlayerList(string errorMessage)
         {
-            // Mostrar al menos un item con el error
             if (_playerItems.Count > 0 && _playerItems[0] != null)
             {
                 var firstItem = _playerItems[0];
                 firstItem.gameObject.SetActive(true);
         
-                // Buscar el text component y mostrar error
                 var nameText = firstItem.GetComponentInChildren<TextMeshProUGUI>();
                 if (nameText != null)
                 {
@@ -702,7 +646,6 @@ namespace HackMonkeys.UI.Panels
 
             playerCountText.text = $"Players: {lobbyInfo.CurrentPlayers}/{lobbyInfo.MaxPlayers}";
 
-            // Cambiar color según ocupación
             if (lobbyInfo.CurrentPlayers == lobbyInfo.MaxPlayers)
                 playerCountText.color = notReadyColor;
             else if (lobbyInfo.CurrentPlayers > lobbyInfo.MaxPlayers * 0.75f)
@@ -717,18 +660,15 @@ namespace HackMonkeys.UI.Panels
 
             Debug.Log($"🧪 [LOBBYROOM] Updating local player controls - Ready: {_isLocalPlayerReady}");
 
-            // Actualizar botón ready
             if (readyButton != null && readyButtonText != null)
             {
                 readyButtonText.text = _isLocalPlayerReady ? "Not Ready" : "Ready";
             }
 
-            // Actualizar indicador
             if (readyStatusIndicator != null)
             {
                 readyStatusIndicator.color = _isLocalPlayerReady ? readyColor : notReadyColor;
 
-                // Animación de pulso cuando está ready
                 if (_isLocalPlayerReady)
                 {
                     readyStatusIndicator.transform.DOScale(1.2f, 0.5f)
@@ -775,22 +715,18 @@ namespace HackMonkeys.UI.Panels
 
             Debug.Log($"🧪 [LOBBYROOM] Updating host controls - Is Host: {isHost}");
 
-            // Mostrar/ocultar controles de host
             if (hostControlsPanel != null)
             {
                 hostControlsPanel.SetActive(isHost);
             }
     
-            // Mostrar/ocultar botón de cambiar mapa
             if (changeMapButton != null)
             {
                 changeMapButton.gameObject.SetActive(isHost);
             }
 
-            // Configurar controles si somos host
             if (isHost && lobbyInfo != null)
             {
-                // Actualizar display del mapa
                 UpdateMapDisplay();
             }
 
@@ -806,7 +742,6 @@ namespace HackMonkeys.UI.Panels
 
             Debug.Log($"🧪 [LOBBYROOM] Start button - Can start: {canStart}");
 
-            // Efecto visual en el botón cuando puede iniciar
             if (canStart)
             {
                 startGameButton.transform.DOScale(1.1f, 0.8f)
@@ -831,7 +766,6 @@ namespace HackMonkeys.UI.Panels
                 bool isActive = roomSettingsPanel.activeSelf;
                 roomSettingsPanel.SetActive(!isActive);
 
-                // Animación de panel
                 if (!isActive)
                 {
                     roomSettingsPanel.transform.localScale = Vector3.zero;
@@ -846,7 +780,6 @@ namespace HackMonkeys.UI.Panels
 
             Debug.Log($"🧪 [LOBBYROOM] Player item clicked: {player.GetDisplayName()}");
 
-            // Solo el host puede kickear jugadores (excepto a sí mismo)
             var lobbyInfo = _lobbyController?.GetLobbyInfo();
             if (lobbyInfo?.IsHost == true && !player.IsLocalPlayer && kickPlayerButton != null)
             {
@@ -904,11 +837,9 @@ namespace HackMonkeys.UI.Panels
 
         private void AnimateRoomEntry()
         {
-            // Animación de entrada del panel completo
             transform.localScale = Vector3.zero;
             transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack);
 
-            // Animar elementos secuencialmente
             if (roomNameText != null)
             {
                 roomNameText.transform.localScale = Vector3.zero;
@@ -920,7 +851,6 @@ namespace HackMonkeys.UI.Panels
 
         private void PlayJoinEffect()
         {
-            // Efecto de partículas o animación cuando alguien se une
             if (confettiEffect != null)
             {
                 var emission = confettiEffect.emission;
@@ -936,7 +866,6 @@ namespace HackMonkeys.UI.Panels
         {
             if (statusText == null) return;
 
-            // Color según tipo de mensaje
             Color messageColor = type switch
             {
                 MessageType.Success => readyColor,
@@ -948,7 +877,6 @@ namespace HackMonkeys.UI.Panels
             statusText.text = message;
             statusText.color = messageColor;
 
-            // Animación de fade
             if (_statusTextTween != null) _statusTextTween.Kill();
             statusText.alpha = 0f;
             _statusTextTween = statusText.DOFade(1f, 0.3f).OnComplete(() =>
@@ -973,7 +901,6 @@ namespace HackMonkeys.UI.Panels
         {
             base.ConfigureButtons();
 
-            // ✅ CAMBIO: El back button usa LobbyController
             if (backButton != null)
             {
                 backButton.OnButtonPressed.RemoveAllListeners();
@@ -982,7 +909,6 @@ namespace HackMonkeys.UI.Panels
                     ShowStatusMessage("Leaving room...", MessageType.Info);
                     _lobbyController?.LeaveLobby();
 
-                    // Pequeño delay para que se procese la salida
                     await System.Threading.Tasks.Task.Delay(500);
                     _uiManager.ShowPanel(PanelID.LobbyBrowser);
                 });
@@ -1074,7 +1000,6 @@ namespace HackMonkeys.UI.Panels
 
         private void OnDestroy()
         {
-            // Cleanup tweens
             _statusTextTween?.Kill();
             _readyButtonTween?.Kill();
         }

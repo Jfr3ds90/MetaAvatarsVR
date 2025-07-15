@@ -40,19 +40,16 @@ namespace HackMonkeys.UI.Panels
         [Header("Animation")] [SerializeField] private float hoverScale = 1.05f;
         [SerializeField] private float animationDuration = 0.2f;
 
-        // Private state
         private LobbyPlayer _playerData;
         private System.Action<LobbyPlayer> _onPlayerClicked;
         private bool _isSelected = false;
         private bool _isHovered = false;
 
-        // Animation tweeners
         private Tween _readyPulseTween;
         private Tween _hoverTween;
 
         private void Awake()
         {
-            // Configurar botón si existe
             if (selectButton != null)
             {
                 selectButton.OnButtonPressed.AddListener(OnPlayerSelected);
@@ -85,25 +82,18 @@ namespace HackMonkeys.UI.Panels
     
             Debug.Log($"[LobbyPlayerItem] Updating display for: {playerData.GetDisplayName()}");
     
-            // Asegurar que el gameObject esté activo
             gameObject.SetActive(true);
     
-            // Actualizar nombre
             UpdatePlayerName();
 
-            // Actualizar estado (Ready/Not Ready)
             UpdatePlayerStatus();
 
-            // Actualizar indicadores especiales
             UpdatePlayerIndicators();
 
-            // Actualizar avatar
             UpdatePlayerAvatar();
 
-            // Actualizar ping (placeholder)
             UpdatePingDisplay();
 
-            // Animar cambios
             AnimateUpdate();
         }
 
@@ -113,7 +103,6 @@ namespace HackMonkeys.UI.Panels
             {
                 string displayName = _playerData.GetDisplayName();
         
-                // CORRECCIÓN: Verificar que el nombre no esté vacío
                 if (string.IsNullOrEmpty(displayName))
                 {
                     displayName = $"Player {_playerData.PlayerRef.PlayerId}";
@@ -121,7 +110,6 @@ namespace HackMonkeys.UI.Panels
         
                 playerNameText.text = displayName;
 
-                // Color especial para jugador local
                 if (_playerData.IsLocalPlayer)
                 {
                     playerNameText.color = localPlayerColor;
@@ -149,19 +137,16 @@ namespace HackMonkeys.UI.Panels
 
             bool isReady = _playerData.IsReady;
 
-            // Actualizar texto de estado
             if (playerStatusText != null)
             {
                 playerStatusText.text = isReady ? "Ready" : "Not Ready";
                 playerStatusText.color = isReady ? readyColor : notReadyColor;
             }
 
-            // Actualizar indicador visual
             if (readyIndicator != null)
             {
                 readyIndicator.color = isReady ? readyColor : notReadyColor;
 
-                // Efecto de pulso si está ready
                 if (isReady)
                 {
                     StartReadyPulse();
@@ -177,19 +162,16 @@ namespace HackMonkeys.UI.Panels
         {
             if (_playerData == null) return;
 
-            // Mostrar/ocultar icono de host
             if (hostIcon != null)
             {
                 hostIcon.SetActive(_playerData.IsHost);
             }
 
-            // Mostrar/ocultar icono de jugador local
             if (localPlayerIcon != null)
             {
                 localPlayerIcon.SetActive(_playerData.IsLocalPlayer);
             }
 
-            // Actualizar fondo según tipo de jugador
             UpdateBackgroundColor();
         }
 
@@ -219,7 +201,6 @@ namespace HackMonkeys.UI.Panels
         {
             if (playerAvatar == null || _playerData == null) return;
 
-            // Usar el color del jugador como avatar simple
             Color playerColor = _playerData.PlayerColor;
             playerAvatar.color = playerColor;
 
@@ -229,19 +210,16 @@ namespace HackMonkeys.UI.Panels
 
         private void UpdatePingDisplay()
         {
-            // Placeholder para ping - en implementación real obtendríamos de Fusion
             if (pingIndicator != null)
             {
                 pingIndicator.SetActive(true);
 
-                // Simular ping para demo
                 int fakePing = _playerData.IsLocalPlayer ? 0 : UnityEngine.Random.Range(30, 150);
 
                 if (pingText != null)
                 {
                     pingText.text = _playerData.IsLocalPlayer ? "LOCAL" : $"{fakePing}ms";
 
-                    // Color según latencia
                     if (fakePing < 50)
                         pingText.color = readyColor;
                     else if (fakePing < 100)
@@ -256,7 +234,6 @@ namespace HackMonkeys.UI.Panels
 
         private void AnimateUpdate()
         {
-            // Pequeña animación cuando se actualiza
             transform.DOPunchScale(Vector3.one * 0.05f, 0.3f, 5, 0.3f);
         }
 
@@ -290,12 +267,10 @@ namespace HackMonkeys.UI.Panels
 
             _isHovered = true;
 
-            // Efecto de hover
             if (_hoverTween != null) _hoverTween.Kill();
             _hoverTween = transform.DOScale(Vector3.one * hoverScale, animationDuration)
                 .SetEase(Ease.OutQuad);
 
-            // Cambiar opacidad del fondo
             if (backgroundPanel != null)
             {
                 Color currentColor = backgroundPanel.color;
@@ -310,24 +285,19 @@ namespace HackMonkeys.UI.Panels
 
             _isHovered = false;
 
-            // Revertir hover
             if (_hoverTween != null) _hoverTween.Kill();
             _hoverTween = transform.DOScale(Vector3.one, animationDuration)
                 .SetEase(Ease.OutQuad);
 
-            // Restaurar color de fondo
             UpdateBackgroundColor();
         }
 
         private void OnPlayerSelected()
         {
-            // Efecto de selección
             transform.DOPunchScale(Vector3.one * 0.1f, 0.3f, 5, 0.5f);
 
-            // Notificar selección
             _onPlayerClicked?.Invoke(_playerData);
 
-            // Feedback háptico ligero
             OVRInput.SetControllerVibration(1, 0.2f, OVRInput.Controller.Touch);
             DOVirtual.DelayedCall(0.05f, () => OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.Touch));
         }
@@ -346,7 +316,6 @@ namespace HackMonkeys.UI.Panels
 
             if (selected)
             {
-                // Efecto visual adicional para selección
                 if (backgroundPanel != null)
                 {
                     backgroundPanel.transform.DOPunchScale(Vector3.one * 0.05f, 0.2f, 3, 0.3f);
@@ -403,7 +372,6 @@ namespace HackMonkeys.UI.Panels
         /// </summary>
         public void PlayReadyEffect()
         {
-            // Efecto de partículas verdes
             GameObject effect = new GameObject("ReadyEffect");
             effect.transform.SetParent(transform);
             effect.transform.localPosition = Vector3.zero;
@@ -423,10 +391,8 @@ namespace HackMonkeys.UI.Panels
 
             particles.Play();
 
-            // Destruir después de la animación
             Destroy(effect, 2f);
 
-            // Efecto de escala
             transform.DOPunchScale(Vector3.one * 0.15f, 0.5f, 8, 0.3f);
         }
 
@@ -435,13 +401,11 @@ namespace HackMonkeys.UI.Panels
         /// </summary>
         public void PlayJoinEffect()
         {
-            // Animación de entrada
             transform.localScale = Vector3.zero;
             transform.DOScale(Vector3.one, 0.5f)
                 .SetEase(Ease.OutBack)
                 .SetDelay(UnityEngine.Random.Range(0f, 0.2f)); // Pequeño delay aleatorio
 
-            // Efecto de brillo
             if (backgroundPanel != null)
             {
                 Color originalColor = backgroundPanel.color;
@@ -455,12 +419,10 @@ namespace HackMonkeys.UI.Panels
         /// </summary>
         public void PlayLeaveEffect()
         {
-            // Animación de salida
             transform.DOScale(Vector3.zero, 0.3f)
                 .SetEase(Ease.InBack)
                 .OnComplete(() => gameObject.SetActive(false));
 
-            // Efecto de desvanecimiento
             CanvasGroup canvasGroup = GetComponent<CanvasGroup>();
             if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
 
@@ -482,11 +444,10 @@ namespace HackMonkeys.UI.Panels
             // TODO: Implementar menú contextual
             Debug.Log($"[LobbyPlayerItem] Showing options for {_playerData.GetDisplayName()}");
 
-            // Opciones posibles:
+            // Todo: Opciones posibles:
             // - Kick Player
             // - Transfer Host
             // - Mute/Unmute
-            // - View Profile
         }
 
         #endregion
@@ -498,7 +459,6 @@ namespace HackMonkeys.UI.Panels
         {
             if (_playerData != null)
             {
-                // Simular cambio de estado para testing
                 bool newReadyState = !_playerData.IsReady;
 
                 if (playerStatusText != null)
@@ -557,11 +517,9 @@ namespace HackMonkeys.UI.Panels
 
         private void OnDestroy()
         {
-            // Cleanup tweens
             _readyPulseTween?.Kill();
             _hoverTween?.Kill();
 
-            // Remove button listeners
             if (selectButton != null)
             {
                 selectButton.OnButtonPressed.RemoveAllListeners();
@@ -574,7 +532,6 @@ namespace HackMonkeys.UI.Panels
 
         private void OnDrawGizmosSelected()
         {
-            // Visualizar bounds del item en editor
             Gizmos.color = Color.cyan;
             Gizmos.DrawWireCube(transform.position, new Vector3(2f, 0.3f, 0.1f));
         }

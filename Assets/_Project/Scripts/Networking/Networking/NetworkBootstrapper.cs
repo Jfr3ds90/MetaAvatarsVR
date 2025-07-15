@@ -11,10 +11,6 @@ using UnityEngine.SceneManagement;
 
 namespace HackMonkeys.Core
 {
-    /// <summary>
-    /// NetworkBootstrapper CONSOLIDADO - Ahora maneja spawning de jugadores
-    /// ELIMINA la dependencia de PlayerSpawner
-    /// </summary>
     public class NetworkBootstrapper : MonoBehaviour, INetworkRunnerCallbacks
     {
         [Header("Configuration")] [SerializeField]
@@ -54,7 +50,6 @@ namespace HackMonkeys.Core
         public bool IsInRoom => _isInRoom;
         public bool IsHost => _runner != null && _runner.IsServer;
 
-        // Información de la sala actual
         public string CurrentRoomName { get; private set; }
         public int CurrentMaxPlayers { get; private set; }
 
@@ -85,10 +80,8 @@ namespace HackMonkeys.Core
             {
                 Debug.Log($"[NetworkBootstrapper] Creating room: {roomName}");
 
-                // Usar valores por defecto si no se especifican
                 if (maxPlayers <= 0) maxPlayers = defaultMaxPlayers;
 
-                // Validar y establecer la escena
                 if (!string.IsNullOrEmpty(sceneName) && IsValidScene(sceneName))
                 {
                     _selectedSceneName = sceneName;
@@ -96,24 +89,20 @@ namespace HackMonkeys.Core
                 }
                 else
                 {
-                    _selectedSceneName = gameSceneName; // Usar default
+                    _selectedSceneName = gameSceneName; 
                     Debug.Log($"[NetworkBootstrapper] Using default scene: {gameSceneName}");
                 }
 
                 CurrentRoomName = roomName;
                 CurrentMaxPlayers = maxPlayers;
 
-                // Crear nuevo NetworkRunner
                 _runner = Instantiate(runnerPrefab);
                 _runner.name = "NetworkRunner_Host";
 
-                // Configurar callbacks ANTES de StartGame
                 _runner.AddCallbacks(this);
 
-                // Crear SceneManager
                 _sceneManager = Instantiate(sceneManagerPrefab);
 
-                // Configurar los argumentos de inicio
                 var startGameArgs = new StartGameArgs()
                 {
                     GameMode = GameMode.Host,
@@ -123,22 +112,17 @@ namespace HackMonkeys.Core
                     CustomLobbyName = "HackMonkeys_Lobby",
                     IsVisible = true,
                     IsOpen = true,
-                    // Agregar propiedades de sesión personalizadas
                     SessionProperties = CreateSessionProperties(sceneName)
                 };
 
-                // Iniciar la conexión
                 var result = await _runner.StartGame(startGameArgs);
 
                 if (result.Ok)
                 {
                     Debug.Log("[NetworkBootstrapper] ✅ Room created successfully!");
                     
-                    //Registrar datos de sesión
                     PlayerDataManager.Instance.SetSessionData(Runner.LocalPlayer, true, roomName);
                     
-                    // Actualizar LocalPlayerRef para el HOST
-                    // OnConnectedToServer no se llama para el host, así que lo hacemos aquí
                     if (PlayerDataManager.Instance != null && Runner.LocalPlayer.IsRealPlayer)
                     {
                         PlayerDataManager.Instance.UpdateLocalPlayerRef(Runner.LocalPlayer);
@@ -166,7 +150,6 @@ namespace HackMonkeys.Core
             }
         }
         
-        // Crear propiedades de sesión con info del mapa
         private Dictionary<string, SessionProperty> CreateSessionProperties(string sceneName)
         {
             var properties = new Dictionary<string, SessionProperty>();
@@ -176,7 +159,6 @@ namespace HackMonkeys.Core
                 properties["scene"] = sceneName;
             }
     
-            // Podemos agregar más propiedades aquí
             properties["version"] = Application.version;
             properties["gamemode"] = "default";
     
@@ -202,7 +184,7 @@ namespace HackMonkeys.Core
             _selectedSceneName = newSceneName;
             Debug.Log($"[NetworkBootstrapper] Scene changed to: {newSceneName}");
     
-            // TODO: Aquí podrías enviar un RPC para notificar a los clientes del cambio
+            // TODO: Enviar un RPC para notificar a los clientes del cambio
     
             return true;
         }
@@ -225,27 +207,21 @@ namespace HackMonkeys.Core
                 CurrentRoomName = session.Name;
                 CurrentMaxPlayers = session.MaxPlayers;
 
-                // Crear nuevo NetworkRunner
                 _runner = Instantiate(runnerPrefab);
                 _runner.name = "NetworkRunner_Client";
 
-                // Configurar callbacks ANTES de StartGame
                 _runner.AddCallbacks(this);
 
-                // Crear SceneManager
                 _sceneManager = Instantiate(sceneManagerPrefab);
 
-                // Configurar los argumentos de inicio
                 var startGameArgs = new StartGameArgs()
                 {
                     GameMode = GameMode.Client,
                     SessionName = session.Name,
                     SceneManager = _sceneManager,
-                    // NO especificar Scene para quedarnos en la escena actual
                     CustomLobbyName = "HackMonkeys_Lobby"
                 };
 
-                // Iniciar la conexión
                 var result = await _runner.StartGame(startGameArgs);
 
                 if (result.Ok)
@@ -255,7 +231,6 @@ namespace HackMonkeys.Core
                     _isInRoom = true;
                     OnConnectedToServerEvent?.Invoke();
                     
-                    // Cliente registra su info básica
                     PlayerDataManager.Instance.SetSessionData(PlayerRef.None, false, session.Name);
                     
                     return true;
@@ -328,26 +303,22 @@ namespace HackMonkeys.Core
                 var tempRunner = Instantiate(runnerPrefab);
                 tempRunner.name = "NetworkRunner_SessionFinder";
 
-                // Crear un callback temporal solo para capturar la lista
                 var sessionListCallback = new SessionListCallback();
                 tempRunner.AddCallbacks(sessionListCallback);
 
                 var startGameArgs = new StartGameArgs()
                 {
                     GameMode = GameMode.Client,
-                    SessionName = null, // IMPORTANTE: No especificar nombre
+                    SessionName = null, 
                     CustomLobbyName = "HackMonkeys_Lobby",
                 };
 
-                // Intentar conectar al lobby (no a una sesión específica)
                 await tempRunner.JoinSessionLobby(SessionLobby.Custom, "HackMonkeys_Lobby");
 
-                // Esperar un momento para recibir la lista
                 await Task.Delay(2000);
 
                 var sessions = sessionListCallback.GetSessions();
 
-                // Limpiar
                 await tempRunner.Shutdown();
                 Destroy(tempRunner.gameObject);
 
@@ -379,7 +350,7 @@ namespace HackMonkeys.Core
         }
 
         /// <summary>
-        /// Iniciar partida con escena seleccionada (MEJORADO)
+        /// Iniciar partida con escena seleccionada
         /// </summary>
         public async Task<bool> StartGame(string overrideSceneName = null)
         {
@@ -391,12 +362,10 @@ namespace HackMonkeys.Core
     
             try
             {
-                // Usar escena override si se proporciona, sino usar la seleccionada
                 string sceneToLoad = !string.IsNullOrEmpty(overrideSceneName) ? overrideSceneName : SelectedSceneName;
         
                 Debug.Log($"[NetworkBootstrapper] 🚀 Starting game with scene: {sceneToLoad}");
         
-                // Validar que la escena existe
                 var sceneIndex = GetSceneIndex(sceneToLoad);
                 if (sceneIndex.IsValid == false)
                 {
@@ -404,7 +373,6 @@ namespace HackMonkeys.Core
                     return false;
                 }
         
-                // Cambiar a la escena del juego
                 await _runner.LoadScene(sceneIndex);
                 return true;
             }
@@ -417,26 +385,22 @@ namespace HackMonkeys.Core
 
         #region SceneManagement
 
-        // Propiedad para obtener la escena seleccionada
         public string SelectedSceneName
         {
             get => string.IsNullOrEmpty(_selectedSceneName) ? gameSceneName : _selectedSceneName;
             set => _selectedSceneName = value;
         }
 
-        // Obtener lista de escenas disponibles
         public List<SceneInfo> GetAvailableScenes()
         {
             return availableScenes;
         }
 
-        // Validar si una escena es válida
         public bool IsValidScene(string sceneName)
         {
             return availableScenes.Any(s => s.sceneName == sceneName);
         }
 
-        // Obtener info de una escena
         public SceneInfo GetSceneInfo(string sceneName)
         {
             return availableScenes.FirstOrDefault(s => s.sceneName == sceneName);
@@ -462,7 +426,7 @@ namespace HackMonkeys.Core
         #endregion
 
         // ========================================
-        // MÉTODOS DE LIMPIEZA MEJORADOS
+        // MÉTODOS DE LIMPIEZA
         // ========================================
 
         private async Task ShutdownRunner()
@@ -479,7 +443,6 @@ namespace HackMonkeys.Core
         {
             if (_runner != null)
             {
-                // Remover callbacks antes de destruir
                 _runner.RemoveCallbacks(this);
                 Destroy(_runner.gameObject);
                 _runner = null;
@@ -493,19 +456,17 @@ namespace HackMonkeys.Core
                 Debug.Log("[NetworkBootstrapper] ✅ SceneManager cleaned up");
             }
 
-            // Pequeño delay para asegurar la limpieza
             await Task.Delay(100);
         }
 
         // ========================================
-        // CALLBACKS DE FUSION - IMPLEMENTACIÓN COMPLETA
+        // CALLBACKS DE FUSION
         // ========================================
 
         public void OnConnectedToServer(NetworkRunner runner)
         {
             Debug.Log("[NetworkBootstrapper] 🌐 Connected to Photon Cloud");
     
-            // AQUÍ sí tenemos el PlayerRef correcto
             if (PlayerDataManager.Instance != null)
             {
                 PlayerDataManager.Instance.UpdateLocalPlayerRef(runner.LocalPlayer);
@@ -527,7 +488,6 @@ namespace HackMonkeys.Core
 
         public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
         {
-            // Solo procesar si es el runner temporal de búsqueda
             if (runner.name == "NetworkRunner_SessionFinder")
             {
                 Debug.Log($"[NetworkBootstrapper] 📋 Session list updated: {sessionList.Count} sessions");
@@ -535,11 +495,9 @@ namespace HackMonkeys.Core
                 _sessionListTcs?.TrySetResult(_receivedSessions);
             }
 
-            // Notificar a LobbyBrowser
             OnSessionListUpdatedEvent?.Invoke(sessionList);
         }
 
-        // Implementación vacía de otros callbacks
         public void OnInput(NetworkRunner runner, NetworkInput input)
         {
         }
@@ -587,7 +545,6 @@ namespace HackMonkeys.Core
         {
             Debug.Log("[NetworkBootstrapper] 🎬 Scene load starting...");
     
-            // Asegurar que todos tengan el mapa correcto antes de cargar
             PlayerDataManager.Instance.UpdateSelectedMapFromLobbyPlayer();
         }
 

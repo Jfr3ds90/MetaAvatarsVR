@@ -68,16 +68,12 @@ namespace HackMonkeys.UI.Spatial
 
         private void Start()
         {
-            // Obtener referencia al transform del jugador VR
             _playerTransform = Camera.main.transform.parent;
 
-            // Registrar todos los paneles hijos
             RegisterChildPanels();
 
-            // Configurar visuales de los rayos
             SetupRayVisuals();
 
-            // Mostrar panel principal
             ShowPanel(PanelID.MainPanel);
         }
 
@@ -89,8 +85,6 @@ namespace HackMonkeys.UI.Spatial
 
         private void ConfigureRayInteractors()
         {
-            // Los RayInteractors de Meta no usan eventos de Unity como XRRayInteractor
-            // En su lugar, debemos checkear su estado en Update
             if (leftHandRayInteractor != null)
             {
                 leftHandRayInteractor.MaxRayLength = 10f;
@@ -104,7 +98,6 @@ namespace HackMonkeys.UI.Spatial
 
         private void SetupRayVisuals()
         {
-            // Configurar LineRenderers para visualización de rayos
             if (leftRayVisual != null)
             {
                 leftRayVisual.startWidth = rayWidth;
@@ -121,7 +114,6 @@ namespace HackMonkeys.UI.Spatial
                 rightRayVisual.positionCount = 2;
             }
 
-            // Crear reticle si no existe
             if (reticle == null)
             {
                 reticle = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -133,10 +125,8 @@ namespace HackMonkeys.UI.Spatial
 
         private void UpdateRayVisuals()
         {
-            // Actualizar visual del rayo izquierdo
             UpdateSingleRayVisual(leftHandRayInteractor, leftRayVisual, true);
             
-            // Actualizar visual del rayo derecho
             UpdateSingleRayVisual(rightHandRayInteractor, rightRayVisual, false);
         }
 
@@ -144,25 +134,20 @@ namespace HackMonkeys.UI.Spatial
         {
             if (rayInteractor == null || rayVisual == null) return;
 
-            // Obtener el estado actual del interactor
             bool isInteracting = rayInteractor.State == InteractorState.Select;
             bool hasCandidate = rayInteractor.HasCandidate;
             
-            // Mostrar/ocultar rayo basado en el estado
             rayVisual.enabled = rayInteractor.enabled && (hasCandidate || isInteracting);
 
             if (rayVisual.enabled)
             {
-                // Configurar posiciones del rayo
                 rayVisual.SetPosition(0, rayInteractor.Origin);
                 rayVisual.SetPosition(1, rayInteractor.End);
 
-                // Cambiar color si está hovering
                 if (hasCandidate)
                 {
                     rayVisual.colorGradient = rayHoverGradient;
                     
-                    // Posicionar reticle en el punto de colisión
                     if (rayInteractor.CollisionInfo.HasValue && reticle != null)
                     {
                         reticle.SetActive(true);
@@ -184,7 +169,6 @@ namespace HackMonkeys.UI.Spatial
 
         private void CheckForInteractions()
         {
-            // Chequear interacciones para ambas manos
             CheckHandInteraction(leftHandRayInteractor);
             CheckHandInteraction(rightHandRayInteractor);
         }
@@ -193,25 +177,21 @@ namespace HackMonkeys.UI.Spatial
         {
             if (rayInteractor == null) return;
 
-            // Obtener el interactable actual si existe
             RayInteractable currentInteractable = null;
             if (rayInteractor.HasCandidate && rayInteractor.CandidateProperties is RayInteractor.RayCandidateProperties props)
             {
                 currentInteractable = props.ClosestInteractable;
             }
 
-            // Verificar si cambió el hover
             if (_hoveredInteractables.TryGetValue(rayInteractor, out RayInteractable previousInteractable))
             {
                 if (previousInteractable != currentInteractable)
                 {
-                    // Salió del hover anterior
                     if (previousInteractable != null)
                     {
                         OnRayHoverExit(previousInteractable);
                     }
 
-                    // Entró a un nuevo hover
                     if (currentInteractable != null)
                     {
                         OnRayHoverEnter(currentInteractable, rayInteractor);
@@ -220,20 +200,16 @@ namespace HackMonkeys.UI.Spatial
             }
             else if (currentInteractable != null)
             {
-                // Primera vez que hoverea algo
                 OnRayHoverEnter(currentInteractable, rayInteractor);
             }
 
-            // Actualizar el diccionario
             _hoveredInteractables[rayInteractor] = currentInteractable;
 
-            // Obtener estados para detectar transiciones
             InteractorState previousState = _previousInteractorStates.ContainsKey(rayInteractor) 
                 ? _previousInteractorStates[rayInteractor] 
                 : InteractorState.Normal;
             InteractorState currentState = rayInteractor.State;
 
-            // Chequear selección - solo en transición de no-seleccionado a seleccionado
             if (currentState == InteractorState.Select && 
                 previousState != InteractorState.Select && 
                 currentInteractable != null)
@@ -241,22 +217,18 @@ namespace HackMonkeys.UI.Spatial
                 OnRaySelect(currentInteractable, rayInteractor);
             }
 
-            // Actualizar el estado previo
             _previousInteractorStates[rayInteractor] = currentState;
         }
 
         private void OnRayHoverEnter(RayInteractable interactable, RayInteractor interactor)
         {
-            // Buscar el botón 3D asociado
             var button = interactable.GetComponentInParent<InteractableButton3D>();
             if (button != null)
             {
                 button.OnHoverEnter();
         
-                // Verificar si el botón pertenece a un teclado virtual
                 VirtualKeyboard3D keyboard = button.GetComponentInParent<VirtualKeyboard3D>();
         
-                // Solo reproducir sonido y haptics si NO es parte del teclado
                 if (keyboard == null)
                 {
                     TriggerHapticFeedback(interactor, hoverHapticStrength);
@@ -267,7 +239,6 @@ namespace HackMonkeys.UI.Spatial
 
         private void OnRayHoverExit(RayInteractable interactable)
         {
-            // Buscar el botón 3D asociado
             var button = interactable.GetComponentInParent<InteractableButton3D>();
             if (button != null)
             {
@@ -277,7 +248,6 @@ namespace HackMonkeys.UI.Spatial
 
         private void OnRaySelect(RayInteractable interactable, RayInteractor interactor)
         {
-            // Buscar el botón 3D asociado
             var button = interactable.GetComponentInParent<InteractableButton3D>();
             if (button != null)
             {
@@ -322,7 +292,6 @@ namespace HackMonkeys.UI.Spatial
             _isTransitioning = true;
             MenuPanel targetPanel = _panels[panelId];
 
-            // Ocultar panel actual
             if (_currentPanel != null)
             {
                 yield return StartCoroutine(AnimatePanelOut(_currentPanel));
@@ -334,17 +303,14 @@ namespace HackMonkeys.UI.Spatial
                 }
             }
 
-            // Posicionar nuevo panel frente al jugador
             PositionPanelInFrontOfPlayer(targetPanel);
 
-            // Mostrar nuevo panel
             targetPanel.gameObject.SetActive(true);
             yield return StartCoroutine(AnimatePanelIn(targetPanel));
 
             _currentPanel = targetPanel;
             _currentPanel.OnPanelShown();
 
-            // Reproducir sonido de transición
             PlayUISound(selectSound);
 
             _isTransitioning = false;
@@ -354,9 +320,8 @@ namespace HackMonkeys.UI.Spatial
         {
             if (_playerTransform == null) return;
 
-            // Calcular posición frente al jugador
             Vector3 forward = _playerTransform.forward;
-            forward.y = 0; // Mantener panel a nivel horizontal
+            forward.y = 0; 
             forward.Normalize();
 
             Vector3 targetPosition = _playerTransform.position + forward * defaultPanelDistance;
@@ -364,7 +329,6 @@ namespace HackMonkeys.UI.Spatial
 
             panel.transform.position = targetPosition;
 
-            // Rotar panel para que mire al jugador
             Vector3 lookDirection = _playerTransform.position - panel.transform.position;
             lookDirection.y = 0;
             panel.transform.rotation = Quaternion.LookRotation(-lookDirection);
@@ -427,7 +391,6 @@ namespace HackMonkeys.UI.Spatial
 
         private void TriggerHapticFeedback(RayInteractor interactor, float intensity)
         {
-            // Para Meta Interaction SDK, necesitamos acceder al OVRInput
             if (interactor == leftHandRayInteractor)
             {
                 OVRInput.SetControllerVibration(1, intensity, OVRInput.Controller.LTouch);
@@ -486,7 +449,6 @@ namespace HackMonkeys.UI.Spatial
 
         private void OnDestroy()
         {
-            // Limpiar referencias
             _hoveredInteractables.Clear();
             _previousInteractorStates.Clear();
 
