@@ -9,7 +9,7 @@ public class Chemistry : MonoBehaviour
     [SerializeField] private MeshRenderer Chem;
     private void OnTriggerEnter(Collider collision)
     {
-        if(collision.gameObject.GetComponent<Chemistry>()!=null)
+       /* if(collision.gameObject.GetComponent<Chemistry>()!=null)
        { 
             var otherElement= collision.gameObject.GetComponent<Chemistry>().element;
             if(isSelected==true)
@@ -67,7 +67,8 @@ public class Chemistry : MonoBehaviour
                         break;
                 }
         }
-        else if (collision.gameObject.tag=="cubePuzzle")
+        else*/ 
+        if (collision.gameObject.tag=="cubePuzzle")
         {
             LeftDoor.OpenDoorAct();
             RightDoor.CloseDoorAct();
@@ -75,9 +76,10 @@ public class Chemistry : MonoBehaviour
     }
     private void OnParticleCollision(GameObject other)
     {
+        Debug.LogWarning("detecto particulas");
         if (other != null)
             Debug.Log(other.name + " es la particula que choco");
-        Color color = other.GetComponent<ParticleSystem>().main.startColor.color;
+        Color color = FindAnyObjectByType<ValveManager>().colorGas;
         Chem.material.color = color;
 
     }
