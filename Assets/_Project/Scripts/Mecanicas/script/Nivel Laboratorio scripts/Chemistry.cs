@@ -87,17 +87,10 @@ public class Chemistry : MonoBehaviour
     {
         Debug.Log(name+" es quien detecto");
     }
-    private void OnEnable()
-    {
-        //FindAnyObjectByType<ParticleSystem>().Play();
-        Debug.Log(FindAnyObjectByType<ParticleSystem>().name+" es la particula encontrada");
-    }
     public void onGrab()
     {
         Debug.Log(isSelected);
         isSelected= !isSelected;
-        Debug.Log("esto funciona");
-        Debug.Log(GetComponent<BoxCollider>()+" esta presente");
-        GetComponent<BoxCollider>().isTrigger = isSelected;
+
     }
 }
