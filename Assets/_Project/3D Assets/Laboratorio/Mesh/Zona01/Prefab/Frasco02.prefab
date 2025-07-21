@@ -31,7 +31,8 @@ Transform:
   m_LocalPosition: {x: -0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 5232624674805036603}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &984076997078097078
@@ -109,3 +110,65 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -4221042580186793821, guid: aaf72e3dcf4a4c54eb28839276759207, type: 3}
+--- !u!1001 &8858024240922912909
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 3072884307075317874}
+    m_Modifications:
+    - target: {fileID: 3634407607477788342, guid: 0da6ffcdb73a0f548bc22cc95fd254b5, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3634407607477788342, guid: 0da6ffcdb73a0f548bc22cc95fd254b5, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3634407607477788342, guid: 0da6ffcdb73a0f548bc22cc95fd254b5, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3634407607477788342, guid: 0da6ffcdb73a0f548bc22cc95fd254b5, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3634407607477788342, guid: 0da6ffcdb73a0f548bc22cc95fd254b5, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3634407607477788342, guid: 0da6ffcdb73a0f548bc22cc95fd254b5, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3634407607477788342, guid: 0da6ffcdb73a0f548bc22cc95fd254b5, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3634407607477788342, guid: 0da6ffcdb73a0f548bc22cc95fd254b5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3634407607477788342, guid: 0da6ffcdb73a0f548bc22cc95fd254b5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3634407607477788342, guid: 0da6ffcdb73a0f548bc22cc95fd254b5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3786475347003703490, guid: 0da6ffcdb73a0f548bc22cc95fd254b5, type: 3}
+      propertyPath: m_Name
+      value: Frasco02Liquido
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 0da6ffcdb73a0f548bc22cc95fd254b5, type: 3}
+--- !u!4 &5232624674805036603 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3634407607477788342, guid: 0da6ffcdb73a0f548bc22cc95fd254b5, type: 3}
+  m_PrefabInstance: {fileID: 8858024240922912909}
+  m_PrefabAsset: {fileID: 0}
