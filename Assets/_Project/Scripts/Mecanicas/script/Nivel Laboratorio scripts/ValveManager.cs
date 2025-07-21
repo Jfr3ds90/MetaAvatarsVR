@@ -5,20 +5,16 @@ public class ValveManager : MonoBehaviour
 {
     public bool[] activatedValves;
     int lastValveActived;
+    public float velocityFog;//modificar para cambiar velocidad de la neblina
     public static float gasFog;
-    public Color colorGas;
-    private Color trueColor;
+    public Color colorGas,keyColor;
+    public static Color trueColor;
     [SerializeField]ParticleSystem[] PS_Gas;
-
-    private void Awake()
-    {
-        trueColor = Random.ColorHSV();
-        Debug.Log(trueColor+" es el color correcto");
-    }
     private void OnEnable()
     {
        for (int i = 0; i < PS_Gas.Length; i++)
-            PS_Gas[i].Stop(); 
+            PS_Gas[i].Stop();
+        trueColor = keyColor;
     }
     public void MixtureGas(int value)
     {
@@ -108,7 +104,7 @@ public class ValveManager : MonoBehaviour
     {while (true) 
         {
             gasFog += Time.deltaTime * 0.1f;
-            RenderSettings.fogDensity = gasFog / 350;
+            RenderSettings.fogDensity = gasFog*velocityFog / 350;
 
             RenderSettings.fogColor = new Vector4(colorGas.r* RenderSettings.fogDensity,
                 colorGas.g* RenderSettings.fogDensity, 

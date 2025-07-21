@@ -68,7 +68,7 @@ public class Chemistry : MonoBehaviour
                 }
         }
         else*/ 
-        if (collision.gameObject.tag=="cubePuzzle")
+        if (collision.gameObject.tag=="cubePuzzle"&& Chem.material.color==ValveManager.trueColor)
         {
             LeftDoor.OpenDoorAct();
             RightDoor.CloseDoorAct();
