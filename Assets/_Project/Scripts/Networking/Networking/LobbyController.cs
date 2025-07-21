@@ -18,6 +18,7 @@ namespace HackMonkeys.Core
         
         private LobbyState _lobbyState;
         private NetworkBootstrapper _networkBootstrapper;
+        private GameCore _gameCore;
         
         public static LobbyController Instance { get; private set; }
         
@@ -41,6 +42,8 @@ namespace HackMonkeys.Core
         
         private void Start()
         {
+            _gameCore = GameCore.Instance;
+            
             StartCoroutine(InitializeReferences());
         }
         
@@ -96,19 +99,26 @@ namespace HackMonkeys.Core
             {
                 Debug.Log("[LobbyController] ✅ Validation passed, starting game...");
                 OnGameStarting?.Invoke();
-                
-                
-                bool success = await _networkBootstrapper.StartGame();
-                
-                if (success)
+
+                string mapName = PlayerDataManager.Instance.SelectedMap;
+                int playerCount = _lobbyState.PlayerCount;
+
+                bool coreReady = await _gameCore.StartMatch(mapName, playerCount);
+
+                if (coreReady)
                 {
-                    Debug.Log("[LobbyController] ✅ Game started successfully!");
-                }
-                else
-                {
-                    Debug.LogError("[LobbyController] ❌ Failed to start game - NetworkBootstrapper error");
-                    OnActionFailed?.Invoke("Failed to start game - network error");
-                    OnGameStartFailed?.Invoke();
+                    bool success = await _networkBootstrapper.StartGame();
+                    
+                    if (success)
+                    {
+                        Debug.Log("[LobbyController] ✅ Game started successfully!");
+                    }
+                    else
+                    {
+                        Debug.LogError("[LobbyController] ❌ Failed to start game - NetworkBootstrapper error");
+                        OnActionFailed?.Invoke("Failed to start game - network error");
+                        OnGameStartFailed?.Invoke();
+                    }
                 }
             }
             catch (System.Exception e)

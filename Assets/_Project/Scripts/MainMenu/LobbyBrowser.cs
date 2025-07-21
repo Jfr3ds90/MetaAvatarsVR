@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -51,6 +52,7 @@ namespace HackMonkeys.UI.Panels
         private bool _showFullRooms = true;
         private bool _showInProgressRooms = true;
         private SortType _currentSortType = SortType.PlayerCount;
+        private GameCore _gameCore;
         
         private enum SortType
         {
@@ -58,7 +60,12 @@ namespace HackMonkeys.UI.Panels
             PlayerCount,
             Ping
         }
-        
+
+        private void Start()
+        {
+            _gameCore = GameCore.Instance;
+        }
+
         protected override void SetupPanel()
         {
             base.SetupPanel();
@@ -337,8 +344,7 @@ namespace HackMonkeys.UI.Panels
     
             Debug.Log($"[LobbyBrowser] 🎮 Attempting to join room: {_selectedSession.Name}");
     
-            if (joinButton != null)
-                joinButton.SetInteractable(false);
+            if (joinButton != null) joinButton.SetInteractable(false);
         
             UpdateStatusText("Joining room...");
     
@@ -350,6 +356,8 @@ namespace HackMonkeys.UI.Panels
         
                 if (success)
                 {
+                    _gameCore.OnJoinedLobby(_selectedSession.Name, false);
+                    
                     UpdateStatusText("Connected! Loading lobby...");
             
                     Debug.Log("[LobbyBrowser] ⏳ Waiting for player spawn...");

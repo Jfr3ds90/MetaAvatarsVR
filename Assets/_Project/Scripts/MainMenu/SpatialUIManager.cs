@@ -466,5 +466,6 @@ namespace HackMonkeys.UI.Spatial
         Settings,
         Options,
         ExitPanel,
+        Results
     }
 }

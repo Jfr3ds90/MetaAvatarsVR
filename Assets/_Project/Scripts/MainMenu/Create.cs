@@ -10,6 +10,8 @@ public class Create : MenuPanel
     [SerializeField] TMP_InputField roomPasswordField;
     [SerializeField] InteractableButton3D createRoomButton;
     [SerializeField] private NetworkBootstrapper networkBootstrapper;
+    
+    private GameCore _gameCore;
 
     private void Awake()
     {
@@ -20,6 +22,11 @@ public class Create : MenuPanel
         createRoomButton.OnButtonPressed.AddListener(CreateRoom);
     }
 
+    private void Start()
+    {
+        _gameCore = GameCore.Instance;
+    }
+
     private async void CreateRoom()
     {
         if (string.IsNullOrEmpty(roomNameField.text))
@@ -28,14 +35,15 @@ public class Create : MenuPanel
             return;
         }
         
-        if (createRoomButton != null)
-            createRoomButton.SetInteractable(false);
+        if (createRoomButton != null) createRoomButton.SetInteractable(false);
         
         //Todo: Actualizar el maxPlayers 
         bool success = await networkBootstrapper.CreateRoom(roomNameField.text, 4); 
         
         if (success)
         {
+            _gameCore.OnJoinedLobby(roomNameField.text, true);
+            
             await System.Threading.Tasks.Task.Delay(1000); 
             _uiManager.ShowPanel(PanelID.LobbyRoom);
         }
@@ -43,8 +51,7 @@ public class Create : MenuPanel
         {
             Debug.LogError("Failed to create room!");
             
-            if (createRoomButton != null)
-                createRoomButton.SetInteractable(true);
+            if (createRoomButton != null) createRoomButton.SetInteractable(true);
         }
     }
 

@@ -40,6 +40,7 @@ namespace HackMonkeys.Core
         private NetworkRunner _runner;
         private NetworkSceneManagerDefault _sceneManager;
         private bool _isInRoom = false;
+        private GameCore _gameCore;
 
         private TaskCompletionSource<List<SessionInfo>> _sessionListTcs;
         private List<SessionInfo> _receivedSessions;
@@ -63,6 +64,11 @@ namespace HackMonkeys.Core
 
             Instance = this;
             DontDestroyOnLoad(gameObject);
+        }
+
+        private void Start()
+        {
+            _gameCore = GameCore.Instance;
         }
 
         /// <summary>
@@ -478,12 +484,19 @@ namespace HackMonkeys.Core
         {
             Debug.Log($"[NetworkBootstrapper] 📡 Disconnected from server: {reason}");
             _isInRoom = false;
+            
+            if (_gameCore != null)
+            {
+                _gameCore.OnNetworkDisconnected();
+            }
         }
 
         public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
         {
             Debug.LogError($"[NetworkBootstrapper] ❌ Connect failed: {reason}");
             OnConnectionFailed?.Invoke(reason.ToString());
+            
+            
         }
 
         public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
@@ -539,6 +552,13 @@ namespace HackMonkeys.Core
 
         public void OnSceneLoadDone(NetworkRunner runner)
         {
+            Debug.Log("[NetworkBootstrapper] 🎬 Scene load done");
+    
+            // Notificar a GameCore que la escena está lista
+            if (_gameCore != null)
+            {
+                _gameCore.OnGameSceneLoaded();
+            }
         }
 
         public void OnSceneLoadStart(NetworkRunner runner)
