@@ -4,6 +4,7 @@ using UnityEngine;
 public class ValveManager : MonoBehaviour
 {
     public bool[] activatedValves;
+    public bool stepActivationGas;
     int lastValveActived;
     public float velocityFog;//modificar para cambiar velocidad de la neblina
     public static float gasFog;
@@ -101,7 +102,7 @@ public class ValveManager : MonoBehaviour
         StartCoroutine(GasActivated());
     }
     public IEnumerator GasActivated()
-    {while (true) 
+    {while (stepActivationGas == true) 
         {
             gasFog += Time.deltaTime * 0.1f;
             RenderSettings.fogDensity = gasFog*velocityFog / 350;
@@ -126,5 +127,10 @@ public class ValveManager : MonoBehaviour
           //  Debug.Log(RenderSettings.fogDensity + " es la densidad y el color es "+ RenderSettings.fogColor);
             yield return null;
         }
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag=="Player")
+       { stepActivationGas = true; GasAction(); }
     }
 }

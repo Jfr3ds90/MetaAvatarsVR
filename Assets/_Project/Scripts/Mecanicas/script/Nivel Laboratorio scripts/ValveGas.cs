@@ -52,6 +52,7 @@ public class ValveGas : MonoBehaviour
         if (action==true)
        { if(Input.GetKey(KeyCode.RightArrow))
         {
+                manager.stepActivationGas = true;
             transform.rotation = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z + Time.deltaTime * 20);
             OpenClose();
         }
