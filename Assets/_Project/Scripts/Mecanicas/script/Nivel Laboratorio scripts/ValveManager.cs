@@ -9,6 +9,7 @@ public class ValveManager : MonoBehaviour
     public float velocityFog;//modificar para cambiar velocidad de la neblina
     public static float gasFog;
     public Color colorGas,keyColor;
+    [HideInInspector] public Color lastColor;
     public static Color trueColor;
     [SerializeField]ParticleSystem[] PS_Gas;
     private void OnEnable()

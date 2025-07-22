@@ -555,6 +555,85 @@ ParticleSystem:
   m_CorrespondingSourceObject: {fileID: 2194580071184698963, guid: ea269af570212ba41ba28545e584bcfb, type: 3}
   m_PrefabInstance: {fileID: 3297712464040834286}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &161244229
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 161244233}
+  - component: {fileID: 161244232}
+  - component: {fileID: 161244231}
+  - component: {fileID: 161244230}
+  m_Layer: 0
+  m_Name: Pasillo 1
+  m_TagString: cubePuzzle
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &161244230
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 161244229}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d1467ec38f409d4aac8539f66e1e87f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Dfl: {fileID: 347669674}
+  Dfd: {fileID: 1821501963}
+  Dbl: {fileID: 1799235421}
+  Dbd: {fileID: 1277386159}
+--- !u!65 &161244231
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 161244229}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!33 &161244232
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 161244229}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &161244233
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 161244229}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 10.8721, y: 4.1262584, z: 14.635}
+  m_LocalScale: {x: 3.9550033, y: 1, z: 0.21594}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &181667449
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4690,6 +4769,85 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7819716933281526897, guid: 2826ed640a5ba274d845dd23bb55591b, type: 3}
   m_PrefabInstance: {fileID: 761808351}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &779314392
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 779314396}
+  - component: {fileID: 779314395}
+  - component: {fileID: 779314394}
+  - component: {fileID: 779314393}
+  m_Layer: 0
+  m_Name: Pasillo 2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &779314393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 779314392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d1467ec38f409d4aac8539f66e1e87f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Dfl: {fileID: 0}
+  Dfd: {fileID: 0}
+  Dbl: {fileID: 0}
+  Dbd: {fileID: 0}
+--- !u!65 &779314394
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 779314392}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!33 &779314395
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 779314392}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &779314396
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 779314392}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0.901, y: 4.1262584, z: 8.3}
+  m_LocalScale: {x: 3.9550033, y: 1, z: 0.21594}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!23 &789242229 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 331603568607189903, guid: 2bbbbcad0410a7b48a95b7a9f53a37bc, type: 3}
@@ -6273,6 +6431,85 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 6817855776323934494, guid: 2bbbbcad0410a7b48a95b7a9f53a37bc, type: 3}
   m_PrefabInstance: {fileID: 1281002703}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1067993735
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1067993739}
+  - component: {fileID: 1067993738}
+  - component: {fileID: 1067993737}
+  - component: {fileID: 1067993736}
+  m_Layer: 0
+  m_Name: Pasillo 3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1067993736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1067993735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d1467ec38f409d4aac8539f66e1e87f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Dfl: {fileID: 0}
+  Dfd: {fileID: 0}
+  Dbl: {fileID: 0}
+  Dbd: {fileID: 0}
+--- !u!65 &1067993737
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1067993735}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!33 &1067993738
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1067993735}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &1067993739
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1067993735}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -10.22, y: 4.1262584, z: 21.67}
+  m_LocalScale: {x: 3.9550033, y: 1, z: 0.21594}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1082687037
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20263,6 +20500,7 @@ MonoBehaviour:
   velocityFog: 0.01
   colorGas: {r: 0, g: 0, b: 0, a: 0}
   keyColor: {r: 0, g: 1, b: 1, a: 0}
+  lastColor: {r: 0, g: 0, b: 0, a: 0}
   PS_Gas:
   - {fileID: 143032648}
   - {fileID: 1423033311}
@@ -24948,3 +25186,6 @@ SceneRoots:
   - {fileID: 1821501959}
   - {fileID: 1772649353}
   - {fileID: 885536180}
+  - {fileID: 161244233}
+  - {fileID: 779314396}
+  - {fileID: 1067993739}
