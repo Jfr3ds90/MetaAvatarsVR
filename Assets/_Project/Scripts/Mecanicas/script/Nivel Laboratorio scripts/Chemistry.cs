@@ -6,10 +6,10 @@ public class Chemistry : MonoBehaviour
     public int element;
     public bool isSelected;
     [SerializeField] private Switch LeftDoor,RightDoor;
-    private MeshRenderer Chem;
+    [SerializeField] private MeshRenderer Chem;
     private void OnEnable()
     {
-        Chem = GetComponentInChildren<MeshRenderer>();
+     //   Chem = GetComponentInChildren<MeshRenderer>();
     }
     private void OnTriggerEnter(Collider collision)
     {
@@ -85,9 +85,10 @@ public class Chemistry : MonoBehaviour
             Debug.Log(other.name + " es la particula que choco");
         //Chem.enabled = true;
         Color color = FindAnyObjectByType<ValveManager>().colorGas;
-        Chem.materials[0].SetColor("_SideColor",color);
-        Chem.materials[0].SetColor("_TopColor",color);
-        Chem.materials[0].SetFloat("_Fill",0.271f);
+        
+        Chem.material.SetColor("_SideColor",new Color(color.r*0.01f,color.g * 0.01f, color.b * 0.01f, color.a));
+        Chem.material.SetColor("_TopColor",color);
+        Chem.material.SetFloat("_Fill",0.271f);
     }
     private void OnParticleTrigger()
     {
