@@ -26,18 +26,18 @@ public class Switch : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.S))
             OpenDoorAct();    
     }
-    public void OpenDoor(bool value)
+    public void OpenDoor()
     {
         animator.SetBool("Close_",false);
-        animator.SetBool("Right_",value);
+        animator.SetBool("Right_", orientation);
         animator.SetTrigger("Activation_");
     }
     public void OpenDoorAct()
     {
         changeColor();
-        OpenDoor(orientation);Debug.Log(orientation+" orientacion");
+        OpenDoor();Debug.Log(orientation+" orientacion");
         onOff = true;
-        if (GetComponent<AudioSource>() != null)//revisar
+        if (GetComponent<AudioSource>() != null)
             GetComponent<AudioSource>().Play(0);
         float timer=0;
         bool activationExtra = false;
@@ -91,5 +91,11 @@ public class Switch : MonoBehaviour
        var value = FindAnyObjectByType<AudioManager>();
         value.ActualPhase = Phase;
         value.moreAction = ActualMoreAction;
+    }
+    public void RAnimation(bool openClose)
+    {
+        animator.SetBool("Close_", openClose);
+        animator.SetBool("Right_", orientation);
+        animator.SetTrigger("Repeated_");
     }
 }

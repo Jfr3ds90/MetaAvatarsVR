@@ -51,7 +51,7 @@ public class ValveGas : MonoBehaviour
         if (z > 10)
         {
             manager.colorGas = /*(z)*/(colorGas)+ manager.colorGas;
-            manager.colorGas.a = 255;
+            manager.colorGas.a = 1;
             //manager.gasFog = y;
         }
 

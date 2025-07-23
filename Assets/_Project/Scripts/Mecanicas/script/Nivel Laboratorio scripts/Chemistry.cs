@@ -7,6 +7,7 @@ public class Chemistry : MonoBehaviour
     public bool isSelected;
     [SerializeField] private Switch LeftDoor,RightDoor;
     [SerializeField] private MeshRenderer Chem;
+    private Color color;
     private void OnTriggerEnter(Collider collision)
     {
         /* if(collision.gameObject.GetComponent<Chemistry>()!=null)
@@ -68,8 +69,9 @@ public class Chemistry : MonoBehaviour
                  }
          }
          else*/
-        Debug.LogWarning(Chem.material.GetColor("_TopColor")+" es el color");
-        if (collision.gameObject.tag=="cubePuzzle"&& Chem.material.GetColor("_TopColor")==ValveManager.trueColor)
+        Debug.LogWarning(Chem.material.GetColor("_TopColor")+" es el color y el correcto es "+color);
+        if (collision.gameObject.tag=="cubePuzzle")
+            if( Chem.material.GetColor("_TopColor")==FindAnyObjectByType<ValveManager>().keyColor)
         {
             LeftDoor.OpenDoorAct();
             RightDoor.CloseDoorAct();
@@ -81,9 +83,9 @@ public class Chemistry : MonoBehaviour
         if (other != null)
             Debug.Log(other.name + " es la particula que choco");
         //Chem.enabled = true;
-        Color color = FindAnyObjectByType<ValveManager>().colorGas;
+        color = FindAnyObjectByType<ValveManager>().colorGas;
         
-        Chem.material.SetColor("_SideColor",new Color(color.r*0.01f,color.g * 0.01f, color.b * 0.01f, color.a));
+        Chem.material.SetColor("_SideColor",new Color(color.r*0.3f,color.g * 0.3f, color.b * 0.3f, color.a));
         Chem.material.SetColor("_TopColor",color);
         Chem.material.SetFloat("_Fill",0.271f);
     }

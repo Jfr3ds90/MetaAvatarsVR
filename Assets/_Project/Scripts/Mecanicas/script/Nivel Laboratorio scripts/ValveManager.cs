@@ -10,13 +10,12 @@ public class ValveManager : MonoBehaviour
     public static float gasFog;
     public Color colorGas,keyColor;
     [HideInInspector] public Color lastColor;
-    public static Color trueColor;
+
     [SerializeField]ParticleSystem[] PS_Gas;
     private void OnEnable()
     {
        for (int i = 0; i < PS_Gas.Length; i++)
             PS_Gas[i].Stop();
-        trueColor = keyColor;
     }
     public void MixtureGas(int value)
     {
