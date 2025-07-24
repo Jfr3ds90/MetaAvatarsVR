@@ -653,6 +653,7 @@ GameObject:
   - component: {fileID: 7239717102738397870}
   - component: {fileID: 5212677735913409002}
   - component: {fileID: 5246687935077648125}
+  - component: {fileID: 7281365431877768212}
   m_Layer: 0
   m_Name: Linterna
   m_TagString: Untagged
@@ -903,6 +904,48 @@ MonoBehaviour:
   _handAligment: 1
   _handGrabPoses:
   - {fileID: 2431562406624030847}
+--- !u!114 &7281365431877768212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8754574821142820670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9a7676b01585ce43908639a27765dfc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _interactorFilters: []
+  _maxInteractors: -1
+  _maxSelectingInteractors: -1
+  _data: {fileID: 0}
+  _pointableElement: {fileID: 7239717102738397870}
+  _rigidbody: {fileID: 957372382221100121}
+  _physicsGrabbable: {fileID: 0}
+  _resetGrabOnGrabsUpdated: 1
+  _scoringModifier:
+    _positionRotationWeight: 0.8
+  _slippiness: 0
+  _supportedGrabTypes: 3
+  _pinchGrabRules:
+    _thumbRequirement: 1
+    _indexRequirement: 1
+    _middleRequirement: 1
+    _ringRequirement: 0
+    _pinkyRequirement: 0
+    _unselectMode: 0
+  _palmGrabRules:
+    _thumbRequirement: 1
+    _indexRequirement: 2
+    _middleRequirement: 2
+    _ringRequirement: 2
+    _pinkyRequirement: 1
+    _unselectMode: 0
+  _movementProvider: {fileID: 0}
+  _handAligment: 1
+  _handGrabPoses:
+  - {fileID: 2285319648809086913}
 --- !u!1001 &9088008294222800462
 PrefabInstance:
   m_ObjectHideFlags: 0
