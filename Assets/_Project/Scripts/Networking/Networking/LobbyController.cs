@@ -233,7 +233,7 @@ namespace HackMonkeys.Core
             return _networkBootstrapper.IsHost &&
                    _networkBootstrapper.IsInRoom &&
                    _lobbyState.AllPlayersReady &&
-                   _lobbyState.PlayerCount >= 2;
+                   _lobbyState.PlayerCount >= 1;
         }
         
         /// <summary>

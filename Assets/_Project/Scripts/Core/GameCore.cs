@@ -20,6 +20,7 @@ namespace HackMonkeys.Core
     {
         #region Singleton
         private static GameCore _instance;
+
         public static GameCore Instance
         {
             get
@@ -280,14 +281,26 @@ namespace HackMonkeys.Core
 
         private IEnumerator EnterLoadingMatch()
         {
+            Debug.Log($"[GameCore] Entering LoadingMatch state - IsHost: {NetworkBootstrapper.Instance?.IsHost}");
+    
             // Fade out
             yield return FadeOut();
-            
+    
             // Mostrar ambiente de carga VR
             yield return ShowVRLoadingEnvironment();
-            
+    
             // Ocultar UI del lobby
             _spatialUIManager?.gameObject.SetActive(false);
+    
+            // Los clientes solo esperan, el host inicia el cambio de escena
+            if (NetworkBootstrapper.Instance?.IsHost == true)
+            {
+                Debug.Log("[GameCore] HOST: Will trigger scene change");
+            }
+            else
+            {
+                Debug.Log("[GameCore] CLIENT: Waiting for scene sync from host");
+            }
         }
 
         private IEnumerator EnterMatch()
@@ -353,21 +366,25 @@ namespace HackMonkeys.Core
                 Debug.LogError("[GameCore] Can only start match from lobby");
                 return false;
             }
-            
+    
+            // SOLO el host ejecuta esta lógica
+            if (NetworkBootstrapper.Instance?.IsHost != true)
+            {
+                Debug.LogWarning("[GameCore] Only host can start match - clients wait for scene sync");
+                return false;
+            }
+    
             _currentMapName = mapName;
             _currentPlayerCount = playerCount;
-            
+    
             // Transicionar a loading
             TransitionToState(GameState.LoadingMatch);
-            
-            // Esperar un frame para que la transición comience
+    
             await Task.Yield();
-            
-            // NetworkBootstrapper manejará la carga de la escena
-            // Cuando termine, llamará a OnSceneLoadComplete
-            
+    
             return true;
         }
+
 
         /// <summary>
         /// Llamado por NetworkBootstrapper cuando la escena del juego está lista
@@ -536,6 +553,20 @@ namespace HackMonkeys.Core
             }
             
             Debug.Log($"[GameCore] Scene loaded: {sceneName}");
+        }
+        
+        /// <summary>
+        /// Llamado cuando un CLIENTE recibe notificación de cambio de escena
+        /// </summary>
+        public void OnClientSceneChangeStarted()
+        {
+            Debug.Log("[GameCore] 📱 CLIENT: Scene change detected");
+    
+            if (_currentState == GameState.InLobby)
+            {
+                // El cliente también debe transicionar a LoadingMatch
+                TransitionToState(GameState.LoadingMatch);
+            }
         }
         #endregion
 

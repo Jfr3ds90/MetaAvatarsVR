@@ -18,8 +18,8 @@ namespace HackMonkeys.Core
         
         [Header("Progress Display")]
         [SerializeField] private Transform progressRing;
-        [SerializeField] private TextMeshPro progressText;
-        [SerializeField] private TextMeshPro loadingMessageText;
+        [SerializeField] private TextMeshProUGUI progressText;
+        [SerializeField] private TextMeshProUGUI loadingMessageText;
         [SerializeField] private Transform progressFillMesh;
         
         [Header("Animation Settings")]
@@ -28,7 +28,7 @@ namespace HackMonkeys.Core
         [SerializeField] private AnimationCurve pulseCurve = AnimationCurve.EaseInOut(0, 0.9f, 1, 1.1f);
         
         [Header("Tips System")]
-        [SerializeField] private TextMeshPro tipsText;
+        [SerializeField] private TextMeshProUGUI tipsText;
         [SerializeField] private string[] loadingTips = new string[]
         {
             "Look around to explore the environment",
@@ -181,7 +181,7 @@ namespace HackMonkeys.Core
             // Actualizar mesh de relleno
             if (progressFillMesh != null)
             {
-                progressFillMesh.localScale = new Vector3(1, 1, _currentProgress);
+                progressFillMesh.localScale = new Vector3(_currentProgress, 1, 1);
             }
         }
         
@@ -240,7 +240,7 @@ namespace HackMonkeys.Core
             // Fade out
             tipsText.DOFade(0, 0.3f).OnComplete(() =>
             {
-                tipsText.text = $"💡 {tip}";
+                tipsText.text = $"{tip}";
                 // Fade in
                 tipsText.DOFade(1, 0.3f);
             });

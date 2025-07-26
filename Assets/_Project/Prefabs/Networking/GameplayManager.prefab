@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7403114904001982086
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1126199634824703849}
+  - component: {fileID: 6087251206296257199}
+  - component: {fileID: 8537050097446999444}
+  m_Layer: 0
+  m_Name: GameplayManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1126199634824703849
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7403114904001982086}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.7391706, y: 0.42060497, z: -0.4574269}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6087251206296257199
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7403114904001982086}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2547629d25c514e438a47cd6292a6b40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  networkPlayerPrefab:
+    RawGuidValue: 48629d49d5b1ae946b389f4f00edc41f
+  spawnPoints: []
+  spawnRadius: 2
+  localVRRigPrefab: {fileID: 761170512005897583, guid: 41330e79e73770546bda661751b4b6e3, type: 3}
+  playerHeight: 1.8
+  teleportLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  matchDuration: 300
+  minimumPlayers: 2
+  inGameUICanvas: {fileID: 0}
+  matchTimerText: {fileID: 0}
+  playerCountText: {fileID: 0}
+  _MatchStartTime: 0
+  _MatchTimeRemaining: 0
+  _IsMatchActiveBool:
+    _value: 0
+  _CurrentMatchState: 0
+  enableDebugUI: 1
+  autoStartMatch: 0
+--- !u!114 &8537050097446999444
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7403114904001982086}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SortKey: 454380661
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 6087251206296257199}
+  ForceRemoteRenderTimeframe: 0

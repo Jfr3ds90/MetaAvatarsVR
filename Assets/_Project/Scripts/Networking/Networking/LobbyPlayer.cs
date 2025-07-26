@@ -426,7 +426,7 @@ namespace HackMonkeys.Core
 
         #region OnGUI Debug (Editor Only)
 
-        private void OnGUI()
+        /*private void OnGUI()
         {
             if (!Application.isEditor) return;
             if (!HasInputAuthority) return;
@@ -442,7 +442,7 @@ namespace HackMonkeys.Core
             }
 
             GUILayout.EndArea();
-        }
+        }*/
 
         #endregion
     }
