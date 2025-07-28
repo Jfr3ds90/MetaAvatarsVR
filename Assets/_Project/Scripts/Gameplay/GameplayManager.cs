@@ -42,7 +42,7 @@ namespace HackMonkeys.Gameplay
         private GameCore _gameCore;
         private Dictionary<PlayerRef, NetworkPlayer> _players = new Dictionary<PlayerRef, NetworkPlayer>();
         private NetworkPlayer _localPlayer;
-        private GameObject _localVRRig;
+        [SerializeField] public GameObject _localVRRig;
         
         // Match State - Ahora con [Networked] para sincronización
         [Networked] public float MatchStartTime { get; set; }
@@ -262,10 +262,13 @@ namespace HackMonkeys.Gameplay
                 Debug.LogError("[GameplayManager] ❌ Local VR Rig prefab not assigned!");
                 return;
             }
-            
-            // Instanciar OVRCameraRig
-            _localVRRig = Instantiate(localVRRigPrefab);
-            _localVRRig.name = "LocalVRRig";
+
+            if (_localVRRig == null)
+            {
+                // Instanciar OVRCameraRig
+                _localVRRig = Instantiate(localVRRigPrefab);
+                _localVRRig.name = "LocalVRRig";
+            }
             
             // Posicionar en la posición del NetworkPlayer
             _localVRRig.transform.position = localPlayer.transform.position;

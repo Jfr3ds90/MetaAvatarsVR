@@ -13,14 +13,17 @@ namespace HackMonkeys.Core
     /// </summary>
     public class GameplaySceneInitializer : MonoBehaviour
     {
-        [Header("Configuración")] [SerializeField]
-        private NetworkObject gameplayManagerPrefab;
+        [Header("Configuración")] 
+        [SerializeField] private NetworkObject gameplayManagerPrefab;
 
         [SerializeField] private float initializationTimeout = 10f;
         [SerializeField] private bool debugMode = true;
 
-        [Header("Spawn de Jugadores")] [SerializeField]
-        private bool autoSpawnExistingPlayers = true;
+        [Header("Local OVR reference")]
+        [SerializeField] private GameObject _localVRRig;
+        
+        [Header("Spawn de Jugadores")] 
+        [SerializeField] private bool autoSpawnExistingPlayers = true;
 
         [SerializeField] private float playerSpawnDelay = 0.5f;
 
@@ -239,6 +242,8 @@ namespace HackMonkeys.Core
                 Debug.Log($"[GameplaySceneInitializer] 📦 SpawnAsync completado:");
                 Debug.Log($"  - Resultado: {spawnedObject}");
                 Debug.Log($"  - Es null: {spawnedObject == null}");
+
+                spawnedObject.GetComponent<GameplayManager>()._localVRRig = _localVRRig;
 
                 if (spawnedObject != null)
                 {
