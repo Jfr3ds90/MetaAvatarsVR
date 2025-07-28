@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 2796717474011765885}
   - component: {fileID: 1289936717822314741}
   - component: {fileID: 1289107542244591759}
-  - component: {fileID: 8812494277151812921}
   - component: {fileID: 7724207370900133854}
+  - component: {fileID: 8812494277151812921}
   - component: {fileID: 3379479483115300021}
   - component: {fileID: 6646207363239874297}
   - component: {fileID: 2418662607008850712}
@@ -94,27 +94,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &8812494277151812921
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1563427895100623854}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.15619631, y: 0.211057, z: 0.15619631}
-  m_Center: {x: 0.0000019073486, y: -0.0010192692, z: 0.00000047683716}
 --- !u!64 &7724207370900133854
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -137,6 +116,27 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 2637185585131957396, guid: aaf72e3dcf4a4c54eb28839276759207, type: 3}
+--- !u!65 &8812494277151812921
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1563427895100623854}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.15619631, y: 0.211057, z: 0.15619631}
+  m_Center: {x: 0.0000019073486, y: -0.0010192692, z: 0.00000047683716}
 --- !u!114 &3379479483115300021
 MonoBehaviour:
   m_ObjectHideFlags: 0
