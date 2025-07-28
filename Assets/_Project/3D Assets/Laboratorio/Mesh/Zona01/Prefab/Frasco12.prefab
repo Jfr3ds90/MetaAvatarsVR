@@ -107,8 +107,8 @@ GameObject:
   - component: {fileID: 997080424308150507}
   - component: {fileID: 7427781184283764297}
   - component: {fileID: 3585916921142384619}
-  - component: {fileID: 7841217046164449515}
   - component: {fileID: 1705161416354721236}
+  - component: {fileID: 7841217046164449515}
   - component: {fileID: 7086095552433817044}
   - component: {fileID: 1670924689720982234}
   - component: {fileID: 6147167887850601031}
@@ -190,27 +190,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &7841217046164449515
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7466685653622397145}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.12882203, y: 0.21828374, z: 0.1288272}
-  m_Center: {x: -0.00000087171793, y: 0.00002296269, z: -0.00000046938658}
 --- !u!64 &1705161416354721236
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -233,6 +212,27 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 7982971855982231528, guid: aaf72e3dcf4a4c54eb28839276759207, type: 3}
+--- !u!65 &7841217046164449515
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7466685653622397145}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.12882203, y: 0.21828374, z: 0.1288272}
+  m_Center: {x: -0.00000087171793, y: 0.00002296269, z: -0.00000046938658}
 --- !u!114 &7086095552433817044
 MonoBehaviour:
   m_ObjectHideFlags: 0
