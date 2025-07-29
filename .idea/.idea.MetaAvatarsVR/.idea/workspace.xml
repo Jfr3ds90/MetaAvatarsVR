@@ -6,12 +6,16 @@
   <component name="ChangeListManager">
     <list default="true" id="7dff0c71-b160-42d0-b10d-cebacd1be9cc" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.MetaAvatarsVR/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MetaAvatarsVR/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scenes/Desarrollo/AvatarTest.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scenes/Desarrollo/AvatarTest.unity" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/Scenes/Desarrollo/MainMenu.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scenes/Desarrollo/MainMenu.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scenes/Niveles/Level_Laboratory.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scenes/Niveles/Level_Laboratory.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scenes/Niveles/Level_Oficina.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scenes/Niveles/Level_Oficina.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Core/GameplaySceneInitializer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Core/GameplaySceneInitializer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Gameplay/GameplayManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Gameplay/GameplayManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Gameplay/NetworkPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Gameplay/NetworkPlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Core/GameCore.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Core/GameCore.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Core/GameplayManager.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Core/GameplayManager.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Core/VRLoadingEnvironment.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Core/VRLoadingEnvironment.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Networking/Networking/LobbyController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Networking/Networking/LobbyController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Networking/Networking/LobbyPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Networking/Networking/LobbyPlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Scripts/Networking/Networking/NetworkBootstrapper.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Scripts/Networking/Networking/NetworkBootstrapper.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/TagManager.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/TagManager.asset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,7 +50,6 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/ef58b458094c4ca8aee5197d68ecde6bbfa00/d2/67b955a9/NetworkInput.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/ef58b458094c4ca8aee5197d68ecde6bbfa00/d6/fc9e94dd/StartGameArgs.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/ef58b458094c4ca8aee5197d68ecde6bbfa00/e7/616d8765/NetworkRunner.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/f22cb97e7aa5412ba04225fa1fc145f246ae00/c4/cbd600a5/Task.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/d44b17e136d09081da1e8fd0e8c83fde60e11818b9f2442d7ed8cb733fae895e/System.Collections.Generic.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Photon/Fusion/Editor/Fusion.Unity.Editor.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/_Project/Scripts/Core/GameCore.cs" root0="FORCE_HIGHLIGHTING" />
@@ -129,7 +132,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;XThreadsFramesViewSplitterKey&quot;: &quot;0.24429224&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;ad3089dd&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;fredy/GameCore&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -177,15 +180,13 @@
       <option name="useMixedMode" value="false" />
       <method v="2" />
     </configuration>
-    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" ignored-value-for-modified-check="4864">
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
       <option name="allowRunningInParallel" value="false" />
       <option name="listenPortForConnections" value="false" />
-      <option name="pid" value="4864" />
+      <option name="pid" />
       <option name="projectPathOnTarget" />
       <option name="runtimes">
-        <list>
-          <MonoRuntime />
-        </list>
+        <list />
       </option>
       <option name="selectedOptions">
         <list />
@@ -246,8 +247,6 @@
       <workItem from="1753388703788" duration="7726000" />
       <workItem from="1753450235418" duration="4075000" />
       <workItem from="1753472594583" duration="7345000" />
-      <workItem from="1753749632469" duration="2634000" />
-      <workItem from="1753791188406" duration="6381000" />
     </task>
     <servers />
   </component>
@@ -280,17 +279,30 @@
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/Assets/_Project/Scripts/Gameplay/NetworkPlayer.cs</url>
-          <line>204</line>
-          <properties documentPath="D:\Unity\HackMonkeys\MetaAvatarsVR\Assets\_Project\Scripts\Gameplay\NetworkPlayer.cs" containingFunctionPresentation="Method 'SetVRRig'">
+          <url>file://$PROJECT_DIR$/Assets/_Project/Scripts/Gameplay/GameplayManager.cs</url>
+          <line>64</line>
+          <properties documentPath="D:\Unity\HackMonkeys\MetaAvatarsVR\Assets\_Project\Scripts\Gameplay\GameplayManager.cs" containingFunctionPresentation="Method 'Awake'">
             <startOffsets>
-              <option value="7389" />
+              <option value="2409" />
             </startOffsets>
             <endOffsets>
-              <option value="7390" />
+              <option value="2410" />
             </endOffsets>
           </properties>
-          <option name="timeStamp" value="11" />
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Assets/_Project/Scripts/Gameplay/GameplayManager.cs</url>
+          <line>91</line>
+          <properties documentPath="D:\Unity\HackMonkeys\MetaAvatarsVR\Assets\_Project\Scripts\Gameplay\GameplayManager.cs" containingFunctionPresentation="Method 'OnDestroy'">
+            <startOffsets>
+              <option value="3180" />
+            </startOffsets>
+            <endOffsets>
+              <option value="3181" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="16" />
         </line-breakpoint>
         <breakpoint type="DotNet_Exception_Breakpoints">
           <properties exception="System.OperationCanceledException" breakIfHandledByOtherCode="false" displayValue="System.OperationCanceledException" />

@@ -7545,55 +7545,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3072884307075317874, guid: 0c84313af2ca13d479bd0854ae68879c, type: 3}
   m_PrefabInstance: {fileID: 1428668526}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1489525230
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1489525232}
-  - component: {fileID: 1489525231}
-  m_Layer: 0
-  m_Name: GameInitializer
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1489525231
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1489525230}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a6df80c96136d6741adb37c34c936af4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gameplayManagerPrefab: {fileID: 8537050097446999444, guid: 90b5ab4d4666b8f409cbd12bcd139805, type: 3}
-  initializationTimeout: 10
-  debugMode: 1
-  autoSpawnExistingPlayers: 1
-  playerSpawnDelay: 0.5
---- !u!4 &1489525232
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1489525230}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1497169511
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7946,10 +7897,6 @@ PrefabInstance:
     - target: {fileID: 900003476697620406, guid: 90e106fad5b14a84b99f696448464833, type: 3}
       propertyPath: m_Name
       value: PlayerPrefab 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 900003476697620406, guid: 90e106fad5b14a84b99f696448464833, type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1487486497181818068, guid: 90e106fad5b14a84b99f696448464833, type: 3}
       propertyPath: m_UseGravity
@@ -18484,7 +18431,6 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1489525232}
   - {fileID: 203844589}
   - {fileID: 1160234427}
   - {fileID: 1281264023}

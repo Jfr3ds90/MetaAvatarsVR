@@ -9,38 +9,22 @@ namespace HackMonkeys.Core
 {
     /// <summary>
     /// Inicializador de escena de gameplay que maneja el spawn del GameplayManager
-    /// y la configuración del VR Rig local para cada cliente
+    /// Se coloca en cada escena de juego y se encarga de la inicialización correcta
     /// </summary>
     public class GameplaySceneInitializer : MonoBehaviour
     {
-        [Header("Configuración")]
-        [SerializeField] private NetworkObject gameplayManagerPrefab;
+        [Header("Configuración")] [SerializeField]
+        private NetworkObject gameplayManagerPrefab;
+
         [SerializeField] private float initializationTimeout = 10f;
         [SerializeField] private bool debugMode = true;
 
-        [Header("Local VR Reference")]
-        [SerializeField] private GameObject localVRRig; // OVRCameraRig existente en la escena
-        
-        [Header("Spawn de Jugadores")]
-        [SerializeField] private bool autoSpawnExistingPlayers = true;
+        [Header("Spawn de Jugadores")] [SerializeField]
+        private bool autoSpawnExistingPlayers = true;
+
         [SerializeField] private float playerSpawnDelay = 0.5f;
 
         private CancellationTokenSource _cancellationTokenSource;
-
-        private void Awake()
-        {
-            // Validar que el VR Rig esté asignado
-            if (localVRRig == null)
-            {
-                Debug.LogWarning("[GameplaySceneInitializer] ⚠️ Local VR Rig no asignado, buscando en la escena...");
-                localVRRig = FindObjectOfType<OVRCameraRig>()?.gameObject;
-                
-                if (localVRRig != null)
-                {
-                    Debug.Log("[GameplaySceneInitializer] ✅ OVRCameraRig encontrado en la escena");
-                }
-            }
-        }
 
         private async void Start()
         {
@@ -91,129 +75,84 @@ namespace HackMonkeys.Core
             if (debugMode)
                 Debug.Log($"[GameplaySceneInitializer] ✅ NetworkRunner encontrado - IsServer: {runner.IsServer}");
 
-            // 2. Bifurcación HOST/CLIENTE
-            if (runner.IsServer)
+            // 2. Solo el servidor continúa
+            if (!runner.IsServer)
             {
-                // HOST: Spawnear GameplayManager y manejar jugadores
-                await HandleHostInitialization(runner, cancellationToken);
-            }
-            else
-            {
-                // CLIENTE: Esperar su NetworkPlayer y configurar VR
-                await HandleClientInitialization(runner, cancellationToken);
-            }
-        }
-
-        #region Host Logic
-        private async Task HandleHostInitialization(NetworkRunner runner, CancellationToken cancellationToken)
-        {
-            // 1. Esperar simulación
-            if (debugMode) Debug.Log("[GameplaySceneInitializer] ⏳ HOST: Esperando simulación activa...");
-            await WaitForSimulationReady(runner, cancellationToken);
-
-            // 2. Verificar GameplayManager existente
-            var existingManager = FindObjectOfType<GameplayManager>();
-            if (existingManager != null)
-            {
-                Debug.LogWarning("[GameplaySceneInitializer] ⚠️ GameplayManager ya existe");
-                // NO configurar VR aquí todavía
+                if (debugMode) Debug.Log("[GameplaySceneInitializer] 👤 Cliente detectado - terminando inicialización");
                 return;
             }
 
-            // 3. Spawn GameplayManager
+            // 3. Esperar a que la simulación esté activa
+            if (debugMode) Debug.Log("[GameplaySceneInitializer] ⏳ Esperando simulación activa...");
+
+            await WaitForSimulationReady(runner, cancellationToken);
+
+            if (debugMode) Debug.Log($"[GameplaySceneInitializer] ✅ Simulación lista - Tick: {runner.Tick}");
+
+            // 4. Verificar si GameplayManager ya existe
+            var existingManager = FindObjectOfType<GameplayManager>();
+            if (existingManager != null)
+            {
+                Debug.LogWarning("[GameplaySceneInitializer] ⚠️ GameplayManager ya existe en la escena");
+                return;
+            }
+
+            // 5. Spawn del GameplayManager
             if (debugMode) Debug.Log("[GameplaySceneInitializer] 🎯 Spawneando GameplayManager...");
+
+            if (!runner.CanSpawn)
+            {
+                Debug.LogError("[GameplaySceneInitializer] ❌ Runner no puede spawnear objetos!");
+                return;
+            }
             NetworkObject spawnedManager = await SpawnGameplayManager(runner);
 
             if (spawnedManager != null)
             {
-                if (debugMode) Debug.Log("[GameplaySceneInitializer] ✅ GameplayManager spawneado");
+                if (debugMode) Debug.Log("[GameplaySceneInitializer] ✅ GameplayManager spawneado exitosamente");
 
-                // 4. Notificar a GameCore
+                // 6. Notificar a GameCore si es necesario
                 NotifyGameCore();
 
-                // 5. Manejar jugadores existentes (esto crea los NetworkPlayers)
+                // 7. Manejar jugadores existentes
                 if (autoSpawnExistingPlayers)
                 {
                     await HandleExistingPlayers(runner, cancellationToken);
                 }
-
-                // 6. AHORA sí configurar VR del host
-                await SetupHostVR(runner, cancellationToken);
-            }
-        }
-
-        private async Task SetupHostVR(NetworkRunner runner, CancellationToken cancellationToken)
-        {
-            if (debugMode) Debug.Log("[GameplaySceneInitializer] 🥽 HOST: Configurando VR local...");
-
-            // Esperar por el NetworkPlayer del host
-            NetworkPlayer hostPlayer = await WaitForLocalNetworkPlayer(runner, cancellationToken);
-
-            if (hostPlayer != null && localVRRig != null)
-            {
-                hostPlayer.SetVRRig(localVRRig);
-                Debug.Log("[GameplaySceneInitializer] ✅ HOST: VR Rig conectado al NetworkPlayer");
-            }
-        }
-        #endregion
-
-        #region Client Logic
-        private async Task HandleClientInitialization(NetworkRunner runner, CancellationToken cancellationToken)
-        {
-            if (debugMode) Debug.Log("[GameplaySceneInitializer] 👤 CLIENTE: Iniciando configuración...");
-
-            // 1. Esperar a que GameplayManager sea replicado
-            GameplayManager gameplayManager = await WaitForGameplayManager(cancellationToken);
-            if (gameplayManager == null)
-            {
-                Debug.LogError("[GameplaySceneInitializer] ❌ CLIENTE: Timeout esperando GameplayManager");
-                return;
-            }
-
-            // 2. Esperar por el NetworkPlayer local
-            NetworkPlayer localPlayer = await WaitForLocalNetworkPlayer(runner, cancellationToken);
-            if (localPlayer == null)
-            {
-                Debug.LogError("[GameplaySceneInitializer] ❌ CLIENTE: Timeout esperando NetworkPlayer local");
-                return;
-            }
-
-            // 3. Configurar el VR Rig local
-            if (localVRRig != null)
-            {
-                if (debugMode) Debug.Log("[GameplaySceneInitializer] 🥽 CLIENTE: Conectando VR Rig local...");
-                
-                localPlayer.SetVRRig(localVRRig);
-                
-                // Notificar a GameplayManager (sin crear nuevo VR Rig)
-                gameplayManager.RegisterLocalPlayer(localPlayer);
-                
-                Debug.Log("[GameplaySceneInitializer] ✅ CLIENTE: Configuración completa");
             }
             else
             {
-                Debug.LogError("[GameplaySceneInitializer] ❌ CLIENTE: No se encontró VR Rig local en la escena");
+                Debug.LogError("[GameplaySceneInitializer] ❌ Fallo al spawnear GameplayManager");
             }
         }
-        #endregion
 
-        #region Wait Methods
         private async Task<NetworkRunner> WaitForNetworkRunner(CancellationToken cancellationToken)
         {
             float elapsedTime = 0f;
+            
+            Debug.Log($"[GameplaySceneInitializer] Scene: {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
+            Debug.Log($"[GameplaySceneInitializer] NetworkRunner instances: {NetworkRunner.Instances.Count}");
+    
+            foreach (var runner in NetworkRunner.Instances)
+            {
+                Debug.Log($"[GameplaySceneInitializer] Found runner: {runner.name}, IsRunning: {runner.IsRunning}, GameMode: {runner.GameMode}");
+            }
 
             while (elapsedTime < initializationTimeout)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                // Por la escena actual
-                NetworkRunner runner = NetworkRunner.GetRunnerForScene(gameObject.scene);
+                // Intentar obtener el runner de varias formas
+                NetworkRunner runner = null;
+
+                // Método 1: Por la escena actual
+                runner = NetworkRunner.GetRunnerForScene(gameObject.scene);
                 if (runner != null && runner.IsRunning)
                 {
                     return runner;
                 }
 
-                // Primera instancia activa
+                // Método 2: Primera instancia activa
                 if (NetworkRunner.Instances.Count > 0)
                 {
                     foreach (var instance in NetworkRunner.Instances)
@@ -225,8 +164,13 @@ namespace HackMonkeys.Core
                     }
                 }
 
-                await Task.Delay(100);
+                await Task.Delay(100); // Esperar 100ms
                 elapsedTime += 0.1f;
+
+                if (debugMode && (int)(elapsedTime * 10) % 10 == 0) // Log cada segundo
+                {
+                    Debug.Log($"[GameplaySceneInitializer] ⏳ Esperando runner... ({elapsedTime:F1}s)");
+                }
             }
 
             return null;
@@ -234,12 +178,14 @@ namespace HackMonkeys.Core
 
         private async Task WaitForSimulationReady(NetworkRunner runner, CancellationToken cancellationToken)
         {
+            // Esperar a que el tick sea mayor que 0 (simulación activa)
             while (runner.Tick <= 0)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 await Task.Yield();
             }
 
+            // Esperar un par de ticks más para asegurar estabilidad
             int targetTick = runner.Tick + 2;
             while (runner.Tick < targetTick)
             {
@@ -248,105 +194,164 @@ namespace HackMonkeys.Core
             }
         }
 
-        private async Task<GameplayManager> WaitForGameplayManager(CancellationToken cancellationToken)
-        {
-            float elapsedTime = 0f;
-
-            while (elapsedTime < initializationTimeout)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                GameplayManager manager = GameplayManager.Instance;
-                if (manager != null)
-                {
-                    return manager;
-                }
-
-                await Task.Delay(100);
-                elapsedTime += 0.1f;
-
-                if (debugMode && (int)(elapsedTime * 10) % 10 == 0)
-                {
-                    Debug.Log($"[GameplaySceneInitializer] ⏳ Esperando GameplayManager... ({elapsedTime:F1}s)");
-                }
-            }
-
-            return null;
-        }
-
-        private async Task<NetworkPlayer> WaitForLocalNetworkPlayer(NetworkRunner runner, CancellationToken cancellationToken)
-        {
-            float elapsedTime = 0f;
-
-            while (elapsedTime < initializationTimeout)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                var networkPlayers = FindObjectsOfType<NetworkPlayer>();
-                foreach (var player in networkPlayers)
-                {
-                    if (player.HasInputAuthority)
-                    {
-                        return player;
-                    }
-                }
-
-                await Task.Delay(100);
-                elapsedTime += 0.1f;
-
-                if (debugMode && (int)(elapsedTime * 10) % 10 == 0)
-                {
-                    Debug.Log($"[GameplaySceneInitializer] ⏳ Esperando NetworkPlayer local... ({elapsedTime:F1}s)");
-                }
-            }
-
-            return null;
-        }
-        #endregion
-
-        #region Spawn Methods
         private async Task<NetworkObject> SpawnGameplayManager(NetworkRunner runner)
         {
             try
             {
+                // Verificaciones previas
+                Debug.Log("[GameplaySceneInitializer] 🔍 Verificando antes de spawn:");
+                Debug.Log($"  - Runner válido: {runner != null}");
+                Debug.Log($"  - Runner.IsRunning: {runner?.IsRunning}");
+                Debug.Log($"  - Runner.IsServer: {runner?.IsServer}");
+                Debug.Log($"  - Prefab válido: {gameplayManagerPrefab != null}");
+
+                if (gameplayManagerPrefab != null)
+                {
+                    Debug.Log($"  - Prefab name: {gameplayManagerPrefab.name}");
+                    Debug.Log($"  - Has NetworkObject: {gameplayManagerPrefab.GetComponent<NetworkObject>() != null}");
+                    Debug.Log($"  - Has GameplayManager: {gameplayManagerPrefab.GetComponent<GameplayManager>() != null}");
+                }
+                
                 if (!runner.CanSpawn)
                 {
                     Debug.LogError("[GameplaySceneInitializer] ❌ Runner no puede spawnear objetos!");
                     return null;
                 }
+                
+                // Intentar spawn con más información
+                Debug.Log("[GameplaySceneInitializer] 📡 Llamando a SpawnAsync...");
 
-                NetworkObject spawnedObject = await runner.SpawnAsync(
+                var spawnTask = runner.SpawnAsync(
                     gameplayManagerPrefab,
                     Vector3.zero,
-                    Quaternion.identity
+                    Quaternion.identity,
+                    onBeforeSpawned: (runner, obj) =>
+                    {
+                        Debug.Log("[GameplaySceneInitializer] 📦 Pre-spawn callback ejecutado");
+                        Debug.Log($"  - Object: {obj}");
+                        Debug.Log($"  - Object name: {obj?.name}");
+                    }
                 );
+
+                Debug.Log("[GameplaySceneInitializer] ⏳ Esperando resultado de SpawnAsync...");
+                NetworkObject spawnedObject = await spawnTask;
+
+                Debug.Log($"[GameplaySceneInitializer] 📦 SpawnAsync completado:");
+                Debug.Log($"  - Resultado: {spawnedObject}");
+                Debug.Log($"  - Es null: {spawnedObject == null}");
 
                 if (spawnedObject != null)
                 {
+                    Debug.Log($"  - Spawned object name: {spawnedObject.name}");
+                    Debug.Log($"  - Has GameplayManager: {spawnedObject.GetComponent<GameplayManager>() != null}");
+                    Debug.Log($"  - IsValid: {spawnedObject.IsValid}");
+                    Debug.Log($"  - Id: {spawnedObject.Id}");
+
+                    // Verificar que realmente se spawneó
                     var gm = spawnedObject.GetComponent<GameplayManager>();
                     if (gm != null)
                     {
+                        Debug.Log("[GameplaySceneInitializer] ✅ GameplayManager component encontrado!");
                         return spawnedObject;
                     }
+                    else
+                    {
+                        Debug.LogError(
+                            "[GameplaySceneInitializer] ❌ NetworkObject spawneado pero sin GameplayManager component!");
+                    }
+                }
+                else
+                {
+                    Debug.LogError("[GameplaySceneInitializer] ❌ SpawnAsync retornó null!");
                 }
 
                 return null;
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[GameplaySceneInitializer] ❌ Excepción en SpawnGameplayManager: {e.Message}");
+                Debug.LogError($"[GameplaySceneInitializer] ❌ Excepción en SpawnGameplayManager:");
+                Debug.LogError($"  - Tipo: {e.GetType().Name}");
+                Debug.LogError($"  - Mensaje: {e.Message}");
+                Debug.LogError($"  - StackTrace: {e.StackTrace}");
                 return null;
             }
         }
-        #endregion
 
-        #region Helper Methods
+        private NetworkObject SpawnGameplayManagerSync(NetworkRunner runner)
+        {
+            Debug.Log("[GameplaySceneInitializer] 🔄 Intentando spawn síncrono...");
+
+            try
+            {
+                // Método 1: Spawn directo con prefab
+                NetworkObject spawnedObject = runner.Spawn(
+                    gameplayManagerPrefab,
+                    Vector3.zero,
+                    Quaternion.identity,
+                    null, // Sin input authority específico
+                    (runner, obj) =>
+                    {
+                        Debug.Log($"[GameplaySceneInitializer] 📦 OnBeforeSpawned - Object: {obj?.name}");
+                    }
+                );
+
+                if (spawnedObject != null)
+                {
+                    Debug.Log($"[GameplaySceneInitializer] ✅ Spawn síncrono exitoso: {spawnedObject.name}");
+                    return spawnedObject;
+                }
+                else
+                {
+                    Debug.LogError("[GameplaySceneInitializer] ❌ Spawn síncrono retornó null");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[GameplaySceneInitializer] ❌ Error en spawn síncrono: {e.Message}");
+            }
+
+            // Método 2: Instanciar localmente primero (NO RECOMENDADO pero para debug)
+            Debug.LogWarning("[GameplaySceneInitializer] ⚠️ Intentando método de respaldo...");
+
+            try
+            {
+                // Verificar si podemos al menos instanciar el prefab
+                GameObject tempInstance = Instantiate(gameplayManagerPrefab.gameObject);
+                Debug.Log($"[GameplaySceneInitializer] 📦 Instancia local creada: {tempInstance.name}");
+
+                // Verificar componentes
+                var netObj = tempInstance.GetComponent<NetworkObject>();
+                var gmComp = tempInstance.GetComponent<GameplayManager>();
+
+                Debug.Log($"  - NetworkObject: {netObj != null}");
+                Debug.Log($"  - GameplayManager: {gmComp != null}");
+
+                // Destruir la instancia temporal
+                DestroyImmediate(tempInstance);
+
+                // Si llegamos aquí, el prefab está bien configurado
+                Debug.Log("[GameplaySceneInitializer] ✅ Prefab validado correctamente");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[GameplaySceneInitializer] ❌ No se puede ni instanciar el prefab: {e.Message}");
+            }
+
+            return null;
+        }
+
+
         private void NotifyGameCore()
         {
             var gameCore = GameCore.Instance;
-            if (gameCore != null && gameCore.CurrentState == GameCore.GameState.LoadingMatch)
+            if (gameCore != null)
             {
-                gameCore.OnGameSceneLoaded();
+                if (debugMode) Debug.Log("[GameplaySceneInitializer] 📢 Notificando a GameCore...");
+                // GameCore ya debería estar en estado InMatch, pero podemos confirmar
+                if (gameCore.CurrentState == GameCore.GameState.LoadingMatch)
+                {
+                    gameCore.OnGameSceneLoaded();
+                }
             }
         }
 
@@ -354,28 +359,86 @@ namespace HackMonkeys.Core
         {
             if (debugMode) Debug.Log("[GameplaySceneInitializer] 👥 Manejando jugadores existentes...");
 
+            // Esperar un poco para que GameplayManager se inicialice
             await Task.Delay((int)(playerSpawnDelay * 1000), cancellationToken);
 
             var gameplayManager = GameplayManager.Instance;
-            if (gameplayManager == null) return;
+            if (gameplayManager == null)
+            {
+                Debug.LogWarning("[GameplaySceneInitializer] ⚠️ No se pudo obtener GameplayManager.Instance");
+                return;
+            }
 
+            // Obtener todos los jugadores conectados
             foreach (var player in runner.ActivePlayers)
             {
                 if (player.IsRealPlayer)
                 {
+                    if (debugMode) Debug.Log($"[GameplaySceneInitializer] 👤 Notificando jugador existente: {player}");
+
+                    // Llamar a PlayerJoined manualmente
                     gameplayManager.PlayerJoined(player);
+
+                    // Pequeño delay entre jugadores
                     await Task.Delay(100, cancellationToken);
                 }
             }
+
+            if (debugMode) Debug.Log("[GameplaySceneInitializer] ✅ Jugadores existentes procesados");
         }
-        #endregion
 
         private void OnDestroy()
         {
+            // Cancelar cualquier operación en progreso
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
 
             if (debugMode) Debug.Log("[GameplaySceneInitializer] 🧹 Initializer destruido");
         }
+
+        #region Debug Helpers
+
+        [ContextMenu("Debug: Print Scene State")]
+        private void DebugPrintSceneState()
+        {
+            Debug.Log("=== GAMEPLAY SCENE STATE ===");
+
+            // NetworkRunner
+            var runner = NetworkRunner.GetRunnerForScene(gameObject.scene);
+            Debug.Log($"NetworkRunner: {(runner != null ? "Found" : "Not Found")}");
+            if (runner != null)
+            {
+                Debug.Log($"  - IsRunning: {runner.IsRunning}");
+                Debug.Log($"  - IsServer: {runner.IsServer}");
+                Debug.Log($"  - Tick: {runner.Tick}");
+                Debug.Log($"  - ActivePlayers: {runner.ActivePlayers.Count()}");
+            }
+
+            // GameplayManager
+            var gameplayManager = FindObjectOfType<GameplayManager>();
+            Debug.Log($"GameplayManager: {(gameplayManager != null ? "Exists" : "Not Found")}");
+
+            // GameCore
+            var gameCore = GameCore.Instance;
+            Debug.Log($"GameCore State: {(gameCore != null ? gameCore.CurrentState.ToString() : "null")}");
+
+            Debug.Log("===========================");
+        }
+
+        [ContextMenu("Test: Force Spawn GameplayManager")]
+        private async void TestForceSpawn()
+        {
+            var runner = NetworkRunner.GetRunnerForScene(gameObject.scene);
+            if (runner != null && runner.IsServer)
+            {
+                await SpawnGameplayManager(runner);
+            }
+            else
+            {
+                Debug.LogError("No se puede forzar spawn - no hay runner o no es servidor");
+            }
+        }
+
+        #endregion
     }
 }
