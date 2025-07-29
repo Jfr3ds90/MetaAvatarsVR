@@ -28,6 +28,9 @@ namespace HackMonkeys.Gameplay
         [SerializeField] private GameObject inGameUICanvas;
         [SerializeField] private TMPro.TextMeshProUGUI matchTimerText;
         [SerializeField] private TMPro.TextMeshProUGUI playerCountText;
+        
+        [Header("Debug")]
+        [SerializeField] private bool enableDebugLogs = true;
         #endregion
 
         #region Private Fields
@@ -166,33 +169,60 @@ namespace HackMonkeys.Gameplay
         }
 
         private void SpawnPlayer(PlayerRef player)
+{
+    if (enableDebugLogs) Debug.Log($"[GameplayManager] 🎯 Spawning player {player}");
+    
+    // Verificar que el player es válido
+    if (!player.IsRealPlayer)
+    {
+        Debug.LogError($"[GameplayManager] ❌ Invalid player reference: {player}");
+        return;
+    }
+    
+    // Obtener punto de spawn
+    Vector3 spawnPosition = GetSpawnPosition();
+    Quaternion spawnRotation = GetSpawnRotation();
+    
+    // Spawn con callback para verificar autoridad
+    NetworkObject networkPlayerObject = Runner.Spawn(
+        networkPlayerPrefab, 
+        spawnPosition, 
+        spawnRotation, 
+        inputAuthority: player,
+        onBeforeSpawned: (runner, obj) =>
         {
-            Debug.Log($"[GameplayManager] 🎯 Spawning player {player}");
+            Debug.Log($"[GameplayManager] Pre-spawn callback for player {player}");
+            Debug.Log($"  - Object being spawned: {obj}");
+            Debug.Log($"  - Will have InputAuthority: {player}");
+        }
+    );
+    
+    if (networkPlayerObject != null)
+    {
+        NetworkPlayer networkPlayer = networkPlayerObject.GetComponent<NetworkPlayer>();
+        _players[player] = networkPlayer;
+        
+        if (enableDebugLogs) 
+        {
+            Debug.Log($"[GameplayManager] ✅ Player {player} spawned successfully");
+            Debug.Log($"  - Object.InputAuthority: {networkPlayerObject.InputAuthority}");
+            Debug.Log($"  - HasInputAuthority: {networkPlayerObject.HasInputAuthority}");
+            Debug.Log($"  - StateAuthority: {networkPlayerObject.StateAuthority}");
             
-            // Obtener punto de spawn
-            Vector3 spawnPosition = GetSpawnPosition();
-            Quaternion spawnRotation = GetSpawnRotation();
-            
-            // Spawn del NetworkPlayer
-            NetworkObject networkPlayerObject = Runner.Spawn(
-                networkPlayerPrefab, 
-                spawnPosition, 
-                spawnRotation, 
-                player
-            );
-            
-            if (networkPlayerObject != null)
+            // Verificación adicional
+            if (networkPlayerObject.InputAuthority != player)
             {
-                NetworkPlayer networkPlayer = networkPlayerObject.GetComponent<NetworkPlayer>();
-                _players[player] = networkPlayer;
-                
-                Debug.Log($"[GameplayManager] ✅ Player {player} spawned successfully");
-            }
-            else
-            {
-                Debug.LogError($"[GameplayManager] ❌ Failed to spawn player {player}");
+                Debug.LogError($"[GameplayManager] ⚠️ InputAuthority mismatch!");
+                Debug.LogError($"  - Expected: {player}");
+                Debug.LogError($"  - Got: {networkPlayerObject.InputAuthority}");
             }
         }
+    }
+    else
+    {
+        Debug.LogError($"[GameplayManager] ❌ Failed to spawn player {player}");
+    }
+}
 
         private Vector3 GetSpawnPosition()
         {
@@ -216,8 +246,7 @@ namespace HackMonkeys.Gameplay
 
         #region Local Player Registration
         /// <summary>
-        /// Registra el jugador local (llamado por GameplaySceneInitializer)
-        /// NO crea VR Rig, solo registra el jugador
+        /// Registra el jugador local (llamado por NetworkPlayer cuando se auto-configura)
         /// </summary>
         public void RegisterLocalPlayer(NetworkPlayer localPlayer)
         {
@@ -251,6 +280,12 @@ namespace HackMonkeys.Gameplay
         {
             // Actualizar UI localmente
             UpdateUI();
+            
+            // Debug para verificar jugadores
+            if (enableDebugLogs && Time.frameCount % 120 == 0) // Cada 2 segundos
+            {
+                DebugPlayersStatus();
+            }
         }
 
         private void UpdateMatchTimer()
@@ -456,13 +491,30 @@ namespace HackMonkeys.Gameplay
         #endregion
 
         #region Debug
-        [ContextMenu("Debug: List Players")]
+        private void DebugPlayersStatus()
+        {
+            Debug.Log($"[GameplayManager] === PLAYERS STATUS === (IsServer: {Runner.IsServer})");
+            foreach (var kvp in _players)
+            {
+                var player = kvp.Value;
+                Debug.Log($"  Player {kvp.Key}:");
+                Debug.Log($"    - GameObject: {player.name}");
+                Debug.Log($"    - HasInputAuthority: {player.HasInputAuthority}");
+                Debug.Log($"    - IsVRConnected: {player.IsVRRigConnected()}");
+                Debug.Log($"    - Position: {player.transform.position}");
+            }
+            Debug.Log("======================");
+        }
+
+        [ContextMenu("Debug: Force List Players")]
         private void DebugListPlayers()
         {
             Debug.Log("=== GameplayManager Players ===");
             foreach (var kvp in _players)
             {
                 Debug.Log($"Player {kvp.Key}: {kvp.Value.name}");
+                Debug.Log($"  - InputAuthority: {kvp.Value.Object.InputAuthority}");
+                Debug.Log($"  - HasInputAuthority: {kvp.Value.HasInputAuthority}");
             }
             Debug.Log($"Total: {_players.Count}");
             Debug.Log("==============================");

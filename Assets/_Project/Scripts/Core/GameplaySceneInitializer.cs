@@ -9,7 +9,7 @@ namespace HackMonkeys.Core
 {
     /// <summary>
     /// Inicializador de escena de gameplay que maneja el spawn del GameplayManager
-    /// y la configuración del VR Rig local para cada cliente
+    /// y prepara el VR Rig local para auto-detección
     /// </summary>
     public class GameplaySceneInitializer : MonoBehaviour
     {
@@ -29,7 +29,7 @@ namespace HackMonkeys.Core
 
         private void Awake()
         {
-            // Validar que el VR Rig esté asignado
+            // Validar y configurar VR Rig
             if (localVRRig == null)
             {
                 Debug.LogWarning("[GameplaySceneInitializer] ⚠️ Local VR Rig no asignado, buscando en la escena...");
@@ -39,6 +39,13 @@ namespace HackMonkeys.Core
                 {
                     Debug.Log("[GameplaySceneInitializer] ✅ OVRCameraRig encontrado en la escena");
                 }
+            }
+            
+            // Asignar tag para auto-detección
+            if (localVRRig != null && !localVRRig.CompareTag("LocalVRRig"))
+            {
+                localVRRig.tag = "LocalVRRig";
+                Debug.Log("[GameplaySceneInitializer] 🏷️ VR Rig etiquetado como 'LocalVRRig'");
             }
         }
 
@@ -99,101 +106,63 @@ namespace HackMonkeys.Core
             }
             else
             {
-                // CLIENTE: Esperar su NetworkPlayer y configurar VR
-                await HandleClientInitialization(runner, cancellationToken);
+                // CLIENTE: Solo preparar el VR Rig para auto-detección
+                PrepareClientVRRig();
             }
         }
 
         #region Host Logic
         private async Task HandleHostInitialization(NetworkRunner runner, CancellationToken cancellationToken)
         {
-            // 1. Esperar simulación
+            // Esperar a que la simulación esté activa
             if (debugMode) Debug.Log("[GameplaySceneInitializer] ⏳ HOST: Esperando simulación activa...");
             await WaitForSimulationReady(runner, cancellationToken);
 
-            // 2. Verificar GameplayManager existente
+            // Verificar si GameplayManager ya existe
             var existingManager = FindObjectOfType<GameplayManager>();
             if (existingManager != null)
             {
-                Debug.LogWarning("[GameplaySceneInitializer] ⚠️ GameplayManager ya existe");
-                // NO configurar VR aquí todavía
+                Debug.LogWarning("[GameplaySceneInitializer] ⚠️ GameplayManager ya existe en la escena");
                 return;
             }
 
-            // 3. Spawn GameplayManager
+            // Spawn del GameplayManager
             if (debugMode) Debug.Log("[GameplaySceneInitializer] 🎯 Spawneando GameplayManager...");
             NetworkObject spawnedManager = await SpawnGameplayManager(runner);
 
             if (spawnedManager != null)
             {
-                if (debugMode) Debug.Log("[GameplaySceneInitializer] ✅ GameplayManager spawneado");
+                if (debugMode) Debug.Log("[GameplaySceneInitializer] ✅ GameplayManager spawneado exitosamente");
 
-                // 4. Notificar a GameCore
+                // Notificar a GameCore
                 NotifyGameCore();
 
-                // 5. Manejar jugadores existentes (esto crea los NetworkPlayers)
+                // Manejar jugadores existentes (esto creará los NetworkPlayers)
                 if (autoSpawnExistingPlayers)
                 {
                     await HandleExistingPlayers(runner, cancellationToken);
                 }
-
-                // 6. AHORA sí configurar VR del host
-                await SetupHostVR(runner, cancellationToken);
-            }
-        }
-
-        private async Task SetupHostVR(NetworkRunner runner, CancellationToken cancellationToken)
-        {
-            if (debugMode) Debug.Log("[GameplaySceneInitializer] 🥽 HOST: Configurando VR local...");
-
-            // Esperar por el NetworkPlayer del host
-            NetworkPlayer hostPlayer = await WaitForLocalNetworkPlayer(runner, cancellationToken);
-
-            if (hostPlayer != null && localVRRig != null)
-            {
-                hostPlayer.SetVRRig(localVRRig);
-                Debug.Log("[GameplaySceneInitializer] ✅ HOST: VR Rig conectado al NetworkPlayer");
+                
+                // El NetworkPlayer del host se auto-configurará cuando sea spawneado
+                if (debugMode) Debug.Log("[GameplaySceneInitializer] ✅ HOST: Inicialización completa");
             }
         }
         #endregion
 
         #region Client Logic
-        private async Task HandleClientInitialization(NetworkRunner runner, CancellationToken cancellationToken)
+        private void PrepareClientVRRig()
         {
-            if (debugMode) Debug.Log("[GameplaySceneInitializer] 👤 CLIENTE: Iniciando configuración...");
-
-            // 1. Esperar a que GameplayManager sea replicado
-            GameplayManager gameplayManager = await WaitForGameplayManager(cancellationToken);
-            if (gameplayManager == null)
+            if (debugMode) Debug.Log("[GameplaySceneInitializer] 👤 CLIENTE: Preparando VR Rig para auto-detección...");
+            
+            // Asegurar que el VR Rig tenga el tag correcto
+            if (localVRRig != null && !localVRRig.CompareTag("LocalVRRig"))
             {
-                Debug.LogError("[GameplaySceneInitializer] ❌ CLIENTE: Timeout esperando GameplayManager");
-                return;
+                localVRRig.tag = "LocalVRRig";
+                Debug.Log("[GameplaySceneInitializer] ✅ CLIENTE: VR Rig etiquetado correctamente");
             }
-
-            // 2. Esperar por el NetworkPlayer local
-            NetworkPlayer localPlayer = await WaitForLocalNetworkPlayer(runner, cancellationToken);
-            if (localPlayer == null)
-            {
-                Debug.LogError("[GameplaySceneInitializer] ❌ CLIENTE: Timeout esperando NetworkPlayer local");
-                return;
-            }
-
-            // 3. Configurar el VR Rig local
-            if (localVRRig != null)
-            {
-                if (debugMode) Debug.Log("[GameplaySceneInitializer] 🥽 CLIENTE: Conectando VR Rig local...");
-                
-                localPlayer.SetVRRig(localVRRig);
-                
-                // Notificar a GameplayManager (sin crear nuevo VR Rig)
-                gameplayManager.RegisterLocalPlayer(localPlayer);
-                
-                Debug.Log("[GameplaySceneInitializer] ✅ CLIENTE: Configuración completa");
-            }
-            else
-            {
-                Debug.LogError("[GameplaySceneInitializer] ❌ CLIENTE: No se encontró VR Rig local en la escena");
-            }
+            
+            // El NetworkPlayer se auto-configurará cuando sea spawneado
+            Debug.Log("[GameplaySceneInitializer] ✅ CLIENTE: Esperando NetworkPlayer para auto-configuración");
         }
         #endregion
 
@@ -246,61 +215,6 @@ namespace HackMonkeys.Core
                 cancellationToken.ThrowIfCancellationRequested();
                 await Task.Yield();
             }
-        }
-
-        private async Task<GameplayManager> WaitForGameplayManager(CancellationToken cancellationToken)
-        {
-            float elapsedTime = 0f;
-
-            while (elapsedTime < initializationTimeout)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                GameplayManager manager = GameplayManager.Instance;
-                if (manager != null)
-                {
-                    return manager;
-                }
-
-                await Task.Delay(100);
-                elapsedTime += 0.1f;
-
-                if (debugMode && (int)(elapsedTime * 10) % 10 == 0)
-                {
-                    Debug.Log($"[GameplaySceneInitializer] ⏳ Esperando GameplayManager... ({elapsedTime:F1}s)");
-                }
-            }
-
-            return null;
-        }
-
-        private async Task<NetworkPlayer> WaitForLocalNetworkPlayer(NetworkRunner runner, CancellationToken cancellationToken)
-        {
-            float elapsedTime = 0f;
-
-            while (elapsedTime < initializationTimeout)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                var networkPlayers = FindObjectsOfType<NetworkPlayer>();
-                foreach (var player in networkPlayers)
-                {
-                    if (player.HasInputAuthority)
-                    {
-                        return player;
-                    }
-                }
-
-                await Task.Delay(100);
-                elapsedTime += 0.1f;
-
-                if (debugMode && (int)(elapsedTime * 10) % 10 == 0)
-                {
-                    Debug.Log($"[GameplaySceneInitializer] ⏳ Esperando NetworkPlayer local... ({elapsedTime:F1}s)");
-                }
-            }
-
-            return null;
         }
         #endregion
 
@@ -363,10 +277,13 @@ namespace HackMonkeys.Core
             {
                 if (player.IsRealPlayer)
                 {
+                    if (debugMode) Debug.Log($"[GameplaySceneInitializer] 👤 Procesando jugador: {player}");
                     gameplayManager.PlayerJoined(player);
                     await Task.Delay(100, cancellationToken);
                 }
             }
+            
+            if (debugMode) Debug.Log("[GameplaySceneInitializer] ✅ Jugadores existentes procesados");
         }
         #endregion
 
@@ -377,5 +294,22 @@ namespace HackMonkeys.Core
 
             if (debugMode) Debug.Log("[GameplaySceneInitializer] 🧹 Initializer destruido");
         }
+
+        #region Debug
+        [ContextMenu("Debug: Print VR Rig Status")]
+        private void DebugVRRigStatus()
+        {
+            Debug.Log("=== VR RIG STATUS ===");
+            Debug.Log($"Local VR Rig: {localVRRig}");
+            if (localVRRig != null)
+            {
+                Debug.Log($"  - Name: {localVRRig.name}");
+                Debug.Log($"  - Tag: {localVRRig.tag}");
+                Debug.Log($"  - Active: {localVRRig.activeInHierarchy}");
+                Debug.Log($"  - Has OVRCameraRig: {localVRRig.GetComponent<OVRCameraRig>() != null}");
+            }
+            Debug.Log("====================");
+        }
+        #endregion
     }
 }

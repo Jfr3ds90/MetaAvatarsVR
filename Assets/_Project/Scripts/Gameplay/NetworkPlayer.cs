@@ -7,7 +7,7 @@ namespace HackMonkeys.Gameplay
 {
     /// <summary>
     /// NetworkPlayer - Representa un jugador VR sincronizado en la red
-    /// NO crea VR Rigs, solo sincroniza las posiciones del VR Rig local existente
+    /// Auto-detecta y conecta el VR Rig local existente en la escena
     /// </summary>
     public class NetworkPlayer : NetworkBehaviour
     {
@@ -52,6 +52,9 @@ namespace HackMonkeys.Gameplay
         [Header("Audio")]
         [SerializeField] private AudioSource voiceAudioSource;
         [SerializeField] private float voiceMaxDistance = 10f;
+        
+        [Header("Debug")]
+        [SerializeField] private bool enableDebugLogs = true;
         #endregion
 
         #region Private Fields
@@ -61,77 +64,45 @@ namespace HackMonkeys.Gameplay
         private Transform _vrRightHandTransform;
         private TMPro.TextMeshPro _nameTagText;
         private bool _isLocalPlayer;
+        private bool _hasCheckedAuthority = false;
         private PlayerDataManager _playerDataManager;
         
         // Interpolación
         private float _interpolationTime = 0.1f;
-        public bool _vrRigConnected = false;
+        private bool _vrRigConnected = false;
+        
+        // Debug
+        private int _frameCounter = 0;
         #endregion
 
         #region Initialization
         public override void Spawned()
         {
             Debug.Log($"[NetworkPlayer] 🎮 Player spawned: {Object.InputAuthority}");
-    
-            _isLocalPlayer = HasInputAuthority;
+            
+            // FIX: NO usar HasInputAuthority aquí - puede no estar listo
+            // Usar comparación directa en su lugar
+            _isLocalPlayer = Object.InputAuthority == Runner.LocalPlayer;
+            
+            Debug.Log($"[NetworkPlayer] Authority Check:");
+            Debug.Log($"  - Object.InputAuthority: {Object.InputAuthority}");
+            Debug.Log($"  - Runner.LocalPlayer: {Runner.LocalPlayer}");
+            Debug.Log($"  - _isLocalPlayer: {_isLocalPlayer}");
+            Debug.Log($"  - HasInputAuthority: {HasInputAuthority} (may be unreliable during Spawned)");
+            
             _playerDataManager = PlayerDataManager.Instance;
-    
+            
             if (_isLocalPlayer)
             {
                 SetupLocalPlayer();
-        
-                // Buscar y conectar VR Rig automáticamente
                 StartCoroutine(AutoConnectVRRig());
             }
             else
             {
                 SetupRemotePlayer();
             }
-    
+            
             StartCoroutine(InitializePlayerData());
-        }
-        
-        private IEnumerator AutoConnectVRRig()
-        {
-            Debug.Log("[NetworkPlayer] 🔍 Buscando VR Rig local...");
-    
-            // Esperar un frame para asegurar que todo esté inicializado
-            yield return null;
-    
-            // Buscar OVRCameraRig en la escena
-            GameObject vrRig = null;
-    
-            // Primero buscar por tag
-            if (GameObject.FindGameObjectWithTag("LocalVRRig") != null)
-            {
-                vrRig = GameObject.FindGameObjectWithTag("LocalVRRig");
-            }
-            // Si no, buscar por componente
-            else
-            {
-                var ovrCameraRig = FindObjectOfType<OVRCameraRig>();
-                if (ovrCameraRig != null)
-                {
-                    vrRig = ovrCameraRig.gameObject;
-                }
-            }
-    
-            if (vrRig != null)
-            {
-                SetVRRig(vrRig);
-                Debug.Log("[NetworkPlayer] ✅ VR Rig encontrado y conectado automáticamente");
-        
-                // Notificar a GameplayManager
-                var gameplayManager = GameplayManager.Instance;
-                if (gameplayManager != null)
-                {
-                    gameplayManager.RegisterLocalPlayer(this);
-                }
-            }
-            else
-            {
-                Debug.LogError("[NetworkPlayer] ❌ No se encontró VR Rig en la escena!");
-            }
         }
 
         private IEnumerator InitializePlayerData()
@@ -146,10 +117,7 @@ namespace HackMonkeys.Gameplay
                 );
             }
             
-            // Crear name tag
             CreateNameTag();
-            
-            // Aplicar color al avatar
             ApplyPlayerColor();
         }
 
@@ -157,53 +125,86 @@ namespace HackMonkeys.Gameplay
         {
             Debug.Log("[NetworkPlayer] 🥽 Setting up local VR player");
             
-            // Configurar layer para evitar auto-renderizado
             SetLayerRecursively(gameObject, LayerMask.NameToLayer("LocalPlayer"));
             
-            // Desactivar el renderer del avatar local (solo queremos ver nuestras manos)
             if (avatarRenderer != null)
             {
                 avatarRenderer.enabled = false;
             }
             
-            // Configurar audio espacial
             if (voiceAudioSource != null)
             {
-                voiceAudioSource.spatialBlend = 0f; // 2D para el jugador local
+                voiceAudioSource.spatialBlend = 0f;
             }
             
-            // El VR Rig será conectado por GameplaySceneInitializer
-            Debug.Log("[NetworkPlayer] 📍 Esperando conexión del VR Rig desde GameplaySceneInitializer...");
+            Debug.Log("[NetworkPlayer] 📍 Esperando conexión del VR Rig...");
         }
 
         private void SetupRemotePlayer()
         {
-            Debug.Log($"[NetworkPlayer] 👤 Setting up remote player");
+            Debug.Log($"[NetworkPlayer] 👤 Setting up remote player: {Object.InputAuthority}");
             
-            // Configurar layer
             SetLayerRecursively(gameObject, LayerMask.NameToLayer("RemotePlayer"));
             
-            // Configurar audio espacial
             if (voiceAudioSource != null)
             {
-                voiceAudioSource.spatialBlend = 1f; // 3D para jugadores remotos
+                voiceAudioSource.spatialBlend = 1f;
                 voiceAudioSource.maxDistance = voiceMaxDistance;
                 voiceAudioSource.rolloffMode = AudioRolloffMode.Linear;
             }
             
-            // Habilitar interpolación suave
             StartCoroutine(InterpolateMovement());
+        }
+
+        private IEnumerator AutoConnectVRRig()
+        {
+            Debug.Log("[NetworkPlayer] 🔍 Buscando VR Rig local...");
+            
+            // Esperar un frame para asegurar inicialización
+            yield return null;
+            
+            GameObject vrRig = null;
+            
+            // Buscar por tag primero
+            if (GameObject.FindGameObjectWithTag("LocalVRRig") != null)
+            {
+                vrRig = GameObject.FindGameObjectWithTag("LocalVRRig");
+                Debug.Log("[NetworkPlayer] ✅ VR Rig encontrado por tag");
+            }
+            // Si no, buscar por componente
+            else
+            {
+                var ovrCameraRig = FindObjectOfType<OVRCameraRig>();
+                if (ovrCameraRig != null)
+                {
+                    vrRig = ovrCameraRig.gameObject;
+                    Debug.Log("[NetworkPlayer] ✅ VR Rig encontrado por componente");
+                }
+            }
+            
+            if (vrRig != null)
+            {
+                SetVRRig(vrRig);
+                
+                // Notificar a GameplayManager
+                var gameplayManager = GameplayManager.Instance;
+                if (gameplayManager != null)
+                {
+                    gameplayManager.RegisterLocalPlayer(this);
+                }
+            }
+            else
+            {
+                Debug.LogError("[NetworkPlayer] ❌ No se encontró VR Rig en la escena!");
+            }
         }
         #endregion
 
         #region VR Rig Connection
-        /// <summary>
-        /// Conectar el OVRCameraRig local existente a este NetworkPlayer
-        /// Llamado por GameplaySceneInitializer
-        /// </summary>
         public void SetVRRig(GameObject vrRig)
         {
-            if (!_isLocalPlayer)
+            // FIX: Verificar usando la comparación directa
+            if (Object.InputAuthority != Runner.LocalPlayer)
             {
                 Debug.LogWarning("[NetworkPlayer] ❌ SetVRRig llamado en jugador remoto!");
                 return;
@@ -217,7 +218,6 @@ namespace HackMonkeys.Gameplay
             
             _localVRRig = vrRig;
             
-            // Encontrar referencias en el VR Rig
             OVRCameraRig cameraRig = vrRig.GetComponent<OVRCameraRig>();
             if (cameraRig != null)
             {
@@ -234,7 +234,7 @@ namespace HackMonkeys.Gameplay
             }
             else
             {
-                Debug.LogError("[NetworkPlayer] ❌ OVRCameraRig no encontrado en el VR Rig proporcionado!");
+                Debug.LogError("[NetworkPlayer] ❌ OVRCameraRig no encontrado en el VR Rig!");
             }
         }
         #endregion
@@ -242,15 +242,71 @@ namespace HackMonkeys.Gameplay
         #region Network Update
         public override void FixedUpdateNetwork()
         {
-            if (!_isLocalPlayer || !_vrRigConnected) return;
-            
-            // Sincronizar posiciones del VR Rig existente
-            if (_vrCameraTransform != null)
+            // FIX: Verificación adicional de autoridad después de algunos ticks
+            if (!_hasCheckedAuthority && Runner.Tick > 10)
             {
-                HeadPosition = _vrCameraTransform.position;
-                HeadRotation = _vrCameraTransform.rotation;
+                bool shouldBeLocal = Object.InputAuthority == Runner.LocalPlayer;
+                if (shouldBeLocal != _isLocalPlayer)
+                {
+                    Debug.LogWarning($"[NetworkPlayer] Authority mismatch detected! Correcting...");
+                    Debug.Log($"  - Was local: {_isLocalPlayer}");
+                    Debug.Log($"  - Should be local: {shouldBeLocal}");
+                    
+                    _isLocalPlayer = shouldBeLocal;
+                    
+                    if (_isLocalPlayer && !_vrRigConnected)
+                    {
+                        // Re-intentar configuración local
+                        SetupLocalPlayer();
+                        StartCoroutine(AutoConnectVRRig());
+                    }
+                }
+                _hasCheckedAuthority = true;
             }
             
+            // FIX: Usar comparación directa en lugar de HasInputAuthority
+            if (Object.InputAuthority != Runner.LocalPlayer)
+            {
+                return;
+            }
+            
+            // Verificar que el VR esté conectado
+            if (!_vrRigConnected || _localVRRig == null)
+            {
+                if (enableDebugLogs && Runner.Tick % 60 == 0) // Log cada segundo
+                {
+                    Debug.LogWarning($"[NetworkPlayer-{Runner.LocalPlayer}] VR no conectado en FixedUpdateNetwork");
+                }
+                return;
+            }
+            
+            // Sincronizar posiciones
+            SyncVRPositions();
+            
+            // Debug cada segundo
+            if (enableDebugLogs && Runner.Tick % 60 == 0)
+            {
+                Debug.Log($"[NetworkPlayer-{Runner.LocalPlayer}] Sync - Head: {HeadPosition}");
+            }
+        }
+
+        private void SyncVRPositions()
+        {
+            // Sincronizar cabeza
+            if (_vrCameraTransform != null)
+            {
+                Vector3 oldPos = HeadPosition;
+                HeadPosition = _vrCameraTransform.position;
+                HeadRotation = _vrCameraTransform.rotation;
+                
+                // Debug si hay movimiento significativo
+                if (enableDebugLogs && Vector3.Distance(oldPos, HeadPosition) > 0.1f)
+                {
+                    Debug.Log($"[CLIENT-{Runner.LocalPlayer}] Head moved: {oldPos} -> {HeadPosition}");
+                }
+            }
+            
+            // Sincronizar manos
             if (_vrLeftHandTransform != null)
             {
                 LeftHandPosition = _vrLeftHandTransform.position;
@@ -263,7 +319,7 @@ namespace HackMonkeys.Gameplay
                 RightHandRotation = _vrRightHandTransform.rotation;
             }
             
-            // Sincronizar inputs de las manos
+            // Sincronizar inputs
             LeftHandGrip = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, OVRInput.Controller.LTouch);
             RightHandGrip = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, OVRInput.Controller.RTouch);
             LeftHandTrigger = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, OVRInput.Controller.LTouch);
@@ -272,16 +328,26 @@ namespace HackMonkeys.Gameplay
 
         private void Update()
         {
-            if (_isLocalPlayer)
+            _frameCounter++;
+            
+            // FIX: Usar comparación directa también en Update
+            bool isActuallyLocal = Object.InputAuthority == Runner.LocalPlayer;
+            
+            if (isActuallyLocal)
             {
                 UpdateLocalPlayer();
             }
             else
             {
                 UpdateRemotePlayer();
+                
+                // Debug para el HOST
+                if (enableDebugLogs && _frameCounter % 120 == 0) // Cada 2 segundos
+                {
+                    Debug.Log($"[HOST] Remote player {Object.InputAuthority} at: {HeadPosition}");
+                }
             }
             
-            // Actualizar name tag para que mire a la cámara
             UpdateNameTagOrientation();
         }
 
@@ -292,7 +358,7 @@ namespace HackMonkeys.Gameplay
             // El NetworkPlayer sigue al VR Rig
             transform.position = _localVRRig.transform.position;
             
-            // Rotación solo en Y basada en la cabeza
+            // Rotación basada en la cabeza
             if (_vrCameraTransform != null)
             {
                 Vector3 forward = _vrCameraTransform.forward;
@@ -306,7 +372,7 @@ namespace HackMonkeys.Gameplay
 
         private void UpdateRemotePlayer()
         {
-            // Los jugadores remotos usan las posiciones sincronizadas
+            // Actualizar componentes visuales con las posiciones sincronizadas
             if (headTransform != null)
             {
                 headTransform.position = HeadPosition;
@@ -335,12 +401,12 @@ namespace HackMonkeys.Gameplay
                 }
             }
             
-            // Actualizar posición del cuerpo para seguir la cabeza
+            // Actualizar posición del cuerpo
             Vector3 bodyPosition = HeadPosition;
-            bodyPosition.y = transform.position.y; // Mantener altura del suelo
+            bodyPosition.y = transform.position.y;
             transform.position = bodyPosition;
             
-            // Rotación del cuerpo basada en la cabeza
+            // Rotación del cuerpo
             Vector3 headForward = HeadRotation * Vector3.forward;
             headForward.y = 0;
             if (headForward.magnitude > 0.1f)
@@ -353,9 +419,8 @@ namespace HackMonkeys.Gameplay
         #region Interpolation
         private IEnumerator InterpolateMovement()
         {
-            while (!_isLocalPlayer)
+            while (Object.InputAuthority != Runner.LocalPlayer) // FIX: Usar comparación directa
             {
-                // Interpolar suavemente las posiciones para jugadores remotos
                 if (headTransform != null)
                 {
                     headTransform.position = Vector3.Lerp(
@@ -367,6 +432,37 @@ namespace HackMonkeys.Gameplay
                     headTransform.rotation = Quaternion.Slerp(
                         headTransform.rotation,
                         HeadRotation,
+                        Time.deltaTime / _interpolationTime
+                    );
+                }
+                
+                // Interpolar manos también
+                if (leftHandTransform != null)
+                {
+                    leftHandTransform.position = Vector3.Lerp(
+                        leftHandTransform.position,
+                        LeftHandPosition,
+                        Time.deltaTime / _interpolationTime
+                    );
+                    
+                    leftHandTransform.rotation = Quaternion.Slerp(
+                        leftHandTransform.rotation,
+                        LeftHandRotation,
+                        Time.deltaTime / _interpolationTime
+                    );
+                }
+                
+                if (rightHandTransform != null)
+                {
+                    rightHandTransform.position = Vector3.Lerp(
+                        rightHandTransform.position,
+                        RightHandPosition,
+                        Time.deltaTime / _interpolationTime
+                    );
+                    
+                    rightHandTransform.rotation = Quaternion.Slerp(
+                        rightHandTransform.rotation,
+                        RightHandRotation,
                         Time.deltaTime / _interpolationTime
                     );
                 }
@@ -389,8 +485,8 @@ namespace HackMonkeys.Gameplay
             {
                 _nameTagText.text = PlayerName.ToString();
                 
-                // No mostrar nuestro propio nombre
-                if (_isLocalPlayer)
+                // FIX: Usar comparación directa
+                if (Object.InputAuthority == Runner.LocalPlayer)
                 {
                     nameTag.SetActive(false);
                 }
@@ -462,40 +558,36 @@ namespace HackMonkeys.Gameplay
         #endregion
 
         #region Public Methods
-        /// <summary>
-        /// Habilitar/deshabilitar controles del jugador
-        /// </summary>
         public void EnableControls(bool enabled)
         {
-            if (!_isLocalPlayer || _localVRRig == null) return;
+            // FIX: Usar comparación directa
+            if (Object.InputAuthority != Runner.LocalPlayer || _localVRRig == null) return;
             
-            // Habilitar/deshabilitar locomotion
             var locomotion = _localVRRig.GetComponentInChildren<OVRPlayerController>();
             if (locomotion != null)
             {
                 locomotion.enabled = enabled;
             }
-            
-            // TODO: Habilitar/deshabilitar sistema de interacción
         }
 
-        /// <summary>
-        /// Teletransportar jugador
-        /// </summary>
         public void TeleportTo(Vector3 position)
         {
-            if (!_isLocalPlayer || _localVRRig == null) return;
+            // FIX: Usar comparación directa
+            if (Object.InputAuthority != Runner.LocalPlayer || _localVRRig == null) return;
             
             _localVRRig.transform.position = position;
             transform.position = position;
         }
 
-        /// <summary>
-        /// Verifica si el VR Rig está conectado
-        /// </summary>
         public bool IsVRRigConnected()
         {
             return _vrRigConnected;
+        }
+        
+        // FIX: Nuevo método para verificar si somos el jugador local
+        public bool IsLocalPlayer()
+        {
+            return Object.InputAuthority == Runner.LocalPlayer;
         }
         #endregion
 
@@ -513,7 +605,8 @@ namespace HackMonkeys.Gameplay
         #region Debug
         private void OnDrawGizmos()
         {
-            Gizmos.color = _isLocalPlayer ? Color.green : Color.blue;
+            bool isLocal = Object != null && Object.InputAuthority == Runner?.LocalPlayer;
+            Gizmos.color = isLocal ? Color.green : Color.blue;
             Gizmos.DrawWireSphere(transform.position, 0.5f);
             
             Gizmos.color = Color.red;
@@ -530,13 +623,51 @@ namespace HackMonkeys.Gameplay
         private void DebugVRRigStatus()
         {
             Debug.Log("=== NetworkPlayer VR Rig Status ===");
-            Debug.Log($"Is Local Player: {_isLocalPlayer}");
+            Debug.Log($"Player: {Object.InputAuthority}");
+            Debug.Log($"Is Local Player (cached): {_isLocalPlayer}");
+            Debug.Log($"Is Local Player (actual): {Object.InputAuthority == Runner.LocalPlayer}");
+            Debug.Log($"Has Input Authority: {HasInputAuthority}");
             Debug.Log($"VR Rig Connected: {_vrRigConnected}");
             Debug.Log($"Local VR Rig: {_localVRRig}");
             Debug.Log($"Camera Transform: {_vrCameraTransform}");
             Debug.Log($"Left Hand: {_vrLeftHandTransform}");
             Debug.Log($"Right Hand: {_vrRightHandTransform}");
+            Debug.Log($"Current Head Pos: {HeadPosition}");
             Debug.Log("================================");
+        }
+        
+        [ContextMenu("Debug: Force Authority Check")]
+        private void DebugForceAuthorityCheck()
+        {
+            bool shouldBeLocal = Object.InputAuthority == Runner.LocalPlayer;
+            Debug.Log($"[DEBUG] Force Authority Check:");
+            Debug.Log($"  - Current _isLocalPlayer: {_isLocalPlayer}");
+            Debug.Log($"  - Should be local: {shouldBeLocal}");
+            Debug.Log($"  - Object.InputAuthority: {Object.InputAuthority}");
+            Debug.Log($"  - Runner.LocalPlayer: {Runner.LocalPlayer}");
+            Debug.Log($"  - HasInputAuthority: {HasInputAuthority}");
+            
+            if (shouldBeLocal != _isLocalPlayer)
+            {
+                Debug.Log("[DEBUG] Mismatch detected! Correcting...");
+                _isLocalPlayer = shouldBeLocal;
+                
+                if (_isLocalPlayer && !_vrRigConnected)
+                {
+                    SetupLocalPlayer();
+                    StartCoroutine(AutoConnectVRRig());
+                }
+            }
+        }
+        
+        [ContextMenu("Debug: Force Sync Test")]
+        private void DebugForceSyncTest()
+        {
+            if (Object.InputAuthority != Runner.LocalPlayer || !_vrRigConnected) return;
+            
+            Debug.Log("[DEBUG] Forcing sync test...");
+            SyncVRPositions();
+            Debug.Log($"[DEBUG] Head position after sync: {HeadPosition}");
         }
         #endregion
     }
