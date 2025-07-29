@@ -12,6 +12,10 @@ public class ValveManager : MonoBehaviour
     [HideInInspector] public Color lastColor;
 
     [SerializeField]ParticleSystem[] PS_Gas;
+    private void Awake()
+    {
+        colorGas = Color.gray;
+    }
     private void OnEnable()
     {
        for (int i = 0; i < PS_Gas.Length; i++)
