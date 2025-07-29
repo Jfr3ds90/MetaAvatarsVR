@@ -5,7 +5,7 @@ public class ValveManager : MonoBehaviour
 {
     public bool[] activatedValves;
     public bool stepActivationGas;
-    int lastValveActived;
+    int lastValveActived,pressedAction;
     public float velocityFog;//modificar para cambiar velocidad de la neblina
     public static float gasFog;
     public Color colorGas,keyColor;
@@ -101,6 +101,12 @@ public class ValveManager : MonoBehaviour
         RenderSettings.fogDensity = gasFog / 350;
         StartCoroutine(GasActivated());
     }
+    public void GasDeActivation()
+    {
+        StopAllCoroutines();
+        for (int i = 0; i < PS_Gas.Length; i++)
+        { PS_Gas[i].Stop(); }
+    }
     public IEnumerator GasActivated()
     {while (stepActivationGas == true) 
         {
@@ -130,7 +136,12 @@ public class ValveManager : MonoBehaviour
     }
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.tag=="Player")
-       { stepActivationGas = true; GasAction(); }
+        if (collision.gameObject.tag=="Player"&& pressedAction < 3)
+       { stepActivationGas = true; GasAction();++pressedAction; }
+    }
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.tag == "Player" && pressedAction < 3)
+        { stepActivationGas = true; GasDeActivation(); }
     }
 }

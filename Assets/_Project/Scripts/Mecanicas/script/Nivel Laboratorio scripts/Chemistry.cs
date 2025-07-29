@@ -76,6 +76,8 @@ public class Chemistry : MonoBehaviour
             LeftDoor.OpenDoorAct();
             RightDoor.CloseDoorAct();
         }
+        if(collision.gameObject.tag == "Finish")
+                Chem.material.SetFloat("_Fill", 0);
     }
     private void OnParticleCollision(GameObject other)
     {
