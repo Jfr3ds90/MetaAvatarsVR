@@ -1,9 +1,14 @@
+using NUnit.Framework;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Video;
 
 public class OfficeStaff : MonoBehaviour
 {
     bool lightsOn = false;
     public GameObject lightsObjects, emergencyLights,CanvasPc,ButtonsCanvas,pendrive,creditsEnd;
+    public MeshRenderer MRpc;
+    public Material rtVideo;
 
     private void OnEnable()
     {
@@ -29,9 +34,15 @@ public class OfficeStaff : MonoBehaviour
     }
     public void CorrectOption()
     {
-        creditsEnd.SetActive(true);//sacar cuando el video funcione
-        pendrive.GetComponent<simpleKey>().videoCorrect = true;       
+        //creditsEnd.SetActive(true);//sacar cuando el video funcione
+        List<Material> lm = new List<Material>();
+        lm.Add(MRpc.materials[0]);
+        lm.Add(rtVideo);
+        MRpc.SetMaterials(lm);
+        MRpc.GetComponent<VideoPlayer>().Play();
+      //  pendrive.GetComponent<simpleKey>().videoCorrect = true;       
         ButtonsCanvas.SetActive(false);
+        creditsEnd.SetActive(true);
         Debug.Log("opcion correcta");
     }
     public void IncorrectOption()

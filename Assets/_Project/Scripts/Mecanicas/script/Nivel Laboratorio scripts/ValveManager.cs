@@ -4,16 +4,22 @@ using UnityEngine;
 public class ValveManager : MonoBehaviour
 {
     public bool[] activatedValves;
-    int lastValveActived;
+    public bool stepActivationGas;
+    int lastValveActived,pressedAction;
+    public float velocityFog;//modificar para cambiar velocidad de la neblina
     public static float gasFog;
-    public Color colorGas;
-    private Color trueColor;
-    [SerializeField]ParticleSystem[] PS_Gas;
+    public Color colorGas,keyColor;
+    [HideInInspector] public Color lastColor;
 
+    [SerializeField]ParticleSystem[] PS_Gas;
     private void Awake()
     {
-        trueColor = Random.ColorHSV();
-        Debug.Log(trueColor+" es el color correcto");
+        colorGas = Color.gray;
+    }
+    private void OnEnable()
+    {
+       for (int i = 0; i < PS_Gas.Length; i++)
+            PS_Gas[i].Stop();
     }
     public void MixtureGas(int value)
     {
@@ -99,11 +105,17 @@ public class ValveManager : MonoBehaviour
         RenderSettings.fogDensity = gasFog / 350;
         StartCoroutine(GasActivated());
     }
+    public void GasDeActivation()
+    {
+        StopAllCoroutines();
+        for (int i = 0; i < PS_Gas.Length; i++)
+        { PS_Gas[i].Stop(); }
+    }
     public IEnumerator GasActivated()
-    {while (true) 
+    {while (stepActivationGas == true) 
         {
             gasFog += Time.deltaTime * 0.1f;
-            RenderSettings.fogDensity = gasFog / 350;
+            RenderSettings.fogDensity = gasFog*velocityFog / 350;
 
             RenderSettings.fogColor = new Vector4(colorGas.r* RenderSettings.fogDensity,
                 colorGas.g* RenderSettings.fogDensity, 
@@ -118,12 +130,22 @@ public class ValveManager : MonoBehaviour
                 ParticleSystem.ColorOverLifetimeModule COL =PS_Gas[i].colorOverLifetime ;
                 COL.color = new ParticleSystem.MinMaxGradient(colorGas).color;
               //  COL.color = new ParticleSystem.MinMaxGradient(new Vector4(0,0,0,0)).gradientMax;
-                Debug.Log(COL+" es el color");
+           //     Debug.Log(COL+" es el color");
                 if (!PS_Gas[i].isPlaying)
                     PS_Gas[i].Play();
             }
           //  Debug.Log(RenderSettings.fogDensity + " es la densidad y el color es "+ RenderSettings.fogColor);
             yield return null;
         }
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag=="Player"&& pressedAction < 3)
+       { stepActivationGas = true; GasAction();++pressedAction; }
+    }
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.tag == "Player" && pressedAction < 3)
+        { stepActivationGas = true; GasDeActivation(); }
     }
 }

@@ -18,40 +18,58 @@ public class ValveGas : MonoBehaviour
     public void OpenClose()
     {
         RenderSettings.fog = true;
-        //RenderSettings.fogDensity = transform.eulerAngles.y / 350;
+
         z = transform.eulerAngles.z;
+
+        if(manager.colorGas == Color.gray)
+            manager.colorGas = manager.lastColor;
+
         if (z >=350f)
         {
             manager.activatedValves[gasType] = true;
-          //  manager.MixtureGas(gasType);
+
             Debug.Log("maximo");
-          // RenderSettings.fogDensity = 1;
+
         }
-        else if (z <= 1)
+        else if (z <= 10)
         {
             manager.activatedValves[gasType] = false;
-            //  manager.MixtureGas(gasType);
+
+            if (colorGas == Color.red)
+                manager.colorGas = new Color(0, manager.colorGas.g, manager.colorGas.b);
+            else if (colorGas == Color.green)
+                manager.colorGas = new Color(manager.colorGas.r, 0, manager.colorGas.b);
+            else if (colorGas == Color.blue)
+                manager.colorGas = new Color(manager.colorGas.r, manager.colorGas.g, 0);
+
             StopCoroutine(manager.GasActivated());
+
             Debug.Log("minimo");
           //  RenderSettings.fogDensity = 0;
         }
-
-        if (z >= 1)
+       
+        if (z > 10)
         {
-            manager.colorGas += (z)*(colorGas);
+            manager.colorGas = /*(z)*/(colorGas)+ manager.colorGas;
+            manager.colorGas.a = 1;
             //manager.gasFog = y;
         }
+
+        if (manager.colorGas == Color.black)
+            manager.colorGas = Color.gray;
+
         manager.MixtureGas(gasType);
         manager.GasAction();
         //Debug.Log(RenderSettings.fogDensity+" es la densidad "+ manager.gasFog / 350);
-       
+
     }
     private void Update()
     {
-        Debug.Log(transform.eulerAngles + " es la rotacion");
+        //Debug.Log(transform.eulerAngles + " es la rotacion");
         if (action==true)
        { if(Input.GetKey(KeyCode.RightArrow))
         {
+                manager.stepActivationGas = true;
             transform.rotation = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z + Time.deltaTime * 20);
             OpenClose();
         }

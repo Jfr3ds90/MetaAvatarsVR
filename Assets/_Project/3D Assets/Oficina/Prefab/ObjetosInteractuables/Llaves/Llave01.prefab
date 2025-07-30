@@ -155,14 +155,14 @@ Rigidbody:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!114 &1730080644599441256
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -285,9 +285,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameobjectInteractor: {fileID: 0}
+  creditsEnd: {fileID: 0}
   right: 0
   pendrive: 0
   audioHeared: 0
   phase: 3
   MAction: 0
   videoCorrect: 0
+  matVideo: {fileID: 0}
