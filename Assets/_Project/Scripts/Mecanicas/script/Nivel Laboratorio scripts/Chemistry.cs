@@ -95,4 +95,12 @@ public class Chemistry : MonoBehaviour
     {
         isSelected= !isSelected;
     }
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            LeftDoor.OpenDoorAct();
+            RightDoor.CloseDoorAct();
+        }
+    }
 }
