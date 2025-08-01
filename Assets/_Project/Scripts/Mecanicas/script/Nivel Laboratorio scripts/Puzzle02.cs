@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Puzzle02 : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+   public Sprite[] empty, full;
     void Start()
     {
         
