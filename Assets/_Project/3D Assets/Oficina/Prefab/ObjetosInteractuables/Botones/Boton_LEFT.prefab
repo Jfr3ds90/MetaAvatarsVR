@@ -90,8 +90,8 @@ GameObject:
   - component: {fileID: 6699278017815343199}
   - component: {fileID: 4348097473436744174}
   - component: {fileID: 5204909705864913512}
-  - component: {fileID: 5128967264286272358}
   - component: {fileID: 129069836491666354}
+  - component: {fileID: 5128967264286272358}
   m_Layer: 0
   m_Name: Boton_LEFT
   m_TagString: Untagged
@@ -336,20 +336,6 @@ MonoBehaviour:
     ReEnterDistance: 0.02
   _closeDistanceThreshold: 0.001
   _tiebreakerScore: 0
---- !u!114 &5128967264286272358
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7434407969094335463}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b3b3f04ac18184468bedd999e5a6688, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _pokeInteractable: {fileID: 5204909705864913512}
-  _buttonBaseTransform: {fileID: 1610992096202891982}
 --- !u!114 &129069836491666354
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -387,3 +373,17 @@ MonoBehaviour:
   _whenSelectingInteractorViewRemoved:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &5128967264286272358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7434407969094335463}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b3b3f04ac18184468bedd999e5a6688, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _pokeInteractable: {fileID: 5204909705864913512}
+  _buttonBaseTransform: {fileID: 5256269249335136257}
