@@ -8,9 +8,6 @@ using Meta.XR;
 
 namespace HackMonkeys.UI.Panels
 {
-    /// <summary>
-    /// Panel principal del menú VR con opciones principales
-    /// </summary>
     public class MainPanel : MenuPanel
     {
         [Header("UI Elements")]
@@ -34,6 +31,11 @@ namespace HackMonkeys.UI.Panels
         private PlayerDataManager _dataManager;
         private NetworkBootstrapper _networkBootstrapper;
         
+        // Referencias a las animaciones para poder detenerlas
+        private Tweener _logoRotationTween;
+        private Tweener _logoMovementTween;
+        private Vector3 _logoOriginalPosition;
+        
         protected override void SetupPanel()
         {
             base.SetupPanel();
@@ -41,9 +43,13 @@ namespace HackMonkeys.UI.Panels
             _dataManager = PlayerDataManager.Instance;
             _networkBootstrapper = NetworkBootstrapper.Instance;
             
-            UpdatePlayerInfo();
+            // Guardar posición original del logo
+            if (logoTransform != null)
+            {
+                _logoOriginalPosition = logoTransform.localPosition;
+            }
             
-            AnimateLogo();
+            UpdatePlayerInfo();
         }
 
         protected override void ConfigureButtons()
@@ -52,6 +58,7 @@ namespace HackMonkeys.UI.Panels
             
             if (playButton != null)
             {
+                playButton.OnButtonPressed.RemoveAllListeners();
                 playButton.OnButtonPressed.AddListener(() => 
                 {
                     _uiManager.ShowPanel(PanelID.LobbyBrowser);
@@ -60,6 +67,7 @@ namespace HackMonkeys.UI.Panels
             
             if (hostButton != null)
             {
+                hostButton.OnButtonPressed.RemoveAllListeners();
                 hostButton.OnButtonPressed.AddListener(() => 
                 {
                     _uiManager.ShowPanel(PanelID.CreateLobby);
@@ -68,6 +76,7 @@ namespace HackMonkeys.UI.Panels
             
             if (friendsButton != null)
             {
+                friendsButton.OnButtonPressed.RemoveAllListeners();
                 friendsButton.OnButtonPressed.AddListener(() =>
                 {
                     _uiManager.ShowPanel(PanelID.Friends);
@@ -76,6 +85,7 @@ namespace HackMonkeys.UI.Panels
             
             if (settingsButton != null)
             {
+                settingsButton.OnButtonPressed.RemoveAllListeners();
                 settingsButton.OnButtonPressed.AddListener(() => 
                 {
                     _uiManager.ShowPanel(PanelID.Settings);
@@ -84,6 +94,7 @@ namespace HackMonkeys.UI.Panels
             
             if (optionsButton != null)
             {
+                optionsButton.OnButtonPressed.RemoveAllListeners();
                 optionsButton.OnButtonPressed.AddListener(() =>
                 {
                     _uiManager.ShowPanel(PanelID.Options);
@@ -92,6 +103,7 @@ namespace HackMonkeys.UI.Panels
             
             if (exitButton != null)
             {
+                exitButton.OnButtonPressed.RemoveAllListeners();
                 exitButton.OnButtonPressed.AddListener(() => 
                 {
                     _uiManager.ShowPanel(PanelID.ExitPanel);
@@ -153,11 +165,20 @@ namespace HackMonkeys.UI.Panels
         {
             if (logoTransform == null) return;
             
-            logoTransform.DORotate(new Vector3(0, 360, 0), 20f, RotateMode.FastBeyond360)
+            // Detener animaciones anteriores
+            StopLogoAnimations();
+            
+            // Resetear posición
+            logoTransform.localPosition = _logoOriginalPosition;
+            
+            // Crear nuevas animaciones y guardar referencias
+            _logoRotationTween = logoTransform
+                .DORotate(new Vector3(0, 360, 0), 20f, RotateMode.FastBeyond360)
                 .SetLoops(-1, LoopType.Restart)
                 .SetEase(Ease.Linear);
             
-            logoTransform.DOLocalMoveY(logoTransform.localPosition.y + 0.1f, 2f)
+            _logoMovementTween = logoTransform
+                .DOLocalMoveY(_logoOriginalPosition.y + 0.1f, 2f)
                 .SetLoops(-1, LoopType.Yoyo)
                 .SetEase(Ease.InOutSine);
             
@@ -167,14 +188,36 @@ namespace HackMonkeys.UI.Panels
             }
         }
         
+        private void StopLogoAnimations()
+        {
+            // Detener y limpiar animaciones
+            _logoRotationTween?.Kill();
+            _logoMovementTween?.Kill();
+            
+            _logoRotationTween = null;
+            _logoMovementTween = null;
+            
+            // Detener partículas
+            if (logoParticles != null)
+            {
+                logoParticles.Stop();
+            }
+        }
+        
         public override void OnPanelShown()
         {
             base.OnPanelShown();
             
             UpdateConnectionStatus();
             
+            // Iniciar animación del logo
+            AnimateLogo();
+            
             if (_networkBootstrapper != null)
             {
+                _networkBootstrapper.OnConnectedToServerEvent.RemoveListener(OnConnected);
+                _networkBootstrapper.OnConnectionFailed.RemoveListener(OnConnectionFailed);
+                
                 _networkBootstrapper.OnConnectedToServerEvent.AddListener(OnConnected);
                 _networkBootstrapper.OnConnectionFailed.AddListener(OnConnectionFailed);
             }
@@ -192,6 +235,9 @@ namespace HackMonkeys.UI.Panels
         {
             base.OnPanelHidden();
             
+            // IMPORTANTE: Detener animaciones cuando se oculta el panel
+            StopLogoAnimations();
+            
             if (_networkBootstrapper != null)
             {
                 _networkBootstrapper.OnConnectedToServerEvent.RemoveListener(OnConnected);
@@ -202,20 +248,17 @@ namespace HackMonkeys.UI.Panels
         private void OnConnected()
         {
             UpdateConnectionStatus();
-            
             ShowNotification("Connected to server!", NotificationType.Success);
         }
         
         private void OnConnectionFailed(string error)
         {
             UpdateConnectionStatus();
-            
             ShowNotification($"Connection failed: {error}", NotificationType.Error);
         }
           
         private void ShowNotification(string message, NotificationType type)
         {
-            // TODO: Implementar NotificationManager
             Debug.Log($"[Notification] {type}: {message}");
         }
         
@@ -225,6 +268,21 @@ namespace HackMonkeys.UI.Panels
             Error,
             Warning,
             Info
+        }
+        
+        // Asegurar limpieza cuando se destruye
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            StopLogoAnimations();
+            
+            // Limpiar todos los listeners
+            playButton?.OnButtonPressed.RemoveAllListeners();
+            hostButton?.OnButtonPressed.RemoveAllListeners();
+            friendsButton?.OnButtonPressed.RemoveAllListeners();
+            settingsButton?.OnButtonPressed.RemoveAllListeners();
+            optionsButton?.OnButtonPressed.RemoveAllListeners();
+            exitButton?.OnButtonPressed.RemoveAllListeners();
         }
     }
 }

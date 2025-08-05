@@ -3,6 +3,8 @@ using Oculus.Interaction;
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
+using Cysharp.Threading.Tasks;
+using System.Threading;
 
 namespace HackMonkeys.UI.Spatial
 {
@@ -11,7 +13,7 @@ namespace HackMonkeys.UI.Spatial
     /// </summary>
     public class SpatialUIManager : MonoBehaviour
     {
-        [Header("UI Configuration")]
+        [Header("UI Configuration")] 
         [SerializeField] private float defaultPanelDistance = 2f;
         [SerializeField] private float panelHeight = 1.5f;
         [SerializeField] private float panelSpacing = 0.8f;
@@ -50,7 +52,9 @@ namespace HackMonkeys.UI.Spatial
         private RayInteractable _currentHoveredInteractable;
         private Dictionary<RayInteractor, RayInteractable> _hoveredInteractables = new Dictionary<RayInteractor, RayInteractable>();
         private Dictionary<RayInteractor, InteractorState> _previousInteractorStates = new Dictionary<RayInteractor, InteractorState>();
-
+        
+        // Cancellation token for async operations
+        private CancellationTokenSource _transitionCts;
 
         public static SpatialUIManager Instance { get; private set; }
 
@@ -69,12 +73,8 @@ namespace HackMonkeys.UI.Spatial
         private void Start()
         {
             _playerTransform = Camera.main.transform.parent;
-
             RegisterChildPanels();
-
             SetupRayVisuals();
-
-            ShowPanel(PanelID.MainPanel);
         }
 
         private void Update()
@@ -126,7 +126,6 @@ namespace HackMonkeys.UI.Spatial
         private void UpdateRayVisuals()
         {
             UpdateSingleRayVisual(leftHandRayInteractor, leftRayVisual, true);
-            
             UpdateSingleRayVisual(rightHandRayInteractor, rightRayVisual, false);
         }
 
@@ -280,40 +279,73 @@ namespace HackMonkeys.UI.Spatial
             }
         }
 
-        public void ShowPanel(PanelID panelId, bool addToStack = true)
+        public void ShowPanel(PanelID panelId, bool addToStack = true, string str = "")
         {
             if (_isTransitioning || !_panels.ContainsKey(panelId)) return;
 
-            StartCoroutine(TransitionToPanel(panelId, addToStack));
+            _transitionCts?.Cancel();
+            _transitionCts = new CancellationTokenSource();
+            
+            TransitionToPanelAsync(panelId, addToStack, _transitionCts.Token).Forget();
         }
 
-        private System.Collections.IEnumerator TransitionToPanel(PanelID panelId, bool addToStack)
+        private async UniTaskVoid TransitionToPanelAsync(PanelID panelId, bool addToStack, CancellationToken cancellationToken)
         {
-            _isTransitioning = true;
-            MenuPanel targetPanel = _panels[panelId];
-
-            if (_currentPanel != null)
+            try
             {
-                yield return StartCoroutine(AnimatePanelOut(_currentPanel));
-                _currentPanel.gameObject.SetActive(false);
+                _isTransitioning = true;
+                MenuPanel targetPanel = _panels[panelId];
 
-                if (addToStack)
+                // Temporalmente deshabilitar los ray interactors
+                bool leftWasEnabled = leftHandRayInteractor != null && leftHandRayInteractor.enabled;
+                bool rightWasEnabled = rightHandRayInteractor != null && rightHandRayInteractor.enabled;
+                
+                if (leftHandRayInteractor != null) leftHandRayInteractor.enabled = false;
+                if (rightHandRayInteractor != null) rightHandRayInteractor.enabled = false;
+
+                if (_currentPanel != null)
                 {
-                    _navigationStack.Push(_currentPanel);
+                    await AnimatePanelOutAsync(_currentPanel, cancellationToken);
+                    
+                    if (cancellationToken.IsCancellationRequested) return;
+                    
+                    _currentPanel.OnPanelHidden();
+                    _currentPanel.gameObject.SetActive(false);
+
+                    if (addToStack)
+                    {
+                        _navigationStack.Push(_currentPanel);
+                    }
                 }
+
+                PositionPanelInFrontOfPlayer(targetPanel);
+
+                targetPanel.gameObject.SetActive(true);
+                
+                await AnimatePanelInAsync(targetPanel, cancellationToken);
+                
+                if (cancellationToken.IsCancellationRequested) return;
+
+                _currentPanel = targetPanel;
+                _currentPanel.OnPanelShown();
+
+                PlayUISound(selectSound);
+                
+                // Esperar un poco antes de reactivar los rays
+                await UniTask.Delay(100, cancellationToken: cancellationToken);
+                
+                // Restaurar el estado de los ray interactors
+                if (leftHandRayInteractor != null && leftWasEnabled) leftHandRayInteractor.enabled = true;
+                if (rightHandRayInteractor != null && rightWasEnabled) rightHandRayInteractor.enabled = true;
             }
-
-            PositionPanelInFrontOfPlayer(targetPanel);
-
-            targetPanel.gameObject.SetActive(true);
-            yield return StartCoroutine(AnimatePanelIn(targetPanel));
-
-            _currentPanel = targetPanel;
-            _currentPanel.OnPanelShown();
-
-            PlayUISound(selectSound);
-
-            _isTransitioning = false;
+            catch (System.OperationCanceledException)
+            {
+                // Transición cancelada
+            }
+            finally
+            {
+                _isTransitioning = false;
+            }
         }
 
         private void PositionPanelInFrontOfPlayer(MenuPanel panel)
@@ -343,7 +375,7 @@ namespace HackMonkeys.UI.Spatial
             PlayUISound(backSound);
         }
 
-        private System.Collections.IEnumerator AnimatePanelIn(MenuPanel panel)
+        private async UniTask AnimatePanelInAsync(MenuPanel panel, CancellationToken cancellationToken)
         {
             float duration = 0.3f;
             float elapsed = 0f;
@@ -351,7 +383,7 @@ namespace HackMonkeys.UI.Spatial
             panel.CanvasGroup.alpha = 0f;
             panel.transform.localScale = Vector3.one * 0.8f;
 
-            while (elapsed < duration)
+            while (elapsed < duration && !cancellationToken.IsCancellationRequested)
             {
                 elapsed += Time.deltaTime;
                 float t = elapsed / duration;
@@ -360,19 +392,22 @@ namespace HackMonkeys.UI.Spatial
                 panel.CanvasGroup.alpha = curveValue;
                 panel.transform.localScale = Vector3.Lerp(Vector3.one * 0.8f, Vector3.one, curveValue);
 
-                yield return null;
+                await UniTask.Yield(cancellationToken);
             }
 
-            panel.CanvasGroup.alpha = 1f;
-            panel.transform.localScale = Vector3.one;
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                panel.CanvasGroup.alpha = 1f;
+                panel.transform.localScale = Vector3.one;
+            }
         }
 
-        private System.Collections.IEnumerator AnimatePanelOut(MenuPanel panel)
+        private async UniTask AnimatePanelOutAsync(MenuPanel panel, CancellationToken cancellationToken)
         {
             float duration = 0.2f;
             float elapsed = 0f;
 
-            while (elapsed < duration)
+            while (elapsed < duration && !cancellationToken.IsCancellationRequested)
             {
                 elapsed += Time.deltaTime;
                 float t = elapsed / duration;
@@ -381,10 +416,13 @@ namespace HackMonkeys.UI.Spatial
                 panel.CanvasGroup.alpha = curveValue;
                 panel.transform.localScale = Vector3.Lerp(Vector3.one, Vector3.one * 0.8f, t);
 
-                yield return null;
+                await UniTask.Yield(cancellationToken);
             }
 
-            panel.CanvasGroup.alpha = 0f;
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                panel.CanvasGroup.alpha = 0f;
+            }
         }
 
         #region Haptic Feedback
@@ -394,15 +432,19 @@ namespace HackMonkeys.UI.Spatial
             if (interactor == leftHandRayInteractor)
             {
                 OVRInput.SetControllerVibration(1, intensity, OVRInput.Controller.LTouch);
-                DOVirtual.DelayedCall(hapticDuration, () => 
-                    OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.LTouch));
+                DelayedHapticStopAsync(OVRInput.Controller.LTouch).Forget();
             }
             else if (interactor == rightHandRayInteractor)
             {
                 OVRInput.SetControllerVibration(1, intensity, OVRInput.Controller.RTouch);
-                DOVirtual.DelayedCall(hapticDuration, () => 
-                    OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.RTouch));
+                DelayedHapticStopAsync(OVRInput.Controller.RTouch).Forget();
             }
+        }
+
+        private async UniTaskVoid DelayedHapticStopAsync(OVRInput.Controller controller)
+        {
+            await UniTask.Delay((int)(hapticDuration * 1000));
+            OVRInput.SetControllerVibration(0, 0, controller);
         }
 
         #endregion
@@ -449,9 +491,9 @@ namespace HackMonkeys.UI.Spatial
 
         private void OnDestroy()
         {
+            _transitionCts?.Cancel();
             _hoveredInteractables.Clear();
             _previousInteractorStates.Clear();
-
         }
     }
 
@@ -466,6 +508,7 @@ namespace HackMonkeys.UI.Spatial
         Settings,
         Options,
         ExitPanel,
-        Results
+        Results,
+        NameTag
     }
 }

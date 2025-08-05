@@ -49,4 +49,8 @@ public abstract class MenuPanel : MonoBehaviour
             backButton.OnButtonPressed.AddListener(() => _uiManager.GoBack());
         }
     }
+
+    protected virtual void OnDestroy()
+    {
+    }
 }

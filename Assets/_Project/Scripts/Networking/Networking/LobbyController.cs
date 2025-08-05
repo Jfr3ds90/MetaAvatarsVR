@@ -135,29 +135,89 @@ namespace HackMonkeys.Core
         public async void LeaveLobby()
         {
             Debug.Log("[LobbyController] 👋 Attempting to leave lobby...");
-            
+    
             if (!CanLeaveLobby)
             {
                 Debug.LogWarning("[LobbyController] ❌ Not in a lobby to leave");
                 OnActionFailed?.Invoke("Not in a lobby");
                 return;
             }
-            
+    
             try
             {
                 OnLeavingLobby?.Invoke();
-                
+        
+                // IMPORTANTE: Limpiar LobbyState ANTES de desconectar
+                if (_lobbyState != null)
+                {
+                    Debug.Log("[LobbyController] Clearing LobbyState before disconnect");
+            
+                    // Obtener referencia al jugador local antes de limpiar
+                    var localPlayer = _lobbyState.LocalPlayer;
+            
+                    // Limpiar todos los jugadores del estado
+                    _lobbyState.ClearAllPlayers();
+            
+                    // Si tenemos un jugador local, asegurar que se destruya
+                    if (localPlayer != null)
+                    {
+                        Debug.Log("[LobbyController] Forcing cleanup of local player");
+                        localPlayer.ForceCleanup();
+                    }
+                }
+        
+                // Esperar un momento para que se procesen las limpiezas
+                await Task.Delay(100);
+        
+                // Ahora sí, desconectar de la red
                 await _networkBootstrapper.LeaveRoom();
-                
+        
                 Debug.Log("[LobbyController] ✅ Left lobby successfully");
-                
-                _lobbyState?.ClearAllPlayers();
+        
+                // Limpiar referencias locales
+                CleanupLocalReferences();
             }
             catch (System.Exception e)
             {
                 Debug.LogError($"[LobbyController] ❌ Exception leaving lobby: {e.Message}");
                 OnActionFailed?.Invoke($"Error leaving lobby: {e.Message}");
             }
+        }
+        
+        private void CleanupLocalReferences()
+        {
+            Debug.Log("[LobbyController] Cleaning up local references");
+    
+            // Verificar si hay LobbyPlayers huérfanos
+            var orphanedPlayers = FindObjectsOfType<LobbyPlayer>();
+            if (orphanedPlayers.Length > 0)
+            {
+                Debug.LogWarning($"[LobbyController] Found {orphanedPlayers.Length} orphaned LobbyPlayers, destroying them");
+                foreach (var player in orphanedPlayers)
+                {
+                    if (player != null && player.gameObject != null)
+                    {
+                        Destroy(player.gameObject);
+                    }
+                }
+            }
+        }
+        
+        public void OnUnexpectedDisconnection()
+        {
+            Debug.Log("[LobbyController] Handling unexpected disconnection");
+    
+            // Limpiar estado local
+            if (_lobbyState != null)
+            {
+                _lobbyState.ClearAllPlayers();
+            }
+    
+            // Limpiar referencias
+            CleanupLocalReferences();
+    
+            // Notificar UI
+            OnActionFailed?.Invoke("Connection lost");
         }
         
         /// <summary>

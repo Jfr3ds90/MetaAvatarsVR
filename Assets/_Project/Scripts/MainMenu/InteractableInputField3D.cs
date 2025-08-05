@@ -167,94 +167,105 @@ namespace HackMonkeys.UI.Spatial
             CheckInteraction();
         }
         
-        private void CheckInteraction()
+        public bool IsFocused()
         {
-            if (fieldInteractable == null) return;
+            return _isFocused;
+        }
+        
+       private void CheckInteraction()
+{
+    if (fieldInteractable == null) return;
+    
+    var rayInteractors = FindObjectsOfType<RayInteractor>();
+    
+    foreach (var interactor in rayInteractors)
+    {
+        bool isCurrentlyHovering = false;
+        
+        if (interactor.HasCandidate && 
+            interactor.CandidateProperties is RayInteractor.RayCandidateProperties props &&
+            props.ClosestInteractable == fieldInteractable)
+        {
+            isCurrentlyHovering = true;
             
-            // Check for hover/selection
-            var rayInteractors = FindObjectsOfType<RayInteractor>();
+            bool wasHovering = _hoveredInteractors.ContainsKey(interactor) && _hoveredInteractors[interactor];
             
-            foreach (var interactor in rayInteractors)
+            if (!wasHovering)
             {
-                bool isCurrentlyHovering = false;
-                
-                if (interactor.HasCandidate && 
-                    interactor.CandidateProperties is RayInteractor.RayCandidateProperties props &&
-                    props.ClosestInteractable == fieldInteractable)
+                if (!_isHovered)
                 {
-                    isCurrentlyHovering = true;
-                    
-                    // Check if this interactor just started hovering
-                    bool wasHovering = _hoveredInteractors.ContainsKey(interactor) && _hoveredInteractors[interactor];
-                    
-                    if (!wasHovering)
-                    {
-                        // New hover
-                        if (!_isHovered)
-                        {
-                            _activeInteractor = interactor;
-                            OnHoverEnter();
-                        }
-                    }
-                    
-                    // Check for selection (single trigger press)
-                    if (!_isFocused && interactor.State == InteractorState.Select)
-                    {
-                        // Check if this is a new press (not held from before)
-                        InteractorState previousState = InteractorState.Normal;
-                        if (_hoveredInteractors.ContainsKey(interactor))
-                        {
-                            // Use a simple state tracking - in production you'd want more robust state management
-                            Focus();
-                        }
-                    }
+                    _activeInteractor = interactor;
+                    OnHoverEnter();
                 }
-                else if (_hoveredInteractors.ContainsKey(interactor) && _hoveredInteractors[interactor])
-                {
-                    // Was hovering but no longer
-                    if (_activeInteractor == interactor)
-                    {
-                        OnHoverExit();
-                        _activeInteractor = null;
-                    }
-                }
-                
-                _hoveredInteractors[interactor] = isCurrentlyHovering;
             }
             
-            // Check if we should unfocus (click outside)
-            if (_isFocused && _keyboardManager != null)
+            // Detectar clic para focus
+            if (!_isFocused && interactor.State == InteractorState.Select)
             {
-                bool anyInteractorSelecting = false;
-                foreach (var interactor in rayInteractors)
+                // Verificar que es un nuevo clic
+                InteractorState previousState = _hoveredInteractors.ContainsKey(interactor) ? 
+                    InteractorState.Normal : InteractorState.Normal;
+                    
+                if (wasHovering) // Solo si ya estaba hovering
                 {
-                    if (interactor.State == InteractorState.Select)
-                    {
-                        anyInteractorSelecting = true;
-                        
-                        // Check if clicking outside this field
-                        if (interactor.HasCandidate)
-                        {
-                            var props = interactor.CandidateProperties as RayInteractor.RayCandidateProperties;
-                            if (props != null && props.ClosestInteractable != fieldInteractable)
-                            {
-                                // Check if the interactable belongs to the virtual keyboard
-                                InteractableButton3D button = props.ClosestInteractable.GetComponentInParent<InteractableButton3D>();
-                                VirtualKeyboard3D keyboard = button?.GetComponentInParent<VirtualKeyboard3D>();
-        
-                                // Only unfocus if NOT clicking on the virtual keyboard
-                                if (keyboard == null)
-                                {
-                                    // Clicking on something else that is not the keyboard
-                                    Unfocus();
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                    Focus();
                 }
             }
         }
+        else if (_hoveredInteractors.ContainsKey(interactor) && _hoveredInteractors[interactor])
+        {
+            if (_activeInteractor == interactor)
+            {
+                OnHoverExit();
+                _activeInteractor = null;
+            }
+        }
+        
+        _hoveredInteractors[interactor] = isCurrentlyHovering;
+    }
+    
+    // Mejorar detección de clics fuera
+    if (_isFocused && _keyboardManager != null)
+    {
+        bool shouldUnfocus = false;
+        
+        foreach (var interactor in rayInteractors)
+        {
+            if (interactor.State == InteractorState.Select)
+            {
+                if (interactor.HasCandidate)
+                {
+                    var props = interactor.CandidateProperties as RayInteractor.RayCandidateProperties;
+                    if (props != null && props.ClosestInteractable != fieldInteractable)
+                    {
+                        // Verificar si el clic es en el teclado virtual
+                        var clickedInteractable = props.ClosestInteractable;
+                        var button = clickedInteractable.GetComponentInParent<InteractableButton3D>();
+                        var keyboard = button?.GetComponentInParent<VirtualKeyboard3D>();
+                        
+                        if (keyboard == null)
+                        {
+                            // No es el teclado, deberíamos desfocar
+                            shouldUnfocus = true;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    // Clic en el vacío
+                    shouldUnfocus = true;
+                    break;
+                }
+            }
+        }
+        
+        if (shouldUnfocus)
+        {
+            Unfocus();
+        }
+    }
+}
         
         private void OnHoverEnter()
         {
@@ -599,17 +610,20 @@ namespace HackMonkeys.UI.Spatial
         {
             _currentText = text ?? "";
             _caretPosition = _currentText.Length;
-            
+    
             if (inputText != null)
             {
                 inputText.text = _currentText;
             }
-            
-            // Show/hide placeholder
+    
+            // Modificación: mantener inputText visible siempre
             bool hasText = !string.IsNullOrEmpty(_currentText);
-            if (placeholderText != null) placeholderText.gameObject.SetActive(!hasText && !_isFocused);
-            if (inputText != null) inputText.gameObject.SetActive(hasText || _isFocused);
-            
+            if (placeholderText != null) 
+                placeholderText.gameObject.SetActive(!hasText && !_isFocused);
+    
+            if (inputText != null) 
+                inputText.gameObject.SetActive(true); // Siempre visible
+    
             OnValueChanged?.Invoke(_currentText);
         }
         

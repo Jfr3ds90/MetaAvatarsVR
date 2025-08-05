@@ -10,34 +10,36 @@ namespace HackMonkeys.UI.Panels
 {
     /// <summary>
     /// Componente para el prefab que representa a un jugador en la lista del lobby
+    /// Usa paleta de colores simplificada: Amarillo (fondo), Blanco (texto principal), Gris (estados/secundario)
     /// </summary>
     public class LobbyPlayerItem : MonoBehaviour
     {
-        [Header("UI Elements")] [SerializeField]
-        private InteractableButton3D selectButton;
-
+        [Header("UI Elements")] 
+        [SerializeField] private InteractableButton3D selectButton;
         [SerializeField] private TextMeshProUGUI playerNameText;
         [SerializeField] private TextMeshProUGUI playerStatusText;
         [SerializeField] private Image playerAvatar;
         [SerializeField] private Image readyIndicator;
         [SerializeField] private Image backgroundPanel;
 
-        [Header("Status Icons")] [SerializeField]
-        private GameObject hostIcon;
-
+        [Header("Status Icons")] 
+        [SerializeField] private GameObject hostIcon;
         [SerializeField] private GameObject localPlayerIcon;
         [SerializeField] private GameObject pingIndicator;
         [SerializeField] private TextMeshProUGUI pingText;
 
-        [Header("Visual Settings")] [SerializeField]
-        private Color readyColor = Color.green;
+        [Header("Color Palette")]
+        [SerializeField] private Color primaryYellow = new Color(1f, 0.92f, 0.016f); // #FFD700 - Amarillo dorado
+        [SerializeField] private Color textWhite = Color.white; // #FFFFFF - Blanco puro
+        [SerializeField] private Color secondaryGray = new Color(0.5f, 0.5f, 0.5f); // #808080 - Gris medio
+        
+        [Header("Background Variations")]
+        [SerializeField] private float yellowAlpha = 0.9f; // Opacidad del fondo amarillo
+        [SerializeField] private float selectedAlphaMultiplier = 0.7f; // Reducir opacidad cuando está seleccionado
+        [SerializeField] private float hoverAlphaMultiplier = 0.85f; // Reducir ligeramente al hover
 
-        [SerializeField] private Color notReadyColor = Color.red;
-        [SerializeField] private Color hostColor = new Color(1f, 0.8f, 0f); // Gold
-        [SerializeField] private Color localPlayerColor = Color.cyan;
-        [SerializeField] private Color selectedColor = new Color(0.2f, 0.4f, 0.8f, 0.3f);
-
-        [Header("Animation")] [SerializeField] private float hoverScale = 1.05f;
+        [Header("Animation")] 
+        [SerializeField] private float hoverScale = 1.05f;
         [SerializeField] private float animationDuration = 0.2f;
 
         private LobbyPlayer _playerData;
@@ -55,6 +57,14 @@ namespace HackMonkeys.UI.Panels
                 selectButton.OnButtonPressed.AddListener(OnPlayerSelected);
                 selectButton.OnButtonHovered.AddListener(OnPlayerHovered);
                 selectButton.OnButtonUnhovered.AddListener(OnPlayerUnhovered);
+            }
+            
+            // Establecer color base del fondo
+            if (backgroundPanel != null)
+            {
+                Color bgColor = primaryYellow;
+                bgColor.a = yellowAlpha;
+                backgroundPanel.color = bgColor;
             }
         }
 
@@ -85,15 +95,10 @@ namespace HackMonkeys.UI.Panels
             gameObject.SetActive(true);
     
             UpdatePlayerName();
-
             UpdatePlayerStatus();
-
             UpdatePlayerIndicators();
-
             UpdatePlayerAvatar();
-
             UpdatePingDisplay();
-
             AnimateUpdate();
         }
 
@@ -109,20 +114,20 @@ namespace HackMonkeys.UI.Panels
                 }
         
                 playerNameText.text = displayName;
-
-                if (_playerData.IsLocalPlayer)
+                
+                // Todos los nombres en blanco para mantener la paleta limpia
+                playerNameText.color = textWhite;
+                
+                // Agregar indicadores textuales para diferenciar roles
+                if (_playerData.IsHost)
                 {
-                    playerNameText.color = localPlayerColor;
-                    Debug.Log($"[LobbyPlayerItem] Setting local player color for: {displayName}");
+                    displayName = $"★ {displayName}"; // Estrella para el host
+                    playerNameText.text = displayName;
                 }
-                else if (_playerData.IsHost)
+                else if (_playerData.IsLocalPlayer)
                 {
-                    playerNameText.color = hostColor;
-                    Debug.Log($"[LobbyPlayerItem] Setting host color for: {displayName}");
-                }
-                else
-                {
-                    playerNameText.color = Color.white;
+                    displayName = $"▶ {displayName}"; // Triángulo para jugador local
+                    playerNameText.text = displayName;
                 }
             }
             else
@@ -140,12 +145,14 @@ namespace HackMonkeys.UI.Panels
             if (playerStatusText != null)
             {
                 playerStatusText.text = isReady ? "Ready" : "Not Ready";
-                playerStatusText.color = isReady ? readyColor : notReadyColor;
+                // Ready en blanco, Not Ready en gris
+                playerStatusText.color = isReady ? textWhite : secondaryGray;
             }
 
             if (readyIndicator != null)
             {
-                readyIndicator.color = isReady ? readyColor : notReadyColor;
+                // Indicador ready usa los mismos colores
+                readyIndicator.color = isReady ? textWhite : secondaryGray;
 
                 if (isReady)
                 {
@@ -165,11 +172,17 @@ namespace HackMonkeys.UI.Panels
             if (hostIcon != null)
             {
                 hostIcon.SetActive(_playerData.IsHost);
+                // Asegurar que el icono use color blanco
+                var iconImage = hostIcon.GetComponent<Image>();
+                if (iconImage != null) iconImage.color = textWhite;
             }
 
             if (localPlayerIcon != null)
             {
                 localPlayerIcon.SetActive(_playerData.IsLocalPlayer);
+                // Asegurar que el icono use color blanco
+                var iconImage = localPlayerIcon.GetComponent<Image>();
+                if (iconImage != null) iconImage.color = textWhite;
             }
 
             UpdateBackgroundColor();
@@ -177,21 +190,23 @@ namespace HackMonkeys.UI.Panels
 
         private void UpdateBackgroundColor()
         {
-            if (backgroundPanel == null || _playerData == null) return;
+            if (backgroundPanel == null) return;
 
-            Color targetColor = Color.clear;
-
+            // Siempre usar amarillo como base
+            Color targetColor = primaryYellow;
+            
+            // Ajustar alpha según estado
             if (_isSelected)
             {
-                targetColor = selectedColor;
+                targetColor.a = yellowAlpha * selectedAlphaMultiplier;
             }
-            else if (_playerData.IsLocalPlayer)
+            else if (_isHovered)
             {
-                targetColor = new Color(localPlayerColor.r, localPlayerColor.g, localPlayerColor.b, 0.1f);
+                targetColor.a = yellowAlpha * hoverAlphaMultiplier;
             }
-            else if (_playerData.IsHost)
+            else
             {
-                targetColor = new Color(hostColor.r, hostColor.g, hostColor.b, 0.1f);
+                targetColor.a = yellowAlpha;
             }
 
             backgroundPanel.DOColor(targetColor, animationDuration);
@@ -201,11 +216,15 @@ namespace HackMonkeys.UI.Panels
         {
             if (playerAvatar == null || _playerData == null) return;
 
-            Color playerColor = _playerData.PlayerColor;
-            playerAvatar.color = playerColor;
-
-            // TODO: Aquí se podría integrar con Meta Avatars
-            // En el futuro: playerAvatar.sprite = GetMetaAvatarSprite(_playerData.AvatarId);
+            // Avatar en blanco o gris según el estado
+            if (_playerData.IsReady)
+            {
+                playerAvatar.color = textWhite;
+            }
+            else
+            {
+                playerAvatar.color = secondaryGray;
+            }
         }
 
         private void UpdatePingDisplay()
@@ -220,12 +239,15 @@ namespace HackMonkeys.UI.Panels
                 {
                     pingText.text = _playerData.IsLocalPlayer ? "LOCAL" : $"{fakePing}ms";
 
-                    if (fakePing < 50)
-                        pingText.color = readyColor;
-                    else if (fakePing < 100)
-                        pingText.color = Color.yellow;
+                    // Usar solo blanco y gris para el ping
+                    if (_playerData.IsLocalPlayer || fakePing < 100)
+                    {
+                        pingText.color = textWhite;
+                    }
                     else
-                        pingText.color = notReadyColor;
+                    {
+                        pingText.color = secondaryGray;
+                    }
                 }
             }
         }
@@ -271,12 +293,7 @@ namespace HackMonkeys.UI.Panels
             _hoverTween = transform.DOScale(Vector3.one * hoverScale, animationDuration)
                 .SetEase(Ease.OutQuad);
 
-            if (backgroundPanel != null)
-            {
-                Color currentColor = backgroundPanel.color;
-                currentColor.a = Mathf.Max(currentColor.a, 0.2f);
-                backgroundPanel.DOColor(currentColor, animationDuration);
-            }
+            UpdateBackgroundColor();
         }
 
         private void OnPlayerUnhovered()
@@ -378,7 +395,7 @@ namespace HackMonkeys.UI.Panels
 
             ParticleSystem particles = effect.AddComponent<ParticleSystem>();
             var main = particles.main;
-            main.startColor = readyColor;
+            main.startColor = textWhite; // Partículas blancas
             main.startSize = 0.02f;
             main.startLifetime = 1f;
             main.maxParticles = 20;
@@ -404,12 +421,14 @@ namespace HackMonkeys.UI.Panels
             transform.localScale = Vector3.zero;
             transform.DOScale(Vector3.one, 0.5f)
                 .SetEase(Ease.OutBack)
-                .SetDelay(UnityEngine.Random.Range(0f, 0.2f)); // Pequeño delay aleatorio
+                .SetDelay(UnityEngine.Random.Range(0f, 0.2f));
 
             if (backgroundPanel != null)
             {
-                Color originalColor = backgroundPanel.color;
-                backgroundPanel.color = Color.white;
+                // Flash de blanco a amarillo
+                Color originalColor = primaryYellow;
+                originalColor.a = yellowAlpha;
+                backgroundPanel.color = textWhite;
                 backgroundPanel.DOColor(originalColor, 0.8f);
             }
         }
@@ -443,11 +462,6 @@ namespace HackMonkeys.UI.Panels
 
             // TODO: Implementar menú contextual
             Debug.Log($"[LobbyPlayerItem] Showing options for {_playerData.GetDisplayName()}");
-
-            // Todo: Opciones posibles:
-            // - Kick Player
-            // - Transfer Host
-            // - Mute/Unmute
         }
 
         #endregion
@@ -464,12 +478,12 @@ namespace HackMonkeys.UI.Panels
                 if (playerStatusText != null)
                 {
                     playerStatusText.text = newReadyState ? "Ready" : "Not Ready";
-                    playerStatusText.color = newReadyState ? readyColor : notReadyColor;
+                    playerStatusText.color = newReadyState ? textWhite : secondaryGray;
                 }
 
                 if (readyIndicator != null)
                 {
-                    readyIndicator.color = newReadyState ? readyColor : notReadyColor;
+                    readyIndicator.color = newReadyState ? textWhite : secondaryGray;
 
                     if (newReadyState)
                     {
@@ -513,6 +527,33 @@ namespace HackMonkeys.UI.Panels
                 Debug.LogError("[LobbyPlayerItem] ❌ playerStatusText is not assigned!");
         }
 
+        [ContextMenu("Apply Color Palette")]
+        private void ApplyColorPalette()
+        {
+            // Aplicar paleta de colores en el editor
+            if (backgroundPanel != null)
+            {
+                Color bgColor = primaryYellow;
+                bgColor.a = yellowAlpha;
+                backgroundPanel.color = bgColor;
+            }
+            
+            if (playerNameText != null)
+                playerNameText.color = textWhite;
+                
+            if (playerStatusText != null)
+                playerStatusText.color = secondaryGray;
+                
+            if (playerAvatar != null)
+                playerAvatar.color = secondaryGray;
+                
+            if (readyIndicator != null)
+                readyIndicator.color = secondaryGray;
+                
+            if (pingText != null)
+                pingText.color = textWhite;
+        }
+
         #endregion
 
         private void OnDestroy()
@@ -532,7 +573,8 @@ namespace HackMonkeys.UI.Panels
 
         private void OnDrawGizmosSelected()
         {
-            Gizmos.color = Color.cyan;
+            // Gizmo en amarillo para mantener consistencia
+            Gizmos.color = new Color(1f, 0.92f, 0.016f, 0.5f);
             Gizmos.DrawWireCube(transform.position, new Vector3(2f, 0.3f, 0.1f));
         }
 

@@ -85,19 +85,26 @@ namespace HackMonkeys.Core
                 Debug.LogWarning("[LobbyState] ❌ Attempted to unregister null player");
                 return;
             }
-            
+    
             PlayerRef playerRef = player.PlayerRef;
-            
+    
             if (!_players.ContainsKey(playerRef))
             {
                 Debug.LogWarning($"[LobbyState] Player {playerRef} not found in registry");
                 return;
             }
-            
+    
+            // Verificar que sea el mismo objeto
+            if (_players[playerRef] != player)
+            {
+                Debug.LogWarning($"[LobbyState] Player reference mismatch for {playerRef}");
+                return;
+            }
+    
             _players.Remove(playerRef);
-            
+    
             Debug.Log($"[LobbyState] 👋 Player unregistered: {player.GetDisplayName()} (Remaining: {PlayerCount})");
-            
+    
             OnPlayerLeft?.Invoke(player);
             OnPlayerCountChanged?.Invoke(PlayerCount, GetMaxPlayers());
             CheckAllPlayersReady();
@@ -203,15 +210,22 @@ namespace HackMonkeys.Core
         public void ClearAllPlayers()
         {
             Debug.Log("[LobbyState] 🧹 Clearing all players");
-            
+    
+            // Crear copia de la lista para evitar modificación durante iteración
             var playersToRemove = _players.Values.ToList();
+    
+            // Limpiar el diccionario primero
             _players.Clear();
-            
+    
+            // Notificar la salida de cada jugador
             foreach (var player in playersToRemove)
             {
-                OnPlayerLeft?.Invoke(player);
+                if (player != null)
+                {
+                    OnPlayerLeft?.Invoke(player);
+                }
             }
-            
+    
             OnPlayerCountChanged?.Invoke(0, GetMaxPlayers());
             CheckAllPlayersReady();
         }
@@ -239,10 +253,68 @@ namespace HackMonkeys.Core
             }
         }
         
+        public bool ValidateNoDuplicates()
+        {
+            var allLobbyPlayers = FindObjectsOfType<LobbyPlayer>();
+            var playerRefCounts = new Dictionary<PlayerRef, int>();
+    
+            foreach (var player in allLobbyPlayers)
+            {
+                if (!playerRefCounts.ContainsKey(player.PlayerRef))
+                    playerRefCounts[player.PlayerRef] = 0;
+                playerRefCounts[player.PlayerRef]++;
+            }
+    
+            bool hasDuplicates = false;
+            foreach (var kvp in playerRefCounts)
+            {
+                if (kvp.Value > 1)
+                {
+                    Debug.LogError($"[LobbyState] ❌ Found {kvp.Value} instances of player {kvp.Key}!");
+                    hasDuplicates = true;
+                }
+            }
+    
+            return !hasDuplicates;
+        }
+        
         private int GetMaxPlayers()
         {
             return NetworkBootstrapper.Instance?.CurrentMaxPlayers ?? 4;
         }
+        
+        [ContextMenu("Clean Duplicate Players")]
+        public void CleanDuplicatePlayers()
+        {
+            Debug.Log("[LobbyState] Checking for duplicate players...");
+    
+            var allLobbyPlayers = FindObjectsOfType<LobbyPlayer>();
+            var processedRefs = new HashSet<PlayerRef>();
+    
+            foreach (var player in allLobbyPlayers)
+            {
+                if (processedRefs.Contains(player.PlayerRef))
+                {
+                    Debug.LogWarning($"[LobbyState] Found duplicate player {player.PlayerRef}, destroying...");
+            
+                    // Desregistrar si está registrado
+                    if (_players.ContainsKey(player.PlayerRef) && _players[player.PlayerRef] == player)
+                    {
+                        _players.Remove(player.PlayerRef);
+                    }
+            
+                    // Destruir el duplicado
+                    Destroy(player.gameObject);
+                }
+                else
+                {
+                    processedRefs.Add(player.PlayerRef);
+                }
+            }
+    
+            Debug.Log("[LobbyState] Duplicate cleanup complete");
+        }
+
         
         // DEBUG & VALIDATION
         [ContextMenu("Debug: List All Players")]
@@ -276,45 +348,41 @@ namespace HackMonkeys.Core
         private void DebugValidateState()
         {
             Debug.Log("=== LobbyState Validation ===");
-            
-            int nullPlayers = _players.Values.Count(p => p == null);
-            if (nullPlayers > 0)
+    
+            // Verificar duplicados
+            if (!ValidateNoDuplicates())
             {
-                Debug.LogError($"❌ Found {nullPlayers} null players in registry!");
+                Debug.LogError("❌ Duplicate players detected!");
             }
             else
             {
-                Debug.Log("✅ No null players found");
+                Debug.Log("✅ No duplicate players");
             }
-            
-            var hosts = _players.Values.Where(p => p.IsHost).ToList();
-            if (hosts.Count > 1)
+    
+            // Verificar objetos huérfanos
+            var allLobbyPlayers = FindObjectsOfType<LobbyPlayer>();
+            var orphanedCount = 0;
+    
+            foreach (var player in allLobbyPlayers)
             {
-                Debug.LogError($"❌ Multiple hosts detected: {hosts.Count}");
+                if (!_players.ContainsValue(player))
+                {
+                    Debug.LogWarning($"⚠️ Orphaned player found: {player.GetDisplayName()}");
+                    orphanedCount++;
+                }
             }
-            else if (hosts.Count == 1)
+    
+            if (orphanedCount > 0)
             {
-                Debug.Log($"✅ Single host: {hosts[0].GetDisplayName()}");
+                Debug.LogError($"❌ Found {orphanedCount} orphaned players!");
             }
             else
             {
-                Debug.LogWarning("⚠️ No host found");
+                Debug.Log("✅ No orphaned players");
             }
-            
-            var localPlayers = _players.Values.Where(p => p.IsLocalPlayer).ToList();
-            if (localPlayers.Count > 1)
-            {
-                Debug.LogError($"❌ Multiple local players detected: {localPlayers.Count}");
-            }
-            else if (localPlayers.Count == 1)
-            {
-                Debug.Log($"✅ Single local player: {localPlayers[0].GetDisplayName()}");
-            }
-            else
-            {
-                Debug.LogWarning("⚠️ No local player found");
-            }
-            
+    
+            Debug.Log($"Total registered: {_players.Count}");
+            Debug.Log($"Total in scene: {allLobbyPlayers.Length}");
             Debug.Log("================================");
         }
         
@@ -323,6 +391,10 @@ namespace HackMonkeys.Core
             if (Instance == this)
             {
                 Debug.Log("[LobbyState] 🧹 Instance destroyed, clearing singleton reference");
+        
+                // Limpiar todos los jugadores antes de destruir
+                ClearAllPlayers();
+        
                 Instance = null;
             }
         }

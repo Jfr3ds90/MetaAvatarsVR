@@ -7,6 +7,7 @@ using Oculus.Interaction;
 using TMPro;
 using DG.Tweening;
 using Oculus.Interaction.Surfaces;
+using System.Threading;
 
 namespace HackMonkeys.UI.Spatial
 {
@@ -16,72 +17,69 @@ namespace HackMonkeys.UI.Spatial
     [RequireComponent(typeof(RayInteractable))]
     public class InteractableButton3D : MonoBehaviour
     {
-        [Header("Visual Components")] [SerializeField]
-        private Transform buttonTransform;
-
+        [Header("Visual Components")] 
+        [SerializeField] private Transform buttonTransform;
         [SerializeField] private Renderer buttonRenderer;
         [SerializeField] private TextMeshProUGUI buttonText;
         [SerializeField] private GameObject hoverEffect;
         [SerializeField] private GameObject pressEffect;
 
-        [Header("Materials")] [SerializeField] private Material normalMaterial;
+        [Header("Materials")] 
+        [SerializeField] private Material normalMaterial;
         [SerializeField] private Material hoverMaterial;
         [SerializeField] private Material pressedMaterial;
         [SerializeField] private Material disabledMaterial;
 
-        [Header("Animation")] [SerializeField] private float hoverScale = 1.1f;
+        [Header("Animation")] 
+        [SerializeField] private float hoverScale = 1.1f;
         [SerializeField] private float pressScale = 0.95f;
         [SerializeField] private float animationDuration = 0.15f;
         [SerializeField] private Ease scaleEase = Ease.OutBack;
+        [SerializeField] private Vector3 baseScale = Vector3.one; // ESCALA BASE FIJA
 
-        [Header("Button Settings")] [SerializeField]
-        private string buttonLabel = "Button";
-
+        [Header("Button Settings")] 
+        [SerializeField] private string buttonLabel = "Button";
         [SerializeField] private bool isInteractable = true;
         [SerializeField] private bool playSound = true;
 
-        [Header("Interaction Control")] [SerializeField]
-        private bool allowRepeatOnHold = false;
-
+        [Header("Interaction Control")] 
+        [SerializeField] private bool allowRepeatOnHold = false;
         [SerializeField] private float repeatDelay = 0.5f;
         [SerializeField] private float repeatInterval = 0.1f;
         [SerializeField] private bool requireFullRelease = true;
 
-        [Header("Ray Interaction")] [SerializeField]
-        private ColliderSurface buttonSurface;
-
+        [Header("Ray Interaction")] 
+        [SerializeField] private ColliderSurface buttonSurface;
         [SerializeField] private float surfaceRadius = 0.1f;
 
-        [Header("Events")] public UnityEvent OnButtonPressed;
+        [Header("Events")] 
+        public UnityEvent OnButtonPressed;
         public UnityEvent OnButtonHovered;
         public UnityEvent OnButtonUnhovered;
         public UnityEvent OnButtonHeld;
 
+        // Private fields
         private RayInteractable _rayInteractable;
-        private Vector3 _originalScale;
         private Tweener _currentTween;
         private bool _isHovered = false;
-        [SerializeField] private bool _isPressed = false;
+        private bool _isPressed = false;
         private bool _canTrigger = true;
         private float _lastTriggerTime = 0f;
-        private Coroutine _repeatCoroutine;
-
-        // Tracking de interactores para control preciso
-        private Dictionary<RayInteractor, InteractorState> _interactorStates =
-            new Dictionary<RayInteractor, InteractorState>();
-
+        
+        // UniTask cancellation tokens
+        private CancellationTokenSource _repeatCts;
+        
+        // Tracking de interactores
+        private Dictionary<RayInteractor, InteractorState> _interactorStates = new Dictionary<RayInteractor, InteractorState>();
         private RayInteractor _activeInteractor;
 
-        private MaterialPropertyBlock _propBlock;
-
         public bool CanDebug = false;
-        private bool _scaleInitialize;
 
         private void Awake()
         {
             if (CanDebug)
             {
-                Debug.Log(this.name);
+                Debug.Log($"[{name}] Awake - Base scale: {baseScale}");
             }
 
             _rayInteractable = GetComponent<RayInteractable>();
@@ -94,10 +92,6 @@ namespace HackMonkeys.UI.Spatial
             {
                 CreateDefaultSurface();
             }
-
-            _originalScale = buttonTransform != null ? buttonTransform.localScale : transform.localScale;
-            _scaleInitialize = true;
-            _propBlock = new MaterialPropertyBlock();
 
             if (buttonText != null)
             {
@@ -125,34 +119,70 @@ namespace HackMonkeys.UI.Spatial
 
         private void OnEnable()
         {
+            if (CanDebug)
+            {
+                Debug.Log($"[{name}] OnEnable");
+            }
+            
             if (_rayInteractable != null)
             {
                 _rayInteractable.InjectSurface(buttonSurface);
             }
 
+            // Siempre restaurar a la escala base
+            Transform targetTransform = buttonTransform != null ? buttonTransform : transform;
+            targetTransform.localScale = baseScale;
+
             UpdateInteractability();
             _canTrigger = true;
             _interactorStates.Clear();
-
-            _originalScale = buttonTransform != null ? buttonTransform.localScale : transform.localScale;
-            _scaleInitialize = true;
+            
+            // Resetear estados visuales
+            _isHovered = false;
+            _isPressed = false;
+            _activeInteractor = null;
+            
+            // Asegurar material correcto
+            UpdateButtonMaterial(isInteractable ? normalMaterial : disabledMaterial);
         }
 
         private void OnDisable()
         {
-            _currentTween?.Kill();
-
-            if (_repeatCoroutine != null)
+            if (CanDebug)
             {
-                StopCoroutine(_repeatCoroutine);
-                _repeatCoroutine = null;
+                Debug.Log($"[{name}] OnDisable");
             }
 
+            // Cancelar todas las tareas async
+            _repeatCts?.Cancel();
+            
+            // Detener y limpiar animaciones
+            _currentTween?.Kill(true);
+            _currentTween = null;
+
+            // Restaurar escala base
+            Transform targetTransform = buttonTransform != null ? buttonTransform : transform;
+            targetTransform.localScale = baseScale;
+
+            // Resetear estados
             _isHovered = false;
             _isPressed = false;
             _canTrigger = true;
             _activeInteractor = null;
             _interactorStates.Clear();
+            
+            // Detener efectos visuales
+            if (hoverEffect != null) 
+            {
+                hoverEffect.transform.DOKill();
+                hoverEffect.SetActive(false);
+            }
+            
+            if (pressEffect != null) 
+            {
+                pressEffect.transform.DOKill();
+                pressEffect.SetActive(false);
+            }
         }
 
         private void Update()
@@ -170,7 +200,9 @@ namespace HackMonkeys.UI.Spatial
             {
                 bool isHoveringThis = false;
 
-                if (interactor.HasCandidate && interactor.CandidateProperties is RayInteractor.RayCandidateProperties props && props.ClosestInteractable == _rayInteractable)
+                if (interactor.HasCandidate && 
+                    interactor.CandidateProperties is RayInteractor.RayCandidateProperties props && 
+                    props.ClosestInteractable == _rayInteractable)
                 {
                     isHoveringThis = true;
                 }
@@ -242,10 +274,9 @@ namespace HackMonkeys.UI.Spatial
         public void SetAllowRepeatOnHold(bool allow)
         {
             allowRepeatOnHold = allow;
-            if (!allow && _repeatCoroutine != null)
+            if (!allow)
             {
-                StopCoroutine(_repeatCoroutine);
-                _repeatCoroutine = null;
+                _repeatCts?.Cancel();
             }
         }
 
@@ -253,6 +284,16 @@ namespace HackMonkeys.UI.Spatial
         {
             repeatDelay = Mathf.Max(0.1f, delay);
             repeatInterval = Mathf.Max(0.05f, interval);
+        }
+
+        public void SetBaseScale(Vector3 scale)
+        {
+            baseScale = scale;
+            if (!_isHovered && !_isPressed)
+            {
+                Transform targetTransform = buttonTransform != null ? buttonTransform : transform;
+                targetTransform.localScale = baseScale;
+            }
         }
 
         #endregion
@@ -263,10 +304,14 @@ namespace HackMonkeys.UI.Spatial
         {
             if (!isInteractable || _isHovered) return;
 
+            if (CanDebug)
+            {
+                Debug.Log($"[{name}] OnHoverEnter");
+            }
+
             _isHovered = true;
 
             AnimateScale(hoverScale);
-
             UpdateButtonMaterial(hoverMaterial);
 
             if (hoverEffect != null)
@@ -282,32 +327,41 @@ namespace HackMonkeys.UI.Spatial
         {
             if (!isInteractable || !_isHovered) return;
 
+            if (CanDebug)
+            {
+                Debug.Log($"[{name}] OnHoverExit");
+            }
+
             _isHovered = false;
 
             if (!_isPressed)
             {
                 AnimateScale(1f);
-
                 UpdateButtonMaterial(normalMaterial);
             }
 
             if (hoverEffect != null)
             {
+                hoverEffect.transform.DOKill();
                 hoverEffect.SetActive(false);
             }
 
             OnButtonUnhovered?.Invoke();
         }
 
-        public void OnSelectStart()
+        public async void OnSelectStart()
         {
             if (!isInteractable || _isPressed) return;
+
+            if (CanDebug)
+            {
+                Debug.Log($"[{name}] OnSelectStart");
+            }
 
             _isPressed = true;
             _canTrigger = false; 
 
             AnimateScale(pressScale);
-
             UpdateButtonMaterial(pressedMaterial);
 
             if (pressEffect != null)
@@ -320,21 +374,23 @@ namespace HackMonkeys.UI.Spatial
 
             if (allowRepeatOnHold)
             {
-                _repeatCoroutine = StartCoroutine(RepeatActionCoroutine());
+                _repeatCts?.Cancel();
+                _repeatCts = new CancellationTokenSource();
+                RepeatActionAsync(_repeatCts.Token).Forget();
             }
         }
 
-        private void OnSelectEnd()
+        public void OnSelectEnd()
         {
             if (!_isPressed) return;
 
-            _isPressed = false;
-
-            if (_repeatCoroutine != null)
+            if (CanDebug)
             {
-                StopCoroutine(_repeatCoroutine);
-                _repeatCoroutine = null;
+                Debug.Log($"[{name}] OnSelectEnd");
             }
+
+            _isPressed = false;
+            _repeatCts?.Cancel();
 
             if (_isHovered)
             {
@@ -353,19 +409,6 @@ namespace HackMonkeys.UI.Spatial
             }
         }
 
-        /*public async void OnSelect()
-        {
-            if (!isInteractable) return;
-
-            // Si no hay un interactor activo, simular una pulsación completa
-            if (_activeInteractor == null)
-            {
-                OnSelectStart();
-                await UniTask.Delay(100);
-                OnSelectEnd();
-            }
-        }*/
-
         #endregion
 
         #region Private Methods
@@ -374,19 +417,24 @@ namespace HackMonkeys.UI.Spatial
         {
             _lastTriggerTime = Time.time;
             OnButtonPressed?.Invoke();
-
-            ButtonPressRoutine().Forget();
         }
 
-        private IEnumerator RepeatActionCoroutine()
+        private async UniTaskVoid RepeatActionAsync(CancellationToken cancellationToken)
         {
-            yield return new WaitForSeconds(repeatDelay);
-
-            while (_isPressed && allowRepeatOnHold)
+            try
             {
-                OnButtonHeld?.Invoke();
-                ExecuteButtonAction();
-                yield return new WaitForSeconds(repeatInterval);
+                await UniTask.Delay((int)(repeatDelay * 1000), cancellationToken: cancellationToken);
+
+                while (_isPressed && allowRepeatOnHold && !cancellationToken.IsCancellationRequested)
+                {
+                    OnButtonHeld?.Invoke();
+                    ExecuteButtonAction();
+                    await UniTask.Delay((int)(repeatInterval * 1000), cancellationToken: cancellationToken);
+                }
+            }
+            catch (System.OperationCanceledException)
+            {
+                // Cancelled, es normal
             }
         }
 
@@ -399,6 +447,8 @@ namespace HackMonkeys.UI.Spatial
 
             if (!isInteractable)
             {
+                _currentTween?.Kill(true);
+                
                 UpdateButtonMaterial(disabledMaterial);
                 AnimateScale(1f);
 
@@ -409,11 +459,7 @@ namespace HackMonkeys.UI.Spatial
                     buttonText.color = textColor;
                 }
 
-                if (_repeatCoroutine != null)
-                {
-                    StopCoroutine(_repeatCoroutine);
-                    _repeatCoroutine = null;
-                }
+                _repeatCts?.Cancel();
             }
             else
             {
@@ -438,33 +484,24 @@ namespace HackMonkeys.UI.Spatial
 
         private void AnimateScale(float targetScale)
         {
-            if (!_scaleInitialize)
-            {
-                if (gameObject.activeInHierarchy)
-                {
-                    _originalScale = transform.localScale;
-                    _scaleInitialize = true;
-                }
-                else
-                {
-                    Debug.LogError($"❌[{name}] this can not be animated, because its not active");
-                    return;
-                }
-            }
-
             _currentTween?.Kill();
 
             Transform targetTransform = buttonTransform != null ? buttonTransform : transform;
-            Vector3 target = _originalScale * targetScale;
+            Vector3 target = baseScale * targetScale; // Usar baseScale en lugar de una variable dinámica
 
-            _currentTween = targetTransform.DOScale(target, animationDuration).SetEase(scaleEase);
+            _currentTween = targetTransform.DOScale(target, animationDuration)
+                .SetEase(scaleEase)
+                .OnKill(() => _currentTween = null);
         }
 
         private void AnimateHoverEffect()
         {
             if (hoverEffect == null) return;
 
-            hoverEffect.transform.DOScale(_originalScale * 1.2f, 0.5f)
+            hoverEffect.transform.DOKill();
+            
+            hoverEffect.transform.localScale = Vector3.one;
+            hoverEffect.transform.DOScale(Vector3.one * 1.2f, 0.5f)
                 .SetLoops(-1, LoopType.Yoyo)
                 .SetEase(Ease.InOutSine);
         }
@@ -473,48 +510,52 @@ namespace HackMonkeys.UI.Spatial
         {
             if (pressEffect == null) return;
 
+            pressEffect.transform.DOKill();
+            
             pressEffect.transform.localScale = Vector3.zero;
             pressEffect.transform.DOScale(Vector3.one * 1.5f, 0.3f)
                 .SetEase(Ease.OutBack)
-                .OnComplete(() => { pressEffect.SetActive(false); });
+                .OnComplete(() => { 
+                    if (pressEffect != null) 
+                        pressEffect.SetActive(false); 
+                });
         }
-
-        private async UniTask ButtonPressRoutine()
-        {
-            await UniTask.Delay(100);
-        }
-
-        #endregion
-
-        #region Gizmos
-
-        //private void OnDrawGizmosSelected()
-        //{
-        //    // Visualizar área de interacción
-        //    Gizmos.color = Color.green;
-
-        //    BoxCollider boxCollider = GetComponent<BoxCollider>();
-        //    if (boxCollider != null)
-        //    {
-        //        Gizmos.DrawWireCube(transform.position + boxCollider.center, boxCollider.size);
-        //    }
-
-        //    // Visualizar radio de superficie
-        //    Gizmos.color = Color.cyan;
-        //    Gizmos.DrawWireSphere(transform.position, surfaceRadius);
-        //}
 
         #endregion
 
         private void OnDestroy()
         {
+            // Cancelar todas las tareas async
+            _repeatCts?.Cancel();
+            
+            // Limpiar todas las animaciones
             _currentTween?.Kill();
-            if (_repeatCoroutine != null)
-            {
-                StopCoroutine(_repeatCoroutine);
-            }
-
+            
+            if (hoverEffect != null)
+                hoverEffect.transform.DOKill();
+                
+            if (pressEffect != null)
+                pressEffect.transform.DOKill();
+            
             _interactorStates.Clear();
         }
+        
+        #if UNITY_EDITOR
+        // Helper para resetear la escala base en el editor
+        [ContextMenu("Reset Base Scale to Current")]
+        private void ResetBaseScaleTourrent()
+        {
+            Transform targetTransform = buttonTransform != null ? buttonTransform : transform;
+            baseScale = targetTransform.localScale;
+            Debug.Log($"Base scale set to: {baseScale}");
+        }
+        
+        [ContextMenu("Apply Base Scale")]
+        private void ApplyBaseScale()
+        {
+            Transform targetTransform = buttonTransform != null ? buttonTransform : transform;
+            targetTransform.localScale = baseScale;
+        }
+        #endif
     }
 }

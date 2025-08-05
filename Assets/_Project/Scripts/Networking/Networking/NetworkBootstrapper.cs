@@ -7,9 +7,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Fusion.Photon.Realtime;
 using HackMonkeys.Gameplay;
+using HackMonkeys.UI.Panels;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
+using System.Linq;
 
 namespace HackMonkeys.Core
 {
@@ -38,6 +40,9 @@ namespace HackMonkeys.Core
         [Header("Events - SIMPLIFICADOS")] public UnityEvent OnConnectedToServerEvent;
         public UnityEvent<string> OnConnectionFailed;
         public UnityEvent<List<SessionInfo>> OnSessionListUpdatedEvent;
+        
+        // Diccionario para trackear los objetos spawneados por cada jugador
+        private Dictionary<PlayerRef, NetworkObject> _playerObjects = new Dictionary<PlayerRef, NetworkObject>();
 
         private NetworkRunner _runner;
         [SerializeField] private NetworkSceneManagerDefault _sceneManager;
@@ -76,132 +81,7 @@ namespace HackMonkeys.Core
         /// <summary>
         /// Crear sala + configurar callbacks automáticamente
         /// </summary>
-        public async Task<bool> CreateRoom(string roomName, int maxPlayers = 0, string sceneName = null)
-        {
-            if (_runner != null)
-            {
-                Debug.LogWarning("[NetworkBootstrapper] Runner already exists. Shutting down...");
-                await ShutdownRunner();
-            }
-
-            try
-            {
-                Debug.Log($"[NetworkBootstrapper] Creating room: {roomName}");
-
-                if (maxPlayers <= 0) maxPlayers = defaultMaxPlayers;
-
-                if (!string.IsNullOrEmpty(sceneName) && IsValidScene(sceneName))
-                {
-                    _selectedSceneName = sceneName;
-                    Debug.Log($"[NetworkBootstrapper] Selected scene: {sceneName}");
-                }
-                else
-                {
-                    _selectedSceneName = gameSceneName; 
-                    Debug.Log($"[NetworkBootstrapper] Using default scene: {gameSceneName}");
-                }
-
-                CurrentRoomName = roomName;
-                CurrentMaxPlayers = maxPlayers;
-
-                _runner = Instantiate(runnerPrefab);
-                _runner.name = "NetworkRunner_Host";
-
-                _runner.AddCallbacks(this);
-
-                _sceneManager = Instantiate(sceneManagerPrefab);
-                DontDestroyOnLoad(_sceneManager);
-
-                var startGameArgs = new StartGameArgs()
-                {
-                    GameMode = GameMode.Host,
-                    SessionName = roomName,
-                    PlayerCount = maxPlayers,
-                    SceneManager = _sceneManager,
-                    CustomLobbyName = "HackMonkeys_Lobby",
-                    IsVisible = true,
-                    IsOpen = true,
-                    SessionProperties = CreateSessionProperties(sceneName)
-                };
-
-                var result = await _runner.StartGame(startGameArgs);
-
-                if (result.Ok)
-                {
-                    Debug.Log("[NetworkBootstrapper] ✅ Room created successfully!");
-                    
-                    PlayerDataManager.Instance.SetSessionData(Runner.LocalPlayer, true, roomName);
-                    
-                    if (PlayerDataManager.Instance != null && Runner.LocalPlayer.IsRealPlayer)
-                    {
-                        PlayerDataManager.Instance.UpdateLocalPlayerRef(Runner.LocalPlayer);
-                        Debug.Log($"[NetworkBootstrapper] ✅ Host LocalPlayerRef updated: {Runner.LocalPlayer}");
-                    }
-                    
-                    _isInRoom = true;
-                    OnConnectedToServerEvent?.Invoke();
-                    return true;
-                }
-                else
-                {
-                    Debug.LogError($"[NetworkBootstrapper] ❌ Failed to create room: {result.ShutdownReason}");
-                    OnConnectionFailed?.Invoke(result.ShutdownReason.ToString());
-                    await CleanupRunner();
-                    return false;
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"[NetworkBootstrapper] ❌ Exception creating room: {e.Message}");
-                OnConnectionFailed?.Invoke(e.Message);
-                await CleanupRunner();
-                return false;
-            }
-        }
-        
-        private Dictionary<string, SessionProperty> CreateSessionProperties(string sceneName)
-        {
-            var properties = new Dictionary<string, SessionProperty>();
-    
-            if (!string.IsNullOrEmpty(sceneName))
-            {
-                properties["scene"] = sceneName;
-            }
-    
-            properties["version"] = Application.version;
-            properties["gamemode"] = "default";
-    
-            return properties;
-        }
-        
-       
-        
-        public bool ChangeSelectedScene(string newSceneName)
-        {
-            if (!IsHost)
-            {
-                Debug.LogWarning("[NetworkBootstrapper] Only host can change scene");
-                return false;
-            }
-    
-            if (!IsValidScene(newSceneName))
-            {
-                Debug.LogError($"[NetworkBootstrapper] Invalid scene: {newSceneName}");
-                return false;
-            }
-    
-            _selectedSceneName = newSceneName;
-            Debug.Log($"[NetworkBootstrapper] Scene changed to: {newSceneName}");
-    
-            // TODO: Enviar un RPC para notificar a los clientes del cambio
-    
-            return true;
-        }
-
-        /// <summary>
-        /// Une a una sala existente + configurar callbacks
-        /// </summary>
-       public async Task<bool> JoinRoom(SessionInfo session)
+      public async Task<bool> CreateRoom(string roomName, int maxPlayers = 0, string sceneName = null)
 {
     if (_runner != null)
     {
@@ -211,45 +91,69 @@ namespace HackMonkeys.Core
 
     try
     {
-        Debug.Log($"[NetworkBootstrapper] Joining room: {session.Name}");
+        Debug.Log($"[NetworkBootstrapper] Creating room: {roomName}");
 
-        CurrentRoomName = session.Name;
-        CurrentMaxPlayers = session.MaxPlayers;
+        if (maxPlayers <= 0) maxPlayers = defaultMaxPlayers;
+
+        // IMPORTANTE: Establecer el mapa inicial
+        if (!string.IsNullOrEmpty(sceneName) && IsValidScene(sceneName))
+        {
+            _selectedSceneName = sceneName;
+            Debug.Log($"[NetworkBootstrapper] Selected scene: {sceneName}");
+        }
+        else
+        {
+            _selectedSceneName = GetDefaultSceneName();
+            Debug.Log($"[NetworkBootstrapper] Using default scene: {_selectedSceneName}");
+        }
+
+        CurrentRoomName = roomName;
+        CurrentMaxPlayers = maxPlayers;
 
         _runner = Instantiate(runnerPrefab);
-        _runner.name = "NetworkRunner_Client";
-        
+        _runner.name = "NetworkRunner_Host";
+
         _runner.AddCallbacks(this);
-        
+
         _sceneManager = Instantiate(sceneManagerPrefab);
-        _sceneManager.name = "NetworkSceneManager_Client";
-        DontDestroyOnLoad(_sceneManager.gameObject); 
-        
-        Debug.Log($"[NetworkBootstrapper] CLIENT SceneManager created and set to DontDestroyOnLoad");
+        DontDestroyOnLoad(_sceneManager);
 
         var startGameArgs = new StartGameArgs()
         {
-            GameMode = GameMode.Client,
-            SessionName = session.Name,
+            GameMode = GameMode.Host,
+            SessionName = roomName,
+            PlayerCount = maxPlayers,
             SceneManager = _sceneManager,
-            CustomLobbyName = "HackMonkeys_Lobby"
+            CustomLobbyName = "HackMonkeys_Lobby",
+            IsVisible = true,
+            IsOpen = true,
+            SessionProperties = CreateSessionProperties(_selectedSceneName) // Pasar el mapa inicial
         };
 
         var result = await _runner.StartGame(startGameArgs);
 
         if (result.Ok)
         {
-            Debug.Log("[NetworkBootstrapper] ✅ Joined room successfully!");
+            Debug.Log("[NetworkBootstrapper] ✅ Room created successfully!");
+            
+            PlayerDataManager.Instance.SetSessionData(Runner.LocalPlayer, true, roomName);
+            
+            // Guardar el mapa seleccionado
+            PlayerDataManager.Instance.SetSelectedMap(_selectedSceneName);
+            
+            if (PlayerDataManager.Instance != null && Runner.LocalPlayer.IsRealPlayer)
+            {
+                PlayerDataManager.Instance.UpdateLocalPlayerRef(Runner.LocalPlayer);
+                Debug.Log($"[NetworkBootstrapper] ✅ Host LocalPlayerRef updated: {Runner.LocalPlayer}");
+            }
+            
             _isInRoom = true;
             OnConnectedToServerEvent?.Invoke();
-            
-            PlayerDataManager.Instance.SetSessionData(PlayerRef.None, false, session.Name);
-            
             return true;
         }
         else
         {
-            Debug.LogError($"[NetworkBootstrapper] ❌ Failed to join room: {result.ShutdownReason}");
+            Debug.LogError($"[NetworkBootstrapper] ❌ Failed to create room: {result.ShutdownReason}");
             OnConnectionFailed?.Invoke(result.ShutdownReason.ToString());
             await CleanupRunner();
             return false;
@@ -257,12 +161,139 @@ namespace HackMonkeys.Core
     }
     catch (Exception e)
     {
-        Debug.LogError($"[NetworkBootstrapper] ❌ Exception joining room: {e.Message}");
+        Debug.LogError($"[NetworkBootstrapper] ❌ Exception creating room: {e.Message}");
         OnConnectionFailed?.Invoke(e.Message);
         await CleanupRunner();
         return false;
     }
 }
+
+        private Dictionary<string, SessionProperty> CreateSessionProperties(string sceneName)
+        {
+            var properties = new Dictionary<string, SessionProperty>();
+
+            if (!string.IsNullOrEmpty(sceneName))
+            {
+                properties["scene"] = sceneName;
+            }
+
+            properties["version"] = Application.version;
+            properties["gamemode"] = "default";
+
+            return properties;
+        }
+
+
+        public bool ChangeSelectedScene(string newSceneName)
+        {
+            if (!IsHost)
+            {
+                Debug.LogWarning("[NetworkBootstrapper] Only host can change scene");
+                return false;
+            }
+
+            if (!IsValidScene(newSceneName))
+            {
+                Debug.LogError($"[NetworkBootstrapper] Invalid scene: {newSceneName}");
+                return false;
+            }
+
+            _selectedSceneName = newSceneName;
+            Debug.Log($"[NetworkBootstrapper] Scene changed to: {newSceneName}");
+
+            // TODO: Enviar un RPC para notificar a los clientes del cambio
+
+            return true;
+        }
+
+        /// <summary>
+        /// Une a una sala existente + configurar callbacks
+        /// </summary>
+        public async Task<bool> JoinRoom(SessionInfo session)
+        {
+            if (_runner != null)
+            {
+                Debug.LogWarning("[NetworkBootstrapper] Runner already exists. Shutting down...");
+                await ShutdownRunner();
+            }
+
+            try
+            {
+                Debug.Log($"[NetworkBootstrapper] Joining room: {session.Name}");
+
+                CurrentRoomName = session.Name;
+                CurrentMaxPlayers = session.MaxPlayers;
+
+                _runner = Instantiate(runnerPrefab);
+                _runner.name = "NetworkRunner_Client";
+
+                _runner.AddCallbacks(this);
+
+                _sceneManager = Instantiate(sceneManagerPrefab);
+                _sceneManager.name = "NetworkSceneManager_Client";
+                DontDestroyOnLoad(_sceneManager.gameObject);
+
+                Debug.Log($"[NetworkBootstrapper] CLIENT SceneManager created and set to DontDestroyOnLoad");
+
+                var startGameArgs = new StartGameArgs()
+                {
+                    GameMode = GameMode.Client,
+                    SessionName = session.Name,
+                    SceneManager = _sceneManager,
+                    CustomLobbyName = "HackMonkeys_Lobby"
+                };
+
+                var result = await _runner.StartGame(startGameArgs);
+
+                if (result.Ok)
+                {
+                    Debug.Log("[NetworkBootstrapper] ✅ Joined room successfully!");
+                    _isInRoom = true;
+                    OnConnectedToServerEvent?.Invoke();
+
+                    PlayerDataManager.Instance.SetSessionData(PlayerRef.None, false, session.Name);
+
+                    return true;
+                }
+                else
+                {
+                    Debug.LogError($"[NetworkBootstrapper] ❌ Failed to join room: {result.ShutdownReason}");
+                    OnConnectionFailed?.Invoke(result.ShutdownReason.ToString());
+                    await CleanupRunner();
+                    return false;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[NetworkBootstrapper] ❌ Exception joining room: {e.Message}");
+                OnConnectionFailed?.Invoke(e.Message);
+                await CleanupRunner();
+                return false;
+            }
+        }
+        
+        /// <summary>
+        /// Obtiene el mapa por defecto o el primero disponible
+        /// </summary>
+        public string GetDefaultSceneName()
+        {
+            // Si ya hay uno seleccionado, usarlo
+            if (!string.IsNullOrEmpty(_selectedSceneName))
+                return _selectedSceneName;
+    
+            // Si hay escenas disponibles, usar la primera
+            if (availableScenes != null && availableScenes.Count > 0)
+            {
+                _selectedSceneName = availableScenes[0].sceneName;
+                Debug.Log($"[NetworkBootstrapper] Using first available scene: {_selectedSceneName}");
+                return _selectedSceneName;
+            }
+    
+            // Fallback al gameSceneName por defecto
+            _selectedSceneName = gameSceneName;
+            Debug.Log($"[NetworkBootstrapper] Using default scene: {_selectedSceneName}");
+            return _selectedSceneName;
+        }
 
         // ========================================
         // AQUÍ SE MUEVE LA LÓGICA DE PlayerSpawner
@@ -290,6 +321,9 @@ namespace HackMonkeys.Core
                 if (networkPlayerObject != null)
                 {
                     Debug.Log($"[NetworkBootstrapper] ✅ Spawned LobbyPlayer for player {player}");
+            
+                    // IMPORTANTE: Guardar referencia para limpieza posterior
+                    _playerObjects[player] = networkPlayerObject;
                 }
                 else
                 {
@@ -301,6 +335,43 @@ namespace HackMonkeys.Core
         public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
         {
             Debug.Log($"[NetworkBootstrapper] 👋 Player {player} left the room");
+    
+            // Solo el servidor debe despawnear objetos
+            if (runner.IsServer)
+            {
+                CleanupPlayerObjects(runner, player);
+            }
+        }
+        
+        private void CleanupPlayerObjects(NetworkRunner runner, PlayerRef player)
+        {
+            Debug.Log($"[NetworkBootstrapper] 🧹 Cleaning up objects for player {player}");
+    
+            // Método 1: Usar el diccionario de referencias
+            if (_playerObjects.TryGetValue(player, out NetworkObject playerObject))
+            {
+                if (playerObject != null && playerObject.IsValid)
+                {
+                    Debug.Log($"[NetworkBootstrapper] Despawning tracked object for player {player}");
+                    runner.Despawn(playerObject);
+                }
+                _playerObjects.Remove(player);
+            }
+    
+            // Método 2: Buscar todos los LobbyPlayers como fallback
+            var allLobbyPlayers = FindObjectsOfType<LobbyPlayer>();
+            foreach (var lobbyPlayer in allLobbyPlayers)
+            {
+                if (lobbyPlayer.PlayerRef == player)
+                {
+                    var netObj = lobbyPlayer.GetComponent<NetworkObject>();
+                    if (netObj != null && netObj.IsValid)
+                    {
+                        Debug.Log($"[NetworkBootstrapper] Despawning found LobbyPlayer for player {player}");
+                        runner.Despawn(netObj);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -321,7 +392,7 @@ namespace HackMonkeys.Core
                 var startGameArgs = new StartGameArgs()
                 {
                     GameMode = GameMode.Client,
-                    SessionName = null, 
+                    SessionName = null,
                     CustomLobbyName = "HackMonkeys_Lobby",
                 };
 
@@ -352,76 +423,139 @@ namespace HackMonkeys.Core
             if (_runner == null || !_isInRoom) return;
 
             Debug.Log("[NetworkBootstrapper] 👋 Leaving room...");
+    
+            try
+            {
+                // IMPORTANTE: Limpiar objetos locales antes de shutdown
+                if (_runner.IsRunning)
+                {
+                    // Si somos el servidor, limpiar todos los objetos
+                    if (_runner.IsServer)
+                    {
+                        CleanupAllNetworkObjects();
+                    }
+                    else
+                    {
+                        // Si somos cliente, solo limpiar nuestros objetos
+                        CleanupLocalPlayerObjects();
+                    }
+            
+                    // Dar tiempo para que los mensajes de despawn se envíen
+                    await Task.Delay(100);
+                }
+        
+                await ShutdownRunner();
+                _isInRoom = false;
+                CurrentRoomName = "";
+                CurrentMaxPlayers = 0;
+        
+                // Limpiar el diccionario de referencias
+                _playerObjects.Clear();
 
-            await ShutdownRunner();
-            _isInRoom = false;
-            CurrentRoomName = "";
-            CurrentMaxPlayers = 0;
-
-            Debug.Log("[NetworkBootstrapper] ✅ Left room successfully");
+                Debug.Log("[NetworkBootstrapper] ✅ Left room successfully");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[NetworkBootstrapper] ❌ Error leaving room: {e.Message}");
+            }
+        }
+        
+        private void CleanupAllNetworkObjects()
+        {
+            Debug.Log("[NetworkBootstrapper] 🧹 Cleaning up all network objects");
+    
+            if (_runner == null || !_runner.IsRunning) return;
+    
+            // Despawnear todos los LobbyPlayers
+            var allLobbyPlayers = FindObjectsOfType<LobbyPlayer>();
+            foreach (var lobbyPlayer in allLobbyPlayers)
+            {
+                var netObj = lobbyPlayer.GetComponent<NetworkObject>();
+                if (netObj != null && netObj.IsValid)
+                {
+                    Debug.Log($"[NetworkBootstrapper] Despawning LobbyPlayer: {lobbyPlayer.PlayerName}");
+                    _runner.Despawn(netObj);
+                }
+            }
+    
+            // Limpiar el diccionario
+            _playerObjects.Clear();
+        }
+        
+        private void CleanupLocalPlayerObjects()
+        {
+            Debug.Log("[NetworkBootstrapper] 🧹 Cleaning up local player objects");
+    
+            if (_runner == null || !_runner.IsRunning) return;
+    
+            var localPlayer = _runner.LocalPlayer;
+            if (localPlayer.IsRealPlayer)
+            {
+                CleanupPlayerObjects(_runner, localPlayer);
+            }
         }
 
         /// <summary>
         /// Iniciar partida con escena seleccionada
         /// </summary>
-      public async Task<bool> StartGame(string overrideSceneName = null)
-{
-    Debug.Log("[NetworkBootstrapper] === START GAME CALLED ===");
-    Debug.Log($"[NetworkBootstrapper] IsHost: {IsHost}, IsInRoom: {IsInRoom}");
-    Debug.Log($"[NetworkBootstrapper] Runner exists: {_runner != null}");
-    Debug.Log($"[NetworkBootstrapper] SceneManager exists: {_sceneManager != null}");
-    
-    if (!IsHost || !_isInRoom)
-    {
-        Debug.LogError("[NetworkBootstrapper] ❌ Only host can start the game!");
-        return false;
-    }
+        public async Task<bool> StartGame(string overrideSceneName = null)
+        {
+            Debug.Log("[NetworkBootstrapper] === START GAME CALLED ===");
+            Debug.Log($"[NetworkBootstrapper] IsHost: {IsHost}, IsInRoom: {IsInRoom}");
+            Debug.Log($"[NetworkBootstrapper] Runner exists: {_runner != null}");
+            Debug.Log($"[NetworkBootstrapper] SceneManager exists: {_sceneManager != null}");
 
-    try
-    {
-        string sceneToLoad = !string.IsNullOrEmpty(overrideSceneName) ? overrideSceneName : SelectedSceneName;
-        
-        Debug.Log($"[NetworkBootstrapper] 🚀 Starting game with scene: {sceneToLoad}");
-        
-        // Verificar Runner
-        if (_runner == null)
-        {
-            Debug.LogError("[NetworkBootstrapper] ❌ Runner is null!");
-            return false;
+            if (!IsHost || !_isInRoom)
+            {
+                Debug.LogError("[NetworkBootstrapper] ❌ Only host can start the game!");
+                return false;
+            }
+
+            try
+            {
+                string sceneToLoad = !string.IsNullOrEmpty(overrideSceneName) ? overrideSceneName : SelectedSceneName;
+
+                Debug.Log($"[NetworkBootstrapper] 🚀 Starting game with scene: {sceneToLoad}");
+
+                // Verificar Runner
+                if (_runner == null)
+                {
+                    Debug.LogError("[NetworkBootstrapper] ❌ Runner is null!");
+                    return false;
+                }
+
+                // Verificar SceneManager
+                if (_sceneManager == null)
+                {
+                    Debug.LogError("[NetworkBootstrapper] ❌ NetworkSceneManagerDefault is null!");
+                    return false;
+                }
+
+                var sceneIndex = GetSceneIndex(sceneToLoad);
+                if (sceneIndex.IsValid == false)
+                {
+                    Debug.LogError($"[NetworkBootstrapper] ❌ Scene '{sceneToLoad}' not found!");
+                    return false;
+                }
+
+                Debug.Log($"[NetworkBootstrapper] 📦 Loading scene index: {sceneIndex}");
+
+                // IMPORTANTE: LoadScene es asíncrono y puede no disparar OnSceneLoadDone inmediatamente
+                await _runner.LoadScene(sceneIndex);
+
+                Debug.Log("[NetworkBootstrapper] ✅ LoadScene completed");
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[NetworkBootstrapper] ❌ Failed to start game: {e.Message}");
+                Debug.LogError($"[NetworkBootstrapper] Stack trace: {e.StackTrace}");
+                return false;
+            }
         }
-        
-        // Verificar SceneManager
-        if (_sceneManager == null)
-        {
-            Debug.LogError("[NetworkBootstrapper] ❌ NetworkSceneManagerDefault is null!");
-            return false;
-        }
-        
-        var sceneIndex = GetSceneIndex(sceneToLoad);
-        if (sceneIndex.IsValid == false)
-        {
-            Debug.LogError($"[NetworkBootstrapper] ❌ Scene '{sceneToLoad}' not found!");
-            return false;
-        }
-        
-        Debug.Log($"[NetworkBootstrapper] 📦 Loading scene index: {sceneIndex}");
-        
-        // IMPORTANTE: LoadScene es asíncrono y puede no disparar OnSceneLoadDone inmediatamente
-        await _runner.LoadScene(sceneIndex);
-        
-        Debug.Log("[NetworkBootstrapper] ✅ LoadScene completed");
-        
-        return true;
-    }
-    catch (Exception e)
-    {
-        Debug.LogError($"[NetworkBootstrapper] ❌ Failed to start game: {e.Message}");
-        Debug.LogError($"[NetworkBootstrapper] Stack trace: {e.StackTrace}");
-        return false;
-    }
-}
-        
-       
+
+
         #region SceneManagement
 
         public string SelectedSceneName
@@ -505,21 +639,29 @@ namespace HackMonkeys.Core
         public void OnConnectedToServer(NetworkRunner runner)
         {
             Debug.Log("[NetworkBootstrapper] 🌐 Connected to Photon Cloud");
-    
+
             if (PlayerDataManager.Instance != null)
             {
                 PlayerDataManager.Instance.UpdateLocalPlayerRef(runner.LocalPlayer);
                 Debug.Log($"[NetworkBootstrapper] ✅ LocalPlayerRef updated: {runner.LocalPlayer}");
             }
-            
+
             Debug.Log($"[NetworkBootstrapper] 🌐 OnConnectedToServer - Callbacks registered: {runner.name}");
         }
 
         public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
         {
             Debug.Log($"[NetworkBootstrapper] 📡 Disconnected from server: {reason}");
+    
+            // Limpiar objetos antes de marcar como desconectado
+            if (runner.IsRunning)
+            {
+                CleanupAllNetworkObjects();
+            }
+    
             _isInRoom = false;
-            
+            _playerObjects.Clear();
+    
             if (_gameCore != null)
             {
                 _gameCore.OnNetworkDisconnected();
@@ -530,8 +672,6 @@ namespace HackMonkeys.Core
         {
             Debug.LogError($"[NetworkBootstrapper] ❌ Connect failed: {reason}");
             OnConnectionFailed?.Invoke(reason.ToString());
-            
-            
         }
 
         public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
@@ -557,6 +697,17 @@ namespace HackMonkeys.Core
         public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
         {
             Debug.Log($"[NetworkBootstrapper] 🔄 Runner shutdown: {shutdownReason}");
+    
+            // Limpiar referencias
+            _playerObjects.Clear();
+    
+            // Destruir cualquier LobbyPlayer huérfano
+            var orphanedPlayers = FindObjectsOfType<LobbyPlayer>();
+            foreach (var player in orphanedPlayers)
+            {
+                Debug.Log($"[NetworkBootstrapper] Destroying orphaned LobbyPlayer: {player.name}");
+                Destroy(player.gameObject);
+            }
         }
 
         public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request,
@@ -588,10 +739,11 @@ namespace HackMonkeys.Core
         public void OnSceneLoadDone(NetworkRunner runner)
         {
             Debug.Log($"[NetworkBootstrapper] 🎬 OnSceneLoadDone - {runner.GameMode}");
-            Debug.Log($"[NetworkBootstrapper] - New Scene: {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
+            Debug.Log(
+                $"[NetworkBootstrapper] - New Scene: {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
             Debug.Log($"[NetworkBootstrapper] - Is Server: {runner.IsServer}");
             Debug.Log($"[NetworkBootstrapper] - Is Client: {runner.IsClient}");
-    
+
             // Notificar a GameCore - TANTO HOST COMO CLIENTES
             if (_gameCore != null)
             {
@@ -601,18 +753,18 @@ namespace HackMonkeys.Core
 
         public void OnSceneLoadStart(NetworkRunner runner)
         {
-                    _gameCore.TransitionToState(GameCore.GameState.LoadingMatch);
-                    Debug.Log($"[NetworkBootstrapper] 🎬 OnSceneLoadStart - {runner.GameMode}");
-    
-                    // IMPORTANTE: Los clientes también deben prepararse
-                    if (!runner.IsServer && _gameCore != null)
-                    {
-                        Debug.Log("[NetworkBootstrapper] 📱 CLIENT: Scene change detected");
-                        // El cliente debe transicionar automáticamente
-                        _gameCore.OnClientSceneChangeStarted(); // NUEVO MÉTODO
-                    }
-    
-                    PlayerDataManager.Instance.UpdateSelectedMapFromLobbyPlayer();
+            _gameCore.TransitionToState(GameCore.GameState.LoadingMatch);
+            Debug.Log($"[NetworkBootstrapper] 🎬 OnSceneLoadStart - {runner.GameMode}");
+
+            // IMPORTANTE: Los clientes también deben prepararse
+            if (!runner.IsServer && _gameCore != null)
+            {
+                Debug.Log("[NetworkBootstrapper] 📱 CLIENT: Scene change detected");
+                // El cliente debe transicionar automáticamente
+                _gameCore.OnClientSceneChangeStarted(); // NUEVO MÉTODO
+            }
+
+            PlayerDataManager.Instance.UpdateSelectedMapFromLobbyPlayer();
         }
 
         public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
@@ -623,14 +775,30 @@ namespace HackMonkeys.Core
         {
         }
 
+        public void OnSessionUpdated(SessionInfo updatedSession)
+        {
+            // Notificar a LobbyBrowser para actualizar el RoomItem correspondiente
+            var lobbyBrowser = FindObjectOfType<LobbyBrowser>();
+            if (lobbyBrowser != null)
+            {
+                lobbyBrowser.UpdateSessionRealtime(updatedSession);
+            }
+        }
+
         private void OnDestroy()
         {
             if (_runner != null)
             {
                 Debug.Log("[NetworkBootstrapper] 🧹 Destroying - final cleanup");
+        
+                // Limpiar todos los objetos antes de destruir
+                CleanupAllNetworkObjects();
+        
                 _runner.RemoveCallbacks(this);
                 _runner.Shutdown();
             }
+    
+            _playerObjects.Clear();
         }
 
         // ========================================
@@ -663,7 +831,7 @@ namespace HackMonkeys.Core
             Debug.Log($"Is Host: {IsHost}");
             Debug.Log("================================");
         }
-        
+
         private class SessionListCallback : INetworkRunnerCallbacks
         {
             private List<SessionInfo> _sessions = new List<SessionInfo>();
@@ -741,7 +909,6 @@ namespace HackMonkeys.Core
 
             public void OnSceneLoadStart(NetworkRunner runner)
             {
-               
             }
 
             public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
@@ -753,7 +920,7 @@ namespace HackMonkeys.Core
             }
         }
     }
-    
+
     [System.Serializable]
     public class SceneInfo
     {

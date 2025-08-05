@@ -7,11 +7,13 @@ using Fusion;
 using DG.Tweening;
 using HackMonkeys.Core;
 using HackMonkeys.UI.Spatial;
+using HackMonkeys.UI.Theme;
 
 namespace HackMonkeys.UI.Panels
 {
     /// <summary>
     /// Panel VR para navegar y unirse a salas disponibles
+    /// Ahora usando paleta de colores unificada
     /// </summary>
     public class LobbyBrowser : MenuPanel
     {
@@ -27,6 +29,7 @@ namespace HackMonkeys.UI.Panels
         [SerializeField] private TextMeshProUGUI selectedRoomPlayers;
         [SerializeField] private TextMeshProUGUI selectedRoomStatus;
         [SerializeField] private InteractableButton3D joinButton;
+        [SerializeField] private Image selectedRoomBackground;
         
         [Header("Status Display")]
         [SerializeField] private TextMeshProUGUI statusText;
@@ -42,6 +45,9 @@ namespace HackMonkeys.UI.Panels
         [SerializeField] private float roomItemSpacing = 0.15f;
         [SerializeField] private int maxVisibleRooms = 6;
         [SerializeField] private ScrollRect scrollView;
+        
+        [Header("Color Theme")]
+        [SerializeField] private UIColorTheme colorTheme;
         
         private NetworkBootstrapper _networkBootstrapper;
         private List<RoomItem> _roomItems = new List<RoomItem>();
@@ -64,6 +70,14 @@ namespace HackMonkeys.UI.Panels
         private void Start()
         {
             _gameCore = GameCore.Instance;
+            
+            // Cargar tema de colores si no está asignado
+            if (colorTheme == null)
+            {
+                colorTheme = UIColorTheme.Instance;
+            }
+            
+            ApplyColorTheme();
         }
 
         protected override void SetupPanel()
@@ -73,13 +87,44 @@ namespace HackMonkeys.UI.Panels
             _networkBootstrapper = NetworkBootstrapper.Instance;
             
             ConfigureButtons();
-            
             ConfigureFilters();
             
             if (selectedRoomInfo != null)
+            {
                 selectedRoomInfo.SetActive(false);
                 
+                // Aplicar color de fondo amarillo al panel de info
+                if (selectedRoomBackground != null)
+                {
+                    selectedRoomBackground.color = colorTheme.GetBackgroundColor();
+                }
+            }
+                
             InitializeRoomItemPool();
+        }
+        
+        private void ApplyColorTheme()
+        {
+            // Aplicar colores a textos
+            if (statusText != null)
+                statusText.color = colorTheme.TextWhite;
+                
+            if (selectedRoomName != null)
+                selectedRoomName.color = colorTheme.TextWhite;
+                
+            if (selectedRoomPlayers != null)
+                selectedRoomPlayers.color = colorTheme.TextWhite;
+                
+            if (selectedRoomStatus != null)
+                selectedRoomStatus.color = colorTheme.TextWhite;
+                
+            // Mensaje de "no hay salas"
+            if (noRoomsMessage != null)
+            {
+                var messageText = noRoomsMessage.GetComponentInChildren<TextMeshProUGUI>();
+                if (messageText != null)
+                    messageText.color = colorTheme.SecondaryGray;
+            }
         }
         
         private void ConfigureButtons()
@@ -131,7 +176,7 @@ namespace HackMonkeys.UI.Panels
                 sortDropdown.onValueChanged.AddListener((value) =>
                 {
                     _currentSortType = (SortType)value;
-                    //SortRooms();
+                    ApplyFilters(); // Re-aplicar filtros para re-ordenar
                 });
             }
         }
@@ -145,7 +190,7 @@ namespace HackMonkeys.UI.Panels
                 
                 if (roomItem != null)
                 {
-                    roomItem.Initialize(i, OnRoomSelected);
+                    roomItem.Initialize(i, OnRoomSelected, colorTheme);
                     roomItem.gameObject.SetActive(false);
                     _roomItems.Add(roomItem);
                 }
@@ -204,30 +249,12 @@ namespace HackMonkeys.UI.Panels
             catch (System.Exception e)
             {
                 Debug.LogError($"[LobbyBrowser] ❌ Error getting sessions: {e.Message}");
-                UpdateStatusText("Error loading rooms");
+                UpdateStatusText("Error loading rooms", MessageType.Error);
             }
             finally
             {
                 _isRefreshing = false;
             }
-        }
-        
-        private System.Collections.IEnumerator RefreshRoutine()
-        {
-            _isRefreshing = true;
-            
-            ShowLoadingState();
-            
-            if (refreshButton != null)
-            {
-                refreshButton.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360)
-                    .SetEase(Ease.Linear);
-            }
-            
-            yield return new WaitForSeconds(0.5f);
-            
-            
-            _isRefreshing = false;
         }
         
         private void OnSessionListUpdated(List<SessionInfo> sessions)
@@ -294,15 +321,21 @@ namespace HackMonkeys.UI.Panels
                 roomItem.SetRoomData(session);
                 roomItem.gameObject.SetActive(true);
                 
-                // float targetY = -i * roomItemSpacing;
-                // roomItem.transform.localPosition = new Vector3(0, targetY + 0.5f, 0);
-                // roomItem.transform.DOLocalMoveY(targetY, 0.3f).SetDelay(i * 0.05f).SetEase(Ease.OutBack);
+                // Animación de entrada escalonada
+                roomItem.transform.localScale = Vector3.zero;
+                roomItem.transform.DOScale(Vector3.one, 0.3f)
+                    .SetDelay(i * 0.05f)
+                    .SetEase(Ease.OutBack);
             }
             
             if (roomListContainer != null)
             {
                 float containerHeight = displayCount * roomItemSpacing;
-                roomListContainer.GetComponent<RectTransform>().sizeDelta = new Vector2(roomListContainer.GetComponent<RectTransform>().sizeDelta.x, containerHeight);
+                var rectTransform = roomListContainer.GetComponent<RectTransform>();
+                if (rectTransform != null)
+                {
+                    rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, containerHeight);
+                }
             }
         }
         
@@ -323,12 +356,18 @@ namespace HackMonkeys.UI.Panels
                 selectedRoomName.text = session.Name;
                 
             if (selectedRoomPlayers != null)
+            {
                 selectedRoomPlayers.text = $"{session.PlayerCount}/{session.MaxPlayers} Players";
+                // Usar color theme para el contador
+                selectedRoomPlayers.color = colorTheme.GetPlayerCountColor(session.PlayerCount, session.MaxPlayers);
+            }
                 
             if (selectedRoomStatus != null)
             {
-                string status = session.IsOpen ? "<color=green>Open</color>" : "<color=yellow>In Progress</color>";
-                selectedRoomStatus.text = status;
+                bool canJoin = session.IsOpen && session.PlayerCount < session.MaxPlayers;
+                string statusText = canJoin ? "Available" : (session.IsOpen ? "Full" : "In Progress");
+                selectedRoomStatus.text = statusText;
+                selectedRoomStatus.color = colorTheme.GetRoomStateColor(session.IsOpen, session.PlayerCount >= session.MaxPlayers);
             }
             
             if (joinButton != null)
@@ -346,7 +385,7 @@ namespace HackMonkeys.UI.Panels
     
             if (joinButton != null) joinButton.SetInteractable(false);
         
-            UpdateStatusText("Joining room...");
+            UpdateStatusText("Joining room...", MessageType.Info);
     
             try
             {
@@ -358,7 +397,7 @@ namespace HackMonkeys.UI.Panels
                 {
                     _gameCore.OnJoinedLobby(_selectedSession.Name, false);
                     
-                    UpdateStatusText("Connected! Loading lobby...");
+                    UpdateStatusText("Connected! Loading lobby...", MessageType.Success);
             
                     Debug.Log("[LobbyBrowser] ⏳ Waiting for player spawn...");
                     await System.Threading.Tasks.Task.Delay(1000);
@@ -368,7 +407,7 @@ namespace HackMonkeys.UI.Panels
                 }
                 else
                 {
-                    UpdateStatusText("Failed to join room");
+                    UpdateStatusText("Failed to join room", MessageType.Error);
                     Debug.LogError("[LobbyBrowser] ❌ Failed to join room");
             
                     await System.Threading.Tasks.Task.Delay(2000);
@@ -379,7 +418,7 @@ namespace HackMonkeys.UI.Panels
             catch (System.Exception e)
             {
                 Debug.LogError($"[LobbyBrowser] ❌ Exception joining room: {e.Message}");
-                UpdateStatusText("Error joining room");
+                UpdateStatusText("Error joining room", MessageType.Error);
         
                 if (joinButton != null)
                     joinButton.SetInteractable(true);
@@ -400,7 +439,7 @@ namespace HackMonkeys.UI.Panels
             if (noRoomsMessage != null)
                 noRoomsMessage.SetActive(false);
                 
-            UpdateStatusText("Searching for rooms...");
+            UpdateStatusText("Searching for rooms...", MessageType.Info);
         }
         
         private void UpdateStatusDisplay()
@@ -416,26 +455,68 @@ namespace HackMonkeys.UI.Panels
                 if (noRoomsMessage != null)
                     noRoomsMessage.SetActive(true);
                     
-                UpdateStatusText("No rooms available");
+                UpdateStatusText("No rooms available", MessageType.Warning);
             }
             else
             {
                 if (noRoomsMessage != null)
                     noRoomsMessage.SetActive(false);
                     
-                UpdateStatusText($"Found {_currentSessions.Count} room(s)");
+                UpdateStatusText($"Found {_currentSessions.Count} room(s)", MessageType.Success);
             }
         }
         
-        private void UpdateStatusText(string text)
+        private void UpdateStatusText(string text, MessageType type)
         {
             if (statusText != null)
             {
                 statusText.text = text;
                 
+                // Usar paleta de colores según el tipo de mensaje
+                switch (type)
+                {
+                    case MessageType.Success:
+                    case MessageType.Info:
+                        statusText.color = colorTheme.TextWhite;
+                        break;
+                    case MessageType.Warning:
+                    case MessageType.Error:
+                        statusText.color = colorTheme.SecondaryGray;
+                        break;
+                }
+                
                 statusText.DOFade(0f, 0f);
                 statusText.DOFade(1f, 0.3f);
             }
+        }
+        
+        private enum MessageType
+        {
+            Info,
+            Success,
+            Warning,
+            Error
+        }
+        
+        #region Debug
+        
+        [ContextMenu("Apply Theme Colors")]
+        private void ApplyThemeInEditor()
+        {
+            if (colorTheme == null)
+            {
+                colorTheme = UIColorTheme.Instance;
+            }
+            
+            ApplyColorTheme();
+            Debug.Log("[LobbyBrowser] Theme colors applied");
+        }
+        
+        #endregion
+
+        public void UpdateSessionRealtime(SessionInfo updatedSession)
+        {
+            throw new NotImplementedException();
         }
     }
 }

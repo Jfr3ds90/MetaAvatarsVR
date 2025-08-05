@@ -129,10 +129,11 @@ namespace HackMonkeys.UI.Panels
                     StartGameWithSelectedMap();
                 });
             }
-            
+    
             if (changeMapButton != null)
             {
                 changeMapButton.OnButtonPressed.AddListener(ToggleMapSelection);
+                Debug.Log("🧪 [LOBBYROOM] Change map button configured");
             }
 
             if (settingsButton != null)
@@ -198,7 +199,6 @@ namespace HackMonkeys.UI.Panels
                 _lobbyState.OnAllPlayersReady.AddListener(OnAllPlayersReadyChanged);
                 _lobbyState.OnMapChanged.AddListener(OnMapChangedByHost);
 
-
                 Debug.Log("🧪 [LOBBYROOM] ✅ Subscribed to LobbyState events");
             }
             else
@@ -227,11 +227,13 @@ namespace HackMonkeys.UI.Panels
             }
 
             UpdateRoomInfo();
-
-            
+    
             StartCoroutine(DelayedRefresh());
 
             UpdateHostControls();
+    
+            // IMPORTANTE: Actualizar el display del mapa al mostrar el panel
+            UpdateMapDisplay();
 
             AnimateRoomEntry();
 
@@ -298,72 +300,75 @@ namespace HackMonkeys.UI.Panels
                 return;
             }
     
-            if (!string.IsNullOrEmpty(_selectedMapName))
+            // Asegurar que el mapa correcto esté configurado
+            string finalMap = "";
+    
+            // Obtener el mapa del host
+            if (_lobbyState != null)
             {
-                _networkBootstrapper.SelectedSceneName = _selectedMapName;
+                var hostPlayer = _lobbyState.HostPlayer;
+                if (hostPlayer != null && !string.IsNullOrEmpty(hostPlayer.SelectedMap.ToString()))
+                {
+                    finalMap = hostPlayer.SelectedMap.ToString();
+                }
             }
+    
+            // Fallback al mapa local
+            if (string.IsNullOrEmpty(finalMap))
+            {
+                finalMap = !string.IsNullOrEmpty(_selectedMapName) 
+                    ? _selectedMapName 
+                    : _networkBootstrapper.SelectedSceneName;
+            }
+    
+            Debug.Log($"[LOBBYROOM] Starting game with map: {finalMap}");
+            _networkBootstrapper.SelectedSceneName = finalMap;
     
             _lobbyController.StartGame();
-        }
-        
-        private void ToggleMapSelection()
-        {
-            if (mapSelectionPanel == null) return;
-    
-            bool isActive = mapSelectionPanel.activeSelf;
-            mapSelectionPanel.SetActive(!isActive);
-    
-            if (!isActive)
-            {
-                PopulateMapSelection();
-        
-                mapSelectionPanel.transform.localScale = Vector3.zero;
-                mapSelectionPanel.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack);
-            }
         }
         
         private void PopulateMapSelection()
         {
             if (_networkBootstrapper == null || mapButtonsContainer == null || mapButtonPrefab == null)
                 return;
-        
+    
             foreach (var btn in _mapButtons)
             {
                 if (btn != null) Destroy(btn);
             }
             _mapButtons.Clear();
-    
+
             var availableScenes = _networkBootstrapper.GetAvailableScenes();
-    
+
             Debug.Log($"🧪 [LOBBYROOM] Populating {availableScenes.Count} maps");
-    
+
             for (int i = 0; i < availableScenes.Count; i++)
             {
                 var sceneInfo = availableScenes[i];
                 GameObject mapBtn = Instantiate(mapButtonPrefab, mapButtonsContainer);
-        
+    
                 var nameText = mapBtn.GetComponentInChildren<TextMeshProUGUI>();
                 if (nameText != null)
                 {
                     nameText.text = sceneInfo.displayName;
                 }
-        
-                var previewImage = mapBtn.GetComponentInChildren<Image>();
+    
+                var previewImage = mapBtn.transform.Find("Map_View");
                 if (previewImage != null && sceneInfo.previewImage != null)
                 {
-                    previewImage.sprite = sceneInfo.previewImage;
+                    previewImage.GetComponent<Image>().sprite = sceneInfo.previewImage;
                 }
+    
         
-                
                 var button = mapBtn.GetComponent<InteractableButton3D>();
                 if (button != null)
                 {
                     string sceneName = sceneInfo.sceneName;
                     button.OnButtonPressed.AddListener(() => SelectMap(sceneName));
                 }
-        
+    
                 _mapButtons.Add(mapBtn);
-        
+    
                 mapBtn.transform.localScale = Vector3.zero;
                 mapBtn.transform.DOScale(Vector3.one, 0.3f).SetDelay(i * 0.1f).SetEase(Ease.OutBack);
             }
@@ -373,10 +378,10 @@ namespace HackMonkeys.UI.Panels
         {
             Debug.Log($"🧪 [LOBBYROOM] === SELECT MAP START ===");
             Debug.Log($"🧪 [LOBBYROOM] Map to select: {mapName}");
-    
+
             var lobbyInfo = _lobbyController?.GetLobbyInfo();
             Debug.Log($"🧪 [LOBBYROOM] Is Host: {lobbyInfo?.IsHost}");
-    
+
             if (lobbyInfo?.IsHost != true)
             {
                 ShowStatusMessage("Only host can change map", MessageType.Warning);
@@ -393,11 +398,14 @@ namespace HackMonkeys.UI.Panels
 
             _selectedMapName = mapName;
             Debug.Log($"🧪 [LOBBYROOM] Local map name set to: {_selectedMapName}");
+    
+            // Actualizar NetworkBootstrapper inmediatamente
+            _networkBootstrapper.SelectedSceneName = mapName;
 
             var localPlayer = _lobbyState?.LocalPlayer;
             Debug.Log($"🧪 [LOBBYROOM] Local player exists: {localPlayer != null}");
             Debug.Log($"🧪 [LOBBYROOM] Local player is host: {localPlayer?.IsHost}");
-    
+
             if (localPlayer != null && localPlayer.IsHost)
             {
                 Debug.Log($"🧪 [LOBBYROOM] 📡 Calling RPC_ChangeMap with: {mapName}");
@@ -412,7 +420,9 @@ namespace HackMonkeys.UI.Panels
 
             if (mapSelectionPanel != null)
             {
-                mapSelectionPanel.transform.DOScale(Vector3.zero, 0.2f).SetEase(Ease.InBack).OnComplete(() => mapSelectionPanel.SetActive(false));
+                mapSelectionPanel.transform.DOScale(Vector3.zero, 0.2f)
+                    .SetEase(Ease.InBack)
+                    .OnComplete(() => mapSelectionPanel.SetActive(false));
             }
 
             ShowStatusMessage($"Map changed to: {mapName}", MessageType.Info);
@@ -422,17 +432,27 @@ namespace HackMonkeys.UI.Panels
         
         private void OnMapChangedByHost(string newMapName)
         {
+            Debug.Log($"[LOBBYROOM] Map changed by host to: {newMapName}");
+    
             if (string.IsNullOrEmpty(newMapName)) return;
-    
+
             _selectedMapName = newMapName;
-            UpdateMapDisplay();
     
+            // Actualizar NetworkBootstrapper
+            if (_networkBootstrapper != null)
+            {
+                _networkBootstrapper.SelectedSceneName = newMapName;
+            }
+    
+            UpdateMapDisplay();
+
             var lobbyInfo = _lobbyController?.GetLobbyInfo();
             if (lobbyInfo?.IsHost == false)
             {
                 ShowStatusMessage($"Host changed map to: {newMapName}", MessageType.Info);
             }
         }
+
 
         #endregion
 
@@ -686,18 +706,43 @@ namespace HackMonkeys.UI.Panels
         private void UpdateMapDisplay()
         {
             if (_networkBootstrapper == null) return;
+
+            // Prioridad: 1) Mapa del host en LobbyState, 2) Mapa local seleccionado, 3) Mapa por defecto
+            string currentMap = "";
     
-            string currentMap = !string.IsNullOrEmpty(_selectedMapName) 
-                ? _selectedMapName 
-                : _networkBootstrapper.SelectedSceneName;
-        
+            // Primero intentar obtener el mapa del host
+            if (_lobbyState != null)
+            {
+                var hostPlayer = _lobbyState.HostPlayer;
+                if (hostPlayer != null && !string.IsNullOrEmpty(hostPlayer.SelectedMap.ToString()))
+                {
+                    currentMap = hostPlayer.SelectedMap.ToString();
+                    Debug.Log($"[LOBBYROOM] Using host's selected map: {currentMap}");
+                }
+            }
+    
+            // Si no hay mapa del host, usar el local o el por defecto
+            if (string.IsNullOrEmpty(currentMap))
+            {
+                currentMap = !string.IsNullOrEmpty(_selectedMapName) 
+                    ? _selectedMapName 
+                    : _networkBootstrapper.SelectedSceneName;
+                Debug.Log($"[LOBBYROOM] Using local/default map: {currentMap}");
+            }
+    
+            // Actualizar el mapa local
+            _selectedMapName = currentMap;
+    
+            // Actualizar NetworkBootstrapper
+            _networkBootstrapper.SelectedSceneName = currentMap;
+
             var sceneInfo = _networkBootstrapper.GetSceneInfo(currentMap);
-    
+
             if (sceneInfo != null)
             {
                 if (currentMapText != null)
                     currentMapText.text = sceneInfo.displayName;
-            
+    
                 if (currentMapPreview != null && sceneInfo.previewImage != null)
                     currentMapPreview.sprite = sceneInfo.previewImage;
             }
@@ -705,8 +750,11 @@ namespace HackMonkeys.UI.Panels
             {
                 if (currentMapText != null)
                     currentMapText.text = "Default Map";
+            
+                Debug.LogWarning($"[LOBBYROOM] Scene info not found for: {currentMap}");
             }
         }
+
 
         private void UpdateHostControls()
         {
@@ -758,7 +806,24 @@ namespace HackMonkeys.UI.Panels
         #endregion
 
         #region Button Actions
+        
+        private void ToggleMapSelection()
+        {
+            if (mapSelectionPanel == null) return;
 
+            bool isActive = mapSelectionPanel.activeSelf;
+            mapSelectionPanel.SetActive(!isActive);
+
+            if (!isActive)
+            {
+                PopulateMapSelection();
+    
+                mapSelectionPanel.transform.localScale = Vector3.zero;
+                mapSelectionPanel.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack);
+            }
+        }
+
+        
         private void ToggleRoomSettings()
         {
             if (roomSettingsPanel != null)

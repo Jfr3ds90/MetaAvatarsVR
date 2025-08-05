@@ -1,333 +1,397 @@
 using UnityEngine;
 using Fusion;
 using HackMonkeys.UI.Panels;
-using TMPro;
+using System.Collections;
+using System.Linq;
 
 namespace HackMonkeys.Core
 {
     /// <summary>
-    /// Representa a un jugador en el lobby con datos sincronizados en red
+    /// LobbyPlayer con sincronización corregida para actualizar también la instancia local
     /// </summary>
     public class LobbyPlayer : NetworkBehaviour
     {
         [Networked] public NetworkString<_32> PlayerName { get; set; }
-
         [Networked] public NetworkBool IsReady { get; set; }
-
         [Networked] public NetworkBool IsHost { get; set; }
-
         [Networked] public Color PlayerColor { get; set; }
-        
-        [property: Networked] public NetworkString<_64> SelectedMap { get; set; }
+        [Networked] public NetworkString<_64> SelectedMap { get; set; }
 
         private PlayerDataManager _dataManager;
         private ChangeDetector _changeDetector;
-
-        private NetworkString<_32> _previousName;
-        private NetworkBool _previousReady;
-
+        
         public PlayerRef PlayerRef => Object.InputAuthority;
         public bool IsLocalPlayer => HasInputAuthority;
 
         public override void Spawned()
         {
-            Debug.Log($"🧪 [LOBBYPLAYER] ========== SPAWNED ==========");
-            Debug.Log($"🧪 [LOBBYPLAYER] Player spawned: {Object.InputAuthority}");
-            Debug.Log($"🧪 [LOBBYPLAYER] Is local player: {HasInputAuthority}");
-            Debug.Log($"🧪 [LOBBYPLAYER] Frame: {Time.frameCount}");
+            Debug.Log($"[LOBBYPLAYER] Player spawned: {Object.InputAuthority} - IsLocal: {HasInputAuthority}");
 
             _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
 
             if (HasInputAuthority)
             {
-                Debug.Log("🧪 [LOBBYPLAYER] Configuring local player data...");
-
                 _dataManager = PlayerDataManager.Instance;
 
-                if (_dataManager == null)
-                {
-                    Debug.LogError("🧪 [LOBBYPLAYER] ❌ PlayerPrefsManager.Instance is NULL!");
-                    RPC_SetPlayerData(
-                        $"Player {Object.InputAuthority.PlayerId}",
-                        Color.HSVToRGB(Random.Range(0f, 1f), 0.8f, 1f),
-                        Runner.IsServer
-                    );
-                }
-                else
+                if (_dataManager != null)
                 {
                     RPC_SetPlayerData(
                         _dataManager.GetPlayerName(),
                         _dataManager.GetPlayerColor(),
-                        Runner.IsServer 
+                        Runner.IsServer
                     );
-
-                    Debug.Log($"🧪 [LOBBYPLAYER] Player name: {_dataManager.GetPlayerName()}");
-                    Debug.Log($"🧪 [LOBBYPLAYER] Is host: {Runner.IsServer}");
-                    Debug.Log($"🧪 [LOBBYPLAYER] Player color: {_dataManager.GetPlayerColor()}");
                 }
             }
 
             TryRegisterInLobbyState();
-
-            _previousName = PlayerName;
-            _previousReady = IsReady;
-
-            Debug.Log($"🧪 [LOBBYPLAYER] ========== END SPAWNED ==========");
+            
+            // Si es un cliente que se une después, sincronizar con el mapa del host
+            if (!HasInputAuthority && !Runner.IsServer)
+            {
+                StartCoroutine(SyncWithHostMap());
+            }
         }
 
         private void TryRegisterInLobbyState()
         {
-            Debug.Log("🧪 [LOBBYPLAYER] Attempting to register in LobbyState...");
-
             if (LobbyState.Instance != null)
             {
-                Debug.Log("🧪 [LOBBYPLAYER] ✅ LobbyState found immediately, registering...");
                 LobbyState.Instance.RegisterPlayer(this);
-                Debug.Log("🧪 [LOBBYPLAYER] ✅ Player registered successfully in LobbyState");
+                // Actualización inicial
+                StartCoroutine(DelayedInitialUpdate());
             }
             else
             {
-                Debug.LogWarning("🧪 [LOBBYPLAYER] ⚠️ LobbyState.Instance is NULL! Starting coroutine fallback...");
                 StartCoroutine(WaitForLobbyStateAndRegister());
+            }
+        }
+
+        private IEnumerator DelayedInitialUpdate()
+        {
+            yield return new WaitForSeconds(0.1f);
+            if (LobbyState.Instance != null)
+            {
+                LobbyState.Instance.UpdatePlayerDisplay(this);
             }
         }
 
         private System.Collections.IEnumerator WaitForLobbyStateAndRegister()
         {
-            Debug.Log("🧪 [LOBBYPLAYER] === Starting WaitForLobbyState Coroutine ===");
-
             float timeout = 5f;
             float elapsed = 0f;
-            int attempts = 0;
 
             while (LobbyState.Instance == null && elapsed < timeout)
             {
-                attempts++;
-                Debug.Log($"🧪 [LOBBYPLAYER] Attempt {attempts} - Waiting for LobbyState... (elapsed: {elapsed:F1}s)");
-
-                if (attempts % 5 == 0) 
-                {
-                    var lobbyStateInScene = FindObjectOfType<LobbyState>();
-                    if (lobbyStateInScene != null)
-                    {
-                        Debug.LogWarning("🧪 [LOBBYPLAYER] Found LobbyState in scene but Instance is still null!");
-                    }
-                }
-
                 yield return new WaitForSeconds(0.1f);
                 elapsed += 0.1f;
             }
 
             if (LobbyState.Instance != null)
             {
-                Debug.Log($"🧪 [LOBBYPLAYER] ✅ LobbyState found after {elapsed:F1}s and {attempts} attempts!");
                 LobbyState.Instance.RegisterPlayer(this);
-                Debug.Log("🧪 [LOBBYPLAYER] ✅ Player registered successfully via coroutine");
-
-                var lobbyRoom = FindObjectOfType<LobbyRoom>();
-                if (lobbyRoom != null && lobbyRoom.gameObject.activeInHierarchy)
-                {
-                    Debug.Log("🧪 [LOBBYPLAYER] Triggering LobbyRoom refresh...");
-                    var method = lobbyRoom.GetType().GetMethod("RefreshPlayersList",
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    method?.Invoke(lobbyRoom, null);
-                }
+                LobbyState.Instance.UpdatePlayerDisplay(this);
             }
-            else
-            {
-                Debug.LogError($"🧪 [LOBBYPLAYER] ❌ CRITICAL: LobbyState never initialized after {timeout}s!");
-                Debug.LogError("🧪 [LOBBYPLAYER] ❌ Player will not appear in lobby UI!");
-
-                var lobbyState = FindObjectOfType<LobbyState>();
-                if (lobbyState != null)
-                {
-                    Debug.LogWarning(
-                        "🧪 [LOBBYPLAYER] Last resort: Found LobbyState via FindObjectOfType, forcing registration");
-                    lobbyState.RegisterPlayer(this);
-                }
-            }
-
-            Debug.Log("🧪 [LOBBYPLAYER] === End WaitForLobbyState Coroutine ===");
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
-            Debug.Log($"🧪 [LOBBYPLAYER] Player despawned: {Object.InputAuthority}");
-
+            Debug.Log($"[LOBBYPLAYER] Despawning player: {PlayerName} (PlayerRef: {Object.InputAuthority})");
+    
+            // Desregistrar de LobbyState
             if (LobbyState.Instance != null)
             {
-                Debug.Log("🧪 [LOBBYPLAYER] 👋 Unregistering player from LobbyState...");
+                Debug.Log("[LOBBYPLAYER] 👋 Unregistering from LobbyState...");
                 LobbyState.Instance.UnregisterPlayer(this);
-                Debug.Log("🧪 [LOBBYPLAYER] ✅ Player unregistered successfully from LobbyState");
-            }
-            else
-            {
-                Debug.LogWarning("🧪 [LOBBYPLAYER] ⚠️ LobbyState.Instance is null during despawn");
-            }
-        }
-
-        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-        private void RPC_SetPlayerData(NetworkString<_32> name, Color color, NetworkBool isHost)
-        {
-            Debug.Log($"🧪 [LOBBYPLAYER] RPC_SetPlayerData called:");
-            Debug.Log($"  - Name: '{name}'");
-            Debug.Log($"  - IsHost: {isHost}");
-            Debug.Log($"  - Color: {color}");
-    
-            if (string.IsNullOrEmpty(name.ToString()))
-            {
-                Debug.LogWarning("🧪 [LOBBYPLAYER] Empty name received, using default");
-                PlayerName = $"Player {Object.InputAuthority.PlayerId}";
-            }
-            else
-            {
-                PlayerName = name;
             }
     
-            PlayerColor = color;
-            IsHost = isHost;
+            // Cancelar todas las coroutines
+            StopAllCoroutines();
     
-            Debug.Log($"🧪 [LOBBYPLAYER] ✅ Player data set via RPC");
-        }
-
-        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-        public void RPC_SetReady(NetworkBool ready)
-        {
-            Debug.Log($"🧪 [LOBBYPLAYER] RPC_SetReady called - Ready: {ready} for player: {PlayerName}");
-
-            IsReady = ready;
-
-            Debug.Log($"🧪 [LOBBYPLAYER] ✅ Ready state set via RPC");
-        }
+            // Limpiar referencias
+            _dataManager = null;
+            _changeDetector = null;
+    
+            // Si somos el jugador local, limpiar referencias adicionales
+            if (IsLocalPlayer)
+            {
+                Debug.Log("[LOBBYPLAYER] Local player despawned, cleaning up local references");
         
-        // RPC para cambiar el mapa (solo el host puede llamarlo)
-        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-        public void RPC_ChangeMap(NetworkString<_64> mapName)
-        {
-            Debug.Log($"🧪 [LOBBYPLAYER] 📡 RPC_ChangeMap called");
-            Debug.Log($"🧪 [LOBBYPLAYER] 📡 Map parameter: {mapName}");
-            Debug.Log($"🧪 [LOBBYPLAYER] 📡 Called by player: {Object.InputAuthority}");
-            Debug.Log($"🧪 [LOBBYPLAYER] 📡 This player IsHost: {IsHost}");
-    
-            if (!IsHost)
-            {
-                Debug.LogWarning($"🧪 [LOBBYPLAYER] ❌ Non-host tried to change map!");
-                return;
+                // Notificar a PlayerDataManager
+                if (PlayerDataManager.Instance != null)
+                {
+                    PlayerDataManager.Instance.ClearSessionData();
+                }
             }
     
-            Debug.Log($"🧪 [LOBBYPLAYER] 📡 Setting SelectedMap from '{SelectedMap}' to '{mapName}'");
-            SelectedMap = mapName;
-            Debug.Log($"🧪 [LOBBYPLAYER] ✅ Map changed successfully to: {SelectedMap}");
+            // Marcar para destrucción
+            if (hasState)
+            {
+                Debug.Log("[LOBBYPLAYER] Scheduling destruction of GameObject");
+                // Destruir el GameObject después de un pequeño delay para asegurar la sincronización
+                Destroy(gameObject, 0.1f);
+            }
+            else
+            {
+                // Si no hay estado, destruir inmediatamente
+                Debug.Log("[LOBBYPLAYER] Destroying GameObject immediately");
+                Destroy(gameObject);
+            }
         }
 
+        /// <summary>
+        /// Detectar cambios usando ChangeDetector para el jugador local
+        /// </summary>
         public override void FixedUpdateNetwork()
         {
-            if (HasStateAuthority || HasInputAuthority)
+            // Solo el jugador local necesita detectar sus propios cambios
+            if (HasInputAuthority || HasStateAuthority)
             {
                 foreach (var change in _changeDetector.DetectChanges(this))
                 {
                     switch (change)
                     {
-                        case nameof(PlayerName):
-                            OnNameChangedCallback();
-                            break;
                         case nameof(IsReady):
-                            OnReadyChangedCallback();
-                            break;
-                        case nameof(PlayerColor):
-                            OnColorChangedCallback();
-                            break;
-                        case nameof(IsHost):
-                            OnHostChangedCallback();
+                            Debug.Log($"[LOBBYPLAYER] Local change detected - Ready: {IsReady}");
+                            if (LobbyState.Instance != null)
+                            {
+                                LobbyState.Instance.UpdatePlayerDisplay(this);
+                            }
                             break;
                         case nameof(SelectedMap):
-                            OnMapChangedCallback();
+                            Debug.Log($"[LOBBYPLAYER] Map change detected - Map: {SelectedMap}");
+                            if (IsHost && LobbyState.Instance != null)
+                            {
+                                LobbyState.Instance.UpdateMapSelection(SelectedMap.ToString());
+                            }
                             break;
                     }
                 }
             }
-    
-            if (!IsHost && LobbyState.Instance != null)
-            {
-                LobbyState.Instance.CheckHostMapChange();
-            }
         }
 
-        private void OnNameChangedCallback()
+        /// <summary>
+        /// Configurar datos iniciales del jugador
+        /// </summary>
+        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+        private void RPC_SetPlayerData(NetworkString<_32> name, Color color, NetworkBool isHost)
         {
-            Debug.Log($"🧪 [LOBBYPLAYER] 🔄 Name changed to: {PlayerName.ToString()}");
-
-            if (LobbyState.Instance != null)
+            Debug.Log($"[LOBBYPLAYER] Setting player data - Name: {name}, IsHost: {isHost}");
+            
+            PlayerName = string.IsNullOrEmpty(name.ToString()) ? 
+                $"Player {Object.InputAuthority.PlayerId}" : name;
+            PlayerColor = color;
+            IsHost = isHost;
+            
+            // Si es el host, inicializar con el mapa por defecto
+            if (isHost && string.IsNullOrEmpty(SelectedMap.ToString()))
             {
-                LobbyState.Instance.UpdatePlayerDisplay(this);
-            }
-            else
-            {
-                Debug.LogWarning("🧪 [LOBBYPLAYER] ⚠️ Cannot update display - LobbyState.Instance is null");
-            }
-        }
-
-        private void OnReadyChangedCallback()
-        {
-            Debug.Log($"🧪 [LOBBYPLAYER] 🔄 Ready state changed to: {IsReady} for player: {PlayerName}");
-
-            if (LobbyState.Instance != null)
-            {
-                LobbyState.Instance.UpdatePlayerDisplay(this);
-            }
-            else
-            {
-                Debug.LogWarning("🧪 [LOBBYPLAYER] ⚠️ Cannot update display - LobbyState.Instance is null");
-            }
-        }
-
-        private void OnColorChangedCallback()
-        {
-            Debug.Log($"🧪 [LOBBYPLAYER] 🔄 Color changed for player: {PlayerName}");
-
-            if (LobbyState.Instance != null)
-            {
-                LobbyState.Instance.UpdatePlayerDisplay(this);
-            }
-        }
-
-        private void OnHostChangedCallback()
-        {
-            Debug.Log($"🧪 [LOBBYPLAYER] 🔄 Host status changed to: {IsHost} for player: {PlayerName}");
-
-            if (LobbyState.Instance != null)
-            {
-                LobbyState.Instance.UpdatePlayerDisplay(this);
+                var networkBootstrapper = NetworkBootstrapper.Instance;
+                if (networkBootstrapper != null)
+                {
+                    string defaultMap = networkBootstrapper.GetDefaultSceneName();
+                    SelectedMap = defaultMap;
+                    Debug.Log($"[LOBBYPLAYER] Host initialized with default map: {defaultMap}");
+                    
+                    // Notificar a todos del mapa inicial
+                    StartCoroutine(NotifyInitialMap());
+                }
             }
         }
         
-        private void OnMapChangedCallback()
+        /// <summary>
+        /// Notifica el mapa inicial después de un pequeño delay
+        /// </summary>
+        private IEnumerator NotifyInitialMap()
         {
-            Debug.Log($"🧪 [LOBBYPLAYER] 🗺️ Map changed to: {SelectedMap.ToString()}");
-            Debug.Log($"🧪 [LOBBYPLAYER] 🗺️ This player IsHost: {IsHost}, IsLocal: {IsLocalPlayer}");
+            yield return new WaitForSeconds(0.2f);
             
-            if (IsHost && LobbyState.Instance != null)
+            if (HasStateAuthority && IsHost && LobbyState.Instance != null)
             {
-                Debug.Log($"🧪 [LOBBYPLAYER] 🗺️ Host player map changed, notifying all clients!");
-                // Notificar a la UI que el mapa cambió
+                Debug.Log($"[LOBBYPLAYER] Notifying initial map: {SelectedMap}");
                 LobbyState.Instance.UpdateMapSelection(SelectedMap.ToString());
             }
         }
 
+        /// <summary>
+        /// Toggle Ready mejorado con actualización local inmediata
+        /// </summary>
         public void ToggleReady()
         {
             if (!HasInputAuthority)
             {
-                Debug.LogWarning($"🧪 [LOBBYPLAYER] ❌ Cannot toggle ready - not input authority for {PlayerName}");
+                Debug.LogWarning($"[LOBBYPLAYER] Cannot toggle ready - not local player");
                 return;
             }
 
             bool newReadyState = !IsReady;
-            Debug.Log($"🧪 [LOBBYPLAYER] 🔄 Toggling ready state to: {newReadyState} for player: {PlayerName}");
-
-            RPC_SetReady(newReadyState);
+            Debug.Log($"[LOBBYPLAYER] Toggling ready to: {newReadyState}");
+            
+            // Actualizar UI local inmediatamente (optimistic update)
+            if (LobbyState.Instance != null)
+            {
+                // Crear una copia temporal con el nuevo estado para actualizar la UI
+                StartCoroutine(OptimisticReadyUpdate(newReadyState));
+            }
+            
+            // Enviar RPC para actualizar en el servidor y otros clientes
+            RPC_SetReadyAndNotify(newReadyState);
         }
 
+        /// <summary>
+        /// Actualización optimista de la UI mientras esperamos la sincronización
+        /// </summary>
+        private IEnumerator OptimisticReadyUpdate(bool newReadyState)
+        {
+            // Actualizar UI local inmediatamente con el estado esperado
+            // Esto da feedback instantáneo al usuario
+            
+            var playerItem = FindObjectsOfType<LobbyPlayerItem>()
+                .FirstOrDefault(item => item.GetPlayerRef() == PlayerRef);
+                
+            if (playerItem != null)
+            {
+                // Actualizar visualmente el botón ready (texto)
+                var readyButton = GameObject.Find("ReadyButton")?.GetComponent<TMPro.TextMeshProUGUI>();
+                if (readyButton != null && IsLocalPlayer)
+                {
+                    readyButton.text = newReadyState ? "Not Ready" : "Ready";
+                }
+            }
+            
+            yield return null;
+        }
+
+        /// <summary>
+        /// RPC híbrido: StateAuthority actualiza, All notifica
+        /// </summary>
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
+        private void RPC_SetReadyAndNotify(NetworkBool ready)
+        {
+            Debug.Log($"[LOBBYPLAYER] RPC_SetReadyAndNotify - Ready: {ready}, HasStateAuth: {HasStateAuthority}, IsLocal: {IsLocalPlayer}");
+            
+            // Solo el StateAuthority puede modificar propiedades Networked
+            if (HasStateAuthority)
+            {
+                IsReady = ready;
+                Debug.Log($"[LOBBYPLAYER] StateAuthority set IsReady to: {IsReady}");
+            }
+            
+            // Todos actualizan su UI, incluyendo el jugador local
+            StartCoroutine(DelayedUIUpdateForAll());
+        }
+
+        /// <summary>
+        /// Actualización de UI con delay para asegurar sincronización
+        /// </summary>
+        private IEnumerator DelayedUIUpdateForAll()
+        {
+            // Esperar 2 frames para asegurar que Fusion sincronizó el valor
+            yield return null;
+            yield return null;
+            
+            Debug.Log($"[LOBBYPLAYER] Updating UI after delay - Name: {PlayerName}, Ready: {IsReady}, IsLocal: {IsLocalPlayer}");
+            
+            if (LobbyState.Instance != null)
+            {
+                LobbyState.Instance.UpdatePlayerDisplay(this);
+            }
+        }
+
+        /// <summary>
+        /// RPC alternativo: Notificar cambio a todos directamente
+        /// </summary>
+        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        private void RPC_BroadcastReadyChange(PlayerRef playerRef, NetworkBool isReady)
+        {
+            Debug.Log($"[LOBBYPLAYER] Broadcast ready change - Player: {playerRef}, Ready: {isReady}");
+            
+            // Buscar el jugador y actualizar su display
+            var player = FindObjectsOfType<LobbyPlayer>()
+                .FirstOrDefault(p => p.PlayerRef == playerRef);
+                
+            if (player != null && LobbyState.Instance != null)
+            {
+                LobbyState.Instance.UpdatePlayerDisplay(player);
+            }
+        }
+
+        /// <summary>
+        /// Cambiar mapa (solo host)
+        /// </summary>
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
+        public void RPC_ChangeMap(NetworkString<_64> mapName)
+        {
+            if (!IsHost)
+            {
+                Debug.LogWarning("[LOBBYPLAYER] Non-host tried to change map!");
+                return;
+            }
+            
+            if (HasStateAuthority)
+            {
+                SelectedMap = mapName;
+            }
+            
+            StartCoroutine(DelayedMapUpdate());
+        }
+
+        private IEnumerator DelayedMapUpdate()
+        {
+            yield return null;
+            yield return null;
+            
+            if (LobbyState.Instance != null && IsHost)
+            {
+                LobbyState.Instance.UpdateMapSelection(SelectedMap.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Sincronizar con el mapa del host cuando un cliente se une
+        /// </summary>
+        private IEnumerator SyncWithHostMap()
+        {
+            // Esperar a que LobbyState esté listo
+            yield return new WaitForSeconds(0.5f);
+            
+            if (LobbyState.Instance != null)
+            {
+                var hostPlayer = LobbyState.Instance.HostPlayer;
+                if (hostPlayer != null && !string.IsNullOrEmpty(hostPlayer.SelectedMap.ToString()))
+                {
+                    Debug.Log($"[LOBBYPLAYER] Client syncing with host map: {hostPlayer.SelectedMap}");
+                    
+                    // Actualizar NetworkBootstrapper local
+                    var networkBootstrapper = NetworkBootstrapper.Instance;
+                    if (networkBootstrapper != null)
+                    {
+                        networkBootstrapper.SelectedSceneName = hostPlayer.SelectedMap.ToString();
+                    }
+                    
+                    // Notificar a LobbyState para actualizar UI
+                    LobbyState.Instance.UpdateMapSelection(hostPlayer.SelectedMap.ToString());
+                }
+            }
+        }
+        
+        public void ForceCleanup()
+        {
+            Debug.Log($"[LOBBYPLAYER] Force cleanup called for: {PlayerName}");
+    
+            // Desregistrar de LobbyState
+            if (LobbyState.Instance != null)
+            {
+                LobbyState.Instance.UnregisterPlayer(this);
+            }
+    
+            // Detener todas las coroutines
+            StopAllCoroutines();
+    
+            // Destruir el GameObject
+            Destroy(gameObject);
+        }
+
+        // Métodos auxiliares
         public string GetDisplayName()
         {
             string name = PlayerName.ToString();
@@ -339,15 +403,21 @@ namespace HackMonkeys.Core
 
             return name;
         }
-
-        public string GetColorHex()
+        
+        private void OnDestroy()
         {
-            return $"#{ColorUtility.ToHtmlStringRGB(PlayerColor)}";
-        }
-
-        public bool CanBeKicked()
-        {
-            return !IsHost && !IsLocalPlayer;
+            Debug.Log($"[LOBBYPLAYER] OnDestroy called for: {PlayerName}");
+    
+            // Última oportunidad para limpiar si no se hizo antes
+            if (LobbyState.Instance != null)
+            {
+                var registered = LobbyState.Instance.GetPlayer(PlayerRef);
+                if (registered == this)
+                {
+                    Debug.Log("[LOBBYPLAYER] Still registered in OnDestroy, unregistering now");
+                    LobbyState.Instance.UnregisterPlayer(this);
+                }
+            }
         }
 
         public string GetStatusText()
@@ -358,92 +428,43 @@ namespace HackMonkeys.Core
                 return IsReady ? "Ready" : "Not Ready";
         }
 
-        public float GetReadyProgress()
-        {
-            return IsReady ? 1.0f : 0.0f;
-        }
-
-        // ✅ DEBUG METHODS
-        [ContextMenu("Debug: Player Info")]
-        private void DebugPlayerInfo()
-        {
-            Debug.Log("=== LobbyPlayer Debug Info ===");
-            Debug.Log($"Player Ref: {PlayerRef}");
-            Debug.Log($"Name: {PlayerName}");
-            Debug.Log($"Display Name: {GetDisplayName()}");
-            Debug.Log($"Is Ready: {IsReady}");
-            Debug.Log($"Is Host: {IsHost}");
-            Debug.Log($"Is Local: {IsLocalPlayer}");
-            Debug.Log($"Color: {GetColorHex()}");
-            Debug.Log($"Status: {GetStatusText()}");
-            Debug.Log($"Can Be Kicked: {CanBeKicked()}");
-            Debug.Log($"Has Input Authority: {HasInputAuthority}");
-            Debug.Log($"Object State: {Object?.IsValid}");
-            Debug.Log("================================");
-        }
-
-        [ContextMenu("Debug: Toggle Ready (Test)")]
-        private void DebugToggleReady()
+        // Debug mejorado
+        [ContextMenu("Debug: Toggle Ready Local")]
+        private void DebugToggleReadyLocal()
         {
             if (HasInputAuthority)
             {
-                Debug.Log("🧪 [DEBUG] Testing toggle ready...");
+                Debug.Log("[DEBUG] Testing toggle ready...");
                 ToggleReady();
             }
             else
             {
-                Debug.LogWarning("🧪 [DEBUG] Cannot test toggle ready - not input authority");
+                Debug.LogWarning("[DEBUG] Not local player!");
             }
         }
-
-        [ContextMenu("Debug: Validate Registration")]
-        private void DebugValidateRegistration()
+        
+        [ContextMenu("Debug: Force UI Update")]
+        private void DebugForceUIUpdate()
         {
-            Debug.Log("=== Registration Validation ===");
-
-            if (LobbyState.Instance == null)
+            Debug.Log($"[DEBUG] Forcing UI update - Ready: {IsReady}");
+            if (LobbyState.Instance != null)
             {
-                Debug.LogError("❌ LobbyState.Instance is NULL");
-                return;
+                LobbyState.Instance.UpdatePlayerDisplay(this);
             }
-
-            var foundPlayer = LobbyState.Instance.GetPlayer(PlayerRef);
-            if (foundPlayer == null)
-            {
-                Debug.LogError($"❌ Player {PlayerRef} not found in LobbyState");
-            }
-            else if (foundPlayer == this)
-            {
-                Debug.Log($"✅ Player {PlayerRef} correctly registered in LobbyState");
-            }
-            else
-            {
-                Debug.LogError($"❌ Player {PlayerRef} registration mismatch - different instance");
-            }
-
-            Debug.Log("================================");
         }
-
-        #region OnGUI Debug (Editor Only)
-
-        /*private void OnGUI()
+        
+        [ContextMenu("Debug: Player State")]
+        private void DebugPlayerState()
         {
-            if (!Application.isEditor) return;
-            if (!HasInputAuthority) return;
-
-            GUILayout.BeginArea(new Rect(10, 10, 300, 100));
-            GUILayout.Label($"Local Player: {PlayerName} - Ready: {IsReady}");
-            GUILayout.Label($"Host: {IsHost} | Authority: {HasInputAuthority}");
-            GUILayout.Label($"LobbyState: {LobbyState.Instance != null}");
-
-            if (GUILayout.Button("Toggle Ready"))
-            {
-                ToggleReady();
-            }
-
-            GUILayout.EndArea();
-        }*/
-
-        #endregion
+            Debug.Log($"=== LobbyPlayer Debug ===");
+            Debug.Log($"Name: {PlayerName}");
+            Debug.Log($"Ready: {IsReady}");
+            Debug.Log($"Host: {IsHost}");
+            Debug.Log($"IsLocal: {IsLocalPlayer}");
+            Debug.Log($"HasInputAuth: {HasInputAuthority}");
+            Debug.Log($"HasStateAuth: {HasStateAuthority}");
+            Debug.Log($"PlayerRef: {PlayerRef}");
+            Debug.Log($"=========================");
+        }
     }
 }

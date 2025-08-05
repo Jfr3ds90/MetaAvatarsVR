@@ -61,7 +61,7 @@ namespace HackMonkeys.Core
 
         #region Private Fields
 
-        private string _playerName;
+        [SerializeField] private string _playerName;
         private Color _playerColor;
         private bool _hasLoadedData = false;
 

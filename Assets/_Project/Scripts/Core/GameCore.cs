@@ -18,6 +18,9 @@ namespace HackMonkeys.Core
     [DefaultExecutionOrder(-1000)]
     public class GameCore : MonoBehaviour
     {
+        [Header("Start Panel")] 
+        [SerializeField] private GameState gameState; 
+        
         #region Singleton
         private static GameCore _instance;
 
@@ -48,7 +51,8 @@ namespace HackMonkeys.Core
             LoadingMatch,   // Cargando partida
             InMatch,        // Jugando
             Results,        // Pantalla de resultados
-            Disconnected    // Desconectado/Error
+            Disconnected,   // Desconectado/Error
+            NameTag
         }
 
         [Header("State Management")]
@@ -147,7 +151,7 @@ namespace HackMonkeys.Core
             CreateVRFadeCanvas();
             
             // Transicionar a menú principal
-            yield return TransitionToStateCoroutine(GameState.MainMenu);
+            yield return TransitionToStateCoroutine(GameState.NameTag);
             
             Debug.Log("[GameCore] ✅ Game initialization complete");
         }
@@ -230,6 +234,9 @@ namespace HackMonkeys.Core
         {
             switch (state)
             {
+                case GameState.NameTag:
+                    yield return EnterName();
+                    break;
                 case GameState.MainMenu:
                     yield return EnterMainMenu();
                     break;
@@ -271,6 +278,21 @@ namespace HackMonkeys.Core
             
             yield return FadeIn();
         }
+        
+        private IEnumerator EnterName()
+        {
+            // Asegurar que estamos en la escena del menú
+            if (SceneManager.GetActiveScene().name != menuSceneName)
+            {
+                yield return LoadSceneAsync(menuSceneName);
+            }
+            
+            // Mostrar UI principal
+            _spatialUIManager?.ShowPanel(PanelID.NameTag);
+            
+            yield return FadeIn();
+        }
+        
 
         private IEnumerator EnterLobby()
         {
@@ -394,6 +416,14 @@ namespace HackMonkeys.Core
             if (_currentState == GameState.LoadingMatch)
             {
                 TransitionToState(GameState.InMatch);
+            }
+        }
+
+        public void OnFinishEnterName()
+        {
+            if (_currentState == GameState.NameTag)
+            {
+                TransitionToState(GameState.MainMenu);
             }
         }
 
