@@ -23,8 +23,8 @@ public class Switch : MonoBehaviour
     }
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.S))
-            OpenDoorAct();    
+     //   if (Input.GetKeyDown(KeyCode.S))
+     //       OpenDoorAct();    
     }
     public void OpenDoor()
     {
