@@ -81,6 +81,6 @@ public class Puzzle01 : MonoBehaviour
 
     public void EndLaberynth()
     {
-
+        Debug.LogWarning("Termino el puzzle");
     }
 }
