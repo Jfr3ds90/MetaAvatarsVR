@@ -35,32 +35,32 @@ public class Puzzle01 : MonoBehaviour
         var last = placeSelected;
         
 
-      if(pos.transform.localPosition.x-0.8f>=-2.8f)
-        pos.transform.localPosition -= new Vector3 (0.8f,0);
+      if(pos.transform.localPosition.x- 0.128f >= -0.523)
+        pos.transform.localPosition -= new Vector3 (0.128f,0);
 
     }
     public void DownMovement()
     {
         var last = placeSelected;
 
-        if (pos.transform.localPosition.y - 0.8f >= -3.625f)
-            pos.transform.localPosition -= new Vector3(0, 0.8f);
+        if (pos.transform.localPosition.y - 0.128f >= -0.7)
+            pos.transform.localPosition -= new Vector3(0, 0.128f);
 
     }
     public void UpMovement()
     {
         var last = placeSelected;
 
-        if (pos.transform.localPosition.y + 0.8f <=4f)
-            pos.transform.localPosition += new Vector3(0, 0.8f);
+        if (pos.transform.localPosition.y + 0.128f <= 0.58)
+            pos.transform.localPosition += new Vector3(0, 0.128f);
 
     }
     public void RightMovement()
     {
         var last = placeSelected;
 
-        if (pos.transform.localPosition.x - 0.8f <= 1f)
-            pos.transform.localPosition += new Vector3(0.8f, 0);
+        if (pos.transform.localPosition.x + 0.128f <= 0.14f)
+            pos.transform.localPosition += new Vector3(0.128f, 0);
 
     }
     public void GreenMovement()
