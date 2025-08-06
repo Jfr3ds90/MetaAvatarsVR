@@ -5,10 +5,11 @@ using UnityEngine;
 public class Puzzle01 : MonoBehaviour
 {
     public GameObject[] laberynth;//scale 1.6 pos 0  |  0.8 dist / -2,3.625 inicial pos  / 0.75 tam | grilla(6,10)
-    public GameObject liquid,pos,objectVertical,objectHorizontal,presentLaber;
+    public GameObject liquid,pos,block,presentLaber;
     Vector2 placeSelected;
     bool ObjectSelected;
-    public Dictionary<Vector2, GameObject> objectItem= new Dictionary<Vector2, GameObject>();
+   // public Dictionary<Vector2, GameObject> objectItem= new Dictionary<Vector2, GameObject>();
+   List <GameObject> objectPos = new List<GameObject>();
     void Update()
     {
        if (Input.GetKeyUp(KeyCode.V))
@@ -27,71 +28,59 @@ public class Puzzle01 : MonoBehaviour
     }
     private void Start()
     {
-        pos = presentLaber.GetComponentInChildren<SelectorID>().gameObject;//cambiar a cuando se cambie de laberinto
+       // pos = presentLaber.GetComponentInChildren<SelectorID>().gameObject;//cambiar a cuando se cambie de laberinto
     }
     public void LeftMovement()
     {
         var last = placeSelected;
         
-       // if (objectItem.ContainsKey(new Vector2(placeSelected.x-1,placeSelected.y)))       
-       //     placeSelected.x-=1;        
-       // else       
-      //      placeSelected = objectItem.Count;
-      if(pos.transform.position.x-0.8f>=-2)
-        pos.transform.position -=new Vector3 (0.8f,0);
-       // GameObject lastObj; objectItem.TryGetValue(last,out lastObj);
-       // Destroy(lastObj);
-       // GameObject newObj; objectItem.TryGetValue(placeSelected, out newObj);
-       // Instantiate(newObj);
+
+      if(pos.transform.localPosition.x-0.8f>=-2.8f)
+        pos.transform.localPosition -= new Vector3 (0.8f,0);
+
     }
     public void DownMovement()
     {
         var last = placeSelected;
-        // if (objectItem.ContainsKey(new Vector2(placeSelected.x,placeSelected.y-1)))       
-        //    placeSelected.y-=1;
-        //   else       
-        //       placeSelected = objectItem.Count;
-        if (pos.transform.position.y - 0.8f >= -3.625f)
-            pos.transform.position -= new Vector3(0, 0.8f);
-       // GameObject lastObj; objectItem.TryGetValue(last, out lastObj);
-       // lastObj.SetActive(false);
-       // GameObject newObj; objectItem.TryGetValue(placeSelected, out newObj);
-       // newObj.SetActive(true);
+
+        if (pos.transform.localPosition.y - 0.8f >= -3.625f)
+            pos.transform.localPosition -= new Vector3(0, 0.8f);
+
     }
     public void UpMovement()
     {
         var last = placeSelected;
-        //  if (objectItem.ContainsKey(new Vector2(placeSelected.x, placeSelected.y + 1)))
-        //     placeSelected.y += 1;
-        //    else       
-        //       placeSelected = 0;
-        if (pos.transform.position.y + 0.8f <=3.625f)
-            pos.transform.position += new Vector3(0, 0.8f);
-        // GameObject lastObj; objectItem.TryGetValue(last, out lastObj);
-        // lastObj.SetActive(false);
-        // GameObject newObj; objectItem.TryGetValue(placeSelected, out newObj);
-        // newObj.SetActive(true);
+
+        if (pos.transform.localPosition.y + 0.8f <=4f)
+            pos.transform.localPosition += new Vector3(0, 0.8f);
+
     }
     public void RightMovement()
     {
         var last = placeSelected;
-        // if (objectItem.ContainsKey(new Vector2(placeSelected.x + 1, placeSelected.y)))
-        //     placeSelected.x += 1;
-        //     else       
-        //         placeSelected =0;
-        if (pos.transform.position.x - 0.8f <= 2)
-            pos.transform.position += new Vector3(0.8f, 0);
-        // GameObject lastObj; objectItem.TryGetValue(last, out lastObj);
-        // lastObj.SetActive(false);
-        // GameObject newObj; objectItem.TryGetValue(placeSelected, out newObj);
-        // newObj.SetActive(true);
+
+        if (pos.transform.localPosition.x - 0.8f <= 1f)
+            pos.transform.localPosition += new Vector3(0.8f, 0);
+
     }
     public void GreenMovement()
     {
-       // if (placeSelected != null)
+        if (objectPos.Count >= 6)
         {
-            GameObject Gselected; objectItem.TryGetValue(placeSelected,out Gselected);
-            Gselected.GetComponent<SelectorID>().selected = true;
+
+            Destroy(objectPos[0]);
+            objectPos.RemoveAt(0);
         }
+        GameObject a;
+        a = Instantiate(block, pos.transform);
+        a.transform.SetParent(transform);
+        objectPos.Add(a);   
+
+       
+    }
+
+    public void EndLaberynth()
+    {
+
     }
 }
