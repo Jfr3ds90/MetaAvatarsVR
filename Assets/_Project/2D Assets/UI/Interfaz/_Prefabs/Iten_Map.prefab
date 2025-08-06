@@ -89,6 +89,7 @@ MonoBehaviour:
   pressScale: 0.95
   animationDuration: 0.15
   scaleEase: 27
+  baseScale: {x: 1, y: 1, z: 1}
   buttonLabel: 
   isInteractable: 1
   playSound: 1
@@ -110,7 +111,6 @@ MonoBehaviour:
   OnButtonHeld:
     m_PersistentCalls:
       m_Calls: []
-  _isPressed: 0
   CanDebug: 0
 --- !u!114 &5515879958158556043
 MonoBehaviour:
@@ -326,8 +326,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: The Office
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: caf03a91b5c43df459118d37a4f3c3bb, type: 2}
+  m_sharedMaterial: {fileID: 2048426737044027305, guid: caf03a91b5c43df459118d37a4f3c3bb, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

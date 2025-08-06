@@ -143,8 +143,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: caf03a91b5c43df459118d37a4f3c3bb, type: 2}
+  m_sharedMaterial: {fileID: 2048426737044027305, guid: caf03a91b5c43df459118d37a4f3c3bb, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -300,6 +300,7 @@ MonoBehaviour:
   pressScale: 0.95
   animationDuration: 0.15
   scaleEase: 27
+  baseScale: {x: 1, y: 1, z: 1}
   buttonLabel: 
   isInteractable: 1
   playSound: 1
@@ -321,7 +322,6 @@ MonoBehaviour:
   OnButtonHeld:
     m_PersistentCalls:
       m_Calls: []
-  _isPressed: 0
   CanDebug: 0
 --- !u!114 &8185974613217309576
 MonoBehaviour:
@@ -354,11 +354,10 @@ MonoBehaviour:
   statusIndicator: {fileID: 0}
   selectButton: {fileID: 6101159129882227112}
   backgroundImage: {fileID: 4404600198374275768}
-  normalColor: {r: 0.99607843, g: 0.75686276, b: 0.06666667, a: 1}
-  openColor: {r: 0, g: 1, b: 0, a: 1}
-  closedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  fullColor: {r: 1, g: 0, b: 0, a: 1}
-  selectedColor: {r: 0.2, g: 0.4, b: 0.8, a: 0.5}
+  lockIcon: {fileID: 0}
+  playingIcon: {fileID: 0}
+  hoverScale: 1.05
+  animationDuration: 0.2
 --- !u!65 &5064845745824750427
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -523,8 +522,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 1/6
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: caf03a91b5c43df459118d37a4f3c3bb, type: 2}
+  m_sharedMaterial: {fileID: 2048426737044027305, guid: caf03a91b5c43df459118d37a4f3c3bb, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
