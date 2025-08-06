@@ -9,10 +9,11 @@ public class VictoryPuzzle : MonoBehaviour
         {
             case 1:
                 if(collision.collider.tag =="cubePuzzle")
-                {
+                {   
+                    Destroy(collision.gameObject);
                     amount++;
-                    FindAnyObjectByType<Puzzle01>().EndLaberynth();
-                 }
+                    FindAnyObjectByType<Puzzle01>().EndLaberynth();                    
+                }
                 break;
             case 2:
                 break;

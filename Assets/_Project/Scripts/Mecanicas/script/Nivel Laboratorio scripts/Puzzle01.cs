@@ -28,7 +28,8 @@ public class Puzzle01 : MonoBehaviour
     }
     private void Start()
     {
-       // pos = presentLaber.GetComponentInChildren<SelectorID>().gameObject;//cambiar a cuando se cambie de laberinto
+        // pos = presentLaber.GetComponentInChildren<SelectorID>().gameObject;//cambiar a cuando se cambie de laberinto
+        vp=FindAnyObjectByType<VictoryPuzzle>();
     }
     public void LeftMovement()
     {
@@ -79,7 +80,13 @@ public class Puzzle01 : MonoBehaviour
 
     public void EndLaberynth()
     {
-        Destroy(presentLaber);
-      presentLaber =  Instantiate(laberynth[vp.amount]);
+        if(laberynth.Length>vp.amount)
+        {
+            Destroy(presentLaber);
+            presentLaber=  Instantiate(laberynth[vp.amount]);
+            presentLaber.transform.SetParent(transform);
+            presentLaber.transform.position = new Vector3(0,0,0) ;
+            vp = FindAnyObjectByType<VictoryPuzzle>();
+        }
     }
 }
