@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 574143029481142033}
   - component: {fileID: 4065628803370630285}
   - component: {fileID: 3149820895668654753}
+  - component: {fileID: 478707862952538477}
   m_Layer: 0
   m_Name: Bloques02_0
   m_TagString: Untagged
@@ -126,7 +127,7 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.7, y: 0.7}
+    oldSize: {x: 0.7, y: 0.2}
     newSize: {x: 0.7, y: 0.7}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -139,6 +140,19 @@ PolygonCollider2D:
       - {x: -0.35, y: -0.099999994}
       - {x: 0.35, y: -0.099999994}
   m_UseDelaunayMesh: 0
+--- !u!114 &478707862952538477
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3229586989279725954}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03ef93d1fbc16aa4fa0d7091784f93fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  puzzle: 1
 --- !u!1 &4884347514988251264
 GameObject:
   m_ObjectHideFlags: 0
@@ -265,7 +279,7 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.7, y: 0.7}
+    oldSize: {x: 0.2, y: 0.7}
     newSize: {x: 0.7, y: 0.7}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -682,7 +696,7 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.7, y: 0.7}
+    oldSize: {x: 0.2, y: 0.7}
     newSize: {x: 0.7, y: 0.7}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

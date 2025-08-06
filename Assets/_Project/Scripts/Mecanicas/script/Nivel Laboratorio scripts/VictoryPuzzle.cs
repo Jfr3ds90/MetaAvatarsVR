@@ -1,16 +1,25 @@
 using UnityEngine;
 
 public class VictoryPuzzle : MonoBehaviour
-{
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+{   
+    public int puzzle;
+    int amount;
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        switch(puzzle)
+        {
+            case 1:
+                if(collision.collider.tag =="cubePuzzle")
+                { FindAnyObjectByType<Puzzle01>().EndLaberynth(); }
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+            case 5:
+                break;
+        }    
     }
 }
