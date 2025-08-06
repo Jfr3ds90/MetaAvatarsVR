@@ -570,6 +570,7 @@ namespace HackMonkeys.UI.Panels
                 foreach (var item in _playerItems)
                 {
                     if (item != null && item.gameObject != null)
+                        item.ResetItem();
                         item.gameObject.SetActive(false);
                 }
 

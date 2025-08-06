@@ -65,6 +65,13 @@ namespace HackMonkeys.Core
         private Color _playerColor;
         private bool _hasLoadedData = false;
 
+        private bool _lastReadyState = false;
+    
+        public bool GetLastReadyState() => _lastReadyState;
+        public void SetLastReadyState(bool ready) => _lastReadyState = ready;
+    
+
+        
         #endregion
 
         #region Unity Lifecycle
@@ -237,8 +244,9 @@ namespace HackMonkeys.Core
             _currentRoomName = null;
             _selectedMap = null;
             _sessionPlayers?.Clear();
-
-            Debug.Log("[PlayerPrefsManager] Session data cleared");
+            _lastReadyState = false; // Resetear ready state
+        
+            Debug.Log("[PlayerDataManager] Session data cleared");
         }
 
         public bool IsHost => _isHost;

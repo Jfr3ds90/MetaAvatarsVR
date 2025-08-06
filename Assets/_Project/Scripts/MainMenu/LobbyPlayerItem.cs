@@ -41,6 +41,9 @@ namespace HackMonkeys.UI.Panels
         [Header("Animation")] 
         [SerializeField] private float hoverScale = 1.05f;
         [SerializeField] private float animationDuration = 0.2f;
+        
+        private Vector3 _originalScale = Vector3.one;
+        private bool _hasInitialized = false;
 
         private LobbyPlayer _playerData;
         private System.Action<LobbyPlayer> _onPlayerClicked;
@@ -52,6 +55,12 @@ namespace HackMonkeys.UI.Panels
 
         private void Awake()
         {
+            if (!_hasInitialized)
+            {
+                _originalScale = transform.localScale;
+                _hasInitialized = true;
+            }
+            
             if (selectButton != null)
             {
                 selectButton.OnButtonPressed.AddListener(OnPlayerSelected);
@@ -418,18 +427,33 @@ namespace HackMonkeys.UI.Panels
         /// </summary>
         public void PlayJoinEffect()
         {
+            // SIEMPRE resetear a la escala original primero
             transform.localScale = Vector3.zero;
-            transform.DOScale(Vector3.one, 0.5f)
+            transform.DOScale(_originalScale, 0.5f) // Usar escala original
                 .SetEase(Ease.OutBack)
                 .SetDelay(UnityEngine.Random.Range(0f, 0.2f));
 
             if (backgroundPanel != null)
             {
-                // Flash de blanco a amarillo
                 Color originalColor = primaryYellow;
                 originalColor.a = yellowAlpha;
                 backgroundPanel.color = textWhite;
                 backgroundPanel.DOColor(originalColor, 0.8f);
+            }
+        }
+        
+        public void ResetItem()
+        {
+            transform.DOKill();
+            transform.localScale = _originalScale;
+            _isSelected = false;
+            _isHovered = false;
+        
+            // Resetear estados visuales
+            if (readyIndicator != null)
+            {
+                readyIndicator.transform.DOKill();
+                readyIndicator.transform.localScale = Vector3.one;
             }
         }
 

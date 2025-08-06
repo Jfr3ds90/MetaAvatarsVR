@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Fusion;
 using HackMonkeys.UI.Panels;
@@ -17,9 +18,10 @@ namespace HackMonkeys.Core
         [Networked] public Color PlayerColor { get; set; }
         [Networked] public NetworkString<_64> SelectedMap { get; set; }
 
+        private string _cachedPlayerName = "Unknown";
         private PlayerDataManager _dataManager;
         private ChangeDetector _changeDetector;
-        
+
         public PlayerRef PlayerRef => Object.InputAuthority;
         public bool IsLocalPlayer => HasInputAuthority;
 
@@ -35,21 +37,47 @@ namespace HackMonkeys.Core
 
                 if (_dataManager != null)
                 {
-                    RPC_SetPlayerData(
-                        _dataManager.GetPlayerName(),
-                        _dataManager.GetPlayerColor(),
-                        Runner.IsServer
-                    );
+                    bool savedReadyState = _dataManager.GetLastReadyState();
+                    if (savedReadyState)
+                    {
+                        StartCoroutine(RestoreReadyState());
+                    }
+
+                    // Agregar delay para asegurar que el Host esté listo
+                    StartCoroutine(DelayedSetPlayerData());
                 }
             }
 
             TryRegisterInLobbyState();
-            
-            // Si es un cliente que se une después, sincronizar con el mapa del host
-            if (!HasInputAuthority && !Runner.IsServer)
+        }
+
+        private IEnumerator DelayedSetPlayerData()
+        {
+            // Esperar 2 frames para asegurar sincronización
+            yield return null;
+            yield return null;
+
+            RPC_SetPlayerData(
+                _dataManager.GetPlayerName(),
+                _dataManager.GetPlayerColor(),
+                Runner.IsServer
+            );
+
+            // Forzar actualización después del RPC
+            yield return new WaitForSeconds(0.1f);
+
+            if (LobbyState.Instance != null)
             {
-                StartCoroutine(SyncWithHostMap());
+                LobbyState.Instance.UpdatePlayerDisplay(this);
             }
+        }
+
+        private IEnumerator RestoreReadyState()
+        {
+            // Esperar a que todo esté inicializado
+            yield return new WaitForSeconds(0.5f);
+
+            RPC_SetReadyAndNotify(true);
         }
 
         private void TryRegisterInLobbyState()
@@ -96,33 +124,33 @@ namespace HackMonkeys.Core
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
             Debug.Log($"[LOBBYPLAYER] Despawning player: {PlayerName} (PlayerRef: {Object.InputAuthority})");
-    
+
             // Desregistrar de LobbyState
             if (LobbyState.Instance != null)
             {
                 Debug.Log("[LOBBYPLAYER] 👋 Unregistering from LobbyState...");
                 LobbyState.Instance.UnregisterPlayer(this);
             }
-    
+
             // Cancelar todas las coroutines
             StopAllCoroutines();
-    
+
             // Limpiar referencias
             _dataManager = null;
             _changeDetector = null;
-    
+
             // Si somos el jugador local, limpiar referencias adicionales
             if (IsLocalPlayer)
             {
                 Debug.Log("[LOBBYPLAYER] Local player despawned, cleaning up local references");
-        
+
                 // Notificar a PlayerDataManager
                 if (PlayerDataManager.Instance != null)
                 {
                     PlayerDataManager.Instance.ClearSessionData();
                 }
             }
-    
+
             // Marcar para destrucción
             if (hasState)
             {
@@ -156,6 +184,7 @@ namespace HackMonkeys.Core
                             {
                                 LobbyState.Instance.UpdatePlayerDisplay(this);
                             }
+
                             break;
                         case nameof(SelectedMap):
                             Debug.Log($"[LOBBYPLAYER] Map change detected - Map: {SelectedMap}");
@@ -163,6 +192,7 @@ namespace HackMonkeys.Core
                             {
                                 LobbyState.Instance.UpdateMapSelection(SelectedMap.ToString());
                             }
+
                             break;
                     }
                 }
@@ -175,36 +205,34 @@ namespace HackMonkeys.Core
         [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
         private void RPC_SetPlayerData(NetworkString<_32> name, Color color, NetworkBool isHost)
         {
-            Debug.Log($"[LOBBYPLAYER] Setting player data - Name: {name}, IsHost: {isHost}");
-            
-            PlayerName = string.IsNullOrEmpty(name.ToString()) ? 
-                $"Player {Object.InputAuthority.PlayerId}" : name;
-            PlayerColor = color;
-            IsHost = isHost;
-            
-            // Si es el host, inicializar con el mapa por defecto
-            if (isHost && string.IsNullOrEmpty(SelectedMap.ToString()))
+            if (HasStateAuthority)
             {
-                var networkBootstrapper = NetworkBootstrapper.Instance;
-                if (networkBootstrapper != null)
-                {
-                    string defaultMap = networkBootstrapper.GetDefaultSceneName();
-                    SelectedMap = defaultMap;
-                    Debug.Log($"[LOBBYPLAYER] Host initialized with default map: {defaultMap}");
-                    
-                    // Notificar a todos del mapa inicial
-                    StartCoroutine(NotifyInitialMap());
-                }
+                PlayerName = name;
+                PlayerColor = color;
+                IsHost = isHost;
+            
+                // Cachear el nombre localmente para debug
+                _cachedPlayerName = name.ToString();
             }
         }
-        
+
+        private IEnumerator NotifyDataUpdate()
+        {
+            yield return new WaitForSeconds(0.1f);
+
+            if (LobbyState.Instance != null)
+            {
+                LobbyState.Instance.UpdatePlayerDisplay(this);
+            }
+        }
+
         /// <summary>
         /// Notifica el mapa inicial después de un pequeño delay
         /// </summary>
         private IEnumerator NotifyInitialMap()
         {
             yield return new WaitForSeconds(0.2f);
-            
+
             if (HasStateAuthority && IsHost && LobbyState.Instance != null)
             {
                 Debug.Log($"[LOBBYPLAYER] Notifying initial map: {SelectedMap}");
@@ -224,15 +252,21 @@ namespace HackMonkeys.Core
             }
 
             bool newReadyState = !IsReady;
+
+            if (_dataManager != null)
+            {
+                _dataManager.SetLastReadyState(newReadyState);
+            }
+
             Debug.Log($"[LOBBYPLAYER] Toggling ready to: {newReadyState}");
-            
+
             // Actualizar UI local inmediatamente (optimistic update)
             if (LobbyState.Instance != null)
             {
                 // Crear una copia temporal con el nuevo estado para actualizar la UI
                 StartCoroutine(OptimisticReadyUpdate(newReadyState));
             }
-            
+
             // Enviar RPC para actualizar en el servidor y otros clientes
             RPC_SetReadyAndNotify(newReadyState);
         }
@@ -244,10 +278,10 @@ namespace HackMonkeys.Core
         {
             // Actualizar UI local inmediatamente con el estado esperado
             // Esto da feedback instantáneo al usuario
-            
+
             var playerItem = FindObjectsOfType<LobbyPlayerItem>()
                 .FirstOrDefault(item => item.GetPlayerRef() == PlayerRef);
-                
+
             if (playerItem != null)
             {
                 // Actualizar visualmente el botón ready (texto)
@@ -257,7 +291,7 @@ namespace HackMonkeys.Core
                     readyButton.text = newReadyState ? "Not Ready" : "Ready";
                 }
             }
-            
+
             yield return null;
         }
 
@@ -267,15 +301,16 @@ namespace HackMonkeys.Core
         [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
         private void RPC_SetReadyAndNotify(NetworkBool ready)
         {
-            Debug.Log($"[LOBBYPLAYER] RPC_SetReadyAndNotify - Ready: {ready}, HasStateAuth: {HasStateAuthority}, IsLocal: {IsLocalPlayer}");
-            
+            Debug.Log(
+                $"[LOBBYPLAYER] RPC_SetReadyAndNotify - Ready: {ready}, HasStateAuth: {HasStateAuthority}, IsLocal: {IsLocalPlayer}");
+
             // Solo el StateAuthority puede modificar propiedades Networked
             if (HasStateAuthority)
             {
                 IsReady = ready;
                 Debug.Log($"[LOBBYPLAYER] StateAuthority set IsReady to: {IsReady}");
             }
-            
+
             // Todos actualizan su UI, incluyendo el jugador local
             StartCoroutine(DelayedUIUpdateForAll());
         }
@@ -288,9 +323,10 @@ namespace HackMonkeys.Core
             // Esperar 2 frames para asegurar que Fusion sincronizó el valor
             yield return null;
             yield return null;
-            
-            Debug.Log($"[LOBBYPLAYER] Updating UI after delay - Name: {PlayerName}, Ready: {IsReady}, IsLocal: {IsLocalPlayer}");
-            
+
+            Debug.Log(
+                $"[LOBBYPLAYER] Updating UI after delay - Name: {PlayerName}, Ready: {IsReady}, IsLocal: {IsLocalPlayer}");
+
             if (LobbyState.Instance != null)
             {
                 LobbyState.Instance.UpdatePlayerDisplay(this);
@@ -304,11 +340,11 @@ namespace HackMonkeys.Core
         private void RPC_BroadcastReadyChange(PlayerRef playerRef, NetworkBool isReady)
         {
             Debug.Log($"[LOBBYPLAYER] Broadcast ready change - Player: {playerRef}, Ready: {isReady}");
-            
+
             // Buscar el jugador y actualizar su display
             var player = FindObjectsOfType<LobbyPlayer>()
                 .FirstOrDefault(p => p.PlayerRef == playerRef);
-                
+
             if (player != null && LobbyState.Instance != null)
             {
                 LobbyState.Instance.UpdatePlayerDisplay(player);
@@ -326,12 +362,12 @@ namespace HackMonkeys.Core
                 Debug.LogWarning("[LOBBYPLAYER] Non-host tried to change map!");
                 return;
             }
-            
+
             if (HasStateAuthority)
             {
                 SelectedMap = mapName;
             }
-            
+
             StartCoroutine(DelayedMapUpdate());
         }
 
@@ -339,7 +375,7 @@ namespace HackMonkeys.Core
         {
             yield return null;
             yield return null;
-            
+
             if (LobbyState.Instance != null && IsHost)
             {
                 LobbyState.Instance.UpdateMapSelection(SelectedMap.ToString());
@@ -353,40 +389,40 @@ namespace HackMonkeys.Core
         {
             // Esperar a que LobbyState esté listo
             yield return new WaitForSeconds(0.5f);
-            
+
             if (LobbyState.Instance != null)
             {
                 var hostPlayer = LobbyState.Instance.HostPlayer;
                 if (hostPlayer != null && !string.IsNullOrEmpty(hostPlayer.SelectedMap.ToString()))
                 {
                     Debug.Log($"[LOBBYPLAYER] Client syncing with host map: {hostPlayer.SelectedMap}");
-                    
+
                     // Actualizar NetworkBootstrapper local
                     var networkBootstrapper = NetworkBootstrapper.Instance;
                     if (networkBootstrapper != null)
                     {
                         networkBootstrapper.SelectedSceneName = hostPlayer.SelectedMap.ToString();
                     }
-                    
+
                     // Notificar a LobbyState para actualizar UI
                     LobbyState.Instance.UpdateMapSelection(hostPlayer.SelectedMap.ToString());
                 }
             }
         }
-        
+
         public void ForceCleanup()
         {
             Debug.Log($"[LOBBYPLAYER] Force cleanup called for: {PlayerName}");
-    
+
             // Desregistrar de LobbyState
             if (LobbyState.Instance != null)
             {
                 LobbyState.Instance.UnregisterPlayer(this);
             }
-    
+
             // Detener todas las coroutines
             StopAllCoroutines();
-    
+
             // Destruir el GameObject
             Destroy(gameObject);
         }
@@ -403,11 +439,28 @@ namespace HackMonkeys.Core
 
             return name;
         }
-        
+
         private void OnDestroy()
         {
-            Debug.Log($"[LOBBYPLAYER] OnDestroy called for: {PlayerName}");
-    
+            // IMPORTANTE: Verificar que el objeto esté spawneado antes de acceder a propiedades Networked
+            string playerNameForLog = "Unknown";
+
+            try
+            {
+                // Solo intentar acceder a PlayerName si el objeto está válido
+                if (Object != null && Object.IsValid && Runner != null)
+                {
+                    playerNameForLog = PlayerName.ToString();
+                }
+            }
+            catch (Exception e)
+            {
+                // Silenciar el error pero loguear para debug
+                Debug.LogWarning($"[LOBBYPLAYER] Could not access PlayerName in OnDestroy: {e.Message}");
+            }
+
+            Debug.Log($"[LOBBYPLAYER] OnDestroy called for: {playerNameForLog}");
+
             // Última oportunidad para limpiar si no se hizo antes
             if (LobbyState.Instance != null)
             {
@@ -442,7 +495,7 @@ namespace HackMonkeys.Core
                 Debug.LogWarning("[DEBUG] Not local player!");
             }
         }
-        
+
         [ContextMenu("Debug: Force UI Update")]
         private void DebugForceUIUpdate()
         {
@@ -452,7 +505,7 @@ namespace HackMonkeys.Core
                 LobbyState.Instance.UpdatePlayerDisplay(this);
             }
         }
-        
+
         [ContextMenu("Debug: Player State")]
         private void DebugPlayerState()
         {

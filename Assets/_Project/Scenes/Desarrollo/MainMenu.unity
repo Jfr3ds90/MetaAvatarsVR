@@ -2045,7 +2045,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &237766174
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4095,6 +4095,12 @@ MonoBehaviour:
   lobbyPlayerPrefab: {fileID: 4562035358086432006, guid: 90d409c1d2c29ee4a94ee9438ee1e3a2, type: 3}
   defaultMaxPlayers: 4
   defaultRegion: sa
+  sessionCacheDuration: 2
+  sessionDiscoveryTimeout: 5
+  maxSessionRetries: 3
+  enableDebugLogs: 1
+  autoCleanupSessionFinder: 1
+  sessionFinderIdleTimeout: 60
   OnConnectedToServerEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -4104,7 +4110,21 @@ MonoBehaviour:
   OnSessionListUpdatedEvent:
     m_PersistentCalls:
       m_Calls: []
-  _sceneManager: {fileID: 0}
+  OnRoomCreated:
+    m_PersistentCalls:
+      m_Calls: []
+  OnRoomJoined:
+    m_PersistentCalls:
+      m_Calls: []
+  OnRoomLeft:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPlayerSpawned:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPlayerDespawned:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &506504946
 Transform:
   m_ObjectHideFlags: 0
@@ -13082,7 +13102,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1980128195
 RectTransform:
   m_ObjectHideFlags: 0
@@ -13345,7 +13365,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2068666536
 Transform:
   m_ObjectHideFlags: 0
@@ -13986,6 +14006,9 @@ MonoBehaviour:
   roomItemSpacing: 0.15
   maxVisibleRooms: 6
   scrollView: {fileID: 0}
+  minRefreshInterval: 3
+  autoRefreshInterval: 10
+  maxConsecutiveFailures: 3
   colorTheme: {fileID: 11400000, guid: f090f7ea3404e384e9aaaa5049a45c47, type: 2}
 --- !u!225 &2122530462
 CanvasGroup:
@@ -14162,7 +14185,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 521555726832732642, guid: f9f107e8ecae49048bda9d4fd7e1d1ec, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 521555726832732652, guid: f9f107e8ecae49048bda9d4fd7e1d1ec, type: 3}
       propertyPath: m_RootOrder
