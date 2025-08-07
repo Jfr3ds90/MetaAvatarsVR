@@ -5,8 +5,9 @@ using UnityEngine;
 public class Puzzle01 : MonoBehaviour
 {
     public GameObject[] laberynth;//scale 1.6 pos 0  |  0.8 dist / -2,3.625 inicial pos  / 0.75 tam | grilla(6,10)
-    public GameObject liquid,pos,block,presentLaber;
+    public GameObject liquid,pos,block,presentLaber,instrctions;
     public VictoryPuzzle vp;
+    public int amount;
     Vector2 placeSelected;
    // public Dictionary<Vector2, GameObject> objectItem= new Dictionary<Vector2, GameObject>();
    List <GameObject> objectPos = new List<GameObject>();
@@ -33,59 +34,72 @@ public class Puzzle01 : MonoBehaviour
     }
     public void LeftMovement()
     {
-        var last = placeSelected;
         
-
-      if(pos.transform.localPosition.x- 0.128f >= -0.523)
-        pos.transform.localPosition -= new Vector3 (0.128f,0);
+        if(instrctions.activeSelf==false)
+        {   
+            if (pos.transform.localPosition.x - 0.128f >= -0.523)
+                pos.transform.localPosition -= new Vector3(0.128f, 0);
+        }
+        else if(instrctions.activeSelf == true)
+            instrctions.SetActive(false);
 
     }
     public void DownMovement()
     {
-        var last = placeSelected;
-
-        if (pos.transform.localPosition.y - 0.128f >= -0.7)
-            pos.transform.localPosition -= new Vector3(0, 0.128f);
-
+        if (instrctions.activeSelf == false)
+        {
+            if (pos.transform.localPosition.y - 0.128f >= -0.7)
+                pos.transform.localPosition -= new Vector3(0, 0.128f);
+        }
+        else if (instrctions.activeSelf == true)
+            instrctions.SetActive(false);
     }
     public void UpMovement()
     {
-        var last = placeSelected;
-
-        if (pos.transform.localPosition.y + 0.128f <= 0.58)
-            pos.transform.localPosition += new Vector3(0, 0.128f);
-
+        if (instrctions.activeSelf == false)
+        {
+            if (pos.transform.localPosition.y + 0.128f <= 0.58)
+                pos.transform.localPosition += new Vector3(0, 0.128f);
+        }
+        else if (instrctions.activeSelf == true)
+            instrctions.SetActive(false);
     }
     public void RightMovement()
     {
-        var last = placeSelected;
-
-        if (pos.transform.localPosition.x + 0.128f <= 0.14f)
-            pos.transform.localPosition += new Vector3(0.128f, 0);
-
+        if (instrctions.activeSelf == false)
+        {
+            if (pos.transform.localPosition.x + 0.128f <= 0.14f)
+                pos.transform.localPosition += new Vector3(0.128f, 0);
+        }
+        else if (instrctions.activeSelf == true)
+            instrctions.SetActive(false);
     }
     public void GreenMovement()
     {
-        if (objectPos.Count >= 6)
+        if (instrctions.activeSelf == false)
         {
-
-            Destroy(objectPos[0]);
-            objectPos.RemoveAt(0);
+            if (objectPos.Count >= 6)
+            {
+                Destroy(objectPos[0]);
+                objectPos.RemoveAt(0);
+            }
+            GameObject a;
+            a = Instantiate(block, pos.transform);
+            a.transform.SetParent(transform);
+            objectPos.Add(a);    
         }
-        GameObject a;
-        a = Instantiate(block, pos.transform);
-        a.transform.SetParent(transform);
-        objectPos.Add(a);    
+        else if (instrctions.activeSelf == true)
+            instrctions.SetActive(false);
     }
 
     public void EndLaberynth()
     {
-        if(laberynth.Length>vp.amount)
+        if(laberynth.Length>amount)
         {
             Destroy(presentLaber);
-            presentLaber=  Instantiate(laberynth[vp.amount]);
+            presentLaber=  Instantiate(laberynth[amount]);
             presentLaber.transform.SetParent(transform);
-            presentLaber.transform.position = new Vector3(0,0,0) ;
+            presentLaber.transform.localPosition = new Vector3(-0.2030001f, 0,0) ;
             vp = FindAnyObjectByType<VictoryPuzzle>();
         }
     }
