@@ -6,8 +6,8 @@ public class Puzzle01 : MonoBehaviour
 {
     public GameObject[] laberynth;//scale 1.6 pos 0  |  0.8 dist / -2,3.625 inicial pos  / 0.75 tam | grilla(6,10)
     public GameObject liquid,pos,block,presentLaber;
+    public VictoryPuzzle vp;
     Vector2 placeSelected;
-    bool ObjectSelected;
    // public Dictionary<Vector2, GameObject> objectItem= new Dictionary<Vector2, GameObject>();
    List <GameObject> objectPos = new List<GameObject>();
     void Update()
@@ -28,7 +28,8 @@ public class Puzzle01 : MonoBehaviour
     }
     private void Start()
     {
-       // pos = presentLaber.GetComponentInChildren<SelectorID>().gameObject;//cambiar a cuando se cambie de laberinto
+        // pos = presentLaber.GetComponentInChildren<SelectorID>().gameObject;//cambiar a cuando se cambie de laberinto
+        vp=FindAnyObjectByType<VictoryPuzzle>();
     }
     public void LeftMovement()
     {
@@ -74,13 +75,18 @@ public class Puzzle01 : MonoBehaviour
         GameObject a;
         a = Instantiate(block, pos.transform);
         a.transform.SetParent(transform);
-        objectPos.Add(a);   
-
-       
+        objectPos.Add(a);    
     }
 
     public void EndLaberynth()
     {
-        Debug.LogWarning("Termino el puzzle");
+        if(laberynth.Length>vp.amount)
+        {
+            Destroy(presentLaber);
+            presentLaber=  Instantiate(laberynth[vp.amount]);
+            presentLaber.transform.SetParent(transform);
+            presentLaber.transform.position = new Vector3(0,0,0) ;
+            vp = FindAnyObjectByType<VictoryPuzzle>();
+        }
     }
 }

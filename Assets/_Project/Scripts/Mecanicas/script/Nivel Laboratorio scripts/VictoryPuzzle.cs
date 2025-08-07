@@ -2,15 +2,18 @@ using UnityEngine;
 
 public class VictoryPuzzle : MonoBehaviour
 {   
-    public int puzzle;
-    int amount;
+    public int puzzle,amount;
     private void OnCollisionEnter2D(Collision2D collision)
     {
         switch(puzzle)
         {
             case 1:
                 if(collision.collider.tag =="cubePuzzle")
-                { FindAnyObjectByType<Puzzle01>().EndLaberynth(); }
+                {   
+                    Destroy(collision.gameObject);
+                    amount++;
+                    FindAnyObjectByType<Puzzle01>().EndLaberynth();                    
+                }
                 break;
             case 2:
                 break;
