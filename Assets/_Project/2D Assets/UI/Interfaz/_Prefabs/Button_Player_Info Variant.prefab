@@ -626,10 +626,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1350777382170903019, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}
-      propertyPath: _selectSurface
-      value: 
-      objectReference: {fileID: 7306193003801306324}
     - target: {fileID: 5381193315181059969, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}
       propertyPath: m_text
       value: In Lobby
@@ -649,6 +645,10 @@ PrefabInstance:
     - target: {fileID: 6883340500520799922, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}
       propertyPath: pingText
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7099614793131383565, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7205352010929216941, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}
       propertyPath: m_Name
@@ -672,17 +672,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1984046593726631671}
   m_SourcePrefab: {fileID: 100100000, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}
---- !u!114 &52471210182019543 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7975494815197485167, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}
-  m_PrefabInstance: {fileID: 7932189208033448376}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1002685835949132821}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d4b5af7c6d8ca342a66c1ef3b93bfaf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1002685835949132821 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7205352010929216941, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}
@@ -700,9 +689,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db5f4b98cb6f3a94786f3b358cc5f933, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  selectButton: {fileID: 52471210182019543}
+  selectButton: {fileID: 0}
   playerNameText: {fileID: 8540953362987366465}
-  playerStatusText: {fileID: 0}
+  playerStatusText: {fileID: 2646175675896532537}
   playerAvatar: {fileID: 0}
   readyIndicator: {fileID: 0}
   backgroundPanel: {fileID: 0}
@@ -710,22 +699,23 @@ MonoBehaviour:
   localPlayerIcon: {fileID: 0}
   pingIndicator: {fileID: 0}
   pingText: {fileID: 0}
-  readyColor: {r: 0, g: 1, b: 0, a: 1}
-  notReadyColor: {r: 1, g: 0, b: 0, a: 1}
-  hostColor: {r: 1, g: 0.8, b: 0, a: 1}
-  localPlayerColor: {r: 0, g: 1, b: 1, a: 1}
-  selectedColor: {r: 0.2, g: 0.4, b: 0.8, a: 0.3}
+  primaryYellow: {r: 0.99607843, g: 0.75686276, b: 0.06666667, a: 1}
+  textWhite: {r: 1, g: 1, b: 1, a: 1}
+  secondaryGray: {r: 0.3207547, g: 0.2980598, b: 0.2980598, a: 1}
+  yellowAlpha: 0.9
+  selectedAlphaMultiplier: 0.7
+  hoverAlphaMultiplier: 0.85
   hoverScale: 1.05
   animationDuration: 0.2
---- !u!114 &7306193003801306324 stripped
+--- !u!114 &2646175675896532537 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 824162981007865196, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}
+  m_CorrespondingSourceObject: {fileID: 5381193315181059969, guid: 654f180f4a24ca6458f6b2e597d9356c, type: 3}
   m_PrefabInstance: {fileID: 7932189208033448376}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1002685835949132821}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a2140d2b457bea84881488302059889b, type: 3}
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!224 &7741246524810618952 stripped

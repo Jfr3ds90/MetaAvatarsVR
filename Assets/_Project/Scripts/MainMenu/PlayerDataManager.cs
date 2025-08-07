@@ -2,16 +2,17 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using Fusion;
+using Cysharp.Threading.Tasks;
 
 namespace HackMonkeys.Core
 {
     /// <summary>
-    /// Solo mantiene lo esencial para el lobby multijugador
+    /// PlayerDataManager mejorado con validación de datos
+    /// Garantiza que siempre haya un nombre disponible
     /// </summary>
     public class PlayerDataManager : MonoBehaviour
     {
         #region Constants
-
         private static class Keys
         {
             public const string PLAYER_NAME = "HM_PlayerName";
@@ -19,11 +20,9 @@ namespace HackMonkeys.Core
             public const string PLAYER_COLOR_G = "HM_PlayerColorG";
             public const string PLAYER_COLOR_B = "HM_PlayerColorB";
         }
-
         #endregion
 
-        #region Sesion Data
-
+        #region Session Data
         [Header("Session Data")]
         [SerializeField] private bool _isHost = false;
         [SerializeField] private PlayerRef _localPlayerRef;
@@ -40,35 +39,27 @@ namespace HackMonkeys.Core
             public bool IsHost;
             public bool IsReady;
         }
-
         #endregion
 
         #region Singleton
-
         public static PlayerDataManager Instance { get; private set; }
-
         #endregion
 
-        #region Inspector Fields - EXPUESTOS PARA DEBUG
-
-        [Header("Debug Override - Leave empty to use saved values")] [SerializeField]
-        private string overridePlayerName = "";
-
+        #region Inspector Fields
+        [Header("Debug Override - Leave empty to use saved values")] 
+        [SerializeField] private string overridePlayerName = "";
         [SerializeField] private bool useRandomNameIfEmpty = true;
         [SerializeField] private Color overridePlayerColor = Color.clear;
-
         #endregion
 
         #region Private Fields
-
         [SerializeField] private string _playerName;
         private Color _playerColor;
         private bool _hasLoadedData = false;
-
+        private bool _isInitializing = false;
         #endregion
 
         #region Unity Lifecycle
-
         private void Awake()
         {
             if (Instance != null)
@@ -80,36 +71,64 @@ namespace HackMonkeys.Core
             Instance = this;
             DontDestroyOnLoad(gameObject);
 
-            LoadOrCreateData();
+            // Inicializar datos inmediatamente
+            InitializeDataAsync().Forget();
         }
-
         #endregion
 
-        #region Data Management
+        #region Async Initialization
+        /// <summary>
+        /// Inicialización asíncrona de datos del jugador
+        /// </summary>
+        private async UniTaskVoid InitializeDataAsync()
+        {
+            if (_isInitializing) return;
+            
+            _isInitializing = true;
+            
+            // Pequeño delay para asegurar que todo esté listo
+            await UniTask.Delay(100);
+            
+            LoadOrCreateData();
+            
+            _isInitializing = false;
+            
+            Debug.Log($"[PlayerDataManager] ✅ Initialized - Name: {_playerName}, Color: {ColorUtility.ToHtmlStringRGB(_playerColor)}");
+        }
 
         private void LoadOrCreateData()
         {
+            // Cargar o generar nombre
             if (!string.IsNullOrEmpty(overridePlayerName))
             {
                 _playerName = overridePlayerName;
-                Debug.Log($"[PlayerPrefsManager] Using override name: {_playerName}");
+                Debug.Log($"[PlayerDataManager] Using override name: {_playerName}");
             }
             else if (PlayerPrefs.HasKey(Keys.PLAYER_NAME))
             {
                 _playerName = PlayerPrefs.GetString(Keys.PLAYER_NAME);
-                Debug.Log($"[PlayerPrefsManager] Loaded saved name: {_playerName}");
+                
+                // Validar que no esté vacío
+                if (string.IsNullOrEmpty(_playerName))
+                {
+                    _playerName = GenerateRandomName();
+                    SavePlayerName();
+                }
+                
+                Debug.Log($"[PlayerDataManager] Loaded saved name: {_playerName}");
             }
             else
             {
                 _playerName = GenerateRandomName();
-                Debug.Log($"[PlayerPrefsManager] Generated new name: {_playerName}");
                 SavePlayerName();
+                Debug.Log($"[PlayerDataManager] Generated new name: {_playerName}");
             }
             
+            // Cargar o generar color
             if (overridePlayerColor != Color.clear && overridePlayerColor.a > 0)
             {
                 _playerColor = overridePlayerColor;
-                Debug.Log($"[PlayerPrefsManager] Using override color");
+                Debug.Log($"[PlayerDataManager] Using override color");
             }
             else if (PlayerPrefs.HasKey(Keys.PLAYER_COLOR_R))
             {
@@ -117,13 +136,13 @@ namespace HackMonkeys.Core
                 float g = PlayerPrefs.GetFloat(Keys.PLAYER_COLOR_G);
                 float b = PlayerPrefs.GetFloat(Keys.PLAYER_COLOR_B);
                 _playerColor = new Color(r, g, b);
-                Debug.Log($"[PlayerPrefsManager] Loaded saved color");
+                Debug.Log($"[PlayerDataManager] Loaded saved color");
             }
             else
             {
                 _playerColor = GenerateRandomColor();
-                Debug.Log($"[PlayerPrefsManager] Generated new color");
                 SavePlayerColor();
+                Debug.Log($"[PlayerDataManager] Generated new color");
             }
 
             _hasLoadedData = true;
@@ -149,50 +168,90 @@ namespace HackMonkeys.Core
             float value = UnityEngine.Random.Range(0.7f, 1f);
             return Color.HSVToRGB(hue, saturation, value);
         }
-
         #endregion
 
         #region Public API - Getters
-
+        /// <summary>
+        /// Obtiene el nombre del jugador, garantizando que nunca sea null o vacío
+        /// </summary>
         public string GetPlayerName()
         {
-            if (!_hasLoadedData) LoadOrCreateData();
+            // Si aún no se han cargado los datos, cargarlos síncronamente
+            if (!_hasLoadedData)
+            {
+                LoadOrCreateData();
+            }
+            
+            // Validación adicional - NUNCA retornar vacío
+            if (string.IsNullOrEmpty(_playerName))
+            {
+                _playerName = GenerateRandomName();
+                SavePlayerName();
+                Debug.LogWarning($"[PlayerDataManager] Name was empty, generated: {_playerName}");
+            }
+            
             return _playerName;
         }
 
         public Color GetPlayerColor()
         {
-            if (!_hasLoadedData) LoadOrCreateData();
+            if (!_hasLoadedData)
+            {
+                LoadOrCreateData();
+            }
+            
+            // Si el color es transparente o negro, generar uno nuevo
+            if (_playerColor.a <= 0 || (_playerColor.r <= 0 && _playerColor.g <= 0 && _playerColor.b <= 0))
+            {
+                _playerColor = GenerateRandomColor();
+                SavePlayerColor();
+                Debug.LogWarning("[PlayerDataManager] Color was invalid, generated new one");
+            }
+            
             return _playerColor;
         }
 
+        /// <summary>
+        /// Espera hasta que los datos estén listos
+        /// </summary>
+        public async UniTask<bool> WaitForDataReady()
+        {
+            int attempts = 0;
+            while (!_hasLoadedData && attempts < 50) // Max 5 segundos
+            {
+                await UniTask.Delay(100);
+                attempts++;
+            }
+            
+            if (!_hasLoadedData)
+            {
+                Debug.LogError("[PlayerDataManager] Data not ready after timeout!");
+                LoadOrCreateData(); // Forzar carga
+            }
+            
+            return _hasLoadedData;
+        }
         #endregion
 
         #region Public API - Setters
-
         public void SetPlayerName(string name)
         {
             if (string.IsNullOrEmpty(name)) return;
 
             _playerName = name;
             SavePlayerName();
-            Debug.Log($"[PlayerPrefsManager] Name updated to: {_playerName}");
+            Debug.Log($"[PlayerDataManager] Name updated to: {_playerName}");
         }
 
         public void SetPlayerColor(Color color)
         {
             _playerColor = color;
             SavePlayerColor();
-            Debug.Log($"[PlayerPrefsManager] Color updated");
+            Debug.Log($"[PlayerDataManager] Color updated");
         }
-
         #endregion
 
         #region Session API
-
-        /// <summary>
-        /// Llamado cuando se une/crea una sala
-        /// </summary>
         public void SetSessionData(PlayerRef localRef, bool isHost, string roomName)
         {
             _localPlayerRef = localRef;
@@ -200,14 +259,13 @@ namespace HackMonkeys.Core
             _currentRoomName = roomName;
             _sessionPlayers = new Dictionary<PlayerRef, SessionPlayerData>();
 
-            Debug.Log($"[PlayerPrefsManager] Session started - Host: {isHost}, Room: {roomName}");
+            Debug.Log($"[PlayerDataManager] Session started - Host: {isHost}, Room: {roomName}, PlayerRef: {localRef}");
         }
 
-        /// <summary>
-        /// Actualiza datos de jugadores desde LobbyState
-        /// </summary>
         public void UpdateSessionPlayers(LobbyState lobbyState)
         {
+            if (lobbyState == null) return;
+            
             _sessionPlayers.Clear();
 
             foreach (var kvp in lobbyState.Players)
@@ -221,15 +279,11 @@ namespace HackMonkeys.Core
                 };
             }
 
-            // Guardar mapa seleccionado
             _selectedMap = lobbyState.GetSelectedMap();
 
-            Debug.Log($"[PlayerPrefsManager] Updated {_sessionPlayers.Count} players in session");
+            Debug.Log($"[PlayerDataManager] Updated {_sessionPlayers.Count} players in session");
         }
 
-        /// <summary>
-        /// Limpia datos de sesión al salir
-        /// </summary>
         public void ClearSessionData()
         {
             _isHost = false;
@@ -238,7 +292,7 @@ namespace HackMonkeys.Core
             _selectedMap = null;
             _sessionPlayers?.Clear();
 
-            Debug.Log("[PlayerPrefsManager] Session data cleared");
+            Debug.Log("[PlayerDataManager] Session data cleared");
         }
 
         public bool IsHost => _isHost;
@@ -255,13 +309,13 @@ namespace HackMonkeys.Core
         {
             return new Dictionary<PlayerRef, SessionPlayerData>(_sessionPlayers ?? new Dictionary<PlayerRef, SessionPlayerData>());
         }
-        
+
         public void UpdateLocalPlayerRef(PlayerRef playerRef)
         {
             _localPlayerRef = playerRef;
             Debug.Log($"[PlayerDataManager] Updated LocalPlayerRef: {playerRef}");
         }
-    
+
         public void UpdateSessionInfo(string selectedMap, string roomName = null)
         {
             _selectedMap = selectedMap;
@@ -270,13 +324,13 @@ namespace HackMonkeys.Core
             
             Debug.Log($"[PlayerDataManager] Updated session info - Map: {selectedMap}");
         }
-    
+
         public void SetSelectedMap(string mapName)
         {
             _selectedMap = mapName;
             Debug.Log($"[PlayerDataManager] Selected map: {mapName}");
         }
-        
+
         public void UpdateSelectedMapFromLobbyPlayer()
         {
             if (LobbyState.Instance != null)
@@ -289,11 +343,9 @@ namespace HackMonkeys.Core
                 }
             }
         }
-
         #endregion
 
         #region Save Methods
-
         private void SavePlayerName()
         {
             PlayerPrefs.SetString(Keys.PLAYER_NAME, _playerName);
@@ -307,34 +359,23 @@ namespace HackMonkeys.Core
             PlayerPrefs.SetFloat(Keys.PLAYER_COLOR_B, _playerColor.b);
             PlayerPrefs.Save();
         }
-
         #endregion
 
         #region Utility Methods
-
-        /// <summary>
-        /// Fuerza un nuevo nombre aleatorio
-        /// </summary>
         public void ForceRandomName()
         {
             _playerName = GenerateRandomName();
             SavePlayerName();
-            Debug.Log($"[PlayerPrefsManager] Forced new random name: {_playerName}");
+            Debug.Log($"[PlayerDataManager] Forced new random name: {_playerName}");
         }
 
-        /// <summary>
-        /// Fuerza un nuevo color aleatorio
-        /// </summary>
         public void ForceRandomColor()
         {
             _playerColor = GenerateRandomColor();
             SavePlayerColor();
-            Debug.Log($"[PlayerPrefsManager] Forced new random color");
+            Debug.Log($"[PlayerDataManager] Forced new random color");
         }
 
-        /// <summary>
-        /// Limpia todos los datos guardados
-        /// </summary>
         public void ClearAllData()
         {
             PlayerPrefs.DeleteKey(Keys.PLAYER_NAME);
@@ -344,42 +385,23 @@ namespace HackMonkeys.Core
             PlayerPrefs.Save();
 
             LoadOrCreateData();
-            Debug.Log("[PlayerPrefsManager] All data cleared and regenerated");
+            Debug.Log("[PlayerDataManager] All data cleared and regenerated");
         }
-
         #endregion
 
         #region Debug Methods
-
         [ContextMenu("Debug: Print Current Settings")]
         private void DebugPrintSettings()
         {
-            Debug.Log("=== PlayerPrefsManager (Simplified) ===");
+            Debug.Log("=== PlayerDataManager ===");
             Debug.Log($"Player Name: {_playerName}");
             Debug.Log($"Player Color: #{ColorUtility.ToHtmlStringRGB(_playerColor)}");
-            Debug.Log($"Has Override Name: {!string.IsNullOrEmpty(overridePlayerName)}");
-            Debug.Log($"Has Override Color: {overridePlayerColor != Color.clear}");
-            Debug.Log("=====================================");
+            Debug.Log($"Has Loaded: {_hasLoadedData}");
+            Debug.Log($"Is Host: {_isHost}");
+            Debug.Log($"Local PlayerRef: {_localPlayerRef}");
+            Debug.Log($"Current Room: {_currentRoomName}");
+            Debug.Log("=========================");
         }
-
-        [ContextMenu("Debug: Force Random Name")]
-        private void DebugForceRandomName()
-        {
-            ForceRandomName();
-        }
-
-        [ContextMenu("Debug: Force Random Color")]
-        private void DebugForceRandomColor()
-        {
-            ForceRandomColor();
-        }
-
-        [ContextMenu("Debug: Clear All Data")]
-        private void DebugClearData()
-        {
-            ClearAllData();
-        }
-
         #endregion
     }
 }

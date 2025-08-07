@@ -41,17 +41,41 @@ namespace HackMonkeys.UI.Panels
         [Header("Animation")] 
         [SerializeField] private float hoverScale = 1.05f;
         [SerializeField] private float animationDuration = 0.2f;
+        
+        private static readonly Vector3 BASE_SCALE = Vector3.one;
+        private static readonly Vector3 HOVER_SCALE = Vector3.one * 1.05f;
+        private static readonly Vector3 READY_PULSE_SCALE = Vector3.one * 1.2f;
+        
+        // Tweeners para control de animaciones
+        private Tween _readyPulseTween;
+        private Tween _hoverTween;
+        private Tween _effectTween;
+        private Tween _joinTween;
+        private Tween _updateTween;
+        
+        private Vector3 _originalScale = Vector3.one;
+        private bool _hasInitialized = false;
 
         private LobbyPlayer _playerData;
         private System.Action<LobbyPlayer> _onPlayerClicked;
         private bool _isSelected = false;
         private bool _isHovered = false;
-
-        private Tween _readyPulseTween;
-        private Tween _hoverTween;
-
+        
         private void Awake()
         {
+            transform.localScale = BASE_SCALE;
+
+            if (readyIndicator != null)
+            {
+                readyIndicator.transform.localScale = BASE_SCALE;
+            }
+            
+            if (!_hasInitialized)
+            {
+                _originalScale = transform.localScale;
+                _hasInitialized = true;
+            }
+            
             if (selectButton != null)
             {
                 selectButton.OnButtonPressed.AddListener(OnPlayerSelected);
@@ -67,6 +91,20 @@ namespace HackMonkeys.UI.Panels
                 backgroundPanel.color = bgColor;
             }
         }
+        
+        private void OnEnable()
+        {
+            // CRÍTICO: Resetear estado al activar
+            ResetAllAnimations();
+            transform.localScale = BASE_SCALE;
+        }
+        
+        private void OnDisable()
+        {
+            // CRÍTICO: Limpiar todas las animaciones
+            KillAllAnimations();
+        }
+        
 
         /// <summary>
         /// Inicializa el componente con callback para selección
@@ -145,13 +183,11 @@ namespace HackMonkeys.UI.Panels
             if (playerStatusText != null)
             {
                 playerStatusText.text = isReady ? "Ready" : "Not Ready";
-                // Ready en blanco, Not Ready en gris
                 playerStatusText.color = isReady ? textWhite : secondaryGray;
             }
 
             if (readyIndicator != null)
             {
-                // Indicador ready usa los mismos colores
                 readyIndicator.color = isReady ? textWhite : secondaryGray;
 
                 if (isReady)
@@ -256,7 +292,15 @@ namespace HackMonkeys.UI.Panels
 
         private void AnimateUpdate()
         {
-            transform.DOPunchScale(Vector3.one * 0.05f, 0.3f, 5, 0.3f);
+            if (_updateTween != null && _updateTween.IsActive())
+                _updateTween.Kill(false);
+    
+            // 2. Resetear escala
+            transform.localScale = Vector3.one;
+    
+            // 3. Animar con callback de reset
+            _updateTween = transform.DOPunchScale(Vector3.one * 0.05f, 0.3f, 5, 0.3f)
+                .OnComplete(() => transform.localScale = Vector3.one);
         }
 
         private void StartReadyPulse()
@@ -264,22 +308,35 @@ namespace HackMonkeys.UI.Panels
             if (readyIndicator == null) return;
 
             StopReadyPulse();
-            _readyPulseTween = readyIndicator.transform.DOScale(1.2f, 0.8f)
+            
+            // IMPORTANTE: Resetear escala antes de animar
+            readyIndicator.transform.localScale = BASE_SCALE;
+            
+            _readyPulseTween = readyIndicator.transform
+                .DOScale(READY_PULSE_SCALE, 0.8f)
                 .SetLoops(-1, LoopType.Yoyo)
-                .SetEase(Ease.InOutSine);
+                .SetEase(Ease.InOutSine)
+                .OnKill(() => {
+                    // Al terminar, volver a escala base
+                    if (readyIndicator != null)
+                        readyIndicator.transform.localScale = BASE_SCALE;
+                });
         }
 
         private void StopReadyPulse()
         {
             if (_readyPulseTween != null)
             {
-                _readyPulseTween.Kill();
+                _readyPulseTween.Kill(false);
                 _readyPulseTween = null;
             }
 
             if (readyIndicator != null)
             {
-                readyIndicator.transform.localScale = Vector3.one;
+                // Animar vuelta a escala base
+                readyIndicator.transform
+                    .DOScale(BASE_SCALE, 0.2f)
+                    .SetEase(Ease.OutQuad);
             }
         }
 
@@ -289,9 +346,23 @@ namespace HackMonkeys.UI.Panels
 
             _isHovered = true;
 
-            if (_hoverTween != null) _hoverTween.Kill();
-            _hoverTween = transform.DOScale(Vector3.one * hoverScale, animationDuration)
-                .SetEase(Ease.OutQuad);
+            // Matar animación previa
+            if (_hoverTween != null) 
+            {
+                _hoverTween.Kill(false);
+            }
+            
+            // IMPORTANTE: Asegurar que comenzamos desde la escala base
+            transform.localScale = BASE_SCALE;
+            
+            _hoverTween = transform
+                .DOScale(HOVER_SCALE, animationDuration)
+                .SetEase(Ease.OutQuad)
+                .OnKill(() => {
+                    // Al terminar, si no está hover, volver a base
+                    if (!_isHovered && transform != null)
+                        transform.localScale = BASE_SCALE;
+                });
 
             UpdateBackgroundColor();
         }
@@ -302,21 +373,45 @@ namespace HackMonkeys.UI.Panels
 
             _isHovered = false;
 
-            if (_hoverTween != null) _hoverTween.Kill();
-            _hoverTween = transform.DOScale(Vector3.one, animationDuration)
-                .SetEase(Ease.OutQuad);
+            if (_hoverTween != null) 
+            {
+                _hoverTween.Kill(false);
+            }
+            
+            // Animar vuelta a escala base
+            _hoverTween = transform
+                .DOScale(BASE_SCALE, animationDuration)
+                .SetEase(Ease.OutQuad)
+                .OnComplete(() => {
+                    transform.localScale = BASE_SCALE; // Asegurar escala final
+                });
 
             UpdateBackgroundColor();
         }
 
         private void OnPlayerSelected()
         {
-            transform.DOPunchScale(Vector3.one * 0.1f, 0.3f, 5, 0.5f);
+            // Matar cualquier animación de efecto previa
+            if (_effectTween != null)
+            {
+                _effectTween.Kill(false);
+            }
+            
+            // Resetear a escala base antes de animar
+            transform.localScale = BASE_SCALE;
+            
+            _effectTween = transform
+                .DOPunchScale(Vector3.one * 0.1f, 0.3f, 5, 0.5f)
+                .OnComplete(() => {
+                    transform.localScale = BASE_SCALE; // Asegurar vuelta a base
+                });
 
             _onPlayerClicked?.Invoke(_playerData);
 
+            // Haptic feedback
             OVRInput.SetControllerVibration(1, 0.2f, OVRInput.Controller.Touch);
-            DOVirtual.DelayedCall(0.05f, () => OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.Touch));
+            DOVirtual.DelayedCall(0.05f, () => 
+                OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.Touch));
         }
 
         #endregion
@@ -389,13 +484,14 @@ namespace HackMonkeys.UI.Panels
         /// </summary>
         public void PlayReadyEffect()
         {
+            // Crear efecto de partículas
             GameObject effect = new GameObject("ReadyEffect");
             effect.transform.SetParent(transform);
             effect.transform.localPosition = Vector3.zero;
 
             ParticleSystem particles = effect.AddComponent<ParticleSystem>();
             var main = particles.main;
-            main.startColor = textWhite; // Partículas blancas
+            main.startColor = textWhite;
             main.startSize = 0.02f;
             main.startLifetime = 1f;
             main.maxParticles = 20;
@@ -407,10 +503,22 @@ namespace HackMonkeys.UI.Panels
             });
 
             particles.Play();
-
             Destroy(effect, 2f);
 
-            transform.DOPunchScale(Vector3.one * 0.15f, 0.5f, 8, 0.3f);
+            // IMPORTANTE: Animación con reset
+            if (_effectTween != null)
+            {
+                _effectTween.Kill(false);
+            }
+            
+            // Asegurar escala base antes de animar
+            transform.localScale = BASE_SCALE;
+            
+            _effectTween = transform
+                .DOPunchScale(Vector3.one * 0.15f, 0.5f, 8, 0.3f)
+                .OnComplete(() => {
+                    transform.localScale = BASE_SCALE; // Forzar vuelta a base
+                });
         }
 
         /// <summary>
@@ -418,19 +526,58 @@ namespace HackMonkeys.UI.Panels
         /// </summary>
         public void PlayJoinEffect()
         {
+            // Matar animación previa
+            if (_joinTween != null)
+            {
+                _joinTween.Kill(false);
+            }
+            
+            // Comenzar desde zero
             transform.localScale = Vector3.zero;
-            transform.DOScale(Vector3.one, 0.5f)
+            
+            _joinTween = transform
+                .DOScale(BASE_SCALE, 0.5f) // IMPORTANTE: Terminar en BASE_SCALE
                 .SetEase(Ease.OutBack)
-                .SetDelay(UnityEngine.Random.Range(0f, 0.2f));
+                .SetDelay(UnityEngine.Random.Range(0f, 0.2f))
+                .OnComplete(() => {
+                    transform.localScale = BASE_SCALE; // Asegurar escala final
+                });
 
             if (backgroundPanel != null)
             {
-                // Flash de blanco a amarillo
                 Color originalColor = primaryYellow;
                 originalColor.a = yellowAlpha;
                 backgroundPanel.color = textWhite;
                 backgroundPanel.DOColor(originalColor, 0.8f);
             }
+        }
+        
+        public void ResetItem()
+        {
+            ResetAllAnimations();
+            
+            _isSelected = false;
+            _isHovered = false;
+            _playerData = null;
+            
+            // Resetear visuales
+            if (playerStatusText != null)
+                playerStatusText.text = "Not Ready";
+                
+            if (readyIndicator != null)
+            {
+                readyIndicator.color = secondaryGray;
+                readyIndicator.transform.localScale = BASE_SCALE;
+            }
+            
+            if (backgroundPanel != null)
+            {
+                Color bgColor = primaryYellow;
+                bgColor.a = yellowAlpha;
+                backgroundPanel.color = bgColor;
+            }
+            
+            UpdateBackgroundColor();
         }
 
         /// <summary>
@@ -438,18 +585,66 @@ namespace HackMonkeys.UI.Panels
         /// </summary>
         public void PlayLeaveEffect()
         {
-            transform.DOScale(Vector3.zero, 0.3f)
+            // Matar animaciones previas
+            KillAllAnimations();
+            
+            transform
+                .DOScale(Vector3.zero, 0.3f)
                 .SetEase(Ease.InBack)
-                .OnComplete(() => gameObject.SetActive(false));
+                .OnComplete(() => {
+                    gameObject.SetActive(false);
+                    transform.localScale = BASE_SCALE; // Reset para próximo uso
+                });
 
             CanvasGroup canvasGroup = GetComponent<CanvasGroup>();
-            if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            if (canvasGroup == null) 
+                canvasGroup = gameObject.AddComponent<CanvasGroup>();
 
             canvasGroup.DOFade(0f, 0.3f);
         }
 
         #endregion
-
+        
+        /// <summary>
+        /// Mata todas las animaciones activas
+        /// </summary>
+        private void KillAllAnimations()
+        {
+            _readyPulseTween?.Kill(false);
+            _hoverTween?.Kill(false);
+            _effectTween?.Kill(false);
+            _joinTween?.Kill(false);
+            
+            _readyPulseTween = null;
+            _hoverTween = null;
+            _effectTween = null;
+            _joinTween = null;
+            
+            // Matar cualquier otra animación en el transform
+            transform.DOKill(false);
+            
+            if (readyIndicator != null)
+            {
+                readyIndicator.transform.DOKill(false);
+            }
+        }
+        
+        /// <summary>
+        /// Resetea todas las animaciones y escalas
+        /// </summary>
+        private void ResetAllAnimations()
+        {
+            KillAllAnimations();
+            
+            // Forzar escalas base
+            transform.localScale = BASE_SCALE;
+            
+            if (readyIndicator != null)
+            {
+                readyIndicator.transform.localScale = BASE_SCALE;
+            }
+        }
+        
         #region Context Menu (Host Only)
 
         /// <summary>
@@ -558,9 +753,10 @@ namespace HackMonkeys.UI.Panels
 
         private void OnDestroy()
         {
-            _readyPulseTween?.Kill();
-            _hoverTween?.Kill();
-
+            // Limpiar todas las animaciones
+            KillAllAnimations();
+            
+            // Limpiar listeners
             if (selectButton != null)
             {
                 selectButton.OnButtonPressed.RemoveAllListeners();
