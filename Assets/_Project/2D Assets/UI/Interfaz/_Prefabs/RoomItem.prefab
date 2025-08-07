@@ -289,7 +289,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   buttonTransform: {fileID: 2998254972985608985}
   buttonRenderer: {fileID: 0}
-  buttonText: {fileID: 8618742508606251982}
+  buttonText: {fileID: 0}
   hoverEffect: {fileID: 0}
   pressEffect: {fileID: 0}
   normalMaterial: {fileID: 0}
@@ -356,8 +356,11 @@ MonoBehaviour:
   backgroundImage: {fileID: 4404600198374275768}
   lockIcon: {fileID: 0}
   playingIcon: {fileID: 0}
+  updateIndicator: {fileID: 0}
+  updateParticles: {fileID: 0}
   hoverScale: 1.05
   animationDuration: 0.2
+  updatePulseDuration: 0.3
 --- !u!65 &5064845745824750427
 BoxCollider:
   m_ObjectHideFlags: 0
