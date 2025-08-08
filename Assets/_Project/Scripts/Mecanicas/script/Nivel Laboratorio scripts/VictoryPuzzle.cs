@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class VictoryPuzzle : MonoBehaviour
 {   
-    public int puzzle,amount;
+    public int puzzle;
     private void OnCollisionEnter2D(Collision2D collision)
     {
         switch(puzzle)
@@ -11,7 +11,7 @@ public class VictoryPuzzle : MonoBehaviour
                 if(collision.collider.tag =="cubePuzzle")
                 {   
                     Destroy(collision.gameObject);
-                    amount++;
+                    FindAnyObjectByType<Puzzle01>().amount++;
                     FindAnyObjectByType<Puzzle01>().EndLaberynth();                    
                 }
                 break;
