@@ -171,18 +171,17 @@ namespace HackMonkeys.Core
         /// </summary>
         public async Task<bool> CreateRoom(string roomName, int maxPlayers = 0, string sceneName = null)
         {
-            // VALIDACIÓN 1: Asegurar que roomName no está vacío
             if (string.IsNullOrWhiteSpace(roomName))
             {
                 Debug.LogError("Room name cannot be empty!");
                 return false;
             }
     
-            // VALIDACIÓN 2: Limpiar caracteres problemáticos
             roomName = SanitizeRoomName(roomName);
     
             Debug.Log($"Creating room with sanitized name: '{roomName}'");
-    
+
+            _isInRoom = true;
             _currentRoomName = roomName;
             _currentMaxPlayers = maxPlayers <= 0 ? defaultMaxPlayers : maxPlayers;
     
@@ -191,11 +190,10 @@ namespace HackMonkeys.Core
             _runner.name = "NetworkRunner_Host";
             _runner.AddCallbacks(this);
     
-            // IMPORTANTE: Configurar StartGameArgs correctamente
             var startGameArgs = new StartGameArgs()
             {
                 GameMode = GameMode.Host,
-                SessionName = roomName,  // CRÍTICO: Este es el nombre que verán los clientes
+                SessionName = roomName, 
                 PlayerCount = _currentMaxPlayers,
                 SceneManager = _sceneManager,
                 CustomLobbyName = "HackMonkeys_Lobby",
@@ -204,7 +202,6 @@ namespace HackMonkeys.Core
                 SessionProperties = CreateEnhancedSessionProperties(roomName, _selectedSceneName)
             };
     
-            // LOG para debug
             Debug.Log($"StartGameArgs configured:");
             Debug.Log($"  - SessionName: '{startGameArgs.SessionName}'");
             Debug.Log($"  - CustomLobbyName: '{startGameArgs.CustomLobbyName}'");
@@ -216,7 +213,6 @@ namespace HackMonkeys.Core
             {
                 Debug.Log($"✅ Room created successfully with name: '{roomName}'");
         
-                // Verificar que el runner tiene el nombre correcto
                 VerifySessionName();
             }
     
@@ -225,11 +221,9 @@ namespace HackMonkeys.Core
         
         private string SanitizeRoomName(string name)
         {
-            // Remover caracteres que pueden causar problemas
             name = name.Trim();
             name = System.Text.RegularExpressions.Regex.Replace(name, @"[^\w\s-.]", "");
     
-            // Limitar longitud
             if (name.Length > 32)
                 name = name.Substring(0, 32);
     
@@ -240,8 +234,7 @@ namespace HackMonkeys.Core
         {
             var properties = new Dictionary<string, SessionProperty>();
     
-            // AGREGAR: Backup del nombre como property
-            properties["displayName"] = roomName;  // Backup en caso de que Name falle
+            properties["displayName"] = roomName; 
             properties["hostName"] = PlayerDataManager.Instance?.GetPlayerName() ?? "Host";
     
             if (!string.IsNullOrEmpty(sceneName))
@@ -257,7 +250,6 @@ namespace HackMonkeys.Core
         
         private void VerifySessionName()
         {
-            // Verificación de debug
             if (_runner != null && _runner.SessionInfo.IsValid)
             {
                 Debug.Log($"[VERIFY] Session Name in Runner: '{_runner.SessionInfo.Name}'");
@@ -284,12 +276,10 @@ namespace HackMonkeys.Core
                 _currentMaxPlayers = session.MaxPlayers;
                 _currentSessionInfo = session;
                 
-                // Create runner
                 _runner = Instantiate(runnerPrefab);
                 _runner.name = "NetworkRunner_Client";
                 _runner.AddCallbacks(this);
                 
-                // Create scene manager
                 _sceneManager = Instantiate(sceneManagerPrefab);
                 _sceneManager.name = "NetworkSceneManager_Client";
                 DontDestroyOnLoad(_sceneManager.gameObject);
@@ -305,7 +295,6 @@ namespace HackMonkeys.Core
                     CustomLobbyName = "HackMonkeys_Lobby"
                 };
                 
-                // Join the game
                 var result = await _runner.StartGame(startGameArgs);
                 
                 if (result.Ok)
