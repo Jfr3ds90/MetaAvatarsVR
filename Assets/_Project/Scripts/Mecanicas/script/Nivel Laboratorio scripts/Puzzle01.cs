@@ -37,10 +37,12 @@ public class Puzzle01 : MonoBehaviour
         if (instrctions.activeSelf == false)
         { 
             a += Time.deltaTime;
-            if(a >= 0.5f)
+            if(a >= 1.5f)
             {
                 GameObject l=Instantiate(liquid,spawnLiquid.transform);
                 l.transform.SetParent(transform);
+                l.transform.position = spawnLiquid.transform.position;
+                l.transform.localScale = new Vector3 (0.05f, 0.05f, 0.05f);
                 liquidTotal.Add(l);
                 a= 0;
             }
