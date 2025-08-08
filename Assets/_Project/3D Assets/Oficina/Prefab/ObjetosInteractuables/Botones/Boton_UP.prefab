@@ -53,7 +53,7 @@ MonoBehaviour:
   _data: {fileID: 0}
   _pointableElement: {fileID: 0}
   _surfacePatch: {fileID: 7950060917168582837}
-  _enterHoverNormal: 0.02
+  _enterHoverNormal: 0.025
   _enterHoverTangent: 0
   _exitHoverNormal: 0.2
   _exitHoverTangent: 0
@@ -205,7 +205,19 @@ MonoBehaviour:
       m_Calls: []
   _whenUnselect:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   _whenInteractorViewAdded:
     m_PersistentCalls:
       m_Calls: []
@@ -246,7 +258,7 @@ Transform:
   m_GameObject: {fileID: 5703993258721101748}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071065, y: -0, z: -0, w: 0.7071071}
-  m_LocalPosition: {x: 0, y: -0.021, z: 0}
+  m_LocalPosition: {x: 0, y: -0.0173, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -293,8 +305,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e08ab46e8fb05dc46b34e54466dc11e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _position: {x: 0, y: 0, z: -0.0205}
-  _size: {x: 0.112, y: 0.112, z: 0.034}
+  _position: {x: 0, y: 0, z: -0.017}
+  _size: {x: 0.113, y: 0.113, z: 0.036}
 --- !u!1 &6314907873803052119
 GameObject:
   m_ObjectHideFlags: 0
