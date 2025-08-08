@@ -419,12 +419,21 @@ namespace HackMonkeys.Core
             if (HasStateAuthority)
             {
                 IsReady = ready;
+                // AÑADIR: Notificar el cambio desde el servidor
+                RPC_NotifyReadyStateChanged(Object.InputAuthority, ready);
             }
-            
-            // Actualizar display con delay
-            UpdateDisplayAfterDelayAsync().Forget();
         }
-
+        
+        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        private void RPC_NotifyReadyStateChanged(PlayerRef playerRef, NetworkBool ready)
+        {
+            // Actualizar display solo cuando el servidor confirma el cambio
+            if (LobbyState.Instance != null && _isRegistered)
+            {
+                LobbyState.Instance.UpdatePlayerDisplay(this);
+            }
+        }
+        
         private async UniTaskVoid UpdateDisplayAfterDelayAsync()
         {
             await UniTask.Delay(50);
