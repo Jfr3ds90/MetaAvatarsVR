@@ -29,7 +29,7 @@ namespace HackMonkeys.Core
         [SerializeField] private string _currentRoomName;
         [SerializeField] private string _selectedMap;
 
-        private Dictionary<PlayerRef, SessionPlayerData> _sessionPlayers;
+        private Dictionary<PlayerRef, SessionPlayerData> _sessionPlayers = new Dictionary<PlayerRef, SessionPlayerData>();
 
         [Serializable]
         public class SessionPlayerData

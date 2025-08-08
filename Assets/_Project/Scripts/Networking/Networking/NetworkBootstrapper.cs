@@ -185,10 +185,13 @@ namespace HackMonkeys.Core
             _currentRoomName = roomName;
             _currentMaxPlayers = maxPlayers <= 0 ? defaultMaxPlayers : maxPlayers;
     
-            // Crear runner
             _runner = Instantiate(runnerPrefab);
             _runner.name = "NetworkRunner_Host";
             _runner.AddCallbacks(this);
+            
+            _sceneManager = Instantiate(sceneManagerPrefab);
+            _sceneManager.name = "NetworkSceneManager_Host";
+            DontDestroyOnLoad(_sceneManager.gameObject);
     
             var startGameArgs = new StartGameArgs()
             {
