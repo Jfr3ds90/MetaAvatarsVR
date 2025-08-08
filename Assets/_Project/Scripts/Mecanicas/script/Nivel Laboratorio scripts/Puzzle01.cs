@@ -5,12 +5,12 @@ using UnityEngine;
 public class Puzzle01 : MonoBehaviour
 {
     public GameObject[] laberynth;//scale 1.6 pos 0  |  0.8 dist / -2,3.625 inicial pos  / 0.75 tam | grilla(6,10)
-    public GameObject liquid,pos,block,presentLaber,instrctions;
+    public GameObject liquid,pos,block,presentLaber,instrctions,spawnLiquid;
     public VictoryPuzzle vp;
     public int amount;
-    Vector2 placeSelected;
+    float a;
    // public Dictionary<Vector2, GameObject> objectItem= new Dictionary<Vector2, GameObject>();
-   List <GameObject> objectPos = new List<GameObject>();
+   List <GameObject> objectPos = new List<GameObject>(), liquidTotal = new List<GameObject>();
     void Update()
     {
        if (Input.GetKeyUp(KeyCode.V))
@@ -31,6 +31,20 @@ public class Puzzle01 : MonoBehaviour
     {
         // pos = presentLaber.GetComponentInChildren<SelectorID>().gameObject;//cambiar a cuando se cambie de laberinto
         vp=FindAnyObjectByType<VictoryPuzzle>();
+    }
+    private void LateUpdate()
+    {
+        if (instrctions.activeSelf == false)
+        { 
+            a += Time.deltaTime;
+            if(a >= 0.5f)
+            {
+                GameObject l=Instantiate(liquid,spawnLiquid.transform);
+                l.transform.SetParent(transform);
+                liquidTotal.Add(l);
+                a= 0;
+            }
+        }
     }
     public void LeftMovement()
     {
@@ -83,8 +97,7 @@ public class Puzzle01 : MonoBehaviour
                 Destroy(objectPos[0]);
                 objectPos.RemoveAt(0);
             }
-            GameObject a;
-            a = Instantiate(block, pos.transform);
+            GameObject a = Instantiate(block, pos.transform);
             a.transform.SetParent(transform);
             objectPos.Add(a);    
         }
@@ -95,12 +108,18 @@ public class Puzzle01 : MonoBehaviour
     public void EndLaberynth()
     {
         if(laberynth.Length>amount)
-        {
+        {            
+            for (int i = 0;i<liquidTotal.Count;i++)            
+                Destroy(liquidTotal[i]);            
+
             Destroy(presentLaber);
             presentLaber=  Instantiate(laberynth[amount]);
             presentLaber.transform.SetParent(transform);
             presentLaber.transform.localPosition = new Vector3(-0.2030001f, 0,0) ;
             vp = FindAnyObjectByType<VictoryPuzzle>();
+
+            liquidTotal.Clear();
+
         }
     }
 }
