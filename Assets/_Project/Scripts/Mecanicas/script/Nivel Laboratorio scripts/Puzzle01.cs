@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Puzzle01 : MonoBehaviour
 {
-    public GameObject[] laberynth;//scale 1.6 pos 0  |  0.8 dist / -2,3.625 inicial pos  / 0.75 tam | grilla(6,10)
-    public GameObject liquid,pos,block,presentLaber,instrctions,spawnLiquid;
+    public GameObject[] laberynth,sl;//scale 1.6 pos 0  |  0.8 dist / -2,3.625 inicial pos  / 0.75 tam | grilla(6,10)
+    public GameObject liquid,pos,block,presentLaber,instrctions;
     public VictoryPuzzle vp;
     public int amount;
     float a;
@@ -39,9 +39,10 @@ public class Puzzle01 : MonoBehaviour
             a += Time.deltaTime;
             if(a >= 1.5f)
             {
-                GameObject l=Instantiate(liquid,spawnLiquid.transform);
+                int r= Random.Range(1, 3);
+                GameObject l = Instantiate(liquid, sl[r].transform);
                 l.transform.SetParent(transform);
-                l.transform.position = spawnLiquid.transform.position;
+                l.transform.position = sl[r].transform.position;
                 l.transform.localScale = new Vector3 (0.05f, 0.05f, 0.05f);
                 liquidTotal.Add(l);
                 a= 0;
@@ -122,6 +123,13 @@ public class Puzzle01 : MonoBehaviour
 
             liquidTotal.Clear();
 
+        }
+        else
+        {
+            for (int i = 0; i < liquidTotal.Count; i++)
+                Destroy(liquidTotal[i]);
+            Destroy(presentLaber);
+            liquidTotal.Clear();
         }
     }
 }
