@@ -2,15 +2,6 @@ using UnityEngine;
 
 public class Puzzle03 : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public Sprite[] level1, level2, level3, level4, level5, level6, level7, level8, level9;
+    public GameObject pos;
 }
