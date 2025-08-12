@@ -1,9 +1,11 @@
+using ExitGames.Client.Photon.StructWrapping;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Puzzle03 : MonoBehaviour
 {
     public Sprite[] level1, level2, level3, level4, level5, level6, level7, level8, level9;
+    public Sprite empty;
     public GameObject[] squarePos;
     public GameObject pos, instrctions;
     int currentLevel = 0;
@@ -120,12 +122,13 @@ public class Puzzle03 : MonoBehaviour
             case 0:
                 foreach (Sprite s in level1)
                     LSprite.Add(s); Debug.LogWarning(LSprite[0]+ " es el sprite 0");
-               LSprite.RemoveAt( Random.Range(0,LSprite.Count));//el vacio
+            //   LSprite.RemoveAt( Random.Range(0,LSprite.Count));//el vacio
                 for (int i = 0; i< squarePos.Length;i++)
                 {
                         RS(i);                    
                 }
                 lis.Clear();
+                squarePos[Random.Range(0, squarePos.Length)].GetComponent<SpriteRenderer>().sprite = empty;
                 break;
             case 1:
                 foreach (Sprite s in level2)
@@ -168,10 +171,12 @@ public class Puzzle03 : MonoBehaviour
         if (!lis.Contains(v))
         {
             lis.Add(v);
-            squarePos[i].GetComponent<SpriteRenderer>().sprite = level1[v];//solo llega al 8
-            LSprite.RemoveAt(v);
+            squarePos[i].GetComponent<SpriteRenderer>().sprite = level1[v];
+          //  LSprite.RemoveAt(v);
         }
         else if (lis.Contains(v))
             RS(i);
+
+        
     }
 }
