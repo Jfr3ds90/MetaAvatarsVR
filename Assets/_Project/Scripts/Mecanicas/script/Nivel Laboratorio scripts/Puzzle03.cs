@@ -152,7 +152,9 @@ public class Puzzle03 : MonoBehaviour
     {
         currentLevel++;
         for (int i = 0; i < squarePos.Length; i++)   
-            ChangeSprite(i, i);       
+            ChangeSprite(i, i);
+        LSprite.Clear();
+        trueImage = true;
     }
     void ChangeSprite(int a, int b)
     {
@@ -196,111 +198,63 @@ public class Puzzle03 : MonoBehaviour
                 foreach (Sprite s in level1)
                     LSprite.Add(s);
                 for (int i = 0; i< squarePos.Length;i++)               
-                        RS(i);                                    
-                lis.Clear();
-                empty = Random.Range(0, squarePos.Length);
-                squarePos[empty].GetComponent<SpriteRenderer>().color = new Color(0,0,0,255);
-                 y = empty/-4;
-                 x = empty%4;//0 - 3 = 0 | 4 - 7 = 1 | 8 - 11 = 2 | 12 - 15 = 3
-                emptyPos = new Vector2(x,y);
+                        RS(i);                                                    
                 break;
             case 1:
                 foreach (Sprite s in level2)
                     LSprite.Add(s);
                 for (int i = 0; i < squarePos.Length; i++)
-                    RS(i);
-                lis.Clear();
-                empty = Random.Range(0, squarePos.Length);
-                squarePos[empty].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 255);
-                 y = empty / -4;
-                 x = empty % 4;//0 - 3 = 0 | 4 - 7 = 1 | 8 - 11 = 2 | 12 - 15 = 3
-                emptyPos = new Vector2(x, y);
+                    RS(i);               
                 break;
             case 2:
                 foreach (Sprite s in level3)
                     LSprite.Add(s);
                 for (int i = 0; i < squarePos.Length; i++)
-                    RS(i);
-                lis.Clear();
-                empty = Random.Range(0, squarePos.Length);
-                squarePos[empty].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 255);
-                y = empty / -4;
-                x = empty % 4;//0 - 3 = 0 | 4 - 7 = 1 | 8 - 11 = 2 | 12 - 15 = 3
-                emptyPos = new Vector2(x, y);
+                    RS(i);               
                 break;
             case 3:
                 foreach (Sprite s in level4)
                     LSprite.Add(s);
                 for (int i = 0; i < squarePos.Length; i++)
-                    RS(i);
-                lis.Clear();
-                empty = Random.Range(0, squarePos.Length);
-                squarePos[empty].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 255);
-                y = empty / -4;
-                x = empty % 4;//0 - 3 = 0 | 4 - 7 = 1 | 8 - 11 = 2 | 12 - 15 = 3
-                emptyPos = new Vector2(x, y);
+                    RS(i);               
                 break;
             case 4:
                 foreach (Sprite s in level5)
                     LSprite.Add(s);
                 for (int i = 0; i < squarePos.Length; i++)
-                    RS(i);
-                lis.Clear();
-                empty = Random.Range(0, squarePos.Length);
-                squarePos[empty].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 255);
-                y = empty / -4;
-                x = empty % 4;//0 - 3 = 0 | 4 - 7 = 1 | 8 - 11 = 2 | 12 - 15 = 3
-                emptyPos = new Vector2(x, y);
+                    RS(i);              
                 break;
             case 5:
                 foreach (Sprite s in level6)
                     LSprite.Add(s);
                 for (int i = 0; i < squarePos.Length; i++)
-                    RS(i);
-                lis.Clear();
-                empty = Random.Range(0, squarePos.Length);
-                squarePos[empty].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 255);
-                y = empty / -4;
-                x = empty % 4;//0 - 3 = 0 | 4 - 7 = 1 | 8 - 11 = 2 | 12 - 15 = 3
-                emptyPos = new Vector2(x, y);
+                    RS(i);               
                 break;
             case 6:
                 foreach (Sprite s in level7)
                     LSprite.Add(s);
                 for (int i = 0; i < squarePos.Length; i++)
-                    RS(i);
-                lis.Clear();
-                empty = Random.Range(0, squarePos.Length);
-                squarePos[empty].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 255);
-                y = empty / -4;
-                x = empty % 4;//0 - 3 = 0 | 4 - 7 = 1 | 8 - 11 = 2 | 12 - 15 = 3
-                emptyPos = new Vector2(x, y);
+                    RS(i);                
                 break;
             case 7:
                 foreach (Sprite s in level8)
                     LSprite.Add(s);
                 for (int i = 0; i < squarePos.Length; i++)
-                    RS(i);
-                lis.Clear();
-                empty = Random.Range(0, squarePos.Length);
-                squarePos[empty].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 255);
-                y = empty / -4;
-                x = empty % 4;//0 - 3 = 0 | 4 - 7 = 1 | 8 - 11 = 2 | 12 - 15 = 3
-                emptyPos = new Vector2(x, y);
+                    RS(i);              
                 break;
             case 8:
                 foreach (Sprite s in level9)
                     LSprite.Add(s);
                 for (int i = 0; i < squarePos.Length; i++)
-                    RS(i);
-                lis.Clear();
-                empty = Random.Range(0, squarePos.Length);
-                squarePos[empty].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 255);
-                y = empty / -4;
-                x = empty % 4;//0 - 3 = 0 | 4 - 7 = 1 | 8 - 11 = 2 | 12 - 15 = 3
-                emptyPos = new Vector2(x, y);
+                    RS(i);                
                 break;
         }
+        lis.Clear();
+        empty = Random.Range(0, squarePos.Length);
+        squarePos[empty].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 255);
+        y = empty / -4;
+        x = empty % 4;
+        emptyPos = new Vector2(x, y);
     }
     void RS(int i)
     {
@@ -320,11 +274,11 @@ public class Puzzle03 : MonoBehaviour
         for (int i = 0; i < squarePos.Length; i++)
         
             if (LSprite[i] == squarePos[i].GetComponent<SpriteRenderer>().sprite)
-                v++;
-            Debug.LogWarning(v + " es la cantidad en posicion correcta ");
+               { v++; Debug.LogWarning(i + " es el correcto "+ LSprite[i]); }
+            //Debug.LogWarning(v + " es la cantidad en posicion correcta ");
         
 
-        if (v==16) return true;
+        if (v==16) {squarePos[empty].GetComponent<SpriteRenderer>().color= Color.white; return true;}
         else
         return false;
     }
