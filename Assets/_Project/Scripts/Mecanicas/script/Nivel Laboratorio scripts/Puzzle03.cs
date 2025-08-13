@@ -1,5 +1,6 @@
 using ExitGames.Client.Photon.StructWrapping;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Puzzle03 : MonoBehaviour
@@ -7,7 +8,8 @@ public class Puzzle03 : MonoBehaviour
     public Sprite[] level1, level2, level3, level4, level5, level6, level7, level8, level9;
     public GameObject[] squarePos;
     public GameObject pos, instrctions;
-    int currentLevel = 0,empty;
+    int currentLevel = 0;
+    public int empty;
     bool trueImage = true;
     List<Sprite> LSprite= new List<Sprite>();
     List<int> lis = new List<int>();
@@ -18,6 +20,8 @@ public class Puzzle03 : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.RightArrow)) RMove();
         if (Input.GetKeyUp(KeyCode.UpArrow)) UMove();
         if (Input.GetKeyUp(KeyCode.DownArrow)) DMove();
+        if (Input.GetKeyUp(KeyCode.Z)) GButton();
+        if (Input.GetKeyUp(KeyCode.R)) DebugResolution();
     }
     public void LMove()
     {
@@ -84,9 +88,62 @@ public class Puzzle03 : MonoBehaviour
         if (instrctions.activeSelf == false)
         {
             if (trueImage == true)
-                { RandomSprite(); trueImage = false; }
-            else if (trueImage == false)
-            { }
+            { RandomSprite(); trueImage = false; }
+            else if (trueImage == false)//y = empty / -4;x = empty % 4;
+            {
+                if (selectPos.x-1 == emptyPos.x && selectPos.y == emptyPos.y) 
+                {
+                    if(CheckFull()==true)
+                        EndLevel();
+                    else
+                    {
+                        squarePos[empty].GetComponent<SpriteRenderer>().sprite = squarePos[empty+1].GetComponent<SpriteRenderer>().sprite;
+                        squarePos[empty].GetComponent<SpriteRenderer>().color = Color.white;
+                        emptyPos = selectPos;
+                        empty += 1;
+                        squarePos[empty].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 255);
+                    }      
+                }
+                else if (selectPos.x+1 == emptyPos.x && selectPos.y == emptyPos.y)
+                {
+                    if (CheckFull() == true)
+                        EndLevel();
+                    else
+                    {
+                        squarePos[empty].GetComponent<SpriteRenderer>().sprite = squarePos[empty - 1].GetComponent<SpriteRenderer>().sprite;
+                        squarePos[empty].GetComponent<SpriteRenderer>().color = Color.white;
+                        emptyPos = selectPos;
+                        empty -= 1;
+                        squarePos[empty].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 255);
+                    }
+                }
+                else if (selectPos.y-1 == emptyPos.y && selectPos.x == emptyPos.x)
+                {
+                    if (CheckFull() == true)
+                        EndLevel();
+                    else
+                    {
+                        squarePos[empty].GetComponent<SpriteRenderer>().sprite = squarePos[empty - 4].GetComponent<SpriteRenderer>().sprite;
+                        squarePos[empty].GetComponent<SpriteRenderer>().color = Color.white;
+                        emptyPos = selectPos;
+                        empty -= 4;
+                        squarePos[empty].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 255);
+                    }
+                }
+                else if (selectPos.y+1 == emptyPos.y && selectPos.x == emptyPos.x)
+                {
+                    if (CheckFull() == true)
+                        EndLevel();
+                    else
+                    { 
+                        squarePos[empty].GetComponent<SpriteRenderer>().sprite = squarePos[empty + 4].GetComponent<SpriteRenderer>().sprite;
+                        squarePos[empty].GetComponent<SpriteRenderer>().color = Color.white;
+                        emptyPos = selectPos;
+                        empty += 4;
+                        squarePos[empty].GetComponent<SpriteRenderer>().color = new Color(0, 0, 0, 255);
+                    }
+                }
+            }
         }
         else if (instrctions.activeSelf == true)
             instrctions.SetActive(false);
@@ -94,28 +151,40 @@ public class Puzzle03 : MonoBehaviour
     public void EndLevel()
     {
         currentLevel++;
-        for (int i = 0; i < squarePos.Length; i++) 
+        for (int i = 0; i < squarePos.Length; i++)   
+            ChangeSprite(i, i);       
+    }
+    void ChangeSprite(int a, int b)
+    {
+        switch (currentLevel)
         {
-            switch (currentLevel)
-            {
-                case 1:squarePos[i].GetComponent<SpriteRenderer>().sprite = level2[i];
-                    break;
-                case 2:squarePos[i].GetComponent<SpriteRenderer>().sprite = level3[i];
-                    break;
-                case 3:squarePos[i].GetComponent<SpriteRenderer>().sprite = level4[i];
-                    break;
-                case 4:squarePos[i].GetComponent<SpriteRenderer>().sprite = level5[i];
-                    break;
-                case 5:squarePos[i].GetComponent<SpriteRenderer>().sprite = level6[i];
-                    break;
-                case 6:squarePos[i].GetComponent<SpriteRenderer>().sprite = level7[i];
-                    break;
-                case 7:squarePos[i].GetComponent<SpriteRenderer>().sprite = level8[i];
-                    break;
-                case 8:squarePos[i].GetComponent<SpriteRenderer>().sprite = level9[i];
-                    break;
-            }
-
+            case 0:
+                squarePos[a].GetComponent<SpriteRenderer>().sprite = level1[b];
+                break;
+            case 1:
+                squarePos[a].GetComponent<SpriteRenderer>().sprite = level2[b];
+                break;
+            case 2:
+                squarePos[a].GetComponent<SpriteRenderer>().sprite = level3[b];
+                break;
+            case 3:
+                squarePos[a].GetComponent<SpriteRenderer>().sprite = level4[b];
+                break;
+            case 4:
+                squarePos[a].GetComponent<SpriteRenderer>().sprite = level5[b];
+                break;
+            case 5:
+                squarePos[a].GetComponent<SpriteRenderer>().sprite = level6[b];
+                break;
+            case 6:
+                squarePos[a].GetComponent<SpriteRenderer>().sprite = level7[b];
+                break;
+            case 7:
+                squarePos[a].GetComponent<SpriteRenderer>().sprite = level8[b];
+                break;
+            case 8:
+                squarePos[a].GetComponent<SpriteRenderer>().sprite = level9[b];
+                break;
         }
     }
     void RandomSprite()
@@ -232,7 +301,6 @@ public class Puzzle03 : MonoBehaviour
                 emptyPos = new Vector2(x, y);
                 break;
         }
-        LSprite.Clear();
     }
     void RS(int i)
     {
@@ -240,20 +308,29 @@ public class Puzzle03 : MonoBehaviour
         if (!lis.Contains(v))
         {
             lis.Add(v);
-            switch (currentLevel)
-            {
-                case 0:squarePos[i].GetComponent<SpriteRenderer>().sprite = level1[v];break;
-                case 1:squarePos[i].GetComponent<SpriteRenderer>().sprite = level2[v];break;
-                case 2:squarePos[i].GetComponent<SpriteRenderer>().sprite = level3[v];break;
-                case 3:squarePos[i].GetComponent<SpriteRenderer>().sprite = level4[v];break;
-                case 4:squarePos[i].GetComponent<SpriteRenderer>().sprite = level5[v];break;
-                case 5:squarePos[i].GetComponent<SpriteRenderer>().sprite = level6[v];break;
-                case 6:squarePos[i].GetComponent<SpriteRenderer>().sprite = level7[v];break;
-                case 7:squarePos[i].GetComponent<SpriteRenderer>().sprite = level8[v];break;
-                case 8:squarePos[i].GetComponent<SpriteRenderer>().sprite = level9[v];break;
-            }
+            ChangeSprite(i,v);
         }
         else if (lis.Contains(v))
             RS(i);   
+    }
+    bool CheckFull()
+    {
+        int v = 0;
+
+        for (int i = 0; i < squarePos.Length; i++)
+        
+            if (LSprite[i] == squarePos[i].GetComponent<SpriteRenderer>().sprite)
+                v++;
+            Debug.LogWarning(v + " es la cantidad en posicion correcta ");
+        
+
+        if (v==16) return true;
+        else
+        return false;
+    }
+    void DebugResolution()
+    {
+        for (int i = 0; i < squarePos.Length; i++)
+           squarePos[i].GetComponent<SpriteRenderer>().sprite = LSprite[i];                
     }
 }
