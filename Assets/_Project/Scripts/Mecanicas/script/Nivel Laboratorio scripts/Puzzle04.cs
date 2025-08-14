@@ -38,6 +38,7 @@ public class Puzzle04 : MonoBehaviour
     }
     public void GButton(bool mov)
     {
+        var anim = kimbo.GetComponent<Animator>();
         anim.SetBool("Walk", mov);
     }
 }
