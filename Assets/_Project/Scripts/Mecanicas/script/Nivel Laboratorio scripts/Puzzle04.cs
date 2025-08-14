@@ -7,33 +7,33 @@ public class Puzzle04 : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyUp(KeyCode.LeftArrow)) LMove(false);
-        if (Input.GetKeyUp(KeyCode.RightArrow)) RMove(false);
-        if (Input.GetKeyUp(KeyCode.UpArrow)) UMove(false);
-        if (Input.GetKeyUp(KeyCode.DownArrow)) DMove(false);
+        if (Input.GetKey(KeyCode.LeftArrow)) LMove(true); else LMove(false);
+       // if (Input.GetKey(KeyCode.RightArrow)) RMove(true); else RMove(false);
+       // if (Input.GetKey(KeyCode.UpArrow)) UMove(true); else UMove(false);
+       // if (Input.GetKey(KeyCode.DownArrow)) DMove(true); else DMove(false);
     }
     public void LMove(bool mov)
     {
       var anim = kimbo.GetComponent<Animator>();
-        anim.SetBool("Left", mov);
+        anim.SetFloat("XValue", -1);
         anim.SetBool("Walk", mov);
     }
     public void RMove(bool mov)
     {
         var anim = kimbo.GetComponent<Animator>();
-        anim.SetBool("Right", mov);
+        anim.SetFloat("XValue", 1);
         anim.SetBool("Walk", mov);
     }
     public void DMove(bool mov)
     {
         var anim = kimbo.GetComponent<Animator>();
-        anim.SetBool("Down", mov);
+        anim.SetFloat("YValue", -1);
         anim.SetBool("Walk", mov);
     }
     public void UMove(bool mov)
     {
         var anim = kimbo.GetComponent<Animator>();
-        anim.SetBool("Up", mov);
+        anim.SetFloat("YValue", 1);
         anim.SetBool("Walk", mov);
     }
     public void GButton(bool mov)
