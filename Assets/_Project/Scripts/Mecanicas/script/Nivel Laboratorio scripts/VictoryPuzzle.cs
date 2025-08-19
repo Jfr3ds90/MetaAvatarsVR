@@ -20,7 +20,14 @@ public class VictoryPuzzle : MonoBehaviour
             case 3:
                 break;
             case 4:
-                break;
+                if (collision.collider.tag == "cubePuzzle")
+                {
+                    var puz = FindAnyObjectByType<Puzzle04>();
+                    puz.level++;
+                    puz.kimbo.transform.position = puz.StartKimbo.position;
+                    puz.ChangeLevel();
+                }
+                    break;
             case 5:
                 break;
         }    
