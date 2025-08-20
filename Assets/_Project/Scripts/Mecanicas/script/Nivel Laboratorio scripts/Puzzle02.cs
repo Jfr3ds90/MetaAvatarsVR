@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,7 +10,7 @@ public class Puzzle02 : MonoBehaviour
     public GameObject pos, instrctions;
     public Vector2 selectPos = new Vector2(0, 0);
     Dictionary<GameObject,Vector2> Coord = new Dictionary<GameObject, Vector2>();//segun el gameobject, es el mismo en la lista de int acorde al orden *tecnicamente*
-    List<int> emptyPlaced = new List<int>();
+    Dictionary<GameObject, int> Rotable = new Dictionary<GameObject, int>();//para recordar cuanto fue rotado
     public int posObj;
     //0.225
     private void Awake()
@@ -20,8 +21,31 @@ public class Puzzle02 : MonoBehaviour
             Coord.Add(Empty[i], new Vector2(0, 0));
             Empty[i].GetComponent<Image>().sprite = empty[value];
             Full[i].GetComponent<Image>().sprite = full[value];
-            emptyPlaced.Add(value);
-          //  Empty[i].SetActive(true);
+            
+            if(value == 1|| value == 3)
+            {
+                int rot = Random.Range(0, 4);
+                switch (rot)
+                {
+                    case 0:
+                        Empty[i].transform.rotation = Quaternion.Euler(0, 0, 0);
+                        Full[i].transform.rotation = Quaternion.Euler(0, 0, 0);
+                        break;
+                    case 1:
+                        Empty[i].transform.rotation = Quaternion.Euler(0, 0, 90);
+                        Full[i].transform.rotation = Quaternion.Euler(0, 0, 90);
+                        break;
+                    case 2:
+                        Empty[i].transform.rotation = Quaternion.Euler(0, 0, 180);
+                        Full[i].transform.rotation = Quaternion.Euler(0, 0, 180);
+                        break;
+                    case 3:
+                        Empty[i].transform.rotation = Quaternion.Euler(0, 0, 270);
+                        Full[i].transform.rotation = Quaternion.Euler(0, 0, 270);
+                        break;
+                }
+                Rotable.Add(Empty[i],rot);
+            }
         }
     }
     private void Update()
@@ -90,6 +114,26 @@ public class Puzzle02 : MonoBehaviour
     }
     public void GButton()
     {
-       Debug.LogWarning("El sprite utilizado es "+emptyPlaced.IndexOf(posObj));
+       //Debug.LogWarning("El sprite utilizado es "+Coord.ElementAt(posObj).Key.GetComponent<Image>().sprite);
+        string sprite = Coord.ElementAt(posObj).Key.GetComponent<Image>().sprite.name;
+        switch (sprite)
+        {
+            case "Puzzle02_Vacio_Cuadruple":
+                Debug.LogWarning("opcion 1");
+                break;
+            case "Puzzle02_Vacio_Triple":
+                Debug.LogWarning("opcion 2");
+                break;
+            case "Puzzle02_Vacio_Vertical":
+                Debug.LogWarning("opcion 3");
+                break;
+            case "Puzzle02_Vacio_Horizontal":
+                Debug.LogWarning("opcion 4");
+                break;
+            case "Puzzle02_Vacio_Desviación":
+                Debug.LogWarning("opcion 5");
+                break;
+               
+        }
     }
 }
