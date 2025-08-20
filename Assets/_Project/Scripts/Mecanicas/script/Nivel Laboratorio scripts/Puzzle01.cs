@@ -6,7 +6,7 @@ public class Puzzle01 : MonoBehaviour
 {
     public GameObject[] laberynth,sl;//scale 1.6 pos 0  |  0.8 dist / -2,3.625 inicial pos  / 0.75 tam | grilla(6,10)
     public GameObject liquid,pos,block,presentLaber,instructions;
-    public VictoryPuzzle vp;
+     VictoryPuzzle vp;
     public int amount;
     float a;
    // public Dictionary<Vector2, GameObject> objectItem= new Dictionary<Vector2, GameObject>();

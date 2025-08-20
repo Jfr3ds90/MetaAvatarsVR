@@ -135,13 +135,15 @@ public class Puzzle02 : MonoBehaviour
     {
        //Debug.LogWarning("El sprite utilizado es "+Coord.ElementAt(posObj).Key.GetComponent<Image>().sprite);
         string sprite = Coord.ElementAt(posObj).Key.GetComponent<Image>().sprite.name;
+        GameObject piece = Coord.ElementAt(posObj).Key;
         switch (sprite)
         {
             case "Puzzle02_Vacio_Cuadruple":
                 Debug.LogWarning("opcion 1");
                 break;
             case "Puzzle02_Vacio_Triple":
-                Debug.LogWarning("opcion 2");
+                Rotable.TryGetValue(piece,out int valT);
+                Debug.LogWarning("opcion 2 con rotacion tipo: "+valT);
                 break;
             case "Puzzle02_Vacio_Vertical":
                 Debug.LogWarning("opcion 3");
@@ -150,7 +152,8 @@ public class Puzzle02 : MonoBehaviour
                 Debug.LogWarning("opcion 4");
                 break;
             case "Puzzle02_Vacio_Desviación":
-                Debug.LogWarning("opcion 5");
+                Rotable.TryGetValue(piece, out int valD);
+                Debug.LogWarning("opcion con rotacion tipo: " + valD);
                 break;
                
         }
