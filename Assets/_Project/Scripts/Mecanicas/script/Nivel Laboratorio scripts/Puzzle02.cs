@@ -21,7 +21,7 @@ public class Puzzle02 : MonoBehaviour
             Coord.Add(Empty[i], new Vector2(0, 0));
             Empty[i].GetComponent<Image>().sprite = empty[value];
             Full[i].GetComponent<Image>().sprite = full[value];
-            
+             Image im =Full[i].GetComponent<Image>();
             if(value == 1|| value == 3)
             {
                 int rot = Random.Range(0, 4);
@@ -46,7 +46,26 @@ public class Puzzle02 : MonoBehaviour
                 }
                 Rotable.Add(Empty[i],rot);
             }
+            switch(value)
+            {
+                case 0://cuadruple Analizar bien desde donde tiene que venir
+                    im.fillMethod = Image.FillMethod.Radial360; break;
+                case 1://desviacion
+                    im.fillMethod = Image.FillMethod.Radial90; break;
+                case 2://horizontal
+                    im.fillMethod = Image.FillMethod.Horizontal; break;
+                case 3://triple
+                    im.fillMethod = Image.FillMethod.Radial180; break;
+                case 4://vertical
+                    im.fillMethod = Image.FillMethod.Vertical; break;
+            }
+           
+            if (i == 0)
+                Full[i].GetComponent<Image>().fillAmount = 1;
+          
         }
+
+
     }
     private void Update()
     {
