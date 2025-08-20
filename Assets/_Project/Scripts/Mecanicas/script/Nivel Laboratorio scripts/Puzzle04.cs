@@ -127,16 +127,16 @@ public class Puzzle04 : MonoBehaviour
         {
             if (x == true)
                { if (p == true)
-                    kimbo.transform.position += new Vector3(Time.deltaTime * 0.1f, 0);
+                    kimbo.transform.position += new Vector3(Time.deltaTime * 0.2f, 0);
                 else if (p == false)
-                    kimbo.transform.position -= new Vector3(Time.deltaTime * 0.1f, 0);
+                    kimbo.transform.position -= new Vector3(Time.deltaTime * 0.2f, 0);
             }
 
                 else if (x == false)
                    { if (p == true)
-                    kimbo.transform.position += new Vector3(0, Time.deltaTime * 0.1f);
+                    kimbo.transform.position += new Vector3(0, Time.deltaTime * 0.2f);
                 else if (p == false)
-                    kimbo.transform.position -= new Vector3(0, Time.deltaTime * 0.1f);
+                    kimbo.transform.position -= new Vector3(0, Time.deltaTime * 0.2f);
             }
         }
     }

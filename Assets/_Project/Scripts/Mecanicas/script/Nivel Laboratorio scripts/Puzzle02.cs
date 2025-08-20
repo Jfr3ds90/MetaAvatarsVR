@@ -49,15 +49,25 @@ public class Puzzle02 : MonoBehaviour
             switch(value)
             {
                 case 0://cuadruple Analizar bien desde donde tiene que venir
-                    im.fillMethod = Image.FillMethod.Radial360; break;
+                    im.fillMethod = Image.FillMethod.Horizontal;//Radial360 no es recomendado, Variantes: horizontal | Vertical
+                    im.fillOrigin = (int)Image.OriginHorizontal.Left; //Variante horizontal: Left _ Right | vertical: Bottom _ Top 
+                    break;
                 case 1://desviacion
-                    im.fillMethod = Image.FillMethod.Radial90; break;
+                    im.fillMethod = Image.FillMethod.Radial90;
+                    im.fillOrigin = (int)Image.Origin90.BottomRight;//variantes: BottomRight | TopLeft
+                    break;
                 case 2://horizontal
-                    im.fillMethod = Image.FillMethod.Horizontal; break;
+                    im.fillMethod = Image.FillMethod.Horizontal;
+                    im.fillOrigin = (int)Image.OriginHorizontal.Left;//variantes: Left | Right
+                    break;
                 case 3://triple
-                    im.fillMethod = Image.FillMethod.Radial180; break;
+                    im.fillMethod = Image.FillMethod.Horizontal;//Radial180 no recomendado, Variantes: Vertical | Horizontal
+                    im.fillOrigin = (int)Image.OriginHorizontal.Left;//Variantes: Vertical->Top | Horizontal: Left _ Right
+                    break;
                 case 4://vertical
-                    im.fillMethod = Image.FillMethod.Vertical; break;
+                    im.fillMethod = Image.FillMethod.Vertical; 
+                    im.fillOrigin = (int)Image.OriginVertical.Bottom;//variantes: Bottom | Top
+                    break;
             }
            
             if (i == 0)
@@ -157,5 +167,6 @@ public class Puzzle02 : MonoBehaviour
                 break;
                
         }
+        Full[posObj].GetComponent<Image>().fillAmount = 1;//borrar una vez todo el sistema funcione
     }
 }
