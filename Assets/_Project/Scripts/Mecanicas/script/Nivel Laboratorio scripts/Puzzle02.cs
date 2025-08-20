@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Puzzle02 : MonoBehaviour
 {
@@ -17,8 +18,8 @@ public class Puzzle02 : MonoBehaviour
         {
             int value = Random.Range(0, empty.Length);
             Coord.Add(Empty[i], new Vector2(0, 0));
-            Empty[i].GetComponent<SpriteRenderer>().sprite = empty[value];
-            Full[i].GetComponent<SpriteRenderer>().sprite = full[value];
+            Empty[i].GetComponent<Image>().sprite = empty[value];
+            Full[i].GetComponent<Image>().sprite = full[value];
             emptyPlaced.Add(value);
           //  Empty[i].SetActive(true);
         }
