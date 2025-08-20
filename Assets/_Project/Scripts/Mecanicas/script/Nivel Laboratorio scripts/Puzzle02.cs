@@ -54,7 +54,8 @@ public class Puzzle02 : MonoBehaviour
                     break;
                 case 1://desviacion
                     im.fillMethod = Image.FillMethod.Radial90;
-                    im.fillOrigin = (int)Image.Origin90.BottomRight;//variantes: BottomRight | TopLeft
+                    im.fillOrigin = (int)Image.Origin90.TopLeft;//Radial90 TopLeft Variante: Clockwise
+                    im.fillClockwise = true;
                     break;
                 case 2://horizontal
                     im.fillMethod = Image.FillMethod.Horizontal;
@@ -71,8 +72,7 @@ public class Puzzle02 : MonoBehaviour
             }
            
             if (i == 0)
-                Full[i].GetComponent<Image>().fillAmount = 1;
-          
+                Full[i].GetComponent<Image>().fillAmount = 1;          
         }
 
 
@@ -168,5 +168,47 @@ public class Puzzle02 : MonoBehaviour
                
         }
         Full[posObj].GetComponent<Image>().fillAmount = 1;//borrar una vez todo el sistema funcione
+    }
+    void originFill(Image im,int direction,int spr,int rot)//de donde viene el liquido
+    {
+        switch (direction)
+        {
+            case 0://izquierda
+                switch(spr)
+                {
+                    case 0:
+                        switch(rot)
+                        {
+                            case 0:
+                                break;
+                            case 1:
+                                break;
+                            case 2:
+                                break;
+                            case 3:
+                                break;
+                        }
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                    case 4:
+                        break;
+
+                }
+                break;
+            case 1://arriba
+                
+                break;
+            case 2://derecha
+               
+                break;
+            case 3://abajo
+               
+                break;
+        }
     }
 }
