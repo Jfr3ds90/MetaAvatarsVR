@@ -176,38 +176,217 @@ public class Puzzle02 : MonoBehaviour
             case 0://izquierda
                 switch(spr)
                 {
-                    case 0:
-                        switch(rot)
+                    case 0://cuadruple
+                        im.fillMethod = Image.FillMethod.Horizontal;
+                        im.fillOrigin = (int)Image.OriginHorizontal.Left;
+                        break;
+                    case 1://desviacion
+                        switch (rot)//Radial90 TopLeft Variante: Clockwise
                         {
                             case 0:
+                                im.fillAmount = 0;
                                 break;
                             case 1:
+                                im.fillAmount = 0;
                                 break;
                             case 2:
+                                im.fillClockwise = false;
                                 break;
                             case 3:
+                                im.fillClockwise = true;
                                 break;
                         }
                         break;
-                    case 1:
+                    case 2://horizontal
+                        im.fillMethod = Image.FillMethod.Horizontal;
+                        im.fillOrigin = (int)Image.OriginHorizontal.Left;
                         break;
-                    case 2:
+                    case 3://triple
+                        switch (rot)
+                        {
+                            case 0:
+                                im.fillMethod = Image.FillMethod.Horizontal;
+                                im.fillOrigin = (int)Image.OriginHorizontal.Right;
+                                break;
+                            case 1:
+                                im.fillAmount = 0;
+                                break;
+                            case 2:
+                                im.fillMethod = Image.FillMethod.Horizontal;
+                                im.fillOrigin = (int)Image.OriginHorizontal.Left;
+                                break;
+                            case 3:
+                                im.fillMethod = Image.FillMethod.Vertical;
+                                im.fillOrigin = (int)Image.OriginVertical.Top;
+                                break;
+                        }
                         break;
-                    case 3:
-                        break;
-                    case 4:
+                    case 4://vertical
+                        im.fillAmount = 0;
                         break;
 
                 }
                 break;
             case 1://arriba
-                
+                switch (spr)
+                {
+                    case 0://cuadruple
+                        im.fillMethod = Image.FillMethod.Vertical;
+                        im.fillOrigin = (int)Image.OriginVertical.Top;
+                        break;
+                    case 1://desviacion
+                        switch (rot)//Radial90 TopLeft Variante: Clockwise
+                        {
+                            case 0:
+                                im.fillClockwise = true;
+                                break;
+                            case 1:
+                                im.fillAmount= 0;
+                                break;
+                            case 2:
+                                im.fillAmount = 0;
+                                break;
+                            case 3:
+                                im.fillClockwise = false;
+                                break;
+                        }
+                        break;
+                    case 2://horizontal
+                        im.fillAmount = 0;
+                        break;
+                    case 3://triple
+                        switch (rot)
+                        {
+                            case 0:
+                                im.fillMethod = Image.FillMethod.Vertical;
+                                im.fillOrigin = (int)Image.OriginVertical.Top;
+                                break;
+                            case 1:
+                                im.fillMethod = Image.FillMethod.Horizontal;
+                                im.fillOrigin = (int)Image.OriginHorizontal.Right;
+                                break;
+                            case 2:
+                                im.fillAmount = 0;
+                                break;
+                            case 3:
+                                im.fillMethod = Image.FillMethod.Horizontal;
+                                im.fillOrigin = (int)Image.OriginHorizontal.Left;
+                                break;
+                        }
+                        break;
+                    case 4://vertical
+                        im.fillMethod = Image.FillMethod.Vertical;
+                        im.fillOrigin = (int)Image.OriginVertical.Top;
+                        break;
+
+                }
                 break;
             case 2://derecha
-               
+                switch (spr)
+                {
+                    case 0://cuadruple
+                        im.fillMethod = Image.FillMethod.Horizontal;
+                        im.fillOrigin = (int)Image.OriginHorizontal.Right;
+                        break;
+                    case 1://desviacion
+                        switch (rot)//Radial90 TopLeft Variante: Clockwise
+                        {
+                            case 0:
+                                im.fillClockwise = false;
+                                break;
+                            case 1:
+                                im.fillClockwise = true;
+                                break;
+                            case 2:
+                                im.fillAmount = 0;
+                                break;
+                            case 3:
+                                im.fillAmount = 0;
+                                break;
+                        }
+                        break;
+                    case 2://horizontal
+                        im.fillMethod = Image.FillMethod.Horizontal;
+                        im.fillOrigin = (int)Image.OriginHorizontal.Right;
+                        break;
+                    case 3://triple
+                        switch (rot)
+                        {
+                            case 0:
+                                im.fillMethod = Image.FillMethod.Horizontal;
+                                im.fillOrigin = (int)Image.OriginHorizontal.Left;
+                                break;
+                            case 1:
+                                im.fillMethod = Image.FillMethod.Vertical;
+                                im.fillOrigin = (int)Image.OriginVertical.Top;
+                                break;
+                            case 2:
+                                im.fillMethod = Image.FillMethod.Horizontal;
+                                im.fillOrigin = (int)Image.OriginHorizontal.Right;
+                                break;
+                            case 3:
+                                im.fillAmount = 0;
+                                break;
+                        }
+                        break;
+                    case 4://vertical
+                        im.fillAmount = 0;
+                        break;
+
+                }
                 break;
             case 3://abajo
-               
+                switch (spr)
+                {
+                    case 0://cuadruple
+                        im.fillMethod = Image.FillMethod.Vertical;
+                        im.fillOrigin = (int)Image.OriginVertical.Bottom;
+                        break;
+                    case 1://desviacion
+                        switch (rot)
+                        {
+                            case 0:
+                                im.fillAmount = 0;
+                                break;
+                            case 1:
+                                im.fillClockwise = false;
+                                break;
+                            case 2:
+                                im.fillClockwise = true;
+                                break;
+                            case 3:
+                                im.fillAmount = 0;
+                                break;
+                        }
+                        break;
+                    case 2://horizontal
+                        im.fillAmount = 0;
+                        break;
+                    case 3://triple
+                        switch (rot)
+                        {
+                            case 0:
+                                im.fillAmount = 0;
+                                break;
+                            case 1:
+                                im.fillMethod = Image.FillMethod.Horizontal;
+                                im.fillOrigin = (int)Image.OriginHorizontal.Left;
+                                break;
+                            case 2:
+                                im.fillMethod = Image.FillMethod.Vertical;
+                                im.fillOrigin = (int)Image.OriginVertical.Top;
+                                break;
+                            case 3:
+                                im.fillMethod = Image.FillMethod.Horizontal;
+                                im.fillOrigin = (int)Image.OriginHorizontal.Right;
+                                break;
+                        }
+                        break;
+                    case 4://vertical
+                        im.fillMethod = Image.FillMethod.Vertical;
+                        im.fillOrigin = (int)Image.OriginVertical.Bottom;
+                        break;
+                }
                 break;
         }
     }
