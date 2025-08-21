@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -17,33 +18,15 @@ public class Puzzle02 : MonoBehaviour
     {
         for (int i = 0; i < Empty.Length; i++)
         {
-            int value = Random.Range(0, empty.Length);
+            int value = UnityEngine.Random.Range(0, empty.Length);
             Coord.Add(Empty[i], new Vector2(0, 0));
             Empty[i].GetComponent<Image>().sprite = empty[value];
             Full[i].GetComponent<Image>().sprite = full[value];
              Image im =Full[i].GetComponent<Image>();
             if(value == 1|| value == 3)
             {
-                int rot = Random.Range(0, 4);
-                switch (rot)
-                {
-                    case 0:
-                        Empty[i].transform.rotation = Quaternion.Euler(0, 0, 0);
-                        Full[i].transform.rotation = Quaternion.Euler(0, 0, 0);
-                        break;
-                    case 1:
-                        Empty[i].transform.rotation = Quaternion.Euler(0, 0, 90);
-                        Full[i].transform.rotation = Quaternion.Euler(0, 0, 90);
-                        break;
-                    case 2:
-                        Empty[i].transform.rotation = Quaternion.Euler(0, 0, 180);
-                        Full[i].transform.rotation = Quaternion.Euler(0, 0, 180);
-                        break;
-                    case 3:
-                        Empty[i].transform.rotation = Quaternion.Euler(0, 0, 270);
-                        Full[i].transform.rotation = Quaternion.Euler(0, 0, 270);
-                        break;
-                }
+                int rot = UnityEngine.Random.Range(0, 4);
+                simpleRotate(rot,i);
                 Rotable.Add(Empty[i],rot);
             }
             switch(value)
@@ -149,21 +132,35 @@ public class Puzzle02 : MonoBehaviour
         switch (sprite)
         {
             case "Puzzle02_Vacio_Cuadruple":
-                Debug.LogWarning("opcion 1");
+               // Debug.LogWarning("opcion 1");
                 break;
             case "Puzzle02_Vacio_Triple":
                 Rotable.TryGetValue(piece,out int valT);
-                Debug.LogWarning("opcion 2 con rotacion tipo: "+valT);
+                valT++;
+                if (valT > 3)
+                    valT = 0;
+                int T = Array.IndexOf(Coord.Keys.ToArray(), piece);
+                simpleRotate(valT, T);
+                Rotable[piece] = valT;
+             //   Debug.LogWarning("opcion 2 con rotacion tipo: "+valT);
                 break;
             case "Puzzle02_Vacio_Vertical":
-                Debug.LogWarning("opcion 3");
+                //es el 3 pasa al 1
+            //    Debug.LogWarning("opcion 3");
                 break;
             case "Puzzle02_Vacio_Horizontal":
-                Debug.LogWarning("opcion 4");
+                //es el 1 pasa al 3
+            //    Debug.LogWarning("opcion 4");
                 break;
             case "Puzzle02_Vacio_Desviación":
                 Rotable.TryGetValue(piece, out int valD);
-                Debug.LogWarning("opcion con rotacion tipo: " + valD);
+                valD++;
+                if (valD > 3)
+                    valD = 0;
+              int D = Array.IndexOf(Coord.Keys.ToArray(), piece);
+                simpleRotate(valD, D);
+                Rotable[piece] = valD;
+                //  Debug.LogWarning("opcion con rotacion tipo: " + valD);
                 break;
                
         }
@@ -387,6 +384,28 @@ public class Puzzle02 : MonoBehaviour
                         im.fillOrigin = (int)Image.OriginVertical.Bottom;
                         break;
                 }
+                break;
+        }
+    }
+    void simpleRotate(int rot,int i)
+    {
+        switch (rot)
+        {
+            case 0:
+                Empty[i].transform.rotation = Quaternion.Euler(0, 0, 0);
+                Full[i].transform.rotation = Quaternion.Euler(0, 0, 0);
+                break;
+            case 1:
+                Empty[i].transform.rotation = Quaternion.Euler(0, 0, 90);
+                Full[i].transform.rotation = Quaternion.Euler(0, 0, 90);
+                break;
+            case 2:
+                Empty[i].transform.rotation = Quaternion.Euler(0, 0, 180);
+                Full[i].transform.rotation = Quaternion.Euler(0, 0, 180);
+                break;
+            case 3:
+                Empty[i].transform.rotation = Quaternion.Euler(0, 0, 270);
+                Full[i].transform.rotation = Quaternion.Euler(0, 0, 270);
                 break;
         }
     }
