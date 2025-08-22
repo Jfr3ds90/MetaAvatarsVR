@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class Puzzle01 : MonoBehaviour
 {
-    public GameObject[] laberynth;//scale 1.6 pos 0  |  0.8 dist / -2,3.625 inicial pos  / 0.75 tam | grilla(6,10)
-    public GameObject liquid,pos,block,presentLaber,instrctions,spawnLiquid;
-    public VictoryPuzzle vp;
+    public GameObject[] laberynth,sl;//scale 1.6 pos 0  |  0.8 dist / -2,3.625 inicial pos  / 0.75 tam | grilla(6,10)
+    public GameObject liquid,pos,block,presentLaber,instructions;
+     VictoryPuzzle vp;
     public int amount;
     float a;
    // public Dictionary<Vector2, GameObject> objectItem= new Dictionary<Vector2, GameObject>();
@@ -34,13 +34,16 @@ public class Puzzle01 : MonoBehaviour
     }
     private void LateUpdate()
     {
-        if (instrctions.activeSelf == false)
+        if (instructions.activeSelf == false)
         { 
             a += Time.deltaTime;
-            if(a >= 0.5f)
+            if(a >= 1.5f)
             {
-                GameObject l=Instantiate(liquid,spawnLiquid.transform);
+                int r= Random.Range(1, 3);
+                GameObject l = Instantiate(liquid, sl[r].transform);
                 l.transform.SetParent(transform);
+                l.transform.position = sl[r].transform.position;
+                l.transform.localScale = new Vector3 (0.05f, 0.05f, 0.05f);
                 liquidTotal.Add(l);
                 a= 0;
             }
@@ -49,48 +52,48 @@ public class Puzzle01 : MonoBehaviour
     public void LeftMovement()
     {
         
-        if(instrctions.activeSelf==false)
+        if(instructions.activeSelf==false)
         {   
             if (pos.transform.localPosition.x - 0.128f >= -0.523)
                 pos.transform.localPosition -= new Vector3(0.128f, 0);
         }
-        else if(instrctions.activeSelf == true)
-            instrctions.SetActive(false);
+        else if(instructions.activeSelf == true)
+            instructions.SetActive(false);
 
     }
     public void DownMovement()
     {
-        if (instrctions.activeSelf == false)
+        if (instructions.activeSelf == false)
         {
             if (pos.transform.localPosition.y - 0.128f >= -0.7)
                 pos.transform.localPosition -= new Vector3(0, 0.128f);
         }
-        else if (instrctions.activeSelf == true)
-            instrctions.SetActive(false);
+        else if (instructions.activeSelf == true)
+            instructions.SetActive(false);
     }
     public void UpMovement()
     {
-        if (instrctions.activeSelf == false)
+        if (instructions.activeSelf == false)
         {
             if (pos.transform.localPosition.y + 0.128f <= 0.58)
                 pos.transform.localPosition += new Vector3(0, 0.128f);
         }
-        else if (instrctions.activeSelf == true)
-            instrctions.SetActive(false);
+        else if (instructions.activeSelf == true)
+            instructions.SetActive(false);
     }
     public void RightMovement()
     {
-        if (instrctions.activeSelf == false)
+        if (instructions.activeSelf == false)
         {
             if (pos.transform.localPosition.x + 0.128f <= 0.14f)
                 pos.transform.localPosition += new Vector3(0.128f, 0);
         }
-        else if (instrctions.activeSelf == true)
-            instrctions.SetActive(false);
+        else if (instructions.activeSelf == true)
+            instructions.SetActive(false);
     }
     public void GreenMovement()
     {
-        if (instrctions.activeSelf == false)
+        if (instructions.activeSelf == false)
         {
             if (objectPos.Count >= 6)
             {
@@ -101,8 +104,8 @@ public class Puzzle01 : MonoBehaviour
             a.transform.SetParent(transform);
             objectPos.Add(a);    
         }
-        else if (instrctions.activeSelf == true)
-            instrctions.SetActive(false);
+        else if (instructions.activeSelf == true)
+            instructions.SetActive(false);
     }
 
     public void EndLaberynth()
@@ -120,6 +123,13 @@ public class Puzzle01 : MonoBehaviour
 
             liquidTotal.Clear();
 
+        }
+        else
+        {
+            for (int i = 0; i < liquidTotal.Count; i++)
+                Destroy(liquidTotal[i]);
+            Destroy(presentLaber);
+            liquidTotal.Clear();
         }
     }
 }
