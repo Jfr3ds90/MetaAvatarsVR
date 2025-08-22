@@ -18,7 +18,11 @@ public class Puzzle02 : MonoBehaviour
     {
         for (int i = 0; i < Empty.Length; i++)
         {
-            int value = UnityEngine.Random.Range(0, empty.Length);
+            int value;
+            if (i!=0)
+            value = UnityEngine.Random.Range(0, empty.Length);
+            else
+                value = 0;
             Coord.Add(Empty[i], new Vector2(0, 0));
             Empty[i].GetComponent<Image>().sprite = empty[value];
             Full[i].GetComponent<Image>().sprite = full[value];
@@ -142,6 +146,7 @@ public class Puzzle02 : MonoBehaviour
                 int T = Array.IndexOf(Coord.Keys.ToArray(), piece);
                 simpleRotate(valT, T);
                 Rotable[piece] = valT;
+                originFill(Coord.ElementAt(posObj).Key.GetComponent<Image>(), originDirection(posObj), 3, valT);
              //   Debug.LogWarning("opcion 2 con rotacion tipo: "+valT);
                 break;
             case "Puzzle02_Vacio_Vertical":
@@ -160,11 +165,13 @@ public class Puzzle02 : MonoBehaviour
               int D = Array.IndexOf(Coord.Keys.ToArray(), piece);
                 simpleRotate(valD, D);
                 Rotable[piece] = valD;
+                originFill(Coord.ElementAt(posObj).Key.GetComponent<Image>(), originDirection(posObj), 1, valD);
                 //  Debug.LogWarning("opcion con rotacion tipo: " + valD);
                 break;
                
         }
-        Full[posObj].GetComponent<Image>().fillAmount = 1;//borrar una vez todo el sistema funcione
+
+       // Full[posObj].GetComponent<Image>().fillAmount = 1;//borrar una vez todo el sistema funcione
     }
     void originFill(Image im,int direction,int spr,int rot)//de donde viene el liquido
     {
@@ -385,6 +392,12 @@ public class Puzzle02 : MonoBehaviour
                         break;
                 }
                 break;
+            case 4://2 conexiones o más
+                im.fillAmount = 1;
+                break;
+            case -1://0 conexiones
+                im.fillAmount = 0;
+                break;
         }
     }
     void simpleRotate(int rot,int i)
@@ -408,5 +421,34 @@ public class Puzzle02 : MonoBehaviour
                 Full[i].transform.rotation = Quaternion.Euler(0, 0, 270);
                 break;
         }
+    }
+    int originDirection(int selected)
+    {
+        int value = -1;bool connected = false;
+        if (Coord.ElementAt(selected - 1).Key.GetComponent<Image>().fillAmount == 1)
+        {
+            if (connected == true)
+                value = 4;
+            else if(connected == false)
+               { value = 0; connected = true;    }          
+        }
+        if(Coord.ElementAt(selected + 6).Key.GetComponent<Image>().fillAmount == 1)
+            if (connected == true)
+                value = 4;
+            else if (connected == false)
+            { value = 1; connected = true; }
+        if (Coord.ElementAt(selected + 1).Key.GetComponent<Image>().fillAmount == 1)
+            if (connected == true)
+                value = 4;
+            else if (connected == false)
+            { value = 2; connected = true; }
+        if (Coord.ElementAt(selected - 6).Key.GetComponent<Image>().fillAmount == 1)
+            if (connected == true)
+                value = 4;
+            else if (connected == false)
+            { value = 3; connected = true; }
+        if (connected==false) value = -1;
+
+                    return value;
     }
 }
