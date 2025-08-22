@@ -80,14 +80,15 @@ namespace HackMonkeys.UI.Spatial
         {
             InitializeComponents();
             SetupInteraction();
-            
-            // Obtener referencia al KeyboardManager
+        }
+        
+        private void Start()
+        {
+            // Obtener referencia al KeyboardManager en Start para asegurar que ya existe
             _keyboardManager = VirtualKeyboardManager.Instance;
             if (_keyboardManager == null)
             {
-                Debug.LogWarning("VirtualKeyboardManager not found! Creating one...");
-                GameObject keyboardManagerObj = new GameObject("VirtualKeyboardManager");
-                _keyboardManager = keyboardManagerObj.AddComponent<VirtualKeyboardManager>();
+                Debug.LogError("VirtualKeyboardManager not found! Please ensure there is a VirtualKeyboardManager in the scene with a keyboard prefab assigned.");
             }
         }
         
