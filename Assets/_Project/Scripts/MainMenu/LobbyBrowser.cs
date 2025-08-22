@@ -299,8 +299,7 @@ namespace HackMonkeys.UI.Panels
             // Animar botón de refresh
             if (refreshButton != null && forceRefresh)
             {
-                refreshButton.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360)
-                    .SetEase(Ease.Linear);
+                //refreshButton.transform.DORotate(new Vector3(0, 0, -360), 1f, RotateMode.FastBeyond360).SetEase(Ease.Linear);
             }
     
             try

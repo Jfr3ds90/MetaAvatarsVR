@@ -357,6 +357,24 @@ namespace HackMonkeys.UI.Spatial
             {
                 Debug.Log($"[{name}] OnSelectStart");
             }
+            
+            // Verificar si este botón NO es parte del teclado virtual
+            // Si no es parte del teclado, cerrar el teclado si está abierto
+            VirtualKeyboard3D parentKeyboard = GetComponentInParent<VirtualKeyboard3D>();
+            if (parentKeyboard == null)
+            {
+                // Este botón no es parte de un teclado virtual
+                // Verificar si hay un teclado abierto y cerrarlo
+                VirtualKeyboardManager keyboardManager = VirtualKeyboardManager.Instance;
+                if (keyboardManager != null && keyboardManager.IsKeyboardVisible)
+                {
+                    if (CanDebug)
+                    {
+                        Debug.Log($"[{name}] Button pressed outside virtual keyboard, closing keyboard");
+                    }
+                    keyboardManager.HideKeyboard();
+                }
+            }
 
             _isPressed = true;
             _canTrigger = false; 

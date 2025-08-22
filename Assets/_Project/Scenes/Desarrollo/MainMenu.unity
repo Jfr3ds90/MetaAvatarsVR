@@ -4596,6 +4596,55 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 6807186431601843694, guid: cc7b12e9cc79fe44583e09d4f29f1eb6, type: 3}
   m_PrefabInstance: {fileID: 687392773}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &703795989
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 703795991}
+  - component: {fileID: 703795990}
+  m_Layer: 0
+  m_Name: KeyboardBootstrapper
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &703795990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 703795989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d7960c751c2850448f0d5b5d1b4355f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  keyboardPrefab: {fileID: 2758171019112552537, guid: c6ccbec76b690f54e82b3ba1fa442fde, type: 3}
+  createIfMissing: 1
+  keyboardOffset: {x: 0, y: 0, z: 0}
+  keyboardSize: {x: 0.035, y: 0.035, z: 0.035}
+  keyboardPosition: 0
+--- !u!4 &703795991
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 703795989}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.17391825, y: 1.8221829, z: 1.7485392}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &713211227
 GameObject:
   m_ObjectHideFlags: 0
@@ -5282,7 +5331,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &821994530
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5296,12 +5345,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   keyboardPrefab: {fileID: 2758171019112552537, guid: c6ccbec76b690f54e82b3ba1fa442fde, type: 3}
-  keyboardDistance: 0.5
-  keyboardYOffset: -0.3
   animationDuration: 0.3
+  optimalDistance: 0.8
+  minDistance: 0.4
+  maxDistance: 1.5
+  heightOffset: -0.15
+  angleTilt: 15
+  smoothMovement: 1
+  smoothSpeed: 5
   keyboardOffset: {x: 0, y: 0.06, z: 0}
   KeyboardSize: {x: 0.035, y: 0.035, z: 0.035}
-  keyboaardPos: 0.45
+  avoidOcclusion: 1
+  occlusionLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  lateralOffset: 0
   _currentActiveField: {fileID: 0}
 --- !u!4 &821994531
 Transform:
@@ -5544,6 +5602,67 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 868720763}
   m_CullTransparentMesh: 1
+--- !u!1001 &868731493
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2022824126534529468, guid: 203dd4eea4904b649ba1adda797398f7, type: 3}
+      propertyPath: m_Name
+      value: RayDebug
+      objectReference: {fileID: 0}
+    - target: {fileID: 2022824126534529468, guid: 203dd4eea4904b649ba1adda797398f7, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4695588730949807477, guid: 203dd4eea4904b649ba1adda797398f7, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4695588730949807477, guid: 203dd4eea4904b649ba1adda797398f7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.18
+      objectReference: {fileID: 0}
+    - target: {fileID: 4695588730949807477, guid: 203dd4eea4904b649ba1adda797398f7, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4695588730949807477, guid: 203dd4eea4904b649ba1adda797398f7, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4695588730949807477, guid: 203dd4eea4904b649ba1adda797398f7, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4695588730949807477, guid: 203dd4eea4904b649ba1adda797398f7, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4695588730949807477, guid: 203dd4eea4904b649ba1adda797398f7, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4695588730949807477, guid: 203dd4eea4904b649ba1adda797398f7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4695588730949807477, guid: 203dd4eea4904b649ba1adda797398f7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4695588730949807477, guid: 203dd4eea4904b649ba1adda797398f7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 203dd4eea4904b649ba1adda797398f7, type: 3}
 --- !u!1 &882121863
 GameObject:
   m_ObjectHideFlags: 0
@@ -13854,3 +13973,5 @@ SceneRoots:
   - {fileID: 1029934979}
   - {fileID: 1074244390}
   - {fileID: 906209249}
+  - {fileID: 703795991}
+  - {fileID: 868731493}

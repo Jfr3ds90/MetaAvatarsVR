@@ -97,10 +97,10 @@ namespace HackMonkeys.Core
         #endregion
 
         #region Events
-        public static event Action<GameState, GameState> OnStateChanged;
-        public static event Action<float> OnLoadingProgress;
-        public static event Action OnMatchStarted;
-        public static event Action OnMatchEnded;
+        public  event Action<GameState, GameState> OnStateChanged;
+        public  event Action<float> OnLoadingProgress;
+        public  event Action OnMatchStarted;
+        public  event Action  OnMatchEnded;
         #endregion
 
         #region Unity Lifecycle
@@ -438,7 +438,7 @@ namespace HackMonkeys.Core
                 return;
             }
             
-            OnMatchEnded?.Invoke();
+            OnMatchEnded ?.Invoke();
             
             // Guardar resultados si los hay
             if (result != null)
