@@ -7144,6 +7144,7 @@ MonoBehaviour:
   pressScale: 0.95
   animationDuration: 0.15
   scaleEase: 27
+  baseScale: {x: 1, y: 1, z: 1}
   buttonLabel: 
   isInteractable: 1
   playSound: 1
@@ -7177,7 +7178,6 @@ MonoBehaviour:
   OnButtonHeld:
     m_PersistentCalls:
       m_Calls: []
-  _isPressed: 0
   CanDebug: 0
 --- !u!65 &7109055059249214702
 BoxCollider:
