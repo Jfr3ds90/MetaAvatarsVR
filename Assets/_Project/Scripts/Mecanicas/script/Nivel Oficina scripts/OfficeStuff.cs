@@ -16,11 +16,15 @@ public class OfficeStaff : MonoBehaviour
     }
     private void Update()
     {
-        if (MRpc.GetComponent<VideoPlayer>().length<= MRpc.GetComponent<VideoPlayer>().time && videoEnd==false)
+        if (MRpc.GetComponent<VideoPlayer>().frame== (long)MRpc.GetComponent<VideoPlayer>().frameCount && videoEnd==false)
         {
             videoEnd=true;
             MRpc.GetComponent<AudioSource>().Play();
         }
+    }
+    void EndVideo()
+    {
+
     }
     public void CoffeMachine()
     {

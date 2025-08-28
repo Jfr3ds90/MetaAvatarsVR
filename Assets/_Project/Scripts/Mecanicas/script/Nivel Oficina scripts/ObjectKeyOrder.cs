@@ -12,12 +12,12 @@ public class ObjectKeyOrder : MonoBehaviour
             other.GetComponent<ObjectPos>().correctPos = true;
             FindAnyObjectByType<DetectorObjectPos>().orderSolution();
             otherPos = other.transform;
-            GetComponent<AudioSource>().Play();
         }
     }
     public void moveToPos()
     {
        transform.position = otherPos.position;
         transform.rotation = otherPos.rotation;
+        GetComponent<AudioSource>().Play();
     }
 }
