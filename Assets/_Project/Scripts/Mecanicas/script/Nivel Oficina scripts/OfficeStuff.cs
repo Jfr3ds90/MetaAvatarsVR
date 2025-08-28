@@ -19,7 +19,7 @@ public class OfficeStaff : MonoBehaviour
         if (MRpc.GetComponent<VideoPlayer>().frame== (long)MRpc.GetComponent<VideoPlayer>().frameCount && videoEnd==false)
         {
             videoEnd=true;
-            MRpc.GetComponent<AudioSource>().Play();
+            CanvasPc.GetComponent<AudioSource>().Play();
         }
     }
     void EndVideo()
