@@ -16,10 +16,11 @@ public class OfficeStaff : MonoBehaviour
     }
     private void Update()
     {
-        if (MRpc.GetComponent<VideoPlayer>().frame== (long)MRpc.GetComponent<VideoPlayer>().frameCount && videoEnd==false)
-        {
-            videoEnd=true;
+        Debug.LogWarning(MRpc.GetComponent<VideoPlayer>().frame+" el frame actual y dura: "+ (long)MRpc.GetComponent<VideoPlayer>().frameCount);
+        if (MRpc.GetComponent<VideoPlayer>().frame== (long)MRpc.GetComponent<VideoPlayer>().frameCount-1 && videoEnd==false)
+        {            
             CanvasPc.GetComponent<AudioSource>().Play();
+            videoEnd = true;
         }
     }
     void EndVideo()
