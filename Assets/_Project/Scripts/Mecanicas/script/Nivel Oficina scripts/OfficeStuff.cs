@@ -5,7 +5,7 @@ using UnityEngine.Video;
 
 public class OfficeStaff : MonoBehaviour
 {
-    bool lightsOn = false;
+    bool lightsOn = false, videoEnd=false;
     public GameObject lightsObjects, emergencyLights,CanvasPc,ButtonsCanvas,pendrive,creditsEnd;
     public MeshRenderer MRpc;
     public Material rtVideo;
@@ -14,7 +14,18 @@ public class OfficeStaff : MonoBehaviour
     {
         CanvasTasksShow.level = "oficina";
     }
+    private void Update()
+    {
+        if (MRpc.GetComponent<VideoPlayer>().frame== (long)MRpc.GetComponent<VideoPlayer>().frameCount && videoEnd==false)
+        {
+            videoEnd=true;
+            CanvasPc.GetComponent<AudioSource>().Play();
+        }
+    }
+    void EndVideo()
+    {
 
+    }
     public void CoffeMachine()
     {
         lightsOn = false;
