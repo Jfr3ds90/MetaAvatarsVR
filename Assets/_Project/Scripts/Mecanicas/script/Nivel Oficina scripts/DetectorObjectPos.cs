@@ -35,11 +35,11 @@ public class DetectorObjectPos : MonoBehaviour
     }
     private void Update()
     {
-        if(Input.GetKeyUp(KeyCode.Space))
+       /* if(Input.GetKeyUp(KeyCode.Space))
         {
             MeshRenderer meshRenderer = this.GetComponent<MeshRenderer>();
             meshRenderer.materials[0].SetColor("_EmissionColor", Color.green);
             meshRenderer.materials[0].SetColor("_BaseColor", Color.green);
-        }
+        }*/
     }
 }
