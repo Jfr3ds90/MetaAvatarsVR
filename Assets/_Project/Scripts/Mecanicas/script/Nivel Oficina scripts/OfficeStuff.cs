@@ -5,40 +5,30 @@ using UnityEngine.Video;
 
 public class OfficeStaff : MonoBehaviour
 {
-    bool lightsOn = false, videoEnd=false;
-    public GameObject lightsObjects, emergencyLights,CanvasPc,ButtonsCanvas,pendrive,creditsEnd;
+    bool videoEnd=false;
+    public GameObject CanvasPc,ButtonsCanvas,pendrive,creditsEnd,AmbientSound;
     public MeshRenderer MRpc;
     public Material rtVideo;
-
+    public AudioClip OnLight, OffLight;
     private void OnEnable()
     {
         CanvasTasksShow.level = "oficina";
     }
     private void Update()
     {
-        Debug.LogWarning(MRpc.GetComponent<VideoPlayer>().frame+" el frame actual y dura: "+ (long)MRpc.GetComponent<VideoPlayer>().frameCount);
         if (MRpc.GetComponent<VideoPlayer>().frame== (long)MRpc.GetComponent<VideoPlayer>().frameCount-1 && videoEnd==false)
         {            
             CanvasPc.GetComponent<AudioSource>().Play();
             videoEnd = true;
         }
     }
-    void EndVideo()
-    {
-
-    }
-    public void CoffeMachine()
-    {
-        lightsOn = false;
-        lightsObjects.SetActive(false);
-        emergencyLights.SetActive(true);
-
-    }
     public void lightBox()
     {
-        lightsOn = true;
-        lightsObjects.SetActive(true);
-        emergencyLights.SetActive(true);
+        if (AmbientSound.GetComponent<AudioSource>().clip == OnLight)
+            AmbientSound.GetComponent<AudioSource>().clip = OffLight;
+        else if(AmbientSound.GetComponent<AudioSource>().clip==OffLight)
+            AmbientSound.GetComponent<AudioSource>().clip = OnLight;
+
     }
     public void activationPc()
     {
@@ -46,13 +36,11 @@ public class OfficeStaff : MonoBehaviour
     }
     public void CorrectOption()
     {
-        //creditsEnd.SetActive(true);//sacar cuando el video funcione
         List<Material> lm = new List<Material>();
         lm.Add(MRpc.materials[0]);
         lm.Add(rtVideo);
         MRpc.SetMaterials(lm);
-        MRpc.GetComponent<VideoPlayer>().Play();
-      //  pendrive.GetComponent<simpleKey>().videoCorrect = true;       
+        MRpc.GetComponent<VideoPlayer>().Play(); 
         ButtonsCanvas.SetActive(false);
         creditsEnd.SetActive(true);
         Debug.Log("opcion correcta");
