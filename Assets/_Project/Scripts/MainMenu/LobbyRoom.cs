@@ -292,7 +292,7 @@ namespace HackMonkeys.UI.Panels
 
         #region  Map Selection
 
-        private void StartGameWithSelectedMap()
+        private async void StartGameWithSelectedMap()
         {
             if (_lobbyController == null || _networkBootstrapper == null)
             {
@@ -300,6 +300,26 @@ namespace HackMonkeys.UI.Panels
                 return;
             }
     
+            Debug.Log($"🧪 [LOBBYROOM] === STARTING GAME SEQUENCE ===");
+            
+            // Paso 1: Sincronizar el mapa con todos los clientes
+            await SyncMapWithAllClients();
+            
+            // Paso 2: Verificar sincronización
+            if (!await VerifyMapSynchronization())
+            {
+                Debug.LogError("[LOBBYROOM] Map synchronization failed, aborting game start");
+                ShowStatusMessage("Failed to sync map with all players", MessageType.Error);
+                return;
+            }
+    
+            // Paso 3: Iniciar el juego
+            Debug.Log($"[LOBBYROOM] ✅ All checks passed, starting game...");
+            _lobbyController.StartGame();
+        }
+        
+        private async System.Threading.Tasks.Task SyncMapWithAllClients()
+        {
             // Asegurar que el mapa correcto esté configurado
             string finalMap = "";
     
@@ -321,10 +341,104 @@ namespace HackMonkeys.UI.Panels
                     : _networkBootstrapper.SelectedSceneName;
             }
     
-            Debug.Log($"[LOBBYROOM] Starting game with map: {finalMap}");
+            Debug.Log($"[LOBBYROOM] 🗺️ Final map determined: {finalMap}");
+            
+            // Actualizar NetworkBootstrapper local (host)
             _networkBootstrapper.SelectedSceneName = finalMap;
-    
-            _lobbyController.StartGame();
+            
+            // Solo enviar RPC si somos el host
+            var lobbyInfo = _lobbyController?.GetLobbyInfo();
+            if (lobbyInfo?.IsHost == true && _lobbyState != null)
+            {
+                var hostPlayer = _lobbyState.LocalPlayer;
+                if (hostPlayer != null && hostPlayer.IsHost)
+                {
+                    Debug.Log($"[LOBBYROOM] 📡 Sending map sync RPC to all clients: {finalMap}");
+                    hostPlayer.RPC_ChangeMap(finalMap);
+                    
+                    // Esperar más tiempo para asegurar propagación completa
+                    await System.Threading.Tasks.Task.Delay(750);
+                    
+                    // Verificar que nuestro propio NetworkBootstrapper esté actualizado
+                    if (_networkBootstrapper.SelectedSceneName != finalMap)
+                    {
+                        Debug.LogWarning($"[LOBBYROOM] NetworkBootstrapper not updated, forcing: {finalMap}");
+                        _networkBootstrapper.SelectedSceneName = finalMap;
+                    }
+                }
+            }
+            else
+            {
+                Debug.Log($"[LOBBYROOM] Not host, skipping RPC send. IsHost: {lobbyInfo?.IsHost}");
+            }
+        }
+        
+        private async System.Threading.Tasks.Task<bool> VerifyMapSynchronization()
+        {
+            if (_lobbyState == null || _networkBootstrapper == null) return false;
+            
+            string expectedMap = _networkBootstrapper.SelectedSceneName;
+            Debug.Log($"[LOBBYROOM] 🔍 Verifying map synchronization: {expectedMap}");
+            
+            // En Photon Fusion, solo el host puede actualizar SelectedMap
+            // Verificamos que:
+            // 1. El host tenga el mapa correcto
+            // 2. Todos los NetworkBootstrapper estén sincronizados
+            
+            int maxAttempts = 5;
+            for (int attempt = 0; attempt < maxAttempts; attempt++)
+            {
+                bool hostHasCorrectMap = false;
+                var players = _lobbyState.GetPlayersList();
+                
+                // Verificar que el host tenga el mapa correcto
+                foreach (var player in players)
+                {
+                    if (player == null) continue;
+                    
+                    if (player.IsHost)
+                    {
+                        string hostMap = player.SelectedMap.ToString();
+                        Debug.Log($"[LOBBYROOM] Host player {player.GetDisplayName()} has map: '{hostMap}'");
+                        
+                        if (!string.IsNullOrEmpty(hostMap) && hostMap == expectedMap)
+                        {
+                            hostHasCorrectMap = true;
+                            Debug.Log($"[LOBBYROOM] ✅ Host has correct map: {expectedMap}");
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"[LOBBYROOM] Host has incorrect map: '{hostMap}', expected '{expectedMap}'");
+                        }
+                        break;
+                    }
+                }
+                
+                // Si el host tiene el mapa correcto, asumimos que la sincronización es correcta
+                // ya que RPC_NotifyMapChange actualiza el NetworkBootstrapper de todos
+                if (hostHasCorrectMap)
+                {
+                    Debug.Log($"[LOBBYROOM] ✅ Map synchronization verified: {expectedMap}");
+                    return true;
+                }
+                
+                Debug.Log($"[LOBBYROOM] ⏳ Attempt {attempt + 1}/{maxAttempts} - waiting for host sync...");
+                await System.Threading.Tasks.Task.Delay(200);
+            }
+            
+            Debug.LogError($"[LOBBYROOM] ❌ Failed to sync host with map after {maxAttempts} attempts");
+            
+            // Log adicional para debug
+            var allPlayers = _lobbyState.GetPlayersList();
+            foreach (var player in allPlayers)
+            {
+                if (player != null)
+                {
+                    Debug.LogError($"[LOBBYROOM] Player {player.GetDisplayName()}: IsHost={player.IsHost}, SelectedMap='{player.SelectedMap}'");
+                }
+            }
+            
+            return false;
         }
         
         private void PopulateMapSelection()
@@ -432,16 +546,26 @@ namespace HackMonkeys.UI.Panels
         
         private void OnMapChangedByHost(string newMapName)
         {
-            Debug.Log($"[LOBBYROOM] Map changed by host to: {newMapName}");
+            Debug.Log($"[LOBBYROOM] 🗺️ Map changed by host to: {newMapName}");
     
-            if (string.IsNullOrEmpty(newMapName)) return;
+            if (string.IsNullOrEmpty(newMapName)) 
+            {
+                Debug.LogWarning("[LOBBYROOM] Received empty map name from host");
+                return;
+            }
 
             _selectedMapName = newMapName;
+            Debug.Log($"[LOBBYROOM] Local _selectedMapName updated to: {_selectedMapName}");
     
-            // Actualizar NetworkBootstrapper
+            // Actualizar NetworkBootstrapper (CRITICO para clientes)
             if (_networkBootstrapper != null)
             {
                 _networkBootstrapper.SelectedSceneName = newMapName;
+                Debug.Log($"[LOBBYROOM] ✅ NetworkBootstrapper.SelectedSceneName updated to: {newMapName}");
+            }
+            else
+            {
+                Debug.LogError("[LOBBYROOM] NetworkBootstrapper is null! Cannot update scene name.");
             }
     
             UpdateMapDisplay();
@@ -450,6 +574,7 @@ namespace HackMonkeys.UI.Panels
             if (lobbyInfo?.IsHost == false)
             {
                 ShowStatusMessage($"Host changed map to: {newMapName}", MessageType.Info);
+                Debug.Log($"[LOBBYROOM] 📢 Showed map change message to client");
             }
         }
 
@@ -1060,6 +1185,89 @@ namespace HackMonkeys.UI.Panels
             RefreshPlayersList();
     
             Debug.Log("🧪 [DEBUG] === END FORCE REFRESH ===");
+        }
+        
+        [ContextMenu("Debug: Complete System State")]
+        private void DebugCompleteSystemState()
+        {
+            Debug.Log("=== COMPLETE SYSTEM DEBUG STATE ===");
+            
+            // LobbyRoom state
+            Debug.Log($"[LobbyRoom] Selected Map Name: {_selectedMapName}");
+            Debug.Log($"[LobbyRoom] NetworkBootstrapper exists: {_networkBootstrapper != null}");
+            Debug.Log($"[LobbyRoom] LobbyController exists: {_lobbyController != null}");
+            Debug.Log($"[LobbyRoom] LobbyState exists: {_lobbyState != null}");
+            
+            // NetworkBootstrapper state
+            if (_networkBootstrapper != null)
+            {
+                Debug.Log($"[NetworkBootstrapper] Selected Scene: {_networkBootstrapper.SelectedSceneName}");
+                Debug.Log($"[NetworkBootstrapper] Is Host: {_networkBootstrapper.IsHost}");
+                Debug.Log($"[NetworkBootstrapper] Is In Room: {_networkBootstrapper.IsInRoom}");
+                Debug.Log($"[NetworkBootstrapper] Is Connected: {_networkBootstrapper.IsConnected}");
+            }
+            
+            // LobbyState players and maps
+            if (_lobbyState != null)
+            {
+                var players = _lobbyState.GetPlayersList();
+                Debug.Log($"[LobbyState] Player count: {players.Count}");
+                
+                foreach (var player in players)
+                {
+                    if (player != null)
+                    {
+                        Debug.Log($"[LobbyState] Player: {player.GetDisplayName()}");
+                        Debug.Log($"  - IsHost: {player.IsHost}");
+                        Debug.Log($"  - IsReady: {player.IsReady}");
+                        Debug.Log($"  - SelectedMap: '{player.SelectedMap}'");
+                        Debug.Log($"  - IsLocalPlayer: {player.IsLocalPlayer}");
+                    }
+                }
+                
+                Debug.Log($"[LobbyState] All Players Ready: {_lobbyState.AllPlayersReady}");
+                Debug.Log($"[LobbyState] Selected Map: {_lobbyState.GetSelectedMap()}");
+            }
+            
+            // LobbyController state
+            if (_lobbyController != null)
+            {
+                Debug.Log($"[LobbyController] Can Start Game: {_lobbyController.CanStartGame}");
+                var info = _lobbyController.GetLobbyInfo();
+                if (info != null)
+                {
+                    Debug.Log($"[LobbyController] Is Host: {info.IsHost}");
+                    Debug.Log($"[LobbyController] Current Players: {info.CurrentPlayers}");
+                    Debug.Log($"[LobbyController] Ready Players: {info.ReadyPlayers}");
+                }
+            }
+            
+            Debug.Log("==================================");
+        }
+        
+        [ContextMenu("Debug: Test Map Synchronization")]
+        private async void DebugTestMapSynchronization()
+        {
+            Debug.Log("=== TESTING MAP SYNCHRONIZATION ===");
+            
+            // Estado antes
+            Debug.Log("--- BEFORE SYNC ---");
+            DebugCompleteSystemState();
+            
+            // Simular sincronización
+            Debug.Log("--- STARTING SYNC ---");
+            await SyncMapWithAllClients();
+            
+            // Estado después
+            Debug.Log("--- AFTER SYNC ---");
+            DebugCompleteSystemState();
+            
+            // Verificar sincronización
+            Debug.Log("--- VERIFYING SYNC ---");
+            bool syncResult = await VerifyMapSynchronization();
+            Debug.Log($"Synchronization result: {syncResult}");
+            
+            Debug.Log("=== TEST COMPLETED ===");
         }
 
         #endregion

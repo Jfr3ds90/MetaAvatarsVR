@@ -79,11 +79,18 @@ namespace HackMonkeys.Core
         /// </summary>
         public async void StartGame()
         {
-            Debug.Log("[LobbyController] 🚀 Attempting to start game...");
+            Debug.Log("[LobbyController] 🚀 === STARTING GAME SEQUENCE ===");
+            
+            // Debug de estado actual
+            //Debug.Log($"[LobbyController] IsHost: {IsHost}, IsInRoom: {IsInRoom}");
+            Debug.Log($"[LobbyController] AllPlayersReady: {_lobbyState?.AllPlayersReady}");
+            Debug.Log($"[LobbyController] PlayerCount: {_lobbyState?.PlayerCount}");
             
             PlayerDataManager.Instance.UpdateSessionPlayers(_lobbyState);
                 
-            PlayerDataManager.Instance.SetSelectedMap(_lobbyState.GetSelectedMap());
+            string selectedMap = _lobbyState.GetSelectedMap();
+            PlayerDataManager.Instance.SetSelectedMap(selectedMap);
+            Debug.Log($"[LobbyController] Selected map: {selectedMap}");
             
             // VALIDACIÓN Fail Fast
             if (!ValidateCanStartGame())
@@ -102,11 +109,15 @@ namespace HackMonkeys.Core
 
                 string mapName = PlayerDataManager.Instance.SelectedMap;
                 int playerCount = _lobbyState.PlayerCount;
+                
+                Debug.Log($"[LobbyController] Starting match with map: {mapName}, players: {playerCount}");
 
                 bool coreReady = await _gameCore.StartMatch(mapName, playerCount);
+                Debug.Log($"[LobbyController] GameCore.StartMatch result: {coreReady}");
 
                 if (coreReady)
                 {
+                    Debug.Log($"[LobbyController] Calling NetworkBootstrapper.StartGame...");
                     bool success = await _networkBootstrapper.StartGame();
                     
                     if (success)
@@ -120,10 +131,17 @@ namespace HackMonkeys.Core
                         OnGameStartFailed?.Invoke();
                     }
                 }
+                else
+                {
+                    Debug.LogError("[LobbyController] ❌ GameCore.StartMatch failed");
+                    OnActionFailed?.Invoke("Failed to initialize game core");
+                    OnGameStartFailed?.Invoke();
+                }
             }
             catch (System.Exception e)
             {
                 Debug.LogError($"[LobbyController] ❌ Exception starting game: {e.Message}");
+                Debug.LogError($"[LobbyController] Stack trace: {e.StackTrace}");
                 OnActionFailed?.Invoke($"Error starting game: {e.Message}");
                 OnGameStartFailed?.Invoke();
             }

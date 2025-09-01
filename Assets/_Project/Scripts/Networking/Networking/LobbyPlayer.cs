@@ -447,29 +447,51 @@ namespace HackMonkeys.Core
         /// <summary>
         /// Cambiar mapa (solo host)
         /// </summary>
-        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
         public void RPC_ChangeMap(NetworkString<_64> mapName)
         {
+            Debug.Log($"[LOBBYPLAYER-RPC] 📤 RPC_ChangeMap received: {mapName}, IsHost: {IsHost}, HasStateAuth: {HasStateAuthority}");
+            
             if (!IsHost)
             {
                 Debug.LogWarning("[LOBBYPLAYER] Non-host tried to change map!");
                 return;
             }
             
+            // Solo el servidor puede cambiar el estado networked
             if (HasStateAuthority)
             {
                 SelectedMap = mapName;
+                Debug.Log($"[LOBBYPLAYER-RPC] ✅ Server updated SelectedMap to: {mapName}");
+                
+                // Notificar a todos los clientes
+                RPC_NotifyMapChange(mapName);
             }
-            
-            RPC_NotifyMapChange(mapName);
         }
 
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
         private void RPC_NotifyMapChange(NetworkString<_64> mapName)
         {
-            if (LobbyState.Instance != null && IsHost)
+            Debug.Log($"[LOBBYPLAYER-RPC] 📥 Map change notification received: {mapName}, IsHost: {IsHost}, HasStateAuth: {HasStateAuthority}");
+            
+            // CRITICO: Todos los jugadores actualizan su SelectedMap
+            if (HasStateAuthority)
             {
+                SelectedMap = mapName;
+                Debug.Log($"[LOBBYPLAYER-RPC] ✅ Updated SelectedMap to: {mapName}");
+            }
+            
+            if (LobbyState.Instance != null)
+            {
+                // Todos los jugadores actualizan su estado
                 LobbyState.Instance.UpdateMapSelection(mapName.ToString());
+                
+                // Todos actualizan su NetworkBootstrapper
+                if (NetworkBootstrapper.Instance != null)
+                {
+                    Debug.Log($"[LOBBYPLAYER-RPC] 🗺️ Updating NetworkBootstrapper map to: {mapName}");
+                    NetworkBootstrapper.Instance.SelectedSceneName = mapName.ToString();
+                }
             }
         }
         #endregion

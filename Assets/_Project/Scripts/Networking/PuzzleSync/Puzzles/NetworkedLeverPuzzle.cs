@@ -67,7 +67,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             {
                 _levers = GetComponentsInChildren<NetworkedLever>();
             }
-            
+    
             for (int i = 0; i < _levers.Length; i++)
             {
                 if (_levers[i] != null)
@@ -75,16 +75,16 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                     string letter = _useCustomMapping && i < _leverLetters.Length 
                         ? _leverLetters[i] 
                         : ((char)('A' + i)).ToString();
-                        
+                
                     _levers[i].SetLeverData(i, letter);
-                    _levers[i].SetPuzzleController(this);
                     _leverIndexToLetter[i] = letter;
-                    
+            
                     int index = i;
                     _levers[i].OnLeverStateChanged.AddListener((idx, state) => OnLeverChanged(idx, state));
                 }
             }
         }
+        
         
         public override void Spawned()
         {
@@ -149,6 +149,20 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 _activatedLevers.Remove(leverIndex);
                 UpdateCurrentSequence();
             }
+        }
+        
+        public void RegisterLever(NetworkedLever lever, int index)
+        {
+            if (index >= 0 && index < _levers.Length)
+            {
+                _levers[index] = lever;
+                Debug.Log($"[NetworkedLeverPuzzle] Lever {index} registered");
+            }
+        }
+
+        public void OnLeverStateChanged(int leverIndex, bool activated)
+        {
+            
         }
         
         private void ProcessLeverActivation(int leverIndex)

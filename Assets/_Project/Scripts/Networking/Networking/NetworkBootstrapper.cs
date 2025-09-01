@@ -922,25 +922,37 @@ namespace HackMonkeys.Core
         
         public void OnSceneLoadDone(NetworkRunner runner)
         {
-            LogDebug($"🎬 OnSceneLoadDone - {runner.GameMode}");
+            LogDebug($"🎬 === OnSceneLoadDone - {runner.GameMode} ===");
             LogDebug($"- New Scene: {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
             LogDebug($"- Is Server: {runner.IsServer}");
             LogDebug($"- Is Client: {runner.IsClient}");
+            LogDebug($"- Runner name: {runner.name}");
+            LogDebug($"- SelectedSceneName: {SelectedSceneName}");
             
             if (_gameCore != null)
             {
+                LogDebug("✅ Notifying GameCore that scene loaded");
                 _gameCore.OnGameSceneLoaded();
+            }
+            else
+            {
+                LogDebug("❌ GameCore is null!");
             }
         }
         
         public void OnSceneLoadStart(NetworkRunner runner)
         {
+            LogDebug($"🎬 === OnSceneLoadStart - {runner.GameMode} ===");
+            LogDebug($"- IsServer: {runner.IsServer}");
+            LogDebug($"- IsClient: {runner.IsClient}");
+            LogDebug($"- Current Scene: {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
+            LogDebug($"- SelectedSceneName: {SelectedSceneName}");
+            
             _gameCore?.TransitionToState(GameCore.GameState.LoadingMatch);
-            LogDebug($"🎬 OnSceneLoadStart - {runner.GameMode}");
             
             if (!runner.IsServer && _gameCore != null)
             {
-                LogDebug("📱 CLIENT: Scene change detected");
+                LogDebug("📱 CLIENT: Scene change detected - notifying GameCore");
                 _gameCore.OnClientSceneChangeStarted();
             }
             
