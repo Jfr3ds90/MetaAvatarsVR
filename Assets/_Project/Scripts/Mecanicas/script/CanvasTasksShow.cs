@@ -5,7 +5,7 @@ public class CanvasTasksShow : MonoBehaviour
 {
     public static string level;
     public static int phase = 1;
-    [SerializeField] private GameObject timePanel, instructionsPanel;
+    [SerializeField] private GameObject  timePanel, instructionsPanel;
     public void ShowInstructions ()
     {
         switch(level)
