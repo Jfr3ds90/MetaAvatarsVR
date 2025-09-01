@@ -5,11 +5,12 @@ using UnityEngine.Video;
 
 public class OfficeStaff : MonoBehaviour
 {
-    bool videoEnd=false;
-    public GameObject CanvasPc,ButtonsCanvas,pendrive,creditsEnd,AmbientSound;
+    bool videoEnd = false;
+    public GameObject CanvasPc, ButtonsCanvas, pendrive, creditsEnd, AmbientSound,leverBox;
     public MeshRenderer MRpc;
     public Material rtVideo;
     public AudioClip OnLight, OffLight;
+    [SerializeField] private float z;
     private void OnEnable()
     {
         CanvasTasksShow.level = "oficina";
@@ -24,11 +25,17 @@ public class OfficeStaff : MonoBehaviour
     }
     public void lightBox()
     {
-        if (AmbientSound.GetComponent<AudioSource>().clip == OnLight)
-            AmbientSound.GetComponent<AudioSource>().clip = OffLight;
-        else if(AmbientSound.GetComponent<AudioSource>().clip==OffLight)
+        if(leverBox.transform.rotation.z >= 0.6f)
+        {
+                AmbientSound.GetComponent<AudioSource>().clip = OffLight;
+            AmbientSound.GetComponent<AudioSource>().Play();
+        }
+        else if(leverBox.transform.rotation.z! <= 0.4f)
+        {
             AmbientSound.GetComponent<AudioSource>().clip = OnLight;
-
+            AmbientSound.GetComponent<AudioSource>().Play();
+        }
+        z = leverBox.transform.rotation.z;
     }
     public void activationPc()
     {

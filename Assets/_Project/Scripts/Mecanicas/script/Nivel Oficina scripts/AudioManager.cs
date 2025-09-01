@@ -6,12 +6,12 @@ using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
-    public AudioClip[] Narrador;
+    public AudioClip[] Narrator;
     AudioSource source;
     public int FindAnimals = 0,FailLevers=0;
     public float timer;
     //RevealingEffect revealingEffect; 
-    [HideInInspector] public bool extra1= false, extra2 = false, extra3= false;
+    [HideInInspector] public bool extra1= false, extra2 = false, extra3= false,NarratorOn=false;
     public bool usedL = false, FindLevers=false,colide=false, intro1 = false, intro2 = false, intro3 = false;
     public int action,moreAction;//reutilizar
     public int ActualPhase = 0;
@@ -28,7 +28,7 @@ public class AudioManager : MonoBehaviour
    public IEnumerator NarratorLines(int tiempo,int objetos)
     {       
         timer = 0;
-        source.clip = Narrador[objetos - 1];
+        source.clip = Narrator[objetos - 1];
         source.Play(); //1 al 9 fase 1|10 al 14 fase 2|15 al 23 fase 3|24 al 29 fase 4|30 al 35 fase 5  //fase 4 |24 al ser agarrado una llave| 25 (ya esta) entrar a la salas separadas | 26 tiempo afk| 27 colocarse frente a la pantalla | 28 figura hecha | 29 inmediatamente tras el 28       //fase 5 |30 al abrirse la caja fuerte| 31 agarrar el pendrive| 32 iniciar ventana de selección (aun no implementado mecanica)| 33 tras hacer el primer envio (aun no implementado mecanica)| 34 tras lograrlo a la primer (aun no implementado mecanica)| 35 tras lograrlo habiendo fallado al menos una vez (aun no implementado mecanica)
         yield return new WaitForSeconds(tiempo);
     }
@@ -125,7 +125,11 @@ public class AudioManager : MonoBehaviour
                 timer += Time.deltaTime;
                 if (timer >= 30) { }
                 break;             
-        }     
+        }
+        if (!source.isPlaying)
+            NarratorOn = false;
+        else if (source.isPlaying)
+            NarratorOn = true;
     }
     public void calls()
     {
