@@ -76,11 +76,11 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                         ? _leverLetters[i] 
                         : ((char)('A' + i)).ToString();
                 
-                    _levers[i].SetLeverData(i, letter);
+                    //_levers[i].SetLeverData(i, letter);
                     _leverIndexToLetter[i] = letter;
             
                     int index = i;
-                    _levers[i].OnLeverStateChanged.AddListener((idx, state) => OnLeverChanged(idx, state));
+                    //_levers[i].OnLeverStateChanged.AddListener((idx, state) => OnLeverChanged(idx, state));
                 }
             }
         }
@@ -327,7 +327,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             {
                 if (lever != null)
                 {
-                    lever.RPC_ResetLever();
+                    //lever.RPC_ResetLever();
                 }
             }
             
@@ -399,7 +399,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             {
                 if (lever != null)
                 {
-                    lever.OnLeverStateChanged.RemoveAllListeners();
+                    //lever.OnLeverStateChanged.RemoveAllListeners();
                 }
             }
         }
