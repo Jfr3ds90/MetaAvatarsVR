@@ -28668,6 +28668,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 453074355140037662}
     m_Modifications:
+    - target: {fileID: 177052203179654836, guid: 4b39ff07b6d515f44b84ae568bd0dc3b, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1931666660974855910, guid: 4b39ff07b6d515f44b84ae568bd0dc3b, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -47933,8 +47937,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70a287317b0708c4baf2f41fa02bc5fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _objectPrefabs: []
-  _spawnPositions: []
+  _objectPrefabs:
+  - {fileID: 6715284292989704905, guid: 021aa9e6f056b2e449bcfbab6305b2ea, type: 3}
+  - {fileID: 2562883755351935129, guid: ca5dd6326dcbe034c9b137d8f1b92dff, type: 3}
+  - {fileID: 6498001435404296029, guid: 6fc47d4950fd61f43ab94f2ef355e3a5, type: 3}
+  - {fileID: 3606397228689997329, guid: bfef65ea61c1f3342aae266e4aa787a2, type: 3}
+  - {fileID: 8514829791689309963, guid: 5294aeeaf10574743b945c1c7c70d706, type: 3}
+  - {fileID: 3096010021853172616, guid: ce749c9f1b200e2449b3240b44b3656b, type: 3}
+  _spawnPositions:
+  - {fileID: 3546185584698064444}
+  - {fileID: 2263235307490508411}
+  - {fileID: 7798500960589525925}
+  - {fileID: 2929615945517024692}
+  - {fileID: 978343825762117844}
+  - {fileID: 4625718995421681856}
+  - {fileID: 7747338518751201548}
+  - {fileID: 9000001407080359312}
+  - {fileID: 5543475328789217449}
+  - {fileID: 657248327299197868}
+  - {fileID: 2996732475589067755}
+  - {fileID: 1183518956306793652}
+  - {fileID: 733560207}
+  - {fileID: 1166577328}
+  - {fileID: 278532639}
+  - {fileID: 1282501414}
+  - {fileID: 746083557}
   _randomizeOnStart: 1
   _allowDuplicates: 0
   _maxActiveObjects: -1
@@ -75742,26 +75769,58 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _doorTransform: {fileID: 1924713757642538913}
-  _openAngle: 90
-  _openSpeed: 2
-  _autoClose: 0
-  _autoCloseDelay: 5
   _requiresPuzzleCompletion: 1
   _requiredPuzzleId: 0
   _useRotation: 1
   _rotationAxis: {x: 0, y: 1, z: 0}
+  _openAngle: 90
   _usePosition: 0
-  _openPosition: {x: 0, y: 0, z: 0}
+  _openOffset: {x: 0, y: 3, z: 0}
+  _animationDuration: 1.5
+  _animationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _autoClose: 0
+  _autoCloseDelay: 5
+  _audioSource: {fileID: 0}
   _openSound: {fileID: 0}
   _closeSound: {fileID: 0}
   _lockedSound: {fileID: 0}
+  _unlockSound: {fileID: 0}
   _lockedIndicator: {fileID: 0}
   _unlockedIndicator: {fileID: 0}
   _openParticles: {fileID: 0}
-  _CurrentState: 0
+  _closeParticles: {fileID: 0}
+  _debugMode: 0
+  _startUnlocked: 0
+  _DoorProgress: 0
+  _IsMoving:
+    _value: 0
+  _TargetOpen:
+    _value: 0
   _IsUnlocked:
     _value: 0
-  _StateChangeTime: 0
   _OpenCount: 0
   OnDoorOpening:
     m_PersistentCalls:
@@ -75779,6 +75838,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnDoorLocked:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDoorProgressChanged:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &7989129369784249511
