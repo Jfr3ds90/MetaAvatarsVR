@@ -47937,46 +47937,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70a287317b0708c4baf2f41fa02bc5fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _objectPrefabs:
-  - {fileID: 6715284292989704905, guid: 021aa9e6f056b2e449bcfbab6305b2ea, type: 3}
-  - {fileID: 2562883755351935129, guid: ca5dd6326dcbe034c9b137d8f1b92dff, type: 3}
-  - {fileID: 6498001435404296029, guid: 6fc47d4950fd61f43ab94f2ef355e3a5, type: 3}
-  - {fileID: 3606397228689997329, guid: bfef65ea61c1f3342aae266e4aa787a2, type: 3}
-  - {fileID: 8514829791689309963, guid: 5294aeeaf10574743b945c1c7c70d706, type: 3}
-  - {fileID: 3096010021853172616, guid: ce749c9f1b200e2449b3240b44b3656b, type: 3}
-  _spawnPositions:
-  - {fileID: 3546185584698064444}
-  - {fileID: 2263235307490508411}
-  - {fileID: 7798500960589525925}
-  - {fileID: 2929615945517024692}
-  - {fileID: 978343825762117844}
-  - {fileID: 4625718995421681856}
-  - {fileID: 7747338518751201548}
-  - {fileID: 9000001407080359312}
-  - {fileID: 5543475328789217449}
-  - {fileID: 657248327299197868}
-  - {fileID: 2996732475589067755}
-  - {fileID: 1183518956306793652}
-  - {fileID: 733560207}
-  - {fileID: 1166577328}
-  - {fileID: 278532639}
-  - {fileID: 1282501414}
-  - {fileID: 746083557}
+  _randomizationTypes: 2
   _randomizeOnStart: 1
-  _allowDuplicates: 0
-  _maxActiveObjects: -1
-  _randomizeMaterials: 0
-  _availableMaterials: []
-  _materialTargets: []
-  _RandomizedObjects: []
-  _ActiveObjectCount: 0
+  _useUniqueSeed: 0
+  _customSeed: 12345
+  _ensureUniquePositions: 1
+  _possiblePositions: []
+  _prefabsToSpawn: []
+  _maxSpawnCount: 10
+  _existingObjects: []
+  _hideUntilRandomized: 1
+  _teleportRigidbodies: 1
+  _preserveAtlasSlot: 1
+  _atlasSlotIndex: 0
+  _possibleMaterials: []
+  _materialSlotsToRandomize: 0100000002000000
+  _uniformScale: 1
+  _scaleRange: {x: 0.8, y: 1.2}
+  _useRotationPresets: 1
+  _rotationPresets: []
+  _validateSetup: 1
+  _debugMode: 0
+  _RandomSeed: 0
   _IsRandomized:
     _value: 0
-  _RandomSeed: 0
+  _RandomizedData: []
+  OnRandomizationStarted:
+    m_PersistentCalls:
+      m_Calls: []
   OnRandomizationComplete:
     m_PersistentCalls:
       m_Calls: []
-  OnObjectSpawned:
+  OnObjectRandomized:
+    m_PersistentCalls:
+      m_Calls: []
+  OnRandomizationFailed:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &4456645839228071676
@@ -56089,23 +56084,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70a287317b0708c4baf2f41fa02bc5fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _objectPrefabs: []
-  _spawnPositions: []
+  _randomizationTypes: 2
   _randomizeOnStart: 1
-  _allowDuplicates: 0
-  _maxActiveObjects: -1
-  _randomizeMaterials: 0
-  _availableMaterials: []
-  _materialTargets: []
-  _RandomizedObjects: []
-  _ActiveObjectCount: 0
+  _useUniqueSeed: 0
+  _customSeed: 12345
+  _ensureUniquePositions: 1
+  _possiblePositions: []
+  _prefabsToSpawn: []
+  _maxSpawnCount: 10
+  _existingObjects: []
+  _hideUntilRandomized: 1
+  _teleportRigidbodies: 1
+  _preserveAtlasSlot: 1
+  _atlasSlotIndex: 0
+  _possibleMaterials: []
+  _materialSlotsToRandomize: 0100000002000000
+  _uniformScale: 1
+  _scaleRange: {x: 0.8, y: 1.2}
+  _useRotationPresets: 1
+  _rotationPresets: []
+  _validateSetup: 1
+  _debugMode: 0
+  _RandomSeed: 0
   _IsRandomized:
     _value: 0
-  _RandomSeed: 0
+  _RandomizedData: []
+  OnRandomizationStarted:
+    m_PersistentCalls:
+      m_Calls: []
   OnRandomizationComplete:
     m_PersistentCalls:
       m_Calls: []
-  OnObjectSpawned:
+  OnObjectRandomized:
+    m_PersistentCalls:
+      m_Calls: []
+  OnRandomizationFailed:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &5428798575372597025
@@ -67188,23 +67201,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70a287317b0708c4baf2f41fa02bc5fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _objectPrefabs: []
-  _spawnPositions: []
+  _randomizationTypes: 2
   _randomizeOnStart: 1
-  _allowDuplicates: 0
-  _maxActiveObjects: -1
-  _randomizeMaterials: 0
-  _availableMaterials: []
-  _materialTargets: []
-  _RandomizedObjects: []
-  _ActiveObjectCount: 0
+  _useUniqueSeed: 0
+  _customSeed: 12345
+  _ensureUniquePositions: 1
+  _possiblePositions: []
+  _prefabsToSpawn: []
+  _maxSpawnCount: 10
+  _existingObjects: []
+  _hideUntilRandomized: 1
+  _teleportRigidbodies: 1
+  _preserveAtlasSlot: 1
+  _atlasSlotIndex: 0
+  _possibleMaterials: []
+  _materialSlotsToRandomize: 0100000002000000
+  _uniformScale: 1
+  _scaleRange: {x: 0.8, y: 1.2}
+  _useRotationPresets: 1
+  _rotationPresets: []
+  _validateSetup: 1
+  _debugMode: 0
+  _RandomSeed: 0
   _IsRandomized:
     _value: 0
-  _RandomSeed: 0
+  _RandomizedData: []
+  OnRandomizationStarted:
+    m_PersistentCalls:
+      m_Calls: []
   OnRandomizationComplete:
     m_PersistentCalls:
       m_Calls: []
-  OnObjectSpawned:
+  OnObjectRandomized:
+    m_PersistentCalls:
+      m_Calls: []
+  OnRandomizationFailed:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &6836439477757503233
