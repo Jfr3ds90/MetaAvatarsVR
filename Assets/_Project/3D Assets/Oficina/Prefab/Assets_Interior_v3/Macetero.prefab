@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6291367467357465469}
   - component: {fileID: 4065789561800159268}
   - component: {fileID: 1053470107688185430}
+  - component: {fileID: 4428741348627481307}
   - component: {fileID: 3850254651771042378}
   m_Layer: 0
   m_Name: Macetero
@@ -87,6 +88,27 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &4428741348627481307
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3827457257535815992}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.36552483, y: 0.3347264, z: 0.41095245}
+  m_Center: {x: 0.01969066, y: 0.1709956, z: -0.07403204}
 --- !u!136 &3850254651771042378
 CapsuleCollider:
   m_ObjectHideFlags: 0
