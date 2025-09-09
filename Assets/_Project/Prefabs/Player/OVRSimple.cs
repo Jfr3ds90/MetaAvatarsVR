@@ -10,18 +10,6 @@
 #define OVR_ANDROID_MRC
 #endif
 
-#if !UNITY_2018_3_OR_NEWER
-#error Oculus Utilities require Unity 2018.3 or higher.
-#endif
-
-#if !USING_XR_MANAGEMENT
-#warning XR Plug-in Management is not enabled. Your project would not launch in XR mode. Please install it through "Project Settings".
-#endif
-
-#if !(USING_XR_SDK_OCULUS || USING_XR_SDK_OPENXR)
-#warning Either "Oculus XR Plugin" or "OpenXR Plugin" must be installed for the project to run properly on Oculus/Meta XR Devices. Please install one of them through "XR Plug-in Management" settings, or Package Manager.
-#endif
-
 #if UNITY_Y_FLIP_FIX_2021 || UNITY_Y_FLIP_FIX_2022 || UNITY_Y_FLIP_FIX_6
 #define UNITY_Y_FLIP_FIX
 #endif
@@ -29,9 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using UnityEngine;
-using UnityEngine.Serialization;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -63,8 +49,8 @@ using Unity.XR.Oculus;
 using Settings = UnityEngine.XR.XRSettings;
 using Node = UnityEngine.XR.XRNode;
 
-public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
-{/*
+public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
+{
     public enum XrApi
     {
         Unknown = OVRPlugin.XrApi.Unknown,
@@ -188,7 +174,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         void OnEvent(OVRPlugin.EventDataBuffer eventData);
     }
 
-    public static OVRManager instance { get; private set; }
+    public static OVRSimple instance { get; private set; }
 
     public static OVRDisplay display { get; private set; }
 
@@ -388,9 +374,9 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
     }
 
     [HideInInspector]
-    private OVRManager.ColorSpace _colorGamut = OVRManager.ColorSpace.P3;
+    private OVRSimple.ColorSpace _colorGamut = OVRSimple.ColorSpace.P3;
 
-    public OVRManager.ColorSpace colorGamut
+    public OVRSimple.ColorSpace colorGamut
     {
         get { return _colorGamut; }
         set
@@ -400,9 +386,9 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         }
     }
 
-    public OVRManager.ColorSpace nativeColorGamut
+    public OVRSimple.ColorSpace nativeColorGamut
     {
-        get { return (OVRManager.ColorSpace)OVRPlugin.GetHmdColorDesc(); }
+        get { return (OVRSimple.ColorSpace)OVRPlugin.GetHmdColorDesc(); }
     }
 
     [SerializeField]
@@ -512,7 +498,10 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
 
     public enum CompositionMethod
     {
-        External
+        External,
+
+        [System.Obsolete("Deprecated. Direct composition is no longer supported", false)]
+        Direct
     }
 
     [HideInInspector]
@@ -554,8 +543,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
     public delegate GameObject InstantiateMrcCameraDelegate(GameObject mainCameraGameObject, MrcCameraType cameraType);
 
     public InstantiateMrcCameraDelegate instantiateMixedRealityCameraGameObject = null;
-
-    // OVRMixedRealityCaptureConfiguration Interface implementation
+    /*
     bool OVRMixedRealityCaptureConfiguration.enableMixedReality
     {
         get { return enableMixedReality; }
@@ -585,7 +573,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         get { return compositionMethod; }
         set { compositionMethod = value; }
     }
-
+    
     Color OVRMixedRealityCaptureConfiguration.externalCompositionBackdropColorRift
     {
         get { return externalCompositionBackdropColorRift; }
@@ -597,7 +585,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         get { return externalCompositionBackdropColorQuest; }
         set { externalCompositionBackdropColorQuest = value; }
     }
-
+/*
     bool OVRMixedRealityCaptureConfiguration.flipCameraFrameHorizontally
     {
 #pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
@@ -677,6 +665,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         set { useDynamicLighting = value; }
 #pragma warning restore CS0618
     }
+
     float OVRMixedRealityCaptureConfiguration.dynamicLightingSmoothFactor
     {
 #pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
@@ -739,8 +728,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         get { return instantiateMixedRealityCameraGameObject; }
         set { instantiateMixedRealityCameraGameObject = value; }
 #pragma warning restore CS0618
-    }
-
+    }*/
 #endif
 
     [HideInInspector, Tooltip("Specify if simultaneous hands and controllers should be enabled. ")]
@@ -851,9 +839,6 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         }
     }
 
-    /// <summary>
-    /// If true, the CPU and GPU are currently throttled to save power and/or reduce the temperature.
-    /// </summary>
     public static bool isPowerSavingActive
     {
         get
@@ -867,19 +852,12 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
 
     public static EyeTextureFormat eyeTextureFormat
     {
-        get { return (OVRManager.EyeTextureFormat)OVRPlugin.GetDesiredEyeTextureFormat(); }
+        get { return (EyeTextureFormat)(OVRSimple.EyeTextureFormat)OVRPlugin.GetDesiredEyeTextureFormat(); }
 
         set { OVRPlugin.SetDesiredEyeTextureFormat((OVRPlugin.EyeTextureFormat)value); }
     }
 
-    public static bool eyeTrackedFoveatedRenderingSupported
-    {
-        get
-        {
-            return GetEyeTrackedFoveatedRenderingSupported();
-        }
-    }
-
+    /*
     public static bool eyeTrackedFoveatedRenderingEnabled
     {
         get
@@ -910,43 +888,14 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 }
             }
         }
-    }
+    }*/
 
     protected static void OnPermissionGranted(string permissionId)
     {
         if (permissionId == OVRPermissionsRequester.GetPermissionId(OVRPermissionsRequester.Permission.EyeTracking))
         {
             OVRPermissionsRequester.PermissionGranted -= OnPermissionGranted;
-            SetEyeTrackedFoveatedRenderingEnabled(true);
-        }
-    }
-
-    public static FoveatedRenderingLevel foveatedRenderingLevel
-    {
-        get
-        {
-            return GetFoveatedRenderingLevel();
-        }
-        set
-        {
-            SetFoveatedRenderingLevel(value);
-        }
-    }
-
-    public static bool fixedFoveatedRenderingSupported
-    {
-        get { return GetFixedFoveatedRenderingSupported(); }
-    }
-
-    public static bool useDynamicFoveatedRendering
-    {
-        get
-        {
-            return GetDynamicFoveatedRenderingEnabled();
-        }
-        set
-        {
-            SetDynamicFoveatedRenderingEnabled(value);
+         /*   SetEyeTrackedFoveatedRenderingEnabled(true);*/
         }
     }
 
@@ -994,11 +943,6 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
             _isSystemHeadsetThemeCached = true;
         }
         return _cachedSystemHeadsetTheme;
-    }
-
-    public static void SetColorScaleAndOffset(Vector4 colorScale, Vector4 colorOffset, bool applyToAllLayers)
-    {
-        SetColorScaleAndOffset_Internal(colorScale, colorOffset, applyToAllLayers);
     }
 
     public static void SetOpenVRLocalPose(Vector3 leftPos, Vector3 rightPos, Quaternion leftRot, Quaternion rightRot)
@@ -1059,7 +1003,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
             m_lastSpaceWarpCamera = null;
         }
 
-        SetSpaceWarp_Internal(enabled);
+       /* SetSpaceWarp_Internal(enabled);*/
         m_SpaceWarpEnabled = enabled;
     }
 
@@ -1100,16 +1044,16 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
     [Header("Tracking")]
     [SerializeField]
     [Tooltip("Defines the current tracking origin type.")]
-    private OVRManager.TrackingOrigin _trackingOriginType = OVRManager.TrackingOrigin.FloorLevel;
+    private OVRSimple.TrackingOrigin _trackingOriginType = OVRSimple.TrackingOrigin.FloorLevel;
 
-    public OVRManager.TrackingOrigin trackingOriginType
+    public OVRSimple.TrackingOrigin trackingOriginType
     {
         get
         {
             if (!isHmdPresent)
                 return _trackingOriginType;
 
-            return (OVRManager.TrackingOrigin)OVRPlugin.GetTrackingOriginType();
+            return (OVRSimple.TrackingOrigin)OVRPlugin.GetTrackingOriginType();
         }
 
         set
@@ -1213,9 +1157,9 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
     public bool LateLatching = false;
 #endif
 
-    private static OVRManager.ControllerDrivenHandPosesType _readOnlyControllerDrivenHandPosesType = OVRManager.ControllerDrivenHandPosesType.None;
+    private static OVRSimple.ControllerDrivenHandPosesType _readOnlyControllerDrivenHandPosesType = OVRSimple.ControllerDrivenHandPosesType.None;
     [Tooltip("Defines if hand poses can be populated by controller data.")]
-    public OVRManager.ControllerDrivenHandPosesType controllerDrivenHandPosesType = OVRManager.ControllerDrivenHandPosesType.None;
+    public OVRSimple.ControllerDrivenHandPosesType controllerDrivenHandPosesType = OVRSimple.ControllerDrivenHandPosesType.None;
 
     [Tooltip("Allows the application to use simultaneous hands and controllers functionality. This option must be enabled at build time.")]
     public bool SimultaneousHandsAndControllersEnabled = false;
@@ -1228,7 +1172,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
 
     public bool IsSimultaneousHandsAndControllersSupported
     {
-        get => (_readOnlyControllerDrivenHandPosesType != OVRManager.ControllerDrivenHandPosesType.None) || launchSimultaneousHandsControllersOnStartup;
+        get => (_readOnlyControllerDrivenHandPosesType != OVRSimple.ControllerDrivenHandPosesType.None) || launchSimultaneousHandsControllersOnStartup;
     }
     public bool isSupportedPlatform { get; private set; }
 
@@ -1290,6 +1234,15 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
     {
         get { return OVRPlugin.nativeSDKVersion; }
     }
+    /*
+    OVRSimple.CompositionMethod OVRMixedRealityCaptureConfiguration.compositionMethod { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public OVRSimple.CameraDevice capturingCameraDevice { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public OVRSimple.DepthQuality depthQuality { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public OVRSimple.VirtualGreenScreenType virtualGreenScreenType { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    OVRSimple.MrcActivationMode OVRMixedRealityCaptureConfiguration.mrcActivationMode { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    OVRSimple.InstantiateMrcCameraDelegate OVRMixedRealityCaptureConfiguration.instantiateMixedRealityCameraGameObject { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    
+    */
 
 #if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_ANDROID
     private static bool MixedRealityEnabledFromCmd()
@@ -1392,12 +1345,12 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         dynamicResolutionVersion = MaxDynamicResolutionVersion;
     }
 
-    public static bool OVRManagerinitialized = false;
+    public static bool OVRSimpleinitialized = false;
 
-    private void InitOVRManager()
+    private void InitOVRSimple()
     {
-        using var marker = new OVRTelemetryMarker(OVRTelemetryConstants.OVRManager.MarkerId.Init);
-        marker.AddSDKVersionAnnotation();
+       /* using var marker = new OVRTelemetryMarker(OVRTelemetryConstants.OVRSimple.MarkerId.Init);
+        marker.AddSDKVersionAnnotation();*/
 
         // Only allow one instance at runtime.
         if (instance != null)
@@ -1405,7 +1358,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
             enabled = false;
             DestroyImmediate(this);
 
-            marker.SetResult(OVRPlugin.Qpl.ResultType.Fail);
+         /*   marker.SetResult(OVRPlugin.Qpl.ResultType.Fail);*/
             return;
         }
 
@@ -1442,12 +1395,12 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         {
             isSupportedPlatform = false;
         }
-
+        /*
         if (!isSupportedPlatform)
         {
             marker.SetResult(OVRPlugin.Qpl.ResultType.Fail);
             return;
-        }
+        }*/
 
 #if UNITY_EDITOR
         OVRPlugin.SetLogCallback2(OVRPluginLogCallback);
@@ -1473,11 +1426,11 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
             {
                 OVRMixedRealityCaptureSettings mrcSettings =
                     ScriptableObject.CreateInstance<OVRMixedRealityCaptureSettings>();
-                mrcSettings.ReadFrom(this);
+               /* mrcSettings.ReadFrom(this);*/
                 if (loadMrcConfig)
                 {
                     mrcSettings.CombineWithConfigurationFile();
-                    mrcSettings.ApplyTo(this);
+                  /*  mrcSettings.ApplyTo(this);*/
                 }
 
                 if (createMrcConfig)
@@ -1508,25 +1461,25 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
             }
         }
 #endif
-
+/*
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || OVR_ANDROID_MRC
         StaticInitializeMixedRealityCapture(this);
-#endif
+#endif*/
 
         Initialize();
         InitPermissionRequest();
-
-        marker.AddPoint(OVRTelemetryConstants.OVRManager.InitPermissionRequest);
+        /*
+        marker.AddPoint(OVRTelemetryConstants.OVRSimple.InitPermissionRequest);
 
             display.displayFrequency,
             string.Join(", ", display.displayFrequenciesAvailable.Select(f => f.ToString()).ToArray()));
-
+*/
         if (resetTrackerOnLoad)
             display.RecenterPose();
 
         // Refresh the client color space
-        OVRManager.ColorSpace clientColorSpace = runtimeSettings.colorSpace;
-        colorGamut = clientColorSpace;
+    /*    OVRSimple.ColorSpace clientColorSpace = runtimeSettings.colorSpace;
+        colorGamut = clientColorSpace;*/
 
         // Set the eyebuffer sharpen type at the start
         OVRPlugin.SetEyeBufferSharpenType(_sharpenType);
@@ -1541,7 +1494,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         {
             InitializeInsightPassthrough();
 
-            marker.AddPoint(OVRTelemetryConstants.OVRManager.InitializeInsightPassthrough);
+        /*    marker.AddPoint(OVRTelemetryConstants.OVRSimple.InitializeInsightPassthrough);*/
         }
 
         // Apply validation criteria to _localDimming toggle to ensure it isn't active on invalid systems
@@ -1620,7 +1573,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
 #endif
 
 
-        OVRManagerinitialized = true;
+        OVRSimpleinitialized = true;
     }
 
     private void InitPermissionRequest()
@@ -1658,12 +1611,12 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
     private void Awake()
     {
 #if !USING_XR_SDK
-        //For legacy, we should initialize OVRManager in all cases.
+        //For legacy, we should initialize OVRSimple in all cases.
         //For now, in XR SDK, only initialize if OVRPlugin is initialized.
-        InitOVRManager();
+        InitOVRSimple();
 #else
         if (OVRPlugin.initialized)
-            InitOVRManager();
+            InitOVRSimple();
 #endif
     }
 
@@ -1761,17 +1714,17 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
 
     private void Update()
     {
-        //Only if we're using the XR SDK do we have to check if OVRManager isn't yet initialized, and init it.
+        //Only if we're using the XR SDK do we have to check if OVRSimple isn't yet initialized, and init it.
         //If we're on legacy, we know initialization occurred properly in Awake()
 #if USING_XR_SDK
-        if (!OVRManagerinitialized)
+        if (!OVRSimpleinitialized)
         {
             XRDisplaySubsystem currentDisplaySubsystem = GetCurrentDisplaySubsystem();
             XRDisplaySubsystemDescriptor currentDisplaySubsystemDescriptor = GetCurrentDisplaySubsystemDescriptor();
             if (currentDisplaySubsystem == null || currentDisplaySubsystemDescriptor == null || !OVRPlugin.initialized)
                 return;
-            //If we're using the XR SDK and the display subsystem is present, and OVRPlugin is initialized, we can init OVRManager
-            InitOVRManager();
+            //If we're using the XR SDK and the display subsystem is present, and OVRPlugin is initialized, we can init OVRSimple
+            InitOVRSimple();
         }
 #endif
 
@@ -1802,9 +1755,9 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
 
         if (OVRPlugin.shouldQuit)
         {
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || OVR_ANDROID_MRC
+/*#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || OVR_ANDROID_MRC
             StaticShutdownMixedRealityCapture(instance);
-#endif
+#endif*/
 
             ShutdownInsightPassthrough();
 
@@ -1870,7 +1823,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
 
         if (AllowRecenter && OVRPlugin.shouldRecenter)
         {
-            OVRManager.display.RecenterPose();
+            OVRSimple.display.RecenterPose();
         }
 
         if (trackingOriginType != _trackingOriginType)
@@ -1933,6 +1886,8 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 if (HMDLost != null)
                     HMDLost();
             }
+            catch (Exception e) { }
+
         }
 
         if (!_wasHmdPresent && isHmdPresent)
@@ -1942,6 +1897,8 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 if (HMDAcquired != null)
                     HMDAcquired();
             }
+            catch (Exception e) { }
+
         }
 
         _wasHmdPresent = isHmdPresent;
@@ -1957,6 +1914,8 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 if (HMDUnmounted != null)
                     HMDUnmounted();
             }
+            catch (Exception e) { }
+
         }
 
         if (!_wasUserPresent && isUserPresent)
@@ -1966,6 +1925,8 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 if (HMDMounted != null)
                     HMDMounted();
             }
+            catch (Exception e) { }
+
         }
 
         _wasUserPresent = isUserPresent;
@@ -1981,6 +1942,8 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 if (VrFocusLost != null)
                     VrFocusLost();
             }
+            catch (Exception e) { }
+
         }
 
         if (!_hadVrFocus && hasVrFocus)
@@ -1990,6 +1953,8 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 if (VrFocusAcquired != null)
                     VrFocusAcquired();
             }
+            catch (Exception e) { }
+
         }
 
         _hadVrFocus = hasVrFocus;
@@ -2005,6 +1970,8 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 if (InputFocusLost != null)
                     InputFocusLost();
             }
+            catch (Exception e) { }
+
         }
 
         if (!_hadInputFocus && hasInputFocus)
@@ -2013,7 +1980,8 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
             {
                 if (InputFocusAcquired != null)
                     InputFocusAcquired();
-            }
+            }            catch (Exception e) { }
+
         }
 
         _hadInputFocus = hasInputFocus;
@@ -2033,6 +2001,8 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 if (AudioOutChanged != null)
                     AudioOutChanged();
             }
+            catch (Exception e) { }
+
             prevAudioOutId = audioOutId;
         }
 
@@ -2049,6 +2019,8 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 if (AudioInChanged != null)
                     AudioInChanged();
             }
+            catch (Exception e) { }
+
             prevAudioInId = audioInId;
         }
 
@@ -2061,6 +2033,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 if (TrackingLost != null)
                     TrackingLost();
             }
+            catch (Exception e) { }
         }
 
         if (!wasPositionTracked && tracker.isPositionTracked)
@@ -2070,6 +2043,8 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 if (TrackingAcquired != null)
                     TrackingAcquired();
             }
+            catch (Exception e) { }
+
         }
 
         wasPositionTracked = tracker.isPositionTracked;
@@ -2091,15 +2066,15 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
             _readOnlyControllerDrivenHandPosesType = controllerDrivenHandPosesType;
             switch (_readOnlyControllerDrivenHandPosesType)
             {
-                case OVRManager.ControllerDrivenHandPosesType.None:
+                case OVRSimple.ControllerDrivenHandPosesType.None:
                     OVRPlugin.SetControllerDrivenHandPoses(false);
                     OVRPlugin.SetControllerDrivenHandPosesAreNatural(false);
                     break;
-                case OVRManager.ControllerDrivenHandPosesType.ConformingToController:
+                case OVRSimple.ControllerDrivenHandPosesType.ConformingToController:
                     OVRPlugin.SetControllerDrivenHandPoses(true);
                     OVRPlugin.SetControllerDrivenHandPosesAreNatural(false);
                     break;
-                case OVRManager.ControllerDrivenHandPosesType.Natural:
+                case OVRSimple.ControllerDrivenHandPosesType.Natural:
                     OVRPlugin.SetControllerDrivenHandPoses(true);
                     OVRPlugin.SetControllerDrivenHandPosesAreNatural(true);
                     break;
@@ -2118,7 +2093,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         UpdateHMDEvents();
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || OVR_ANDROID_MRC
-        StaticUpdateMixedRealityCapture(this, gameObject, trackingOriginType);
+        StaticUpdateMixedRealityCapture(this.GetComponent<OVRMixedRealityCaptureConfiguration>(), gameObject, trackingOriginType);
 #endif
 
         UpdateInsightPassthrough(isInsightPassthroughEnabled);
@@ -2131,7 +2106,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         while (OVRPlugin.PollEvent(ref eventDataBuffer))
         {
             switch (eventDataBuffer.EventType)
-            {
+            {/*
                 case OVRPlugin.EventType.DisplayRefreshRateChanged:
                     if (DisplayRefreshRateChanged != null)
                     {
@@ -2367,7 +2342,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                             OVRTask.GetId(data.Tracker, data.EventType),
                             OVRResult<OVRPlugin.Result>.From(data.Result));
                         break;
-                    }
+                    }*/
                 default:
                     foreach (var listener in eventListeners)
                     {
@@ -2438,7 +2413,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         {
             if (!multipleMainCameraWarningPresented)
             {
-                    "Multiple MainCamera found. Assume the real MainCamera is the camera with the least depth");
+              /*      "Multiple MainCamera found. Assume the real MainCamera is the camera with the least depth");*/
                 multipleMainCameraWarningPresented = true;
             }
 
@@ -2500,15 +2475,15 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 var rot = m_AppSpaceTransform.rotation;
 
                 // Strange behavior may occur with non-uniform scale
-                var scale = m_AppSpaceTransform.lossyScale;
+              /*  var scale = m_AppSpaceTransform.lossyScale;
                 SetAppSpacePosition(pos.x / scale.x, pos.y / scale.y, pos.z / scale.z);
-                SetAppSpaceRotation(rot.x, rot.y, rot.z, rot.w);
+                SetAppSpaceRotation(rot.x, rot.y, rot.z, rot.w);*/
             }
-            else
+           /* else
             {
                 SetAppSpacePosition(0.0f, 0.0f, 0.0f);
                 SetAppSpaceRotation(0.0f, 0.0f, 0.0f, 1.0f);
-            }
+            }*/
         }
     }
 
@@ -2522,7 +2497,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
 #if UNITY_EDITOR
         OVRPlugin.SetLogCallback2(null);
 #endif
-        OVRManagerinitialized = false;
+        OVRSimpleinitialized = false;
     }
 
     #endregion // Unity Messages
@@ -2552,14 +2527,14 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 }
 
                 OVRPlugin.Media.SetMrcInputVideoBufferType(OVRPlugin.Media.InputVideoBufferType.TextureHandle);
-                if (configuration.mrcActivationMode == MrcActivationMode.Automatic)
+            /*    if (configuration.mrcActivationMode == MrcActivationMode.Automatic)
                 {
                     OVRPlugin.Media.SetMrcActivationMode(OVRPlugin.Media.MrcActivationMode.Automatic);
                 }
                 else if (configuration.mrcActivationMode == MrcActivationMode.Disabled)
                 {
                     OVRPlugin.Media.SetMrcActivationMode(OVRPlugin.Media.MrcActivationMode.Disabled);
-                }
+                }*/
                 if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Vulkan)
                 {
                     OVRPlugin.Media.SetAvailableQueueIndexVulkan(1);
@@ -2589,7 +2564,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         configuration.enableMixedReality = OVRPlugin.Media.GetInitialized() && OVRPlugin.Media.IsMrcActivated();
 
         // force external composition on Android MRC
-        configuration.compositionMethod = CompositionMethod.External;
+      /*  configuration.compositionMethod = CompositionMethod.External;*/
 
         if (OVRPlugin.Media.GetInitialized())
         {
@@ -2608,7 +2583,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                     staticPrevEnableMixedRealityCapture = true;
                 }
 
-                OVRMixedReality.Update(gameObject, mainCamera, configuration, trackingOrigin);
+              /*  OVRMixedReality.Update(gameObject, mainCamera, configuration, trackingOrigin);*/
                 suppressDisableMixedRealityBecauseOfNoMainCameraWarning = false;
             }
             else if (!suppressDisableMixedRealityBecauseOfNoMainCameraWarning)
@@ -2619,7 +2594,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         else if (staticPrevEnableMixedRealityCapture)
         {
             staticPrevEnableMixedRealityCapture = false;
-            OVRMixedReality.Cleanup();
+          /*  OVRMixedReality.Cleanup();*/
         }
 
         staticMrcSettings.ReadFrom(configuration);
@@ -2632,7 +2607,7 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
             ScriptableObject.Destroy(staticMrcSettings);
             staticMrcSettings = null;
 
-            OVRMixedReality.Cleanup();
+           /* OVRMixedReality.Cleanup();*/
 
 #if OVR_ANDROID_MRC
             if (OVRPlugin.Media.GetInitialized())
@@ -2645,7 +2620,6 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
     }
 
 #endif
-
 
     enum PassthroughInitializationState
     {
@@ -2809,47 +2783,21 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
             isBoundaryVisibilitySuppressed = shouldBoundaryVisibilityBeSuppressed;
         }
     }
-
-    /// <summary>
-    /// Checks whether simultaneous hands and controllers is currently supported by the system.
-    /// This method should only be called when the XR Plug-in is initialized.
-    /// </summary>
     public static bool IsMultimodalHandsControllersSupported()
     {
         return OVRPlugin.IsMultimodalHandsControllersSupported();
     }
 
-    /// <summary>
-    /// Checks whether Passthrough is supported by the system. This method should only be called when the XR Plug-in is initialized.
-    /// </summary>
     public static bool IsInsightPassthroughSupported()
     {
         return OVRPlugin.IsInsightPassthroughSupported();
     }
 
-    /// <summary>
-    /// This class is used by <see cref="OVRManager.GetPassthroughCapabilities()"/> to report on Passthrough
-    /// capabilities provided by the system.
-    /// Use it to configure various passthrough color mapping techniques, e.g. color LUTs. See
-    /// [Color Mapping Techniques](https://developer.oculus.com/documentation/unity/unity-customize-passthrough-color-mapping/) for more details.
-    /// </summary>
     public class PassthroughCapabilities
     {
-        /// <summary>
-        /// Indicates that Passthrough is available on the current system.
-        /// </summary>
         public bool SupportsPassthrough { get; }
-
-        /// <summary>
-        /// Indicates that the system can show Passthrough with realistic colors. If 'false', then the system
-        /// either supports the basic grayscale passthrough, or doesn't support passthrough at all.
-        /// </summary>
         public bool SupportsColorPassthrough { get; }
 
-        /// <summary>
-        /// Maximum color LUT resolution supported by the system. Use it together with the <see cref="OVRPassthroughLayer.SetColorLut(OVRPassthroughColorLut, float)"/>
-        /// method to apply a color LUT to a <see cref="OVRPassthroughLayer"/> component.
-        /// </summary>
         public uint MaxColorLutResolution { get; }
 
         public PassthroughCapabilities(bool supportsPassthrough, bool supportsColorPassthrough,
@@ -2860,10 +2808,6 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
             MaxColorLutResolution = maxColorLutResolution;
         }
     }
-
-    /// <summary>
-    /// Returns information about Passthrough capabilities provided by the system. This method should only be called when the XR Plug-in is initialized.
-    /// </summary>
     public static PassthroughCapabilities GetPassthroughCapabilities()
     {
         if (_passthroughCapabilities == null)
@@ -2888,39 +2832,27 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         return _passthroughCapabilities;
     }
 
-    /// Checks whether Passthrough is initialized.
-    /// \return Boolean value to indicate the current state of passthrough. If the value returned is true, Passthrough is initialized.
     public static bool IsInsightPassthroughInitialized()
     {
         return _passthroughInitializationState.Value == PassthroughInitializationState.Initialized;
     }
 
-    /// Checks whether Passthrough has failed initialization.
-    /// \return Boolean value to indicate the passthrough initialization failed status. If the value returned is true, Passthrough has failed the initialization.
     public static bool HasInsightPassthroughInitFailed()
     {
         return _passthroughInitializationState.Value == PassthroughInitializationState.Failed;
     }
 
-    /// Checks whether Passthrough is in the process of initialization.
-    /// \return Boolean value to indicate the current state of passthrough. If the value returned is true, Passthrough is initializing.
     public static bool IsInsightPassthroughInitPending()
     {
         return _passthroughInitializationState.Value == PassthroughInitializationState.Pending;
     }
 
-    /// <summary>
-    /// Get a system recommendation on whether Passthrough should be active.
-    /// When set, it is recommended for apps which optionally support an MR experience with Passthrough to default to that mode.
-    /// Currently, this is determined based on whether the user has Passthrough active in the home environment.
-    /// </summary>
-    /// <returns>Flag indicating whether Passthrough is recommended.</returns>
-    public static bool IsPassthroughRecommended()
+   /* public static bool IsPassthroughRecommended()
     {
-        OVRPlugin.GetPassthroughPreferences(out var preferences);
+        OVRPlugin.GetPassthroughPreferences(out var preferences)
         return (preferences.Flags & OVRPlugin.PassthroughPreferenceFlags.DefaultToActive) ==
-            OVRPlugin.PassthroughPreferenceFlags.DefaultToActive;
-    }
+            OVRPlugin.PassthroughPreferenceFlags.DefaultToActive;;
+    }*/
 
     #region Utils
 
@@ -2961,5 +2893,4 @@ public class OVRSSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
     }
 
     #endregion
-    */
 }
