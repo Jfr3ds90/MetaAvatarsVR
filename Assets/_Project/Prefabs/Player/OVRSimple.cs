@@ -49,7 +49,7 @@ using Unity.XR.Oculus;
 using Settings = UnityEngine.XR.XRSettings;
 using Node = UnityEngine.XR.XRNode;
 
-public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
+public class OVRSimple : MonoBehaviour
 {
     public enum XrApi
     {
@@ -489,13 +489,6 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
 
 #if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_ANDROID
 
-    [HideInInspector]
-    public bool expandMixedRealityCapturePropertySheet = false;
-
-    [HideInInspector, Tooltip("If true, Mixed Reality mode will be enabled. It would be always set to false when " +
-                              "the game is launching without editor")]
-    public bool enableMixedReality = false;
-
     public enum CompositionMethod
     {
         External,
@@ -542,193 +535,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
 
     public delegate GameObject InstantiateMrcCameraDelegate(GameObject mainCameraGameObject, MrcCameraType cameraType);
 
-    public InstantiateMrcCameraDelegate instantiateMixedRealityCameraGameObject = null;
-    /*
-    bool OVRMixedRealityCaptureConfiguration.enableMixedReality
-    {
-        get { return enableMixedReality; }
-        set { enableMixedReality = value; }
-    }
-
-    LayerMask OVRMixedRealityCaptureConfiguration.extraHiddenLayers
-    {
-        get { return extraHiddenLayers; }
-        set { extraHiddenLayers = value; }
-    }
-
-    LayerMask OVRMixedRealityCaptureConfiguration.extraVisibleLayers
-    {
-        get { return extraVisibleLayers; }
-        set { extraVisibleLayers = value; }
-    }
-
-    bool OVRMixedRealityCaptureConfiguration.dynamicCullingMask
-    {
-        get { return dynamicCullingMask; }
-        set { dynamicCullingMask = value; }
-    }
-
-    CompositionMethod OVRMixedRealityCaptureConfiguration.compositionMethod
-    {
-        get { return compositionMethod; }
-        set { compositionMethod = value; }
-    }
-    
-    Color OVRMixedRealityCaptureConfiguration.externalCompositionBackdropColorRift
-    {
-        get { return externalCompositionBackdropColorRift; }
-        set { externalCompositionBackdropColorRift = value; }
-    }
-
-    Color OVRMixedRealityCaptureConfiguration.externalCompositionBackdropColorQuest
-    {
-        get { return externalCompositionBackdropColorQuest; }
-        set { externalCompositionBackdropColorQuest = value; }
-    }
-/*
-    bool OVRMixedRealityCaptureConfiguration.flipCameraFrameHorizontally
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return flipCameraFrameHorizontally; }
-        set { flipCameraFrameHorizontally = value; }
-#pragma warning restore CS0618
-    }
-
-    bool OVRMixedRealityCaptureConfiguration.flipCameraFrameVertically
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return flipCameraFrameVertically; }
-        set { flipCameraFrameVertically = value; }
-#pragma warning restore CS0618
-    }
-
-    float OVRMixedRealityCaptureConfiguration.handPoseStateLatency
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return handPoseStateLatency; }
-        set { handPoseStateLatency = value; }
-#pragma warning restore CS0618
-    }
-
-    float OVRMixedRealityCaptureConfiguration.sandwichCompositionRenderLatency
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return sandwichCompositionRenderLatency; }
-        set { sandwichCompositionRenderLatency = value; }
-#pragma warning restore CS0618
-    }
-
-    int OVRMixedRealityCaptureConfiguration.sandwichCompositionBufferedFrames
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return sandwichCompositionBufferedFrames; }
-        set { sandwichCompositionBufferedFrames = value; }
-#pragma warning restore CS0618
-    }
-
-    Color OVRMixedRealityCaptureConfiguration.chromaKeyColor
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return chromaKeyColor; }
-        set { chromaKeyColor = value; }
-#pragma warning restore CS0618
-    }
-
-    float OVRMixedRealityCaptureConfiguration.chromaKeySimilarity
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return chromaKeySimilarity; }
-        set { chromaKeySimilarity = value; }
-#pragma warning restore CS0618
-    }
-
-    float OVRMixedRealityCaptureConfiguration.chromaKeySmoothRange
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return chromaKeySmoothRange; }
-        set { chromaKeySmoothRange = value; }
-#pragma warning restore CS0618
-    }
-
-    float OVRMixedRealityCaptureConfiguration.chromaKeySpillRange
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return chromaKeySpillRange; }
-        set { chromaKeySpillRange = value; }
-#pragma warning restore CS0618
-    }
-
-    bool OVRMixedRealityCaptureConfiguration.useDynamicLighting
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return useDynamicLighting; }
-        set { useDynamicLighting = value; }
-#pragma warning restore CS0618
-    }
-
-    float OVRMixedRealityCaptureConfiguration.dynamicLightingSmoothFactor
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return dynamicLightingSmoothFactor; }
-        set { dynamicLightingSmoothFactor = value; }
-#pragma warning restore CS0618
-    }
-
-    float OVRMixedRealityCaptureConfiguration.dynamicLightingDepthVariationClampingValue
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return dynamicLightingDepthVariationClampingValue; }
-        set { dynamicLightingDepthVariationClampingValue = value; }
-#pragma warning restore CS0618
-    }
-
-    float OVRMixedRealityCaptureConfiguration.virtualGreenScreenTopY
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return virtualGreenScreenTopY; }
-        set { virtualGreenScreenTopY = value; }
-#pragma warning restore CS0618
-    }
-
-    float OVRMixedRealityCaptureConfiguration.virtualGreenScreenBottomY
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return virtualGreenScreenBottomY; }
-        set { virtualGreenScreenBottomY = value; }
-#pragma warning restore CS0618
-    }
-
-    bool OVRMixedRealityCaptureConfiguration.virtualGreenScreenApplyDepthCulling
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return virtualGreenScreenApplyDepthCulling; }
-        set { virtualGreenScreenApplyDepthCulling = value; }
-#pragma warning restore CS0618
-    }
-
-    float OVRMixedRealityCaptureConfiguration.virtualGreenScreenDepthTolerance
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return virtualGreenScreenDepthTolerance; }
-        set { virtualGreenScreenDepthTolerance = value; }
-#pragma warning restore CS0618
-    }
-
-    MrcActivationMode OVRMixedRealityCaptureConfiguration.mrcActivationMode
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return mrcActivationMode; }
-        set { mrcActivationMode = value; }
-#pragma warning restore CS0618
-    }
-
-    InstantiateMrcCameraDelegate OVRMixedRealityCaptureConfiguration.instantiateMixedRealityCameraGameObject
-    {
-#pragma warning disable CS0618 // Field is deprecated, but property encapsulation is not
-        get { return instantiateMixedRealityCameraGameObject; }
-        set { instantiateMixedRealityCameraGameObject = value; }
-#pragma warning restore CS0618
-    }*/
+  
 #endif
 
     [HideInInspector, Tooltip("Specify if simultaneous hands and controllers should be enabled. ")]
@@ -857,45 +664,11 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         set { OVRPlugin.SetDesiredEyeTextureFormat((OVRPlugin.EyeTextureFormat)value); }
     }
 
-    /*
-    public static bool eyeTrackedFoveatedRenderingEnabled
-    {
-        get
-        {
-            return GetEyeTrackedFoveatedRenderingEnabled();
-        }
-        set
-        {
-            if (eyeTrackedFoveatedRenderingSupported)
-            {
-                if (value)
-                {
-                    if (OVRPermissionsRequester.IsPermissionGranted(OVRPermissionsRequester.Permission.EyeTracking))
-                    {
-                        SetEyeTrackedFoveatedRenderingEnabled(value);
-                    }
-#if OCULUS_XR_ETFR_DELAYED_PERMISSION_REQUEST
-                    else
-                    {
-                        OVRPermissionsRequester.PermissionGranted += OnPermissionGranted;
-                        OVRPermissionsRequester.Request(new List<OVRPermissionsRequester.Permission> { OVRPermissionsRequester.Permission.EyeTracking });
-                    }
-#endif
-                }
-                else
-                {
-                    SetEyeTrackedFoveatedRenderingEnabled(value);
-                }
-            }
-        }
-    }*/
-
     protected static void OnPermissionGranted(string permissionId)
     {
         if (permissionId == OVRPermissionsRequester.GetPermissionId(OVRPermissionsRequester.Permission.EyeTracking))
         {
             OVRPermissionsRequester.PermissionGranted -= OnPermissionGranted;
-         /*   SetEyeTrackedFoveatedRenderingEnabled(true);*/
         }
     }
 
@@ -1234,78 +1007,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
     {
         get { return OVRPlugin.nativeSDKVersion; }
     }
-    /*
-    OVRSimple.CompositionMethod OVRMixedRealityCaptureConfiguration.compositionMethod { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    public OVRSimple.CameraDevice capturingCameraDevice { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    public OVRSimple.DepthQuality depthQuality { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    public OVRSimple.VirtualGreenScreenType virtualGreenScreenType { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    OVRSimple.MrcActivationMode OVRMixedRealityCaptureConfiguration.mrcActivationMode { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-    OVRSimple.InstantiateMrcCameraDelegate OVRMixedRealityCaptureConfiguration.instantiateMixedRealityCameraGameObject { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     
-    */
-
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_ANDROID
-    private static bool MixedRealityEnabledFromCmd()
-    {
-        var args = System.Environment.GetCommandLineArgs();
-        for (int i = 0; i < args.Length; i++)
-        {
-            if (args[i].ToLower() == "-mixedreality")
-                return true;
-        }
-
-        return false;
-    }
-
-    private static bool UseDirectCompositionFromCmd()
-    {
-        var args = System.Environment.GetCommandLineArgs();
-        for (int i = 0; i < args.Length; i++)
-        {
-            if (args[i].ToLower() == "-directcomposition")
-                return true;
-        }
-
-        return false;
-    }
-
-    private static bool UseExternalCompositionFromCmd()
-    {
-        var args = System.Environment.GetCommandLineArgs();
-        for (int i = 0; i < args.Length; i++)
-        {
-            if (args[i].ToLower() == "-externalcomposition")
-                return true;
-        }
-
-        return false;
-    }
-
-    private static bool CreateMixedRealityCaptureConfigurationFileFromCmd()
-    {
-        var args = System.Environment.GetCommandLineArgs();
-        for (int i = 0; i < args.Length; i++)
-        {
-            if (args[i].ToLower() == "-create_mrc_config")
-                return true;
-        }
-
-        return false;
-    }
-
-    private static bool LoadMixedRealityCaptureConfigurationFileFromCmd()
-    {
-        var args = System.Environment.GetCommandLineArgs();
-        for (int i = 0; i < args.Length; i++)
-        {
-            if (args[i].ToLower() == "-load_mrc_config")
-                return true;
-        }
-
-        return false;
-    }
-#endif
-
     public static bool IsUnityAlphaOrBetaVersion()
     {
         string ver = Application.unityVersion;
@@ -1410,61 +1112,6 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         // Turn off chromatic aberration by default to save texture bandwidth.
         chromatic = false;
 #endif
-
-#if (UNITY_STANDALONE_WIN || UNITY_ANDROID) && !UNITY_EDITOR
-        // we should never start the standalone game in MxR mode, unless the command-line parameter is provided
-        enableMixedReality = false;
-#endif
-
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-        if (!staticMixedRealityCaptureInitialized)
-        {
-            bool loadMrcConfig = LoadMixedRealityCaptureConfigurationFileFromCmd();
-            bool createMrcConfig = CreateMixedRealityCaptureConfigurationFileFromCmd();
-
-            if (loadMrcConfig || createMrcConfig)
-            {
-                OVRMixedRealityCaptureSettings mrcSettings =
-                    ScriptableObject.CreateInstance<OVRMixedRealityCaptureSettings>();
-               /* mrcSettings.ReadFrom(this);*/
-                if (loadMrcConfig)
-                {
-                    mrcSettings.CombineWithConfigurationFile();
-                  /*  mrcSettings.ApplyTo(this);*/
-                }
-
-                if (createMrcConfig)
-                {
-                    mrcSettings.WriteToConfigurationFile();
-                }
-
-                ScriptableObject.Destroy(mrcSettings);
-            }
-
-            if (MixedRealityEnabledFromCmd())
-            {
-                enableMixedReality = true;
-            }
-
-            if (enableMixedReality)
-            {
-                if (UseDirectCompositionFromCmd())
-                {
-                    compositionMethod = CompositionMethod.External; // CompositionMethod.Direct;
-                }
-
-                if (UseExternalCompositionFromCmd())
-                {
-                    compositionMethod = CompositionMethod.External;
-                }
-
-            }
-        }
-#endif
-/*
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || OVR_ANDROID_MRC
-        StaticInitializeMixedRealityCapture(this);
-#endif*/
 
         Initialize();
         InitPermissionRequest();
@@ -1730,16 +1377,14 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
 
 #if !USING_XR_SDK_OPENXR && (!OCULUS_XR_3_3_0_OR_NEWER || !UNITY_2021_1_OR_NEWER)
         if (enableDynamicResolution && SystemInfo.graphicsDeviceType == GraphicsDeviceType.Vulkan)
-        {
             enableDynamicResolution = false;
-        }
+        
 #endif
 
 #if USING_XR_SDK_OPENXR && !UNITY_Y_FLIP_FIX
         if (enableDynamicResolution)
-        {
             enableDynamicResolution = false;
-        }
+        
 #endif
 
 #if UNITY_EDITOR
@@ -1755,10 +1400,6 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
 
         if (OVRPlugin.shouldQuit)
         {
-/*#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || OVR_ANDROID_MRC
-            StaticShutdownMixedRealityCapture(instance);
-#endif*/
-
             ShutdownInsightPassthrough();
 
 #if UNITY_EDITOR
@@ -1839,10 +1480,9 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
         int currentMsaaLevel = 0;
 #if USING_URP
         var renderPipeline = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
-        if (renderPipeline != null)
-        {
+        if (renderPipeline != null)    
             currentMsaaLevel = renderPipeline.msaaSampleCount;
-        }
+        
         else
 #endif
         {
@@ -1864,20 +1504,17 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
             }
         }
 
-        if (monoscopic != _monoscopic)
-        {
+        if (monoscopic != _monoscopic)     
             monoscopic = _monoscopic;
-        }
+        
 
         if (headPoseRelativeOffsetRotation != _headPoseRelativeOffsetRotation)
-        {
             headPoseRelativeOffsetRotation = _headPoseRelativeOffsetRotation;
-        }
+        
 
         if (headPoseRelativeOffsetTranslation != _headPoseRelativeOffsetTranslation)
-        {
             headPoseRelativeOffsetTranslation = _headPoseRelativeOffsetTranslation;
-        }
+        
 
         if (_wasHmdPresent && !isHmdPresent)
         {
@@ -2090,27 +1727,23 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
 
         OVRInput.Update();
 
-        UpdateHMDEvents();
+        UpdateHMDEvents();//Revizaar
 
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || OVR_ANDROID_MRC
-        StaticUpdateMixedRealityCapture(this.GetComponent<OVRMixedRealityCaptureConfiguration>(), gameObject, trackingOriginType);
-#endif
-
-        UpdateInsightPassthrough(isInsightPassthroughEnabled);
-        UpdateBoundary();
+        UpdateInsightPassthrough(isInsightPassthroughEnabled);//Revizar
+        UpdateBoundary();//Revizar
 
     }
 
     private void UpdateHMDEvents()
-    {
+    {/*
         while (OVRPlugin.PollEvent(ref eventDataBuffer))
         {
             switch (eventDataBuffer.EventType)
-            {/*
+            {
                 case OVRPlugin.EventType.DisplayRefreshRateChanged:
                     if (DisplayRefreshRateChanged != null)
                     {
-                        var data = OVRDeserialize.ByteArrayToStructure<OVRDeserialize.DisplayRefreshRateChangedData>(
+                        var data = OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.DisplayRefreshRateChangedData>(
                             eventDataBuffer.EventData);
                         DisplayRefreshRateChanged(data.FromRefreshRate, data.ToRefreshRate);
                     }
@@ -2119,7 +1752,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 case OVRPlugin.EventType.SpatialAnchorCreateComplete:
                     {
                         var data =
-                            OVRDeserialize.ByteArrayToStructure<OVRDeserialize.SpatialAnchorCreateCompleteData>(
+                            OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpatialAnchorCreateCompleteData>(
                                 eventDataBuffer.EventData);
 
                         OVRTask.SetResult(data.RequestId,
@@ -2129,8 +1762,8 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                     }
                 case OVRPlugin.EventType.SpaceSetComponentStatusComplete:
                     {
-                        var data = OVRDeserialize
-                            .ByteArrayToStructure<OVRDeserialize.SpaceSetComponentStatusCompleteData>(eventDataBuffer
+                        var data = OVRSDeserialize
+                            .ByteArrayToStructure<OVRSDeserialize.SpaceSetComponentStatusCompleteData>(eventDataBuffer
                                 .EventData);
                         SpaceSetComponentStatusComplete?.Invoke(data.RequestId, data.Result >= 0, data.Space, data.Uuid,
                             data.ComponentType, data.Enabled != 0);
@@ -2143,7 +1776,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                     if (SpaceQueryResults != null)
                     {
                         var data =
-                            OVRDeserialize.ByteArrayToStructure<OVRDeserialize.SpaceQueryResultsData>(eventDataBuffer
+                            OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpaceQueryResultsData>(eventDataBuffer
                                 .EventData);
                         SpaceQueryResults(data.RequestId);
                     }
@@ -2151,7 +1784,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                     break;
                 case OVRPlugin.EventType.SpaceQueryComplete:
                     {
-                        var data = OVRDeserialize.ByteArrayToStructure<OVRDeserialize.SpaceQueryCompleteData>(
+                        var data = OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpaceQueryCompleteData>(
                             eventDataBuffer.EventData);
                         SpaceQueryComplete?.Invoke(data.RequestId, data.Result >= 0);
                         OVRAnchor.OnSpaceQueryComplete(data);
@@ -2160,7 +1793,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 case OVRPlugin.EventType.SpaceSaveComplete:
                     if (SpaceSaveComplete != null)
                     {
-                        var data = OVRDeserialize.ByteArrayToStructure<OVRDeserialize.SpaceSaveCompleteData>(
+                        var data = OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpaceSaveCompleteData>(
                             eventDataBuffer.EventData);
                         SpaceSaveComplete(data.RequestId, data.Space, data.Result >= 0, data.Uuid);
                     }
@@ -2169,7 +1802,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 case OVRPlugin.EventType.SpaceEraseComplete:
                     {
                         var data =
-                            OVRDeserialize.ByteArrayToStructure<OVRDeserialize.SpaceEraseCompleteData>(eventDataBuffer
+                            OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpaceEraseCompleteData>(eventDataBuffer
                                 .EventData);
 
                         var result = data.Result >= 0;
@@ -2181,7 +1814,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 case OVRPlugin.EventType.SpaceShareResult:
                     {
                         var data =
-                            OVRDeserialize.ByteArrayToStructure<OVRDeserialize.SpaceShareResultData>(
+                            OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpaceShareResultData>(
                                 eventDataBuffer.EventData);
 
                         OVRTask.SetResult(data.RequestId, OVRResult.From((OVRAnchor.ShareResult)data.Result));
@@ -2191,7 +1824,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 case OVRPlugin.EventType.SpaceListSaveResult:
                     {
                         var data =
-                            OVRDeserialize.ByteArrayToStructure<OVRDeserialize.SpaceListSaveResultData>(
+                            OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpaceListSaveResultData>(
                                 eventDataBuffer.EventData);
 
                         OVRAnchor.OnSpaceListSaveResult(data);
@@ -2200,14 +1833,14 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                     }
                 case OVRPlugin.EventType.SpaceShareToGroupsComplete:
                     {
-                        var data = eventDataBuffer.MarshalEntireStructAs<OVRDeserialize.ShareSpacesToGroupsCompleteData>();
+                        var data = eventDataBuffer.MarshalEntireStructAs<OVRSDeserialize.ShareSpacesToGroupsCompleteData>();
                         OVRAnchor.OnShareAnchorsToGroupsComplete(data.RequestId, data.Result);
                         break;
                     }
                 case OVRPlugin.EventType.SceneCaptureComplete:
                     {
                         var data =
-                            OVRDeserialize.ByteArrayToStructure<OVRDeserialize.SceneCaptureCompleteData>(eventDataBuffer
+                            OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SceneCaptureCompleteData>(eventDataBuffer
                                 .EventData);
                         SceneCaptureComplete?.Invoke(data.RequestId, data.Result >= 0);
                         OVRTask.SetResult(data.RequestId, data.Result >= 0);
@@ -2217,7 +1850,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 case OVRPlugin.EventType.ColocationSessionStartAdvertisementComplete:
                     {
                         var data = eventDataBuffer
-                            .MarshalEntireStructAs<OVRDeserialize.StartColocationSessionAdvertisementCompleteData>();
+                            .MarshalEntireStructAs<OVRSDeserialize.StartColocationSessionAdvertisementCompleteData>();
                         OVRColocationSession.OnColocationSessionStartAdvertisementComplete(data.RequestId, data.Result, data.AdvertisementUuid);
                         break;
                     }
@@ -2225,7 +1858,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 case OVRPlugin.EventType.ColocationSessionStopAdvertisementComplete:
                     {
                         var data = eventDataBuffer
-                            .MarshalEntireStructAs<OVRDeserialize.StopColocationSessionAdvertisementCompleteData>();
+                            .MarshalEntireStructAs<OVRSDeserialize.StopColocationSessionAdvertisementCompleteData>();
                         OVRColocationSession.OnColocationSessionStopAdvertisementComplete(data.RequestId, data.Result);
                         break;
                     }
@@ -2233,7 +1866,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 case OVRPlugin.EventType.ColocationSessionStartDiscoveryComplete:
                     {
                         var data =
-                            eventDataBuffer.MarshalEntireStructAs<OVRDeserialize.StartColocationSessionDiscoveryCompleteData>();
+                            eventDataBuffer.MarshalEntireStructAs<OVRSDeserialize.StartColocationSessionDiscoveryCompleteData>();
                         OVRColocationSession.OnColocationSessionStartDiscoveryComplete(data.RequestId, data.Result);
                         break;
                     }
@@ -2241,7 +1874,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 case OVRPlugin.EventType.ColocationSessionStopDiscoveryComplete:
                     {
                         var data =
-                            eventDataBuffer.MarshalEntireStructAs<OVRDeserialize.StopColocationSessionDiscoveryCompleteData>();
+                            eventDataBuffer.MarshalEntireStructAs<OVRSDeserialize.StopColocationSessionDiscoveryCompleteData>();
                         OVRColocationSession.OnColocationSessionStopDiscoveryComplete(
                             data.RequestId,
                             data.Result);
@@ -2252,7 +1885,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                         unsafe
                         {
                             var data = eventDataBuffer
-                                .MarshalEntireStructAs<OVRDeserialize.ColocationSessionDiscoveryResultData>();
+                                .MarshalEntireStructAs<OVRSDeserialize.ColocationSessionDiscoveryResultData>();
 
                             OVRColocationSession.OnColocationSessionDiscoveryResult(
                                 data.RequestId,
@@ -2266,33 +1899,33 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                 case OVRPlugin.EventType.ColocationSessionAdvertisementComplete:
                     {
                         var data = eventDataBuffer
-                            .MarshalEntireStructAs<OVRDeserialize.ColocationSessionAdvertisementCompleteData>();
+                            .MarshalEntireStructAs<OVRSDeserialize.ColocationSessionAdvertisementCompleteData>();
                         OVRColocationSession.OnColocationSessionAdvertisementComplete(data.RequestId, data.Result);
                         break;
                     }
                 case OVRPlugin.EventType.ColocationSessionDiscoveryComplete:
                     {
-                        var data = eventDataBuffer.MarshalEntireStructAs<OVRDeserialize.ColocationSessionDiscoveryCompleteData>();
+                        var data = eventDataBuffer.MarshalEntireStructAs<OVRSDeserialize.ColocationSessionDiscoveryCompleteData>();
                         OVRColocationSession.OnColocationSessionDiscoveryComplete(data.RequestId, data.Result);
                         break;
                     }
                 case OVRPlugin.EventType.SpaceDiscoveryComplete:
                     {
-                        var data = OVRDeserialize.ByteArrayToStructure<OVRDeserialize.SpaceDiscoveryCompleteData>(
+                        var data = OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpaceDiscoveryCompleteData>(
                             eventDataBuffer.EventData);
                         OVRAnchor.OnSpaceDiscoveryComplete(data);
                         break;
                     }
                 case OVRPlugin.EventType.SpaceDiscoveryResultsAvailable:
                     {
-                        var data = OVRDeserialize.ByteArrayToStructure<OVRDeserialize.SpaceDiscoveryResultsData>(
+                        var data = OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpaceDiscoveryResultsData>(
                             eventDataBuffer.EventData);
                         OVRAnchor.OnSpaceDiscoveryResultsAvailable(data);
                         break;
                     }
                 case OVRPlugin.EventType.SpacesSaveResult:
                     {
-                        var data = OVRDeserialize.ByteArrayToStructure<OVRDeserialize.SpacesSaveResultData>(
+                        var data = OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpacesSaveResultData>(
                             eventDataBuffer.EventData);
                         OVRAnchor.OnSaveSpacesResult(data);
                         OVRTask.SetResult(data.RequestId, OVRResult.From(data.Result));
@@ -2300,7 +1933,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                     }
                 case OVRPlugin.EventType.SpacesEraseResult:
                     {
-                        var data = OVRDeserialize.ByteArrayToStructure<OVRDeserialize.SpacesEraseResultData>(
+                        var data = OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpacesEraseResultData>(
                             eventDataBuffer.EventData);
                         OVRAnchor.OnEraseSpacesResult(data);
                         OVRTask.SetResult(data.RequestId, OVRResult.From(data.Result));
@@ -2312,7 +1945,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
 
                         {
                             var data =
-                                OVRDeserialize.ByteArrayToStructure<OVRDeserialize.PassthroughLayerResumedData>(
+                                OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.PassthroughLayerResumedData>(
                                     eventDataBuffer.EventData);
 
                             PassthroughLayerResumed(data.LayerId);
@@ -2321,7 +1954,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                     }
                 case OVRPlugin.EventType.BoundaryVisibilityChanged:
                     {
-                        var data = OVRDeserialize.ByteArrayToStructure<OVRDeserialize.BoundaryVisibilityChangedData>(
+                        var data = OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.BoundaryVisibilityChangedData>(
                             eventDataBuffer.EventData);
                         BoundaryVisibilityChanged?.Invoke(data.BoundaryVisibility);
                         isBoundaryVisibilitySuppressed = data.BoundaryVisibility == OVRPlugin.BoundaryVisibility.Suppressed;
@@ -2329,7 +1962,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                     }
                 case OVRPlugin.EventType.CreateDynamicObjectTrackerResult:
                     {
-                        var data = eventDataBuffer.MarshalEntireStructAs<OVRDeserialize.CreateDynamicObjectTrackerResultData>();
+                        var data = eventDataBuffer.MarshalEntireStructAs<OVRSDeserialize.CreateDynamicObjectTrackerResultData>();
                         OVRTask.SetResult(
                             OVRTask.GetId(data.Tracker, data.EventType),
                             OVRResult<ulong, OVRPlugin.Result>.From(data.Tracker, data.Result));
@@ -2337,12 +1970,12 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
                     }
                 case OVRPlugin.EventType.SetDynamicObjectTrackedClassesResult:
                     {
-                        var data = eventDataBuffer.MarshalEntireStructAs<OVRDeserialize.SetDynamicObjectTrackedClassesResultData>();
+                        var data = eventDataBuffer.MarshalEntireStructAs<OVRSDeserialize.SetDynamicObjectTrackedClassesResultData>();
                         OVRTask.SetResult(
                             OVRTask.GetId(data.Tracker, data.EventType),
                             OVRResult<OVRPlugin.Result>.From(data.Result));
                         break;
-                    }*/
+                    }
                 default:
                     foreach (var listener in eventListeners)
                     {
@@ -2351,7 +1984,7 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
 
                     break;
             }
-        }
+        }*/
     }
 
     public void UpdateDynamicResolutionVersion()
@@ -2501,125 +2134,6 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
     }
 
     #endregion // Unity Messages
-
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || OVR_ANDROID_MRC
-
-    public static bool staticMixedRealityCaptureInitialized = false;
-    public static bool staticPrevEnableMixedRealityCapture = false;
-    public static OVRMixedRealityCaptureSettings staticMrcSettings = null;
-    private static bool suppressDisableMixedRealityBecauseOfNoMainCameraWarning = false;
-
-    public static void StaticInitializeMixedRealityCapture(OVRMixedRealityCaptureConfiguration configuration)
-    {
-        if (!staticMixedRealityCaptureInitialized)
-        {
-            staticMrcSettings = ScriptableObject.CreateInstance<OVRMixedRealityCaptureSettings>();
-            staticMrcSettings.ReadFrom(configuration);
-
-#if OVR_ANDROID_MRC
-            bool mediaInitialized = OVRPlugin.Media.Initialize();           
-            if (mediaInitialized)
-            {
-                var audioConfig = AudioSettings.GetConfiguration();
-                if (audioConfig.sampleRate > 0)
-                {
-                    OVRPlugin.Media.SetMrcAudioSampleRate(audioConfig.sampleRate);
-                }
-
-                OVRPlugin.Media.SetMrcInputVideoBufferType(OVRPlugin.Media.InputVideoBufferType.TextureHandle);
-            /*    if (configuration.mrcActivationMode == MrcActivationMode.Automatic)
-                {
-                    OVRPlugin.Media.SetMrcActivationMode(OVRPlugin.Media.MrcActivationMode.Automatic);
-                }
-                else if (configuration.mrcActivationMode == MrcActivationMode.Disabled)
-                {
-                    OVRPlugin.Media.SetMrcActivationMode(OVRPlugin.Media.MrcActivationMode.Disabled);
-                }*/
-                if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Vulkan)
-                {
-                    OVRPlugin.Media.SetAvailableQueueIndexVulkan(1);
-                    OVRPlugin.Media.SetMrcFrameImageFlipped(true);
-                }
-            }
-#endif
-            staticPrevEnableMixedRealityCapture = false;
-
-            staticMixedRealityCaptureInitialized = true;
-        }
-        else
-        {
-            staticMrcSettings.ApplyTo(configuration);
-        }
-    }
-
-    public static void StaticUpdateMixedRealityCapture(OVRMixedRealityCaptureConfiguration configuration,
-        GameObject gameObject, TrackingOrigin trackingOrigin)
-    {
-        if (!staticMixedRealityCaptureInitialized)
-        {
-            return;
-        }
-
-#if OVR_ANDROID_MRC
-        configuration.enableMixedReality = OVRPlugin.Media.GetInitialized() && OVRPlugin.Media.IsMrcActivated();
-
-        // force external composition on Android MRC
-      /*  configuration.compositionMethod = CompositionMethod.External;*/
-
-        if (OVRPlugin.Media.GetInitialized())
-        {
-            OVRPlugin.Media.Update();
-        }
-#endif
-
-        if (configuration.enableMixedReality)
-        {
-            Camera mainCamera = FindMainCamera();
-            if (mainCamera != null)
-            {
-                if (!staticPrevEnableMixedRealityCapture)
-                {
-                    OVRPlugin.SendEvent("mixed_reality_capture", "activated");
-                    staticPrevEnableMixedRealityCapture = true;
-                }
-
-              /*  OVRMixedReality.Update(gameObject, mainCamera, configuration, trackingOrigin);*/
-                suppressDisableMixedRealityBecauseOfNoMainCameraWarning = false;
-            }
-            else if (!suppressDisableMixedRealityBecauseOfNoMainCameraWarning)
-            {
-                suppressDisableMixedRealityBecauseOfNoMainCameraWarning = true;
-            }
-        }
-        else if (staticPrevEnableMixedRealityCapture)
-        {
-            staticPrevEnableMixedRealityCapture = false;
-          /*  OVRMixedReality.Cleanup();*/
-        }
-
-        staticMrcSettings.ReadFrom(configuration);
-    }
-
-    public static void StaticShutdownMixedRealityCapture(OVRMixedRealityCaptureConfiguration configuration)
-    {
-        if (staticMixedRealityCaptureInitialized)
-        {
-            ScriptableObject.Destroy(staticMrcSettings);
-            staticMrcSettings = null;
-
-           /* OVRMixedReality.Cleanup();*/
-
-#if OVR_ANDROID_MRC
-            if (OVRPlugin.Media.GetInitialized())
-            {
-                OVRPlugin.Media.Shutdown();
-            }
-#endif
-            staticMixedRealityCaptureInitialized = false;
-        }
-    }
-
-#endif
 
     enum PassthroughInitializationState
     {
@@ -2893,4 +2407,12 @@ public class OVRSimple : MonoBehaviour//, OVRMixedRealityCaptureConfiguration
     }
 
     #endregion
+    /*internal ulong Handle { get; }
+    public Guid Uuid { get; }
+    internal OVRSAnchor(ulong handle, Guid uuid)
+    {
+        Handle = handle;
+        Uuid = uuid;
+    }*/
+
 }
