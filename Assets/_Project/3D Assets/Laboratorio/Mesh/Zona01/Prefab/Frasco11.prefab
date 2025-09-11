@@ -209,6 +209,7 @@ GameObject:
   - component: {fileID: 4648169101081395319}
   - component: {fileID: 1509549767524907428}
   - component: {fileID: 5529527854313754961}
+  - component: {fileID: 3015092166038571727}
   - component: {fileID: 7526092724179868806}
   - component: {fileID: 94605552066246429}
   - component: {fileID: 4721658029563092943}
@@ -397,6 +398,48 @@ MonoBehaviour:
   _handAligment: 1
   _handGrabPoses:
   - {fileID: 6002578437992711661}
+--- !u!114 &3015092166038571727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7694800328705578434}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9a7676b01585ce43908639a27765dfc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _interactorFilters: []
+  _maxInteractors: -1
+  _maxSelectingInteractors: -1
+  _data: {fileID: 0}
+  _pointableElement: {fileID: 1509549767524907428}
+  _rigidbody: {fileID: 94605552066246429}
+  _physicsGrabbable: {fileID: 0}
+  _resetGrabOnGrabsUpdated: 1
+  _scoringModifier:
+    _positionRotationWeight: 0.8
+  _slippiness: 0
+  _supportedGrabTypes: 3
+  _pinchGrabRules:
+    _thumbRequirement: 1
+    _indexRequirement: 1
+    _middleRequirement: 1
+    _ringRequirement: 0
+    _pinkyRequirement: 0
+    _unselectMode: 0
+  _palmGrabRules:
+    _thumbRequirement: 1
+    _indexRequirement: 2
+    _middleRequirement: 2
+    _ringRequirement: 2
+    _pinkyRequirement: 1
+    _unselectMode: 0
+  _movementProvider: {fileID: 0}
+  _handAligment: 1
+  _handGrabPoses:
+  - {fileID: 8504550207880843321}
 --- !u!114 &7526092724179868806
 MonoBehaviour:
   m_ObjectHideFlags: 0

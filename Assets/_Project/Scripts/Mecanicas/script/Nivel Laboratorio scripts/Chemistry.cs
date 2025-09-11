@@ -78,6 +78,8 @@ public class Chemistry : MonoBehaviour
         }
         if(collision.gameObject.tag == "Finish")
                 Chem.material.SetFloat("_Fill", 0);
+        if (collision.gameObject.tag == "Player")
+            Debug.LogWarning("Detecto al jugador");
     }
     private void OnParticleCollision(GameObject other)
     {
@@ -103,4 +105,12 @@ public class Chemistry : MonoBehaviour
             RightDoor.CloseDoorAct();
         }
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.tag == "Player")
+            Debug.LogWarning("Detecto al jugador");
+
+    }
+
 }
