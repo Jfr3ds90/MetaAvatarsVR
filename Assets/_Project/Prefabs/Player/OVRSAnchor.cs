@@ -5,10 +5,10 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using static OVRPlugin;
-/*using TaskResult = OVRResult<System.Collections.Generic.List<OVRSAnchor>, OVRSAnchor.FetchResult>;*/
+using TaskResult = OVRResult<System.Collections.Generic.List<OVRSAnchor>, OVRSAnchor.FetchResult>;
 
 public class OVRSAnchor : MonoBehaviour
-{/*
+{
     /// <summary>
     /// Possible results of a save operation.
     /// </summary>
@@ -23,7 +23,7 @@ public class OVRSAnchor : MonoBehaviour
     /// </remarks>
     /// <seealso cref="OVRSAnchor.SaveAsync()"/>
     /// <seealso cref="OVRSAnchor.SaveAsync(IEnumerable{OVRSAnchor})"/>
-    [OVRResultStatus]
+    /*[OVRResultStatus]*/
     public enum SaveResult
     {
         /// <summary>
@@ -139,7 +139,7 @@ public class OVRSAnchor : MonoBehaviour
     /// </remarks>
     /// <seealso cref="OVRSAnchor.EraseAsync()"/>
     /// <seealso cref="OVRSAnchor.EraseAsync(IEnumerable{OVRSAnchor},IEnumerable{Guid})"/>
-    [OVRResultStatus]
+  /*  [OVRResultStatus]*/
     public enum EraseResult
     {
         /// <summary>
@@ -220,7 +220,7 @@ public class OVRSAnchor : MonoBehaviour
     /// to query for anchors. When that operation completes, use the resulting status code to determine whether the operation succeeded,
     /// or why it failed.
     /// </remarks>
-    [OVRResultStatus]
+    /*[OVRResultStatus]*/
     public enum FetchResult
     {
         /// <summary>
@@ -323,8 +323,8 @@ public class OVRSAnchor : MonoBehaviour
     /// <seealso cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSAnchor},IEnumerable{OVRSpaceUser})"/>
     /// <seealso cref="OVRSpatialAnchor.ShareAsync(IEnumerable{OVRSpatialAnchor}, Guid)"/>
     /// <seealso cref="OVRSpatialAnchor.ShareAsync(IEnumerable{OVRSpatialAnchor}, IEnumerable{Guid})"/>
-    [OVRResultStatus]
-    public enum ShareResult
+  /*  [OVRResultStatus]*/
+   /* public enum ShareResult
     {
         /// <summary>
         /// The operation succeeded.
