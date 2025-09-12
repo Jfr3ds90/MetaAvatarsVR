@@ -83,7 +83,12 @@ public class Chemistry : MonoBehaviour
             RightDoor.CloseDoorAct();
         }
         if(collision.gameObject.tag == "Finish")
-                Chem.material.SetFloat("_Fill", 0);
+        {
+            Chem.material.SetFloat("_Fill", 0);
+
+                audioS.clip = Drop;
+                audioS.Play();
+        }
         if (collision.gameObject.tag == "Player")
             Debug.LogWarning("Detecto al jugador");
     }
@@ -118,13 +123,6 @@ public class Chemistry : MonoBehaviour
     {
         if(collision.gameObject.tag == "Player")
             Debug.LogWarning("Detecto al jugador");
-
-        if(collision.gameObject.tag == "")
-        {
-            audioS.clip = Drop;
-            audioS.Play();
-        }
-
     }
 
 }
