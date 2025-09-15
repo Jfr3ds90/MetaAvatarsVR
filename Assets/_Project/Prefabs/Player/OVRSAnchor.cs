@@ -5,7 +5,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using static OVRPlugin;
-using TaskResult = OVRResult<System.Collections.Generic.List<OVRSAnchor>, OVRSAnchor.FetchResult>;
+/*using TaskResult = OVRSResult<System.Collections.Generic.List<OVRSAnchor>, OVRSAnchor.FetchResult>;*/
 
 public class OVRSAnchor : MonoBehaviour
 {
@@ -15,7 +15,7 @@ public class OVRSAnchor : MonoBehaviour
     /// <remarks>
     /// Saving an anchor is an asynchronous operation that can fail for a number of reasons, enumerated here.
     ///
-    /// <see cref="SaveResult"/> is used as the status for the <see cref="OVRResult"/> returned by
+    /// <see cref="SaveResult"/> is used as the status for the <see cref="OVRSResult"/> returned by
     /// <see cref="OVRSAnchor.SaveAsync()"/>,
     /// <see cref="OVRSAnchor.SaveAsync(IEnumerable{OVRSAnchor})"/>,
     /// <see cref="OVRSpatialAnchor.SaveAnchorAsync"/>, and
@@ -23,13 +23,14 @@ public class OVRSAnchor : MonoBehaviour
     /// </remarks>
     /// <seealso cref="OVRSAnchor.SaveAsync()"/>
     /// <seealso cref="OVRSAnchor.SaveAsync(IEnumerable{OVRSAnchor})"/>
-    /*[OVRResultStatus]*/
+  /*  [OVRSResultStatus]
     public enum SaveResult
     {
         /// <summary>
         /// The operation succeeded.
         /// </summary>
         Success = Result.Success,
+
 
         /// <summary>
         /// The operation failed in an unexpected way.
@@ -47,7 +48,7 @@ public class OVRSAnchor : MonoBehaviour
         FailureInvalidAnchor = Result.Failure_HandleInvalid,
 
         /// <summary>
-        /// Typically indicates an uninitialized <see cref="OVRResult"/>, or a pending <see cref="OVRTask"/> which
+        /// Typically indicates an uninitialized <see cref="OVRSResult"/>, or a pending <see cref="OVRSTask"/> which
         /// expected to have internal result data of a specific type set.
         /// </summary>
         FailureDataIsInvalid = Result.Failure_DataIsInvalid,
@@ -131,7 +132,7 @@ public class OVRSAnchor : MonoBehaviour
     /// <remarks>
     /// Saving an anchor is an asynchronous operation that can fail for a number of reasons, enumerated here.
     ///
-    /// <see cref="EraseResult"/> is used as the status for the <see cref="OVRResult"/> returned by
+    /// <see cref="EraseResult"/> is used as the status for the <see cref="OVRSResult"/> returned by
     /// <see cref="OVRSAnchor.EraseAsync()"/>,
     /// <see cref="OVRSAnchor.EraseAsync(IEnumerable{OVRSAnchor},IEnumerable{Guid})"/>,
     /// <see cref="OVRSpatialAnchor.EraseAnchorAsync"/>, and
@@ -139,7 +140,7 @@ public class OVRSAnchor : MonoBehaviour
     /// </remarks>
     /// <seealso cref="OVRSAnchor.EraseAsync()"/>
     /// <seealso cref="OVRSAnchor.EraseAsync(IEnumerable{OVRSAnchor},IEnumerable{Guid})"/>
-  /*  [OVRResultStatus]*/
+    [OVRSResultStatus]
     public enum EraseResult
     {
         /// <summary>
@@ -163,7 +164,7 @@ public class OVRSAnchor : MonoBehaviour
         FailureInvalidAnchor = Result.Failure_HandleInvalid,
 
         /// <summary>
-        /// Typically indicates an uninitialized <see cref="OVRResult"/>, or a pending <see cref="OVRTask"/> which
+        /// Typically indicates an uninitialized <see cref="OVRSResult"/>, or a pending <see cref="OVRSTask"/> which
         /// expected to have internal result data of a specific type set.
         /// </summary>
         FailureDataIsInvalid = Result.Failure_DataIsInvalid,
@@ -220,7 +221,7 @@ public class OVRSAnchor : MonoBehaviour
     /// to query for anchors. When that operation completes, use the resulting status code to determine whether the operation succeeded,
     /// or why it failed.
     /// </remarks>
-    /*[OVRResultStatus]*/
+    [OVRSResultStatus]
     public enum FetchResult
     {
         /// <summary>
@@ -234,7 +235,7 @@ public class OVRSAnchor : MonoBehaviour
         Failure = Result.Failure,
 
         /// <summary>
-        /// Typically indicates an uninitialized <see cref="OVRResult"/>, or a pending <see cref="OVRTask"/> which
+        /// Typically indicates an uninitialized <see cref="OVRSResult"/>, or a pending <see cref="OVRSTask"/> which
         /// expected to have internal result data set.
         /// </summary>
         FailureDataIsInvalid = Result.Failure_DataIsInvalid,
@@ -312,7 +313,7 @@ public class OVRSAnchor : MonoBehaviour
     /// <remarks>
     /// Sharing an anchor is an asynchronous operation that can fail for a number of reasons, enumerated here.
     ///
-    /// <see cref="ShareResult"/> is used as the status for the <see cref="OVRResult"/> returned by
+    /// <see cref="ShareResult"/> is used as the status for the <see cref="OVRSResult"/> returned by
     /// <see cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSpaceUser})"/>,
     /// <see cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSAnchor},IEnumerable{OVRSpaceUser})"/>,
     /// <see cref="OVRSpatialAnchor.ShareAsync(Guid)"/>,
@@ -323,8 +324,8 @@ public class OVRSAnchor : MonoBehaviour
     /// <seealso cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSAnchor},IEnumerable{OVRSpaceUser})"/>
     /// <seealso cref="OVRSpatialAnchor.ShareAsync(IEnumerable{OVRSpatialAnchor}, Guid)"/>
     /// <seealso cref="OVRSpatialAnchor.ShareAsync(IEnumerable{OVRSpatialAnchor}, IEnumerable{Guid})"/>
-  /*  [OVRResultStatus]*/
-   /* public enum ShareResult
+    [OVRSResultStatus]
+    public enum Shareesult
     {
         /// <summary>
         /// The operation succeeded.
@@ -365,7 +366,7 @@ public class OVRSAnchor : MonoBehaviour
         FailureHandleInvalid = Result.Failure_HandleInvalid,
 
         /// <summary>
-        /// Typically indicates an uninitialized <see cref="OVRResult"/>, or a pending <see cref="OVRTask"/> which
+        /// Typically indicates an uninitialized <see cref="OVRSResult"/>, or a pending <see cref="OVRSTask"/> which
         /// expected to have internal result data of a specific type set.
         /// </summary>
         FailureDataIsInvalid = Result.Failure_DataIsInvalid,
@@ -471,7 +472,7 @@ public class OVRSAnchor : MonoBehaviour
     internal static void OnSpaceDiscoveryComplete(OVRDeserialize.SpaceDiscoveryCompleteData data)
     {
         TaskResult result;
-        if (!OVRTask.TryGetPendingTask<TaskResult>(data.RequestId, out var task))
+        if (!OVRSTask.TryGetPendingTask<TaskResult>(data.RequestId, out var task))
         {
             // Not for us; someone else initiated this request.
             return;
@@ -481,13 +482,13 @@ public class OVRSAnchor : MonoBehaviour
         {
             Telemetry.GetMarker(Telemetry.MarkerId.DiscoverSpaces, data.RequestId)
                 ?.AddAnnotation(Telemetry.Annotation.ResultsCount, taskData.Anchors?.Count ?? 0);
-            result = OVRResult.From(taskData.Anchors, (FetchResult)data.Result);
+            result = OVRSResult.From(taskData.Anchors, (FetchResult)data.Result);
         }
         else
         {
             Debug.LogError($"SpaceDiscovery completed but its task does not have an associated anchor List. " +
                            $"RequestId={data.RequestId}, Result={data.Result}");
-            result = OVRResult.From((List<OVRSAnchor>)null, (FetchResult)data.Result);
+            result = OVRSResult.From((List<OVRSAnchor>)null, (FetchResult)data.Result);
         }
 
         Telemetry.SetAsyncResultAndSend(Telemetry.MarkerId.DiscoverSpaces, data.RequestId, data.Result);
@@ -501,7 +502,7 @@ public class OVRSAnchor : MonoBehaviour
         var requestId = data.RequestId;
 
         // never calls task.SetResult() as that completes the task
-        if (!OVRTask.TryGetPendingTask<TaskResult>(requestId, out var task))
+        if (!OVRSTask.TryGetPendingTask<TaskResult>(requestId, out var task))
             return;
 
         if (!task.TryGetInternalData<FetchTaskData>(out var taskData))
@@ -563,7 +564,7 @@ public class OVRSAnchor : MonoBehaviour
     /// </summary>
     /// <remarks>
     /// This method queries for anchors that match the corresponding <paramref name="options"/>. This method is
-    /// asynchronous; use the returned <see cref="OVRTask"/> to check for completion.
+    /// asynchronous; use the returned <see cref="OVRSTask"/> to check for completion.
     ///
     /// Anchors may be returned in batches. If <paramref name="incrementalResultsCallback"/> is not `null`, then this
     /// delegate is invoked whenever results become available prior to the completion of the entire operation. New anchors
@@ -577,9 +578,9 @@ public class OVRSAnchor : MonoBehaviour
     /// </param>
     /// <param name="options">Options describing which anchors to fetch.</param>
     /// <param name="incrementalResultsCallback">(Optional) A callback invoked when incremental results are available.</param>
-    /// <returns>Returns an <see cref="OVRTask"/> that can be used to track the asynchronous fetch.</returns>
+    /// <returns>Returns an <see cref="OVRSTask"/> that can be used to track the asynchronous fetch.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="anchors"/> is `null`.</exception>
-    public static OVRTask<TaskResult> FetchAnchorsAsync(
+    public static OVRSTask<TaskResult> FetchAnchorsAsync(
         List<OVRSAnchor> anchors, FetchOptions options, Action<List<OVRSAnchor>, int> incrementalResultsCallback = null)
     {
         if (anchors == null)
@@ -587,7 +588,7 @@ public class OVRSAnchor : MonoBehaviour
 
         anchors.Clear();
 
-        return OVRTask.Build(
+        return OVRSTask.Build(
             options.DiscoverSpaces(out var requestId), requestId)
             .ToTask<List<OVRSAnchor>, FetchResult>()
             .WithInternalData(new FetchTaskData
@@ -609,7 +610,7 @@ public class OVRSAnchor : MonoBehaviour
     /// A non-null buffer to store the loaded anchors. This container is cleared before being populated.
     /// </param>
     /// <returns>
-    /// Returns an <see cref="OVRResult"/>&lt;<see cref="List{OVRSAnchor}"/>,<see cref="FetchResult"/>&gt;,
+    /// Returns an <see cref="OVRSResult"/>&lt;<see cref="List{OVRSAnchor}"/>,<see cref="FetchResult"/>&gt;,
     /// which indicates the status of the load operation, as well as returning a now-populated reference to the
     /// <paramref name="anchors"/> buffer list originally provided to this call.
     /// <br/>
@@ -617,14 +618,14 @@ public class OVRSAnchor : MonoBehaviour
     /// is <see cref="Guid.Empty"/>.
     /// </returns>
     /// <remarks>
-    /// This method is asynchronous. The returned <see cref="OVRTask"/> wrapper completes when all results are
+    /// This method is asynchronous. The returned <see cref="OVRSTask"/> wrapper completes when all results are
     /// available.
     /// <br/><br/>
     /// In order to be loaded, the anchor must have previously been shared with the group, e.g., with
     /// <see cref="ShareAsync(IEnumerable{OVRSAnchor}, Guid)"/> or <see cref="ShareAsync(Guid)"/>.
     /// </remarks>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="anchors"/> is null.</exception>
-    public static async OVRTask<TaskResult> FetchSharedAnchorsAsync(
+    public static async OVRSTask<TaskResult> FetchSharedAnchorsAsync(
         Guid groupUuid,
         List<OVRSAnchor> anchors)
     {
@@ -635,7 +636,7 @@ public class OVRSAnchor : MonoBehaviour
 
         var query = OVRSpaceQuery.ForGroupThrow(groupUuid, nameof(groupUuid));
 
-        return OVRResult.From(anchors, (FetchResult)(await FetchAnchors(anchors, query)));
+        return OVRSResult.From(anchors, (FetchResult)(await FetchAnchors(anchors, query)));
     }
 
     /// <summary>
@@ -662,7 +663,7 @@ public class OVRSAnchor : MonoBehaviour
     /// This container is always cleared unless an exception is thrown.
     /// </param>
     /// <returns>
-    /// Returns an <see cref="OVRResult"/>&lt;<see cref="List{OVRSAnchor}"/>,<see cref="FetchResult"/>&gt;,
+    /// Returns an <see cref="OVRSResult"/>&lt;<see cref="List{OVRSAnchor}"/>,<see cref="FetchResult"/>&gt;,
     /// which indicates the status of the load operation, as well as returning a now-populated reference to the
     /// <paramref name="anchors"/> buffer list originally provided to this call.
     /// <br/>
@@ -671,7 +672,7 @@ public class OVRSAnchor : MonoBehaviour
     /// <see cref="OVRSpaceQuery.MaxResultsForAnchors"/>.
     /// </returns>
     /// <remarks>
-    /// This method is asynchronous. The returned <see cref="OVRTask"/> wrapper completes when all results are
+    /// This method is asynchronous. The returned <see cref="OVRSTask"/> wrapper completes when all results are
     /// available.
     /// <br/><br/>
     /// In order to be loaded, the anchor must have previously been shared with the group, e.g., with
@@ -680,7 +681,7 @@ public class OVRSAnchor : MonoBehaviour
     /// <exception cref="ArgumentNullException">
     ///     Thrown if either <paramref name="allowedAnchorUuids"/> or <paramref name="anchors"/> is null.
     /// </exception>
-    public static async OVRTask<TaskResult> FetchSharedAnchorsAsync(
+    public static async OVRSTask<TaskResult> FetchSharedAnchorsAsync(
         Guid groupUuid,
         IEnumerable<Guid> allowedAnchorUuids,
         List<OVRSAnchor> anchors)
@@ -696,7 +697,7 @@ public class OVRSAnchor : MonoBehaviour
 
         var query = OVRSpaceQuery.ForGroupThrow(groupUuid, nameof(groupUuid), allowedAnchorUuids);
 
-        return OVRResult.From(anchors, (FetchResult)(await FetchAnchors(anchors, query)));
+        return OVRSResult.From(anchors, (FetchResult)(await FetchAnchors(anchors, query)));
     }
 
     /// <summary>
@@ -704,14 +705,14 @@ public class OVRSAnchor : MonoBehaviour
     /// </summary>
     /// <remarks>
     /// Spatial anchor creation is asynchronous. This method initiates a request to create a spatial anchor at
-    /// <paramref name="trackingSpacePose"/>. The returned <see cref="OVRTask"/>&lt;<see cref="OVRSAnchor"/>&gt; can be awaited or used to
+    /// <paramref name="trackingSpacePose"/>. The returned <see cref="OVRSTask"/>&lt;<see cref="OVRSAnchor"/>&gt; can be awaited or used to
     /// track the completion of the request.
     ///
     /// If spatial anchor creation fails, the resulting <see cref="OVRSAnchor"/> will be <see cref="OVRSAnchor.Null"/>.
     /// </remarks>
     /// <param name="trackingSpacePose">The pose, in tracking space, at which you wish to create the spatial anchor.</param>
     /// <returns>A task which can be used to track completion of the request.</returns>
-    public static OVRTask<OVRSAnchor> CreateSpatialAnchorAsync(Pose trackingSpacePose) => OVRTask
+    public static OVRSTask<OVRSAnchor> CreateSpatialAnchorAsync(Pose trackingSpacePose) => OVRSTask
         .Build(
             CreateSpatialAnchor(new SpatialAnchorCreateInfo
             {
@@ -730,7 +731,7 @@ public class OVRSAnchor : MonoBehaviour
     /// </summary>
     /// <remarks>
     /// Spatial anchor creation is asynchronous. This method initiates a request to create a spatial anchor at
-    /// <paramref name="transform"/>. The returned <see cref="OVRTask"/>&lt;<see cref="OVRSAnchor"/>&gt; can be awaited or used to
+    /// <paramref name="transform"/>. The returned <see cref="OVRSTask"/>&lt;<see cref="OVRSAnchor"/>&gt; can be awaited or used to
     /// track the completion of the request.
     ///
     /// If spatial anchor creation fails, the resulting <see cref="OVRSAnchor"/> will be <see cref="OVRSAnchor.Null"/>.
@@ -740,7 +741,7 @@ public class OVRSAnchor : MonoBehaviour
     /// <returns>A task which can be used to track completion of the request.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="transform"/> is `null`.</exception>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="centerEyeCamera"/> is `null`.</exception>
-    public static OVRTask<OVRSAnchor> CreateSpatialAnchorAsync(Transform transform, Camera centerEyeCamera)
+    public static OVRSTask<OVRSAnchor> CreateSpatialAnchorAsync(Transform transform, Camera centerEyeCamera)
     {
         if (transform == null)
             throw new ArgumentNullException(nameof(transform));
@@ -765,17 +766,17 @@ public class OVRSAnchor : MonoBehaviour
     /// This method persists the anchor so that it may be retrieved later, e.g., by using
     /// <see cref="FetchAnchorsAsync(List{OVRSAnchor},FetchOptions,Action{List{OVRSAnchor},int})"/>.
     ///
-    /// This operation is asynchronous. Use the returned <see cref="OVRTask"/> to track the result of the
+    /// This operation is asynchronous. Use the returned <see cref="OVRSTask"/> to track the result of the
     /// asynchronous operation.
     ///
     /// NOTE: When saving multiple anchors, it is more efficient to save them in a batch using
     /// <see cref="SaveAsync(IEnumerable{OVRSAnchor})"/>.
     /// </remarks>
-    /// <returns>An awaitable <see cref="OVRTask"/> representing the asynchronous request.</returns>
+    /// <returns>An awaitable <see cref="OVRSTask"/> representing the asynchronous request.</returns>
     /// <seealso cref="FetchAnchorsAsync(List{OVRSAnchor},FetchOptions,Action{List{OVRSAnchor},int})"/>
     /// <seealso cref="SaveAsync(IEnumerable{OVRSAnchor})"/>
     /// <seealso cref="EraseAsync()"/>
-    public OVRTask<OVRResult<SaveResult>> SaveAsync()
+    public OVRSTask<OVRSResult<SaveResult>> SaveAsync()
     {
         var handle = Handle;
         unsafe
@@ -790,15 +791,15 @@ public class OVRSAnchor : MonoBehaviour
     /// <remarks>
     /// This method persists anchors so that they may be retrieved later.
     ///
-    /// This operation is asynchronous. Use the returned <see cref="OVRTask"/> to track the result of the
+    /// This operation is asynchronous. Use the returned <see cref="OVRSTask"/> to track the result of the
     /// asynchronous operation.
     /// </remarks>
     /// <param name="anchors">A collection of anchors to persist.</param>
-    /// <returns>Returns an awaitable <see cref="OVRTask"/> representing the asynchronous request.</returns>
+    /// <returns>Returns an awaitable <see cref="OVRSTask"/> representing the asynchronous request.</returns>
     /// <seealso cref="FetchAnchorsAsync(List{OVRSAnchor},FetchOptions,Action{List{OVRSAnchor},int})"/>
     /// <seealso cref="SaveAsync()"/>
     /// <seealso cref="EraseAsync(IEnumerable{OVRSAnchor},IEnumerable{Guid})"/>
-    public static OVRTask<OVRResult<SaveResult>> SaveAsync(IEnumerable<OVRSAnchor> anchors)
+    public static OVRSTask<OVRSResult<SaveResult>> SaveAsync(IEnumerable<OVRSAnchor> anchors)
     {
         using var spaces = OVRNativeList.WithSuggestedCapacityFrom(anchors).AllocateEmpty<ulong>(Allocator.Temp);
         foreach (var anchor in anchors.ToNonAlloc())
@@ -808,13 +809,13 @@ public class OVRSAnchor : MonoBehaviour
 
         if (spaces.Count == 0)
         {
-            return OVRTask.FromResult(OVRResult.From(SaveResult.Success));
+            return OVRSTask.FromResult(OVRSResult.From(SaveResult.Success));
         }
 
         return SaveSpacesAsync(spaces);
     }
 
-    internal static unsafe OVRTask<OVRResult<SaveResult>> SaveSpacesAsync(ReadOnlySpan<ulong> spaces)
+    internal static unsafe OVRSTask<OVRSResult<SaveResult>> SaveSpacesAsync(ReadOnlySpan<ulong> spaces)
     {
         var telemetryMarker = OVRTelemetry
             .Start((int)Telemetry.MarkerId.SaveSpaces)
@@ -825,7 +826,7 @@ public class OVRSAnchor : MonoBehaviour
             var result = SaveSpaces(ptr, spaces.Length, out var requestId);
             Telemetry.SetSyncResult(telemetryMarker, requestId, result);
 
-            return OVRTask.Build(result, requestId).ToResultTask<SaveResult>();
+            return OVRSTask.Build(result, requestId).ToResultTask<SaveResult>();
         }
     }
 
@@ -839,16 +840,16 @@ public class OVRSAnchor : MonoBehaviour
     /// <remarks>
     /// This method removes the anchor from persistent storage. Note this does not destroy the current instance.
     ///
-    /// This operation is asynchronous. Use the returned <see cref="OVRTask"/> to track the result of the
+    /// This operation is asynchronous. Use the returned <see cref="OVRSTask"/> to track the result of the
     /// asynchronous operation.
     ///
     /// NOTE: When erasing multiple anchors, it is more efficient to erase them in a batch using
     /// <see cref="EraseAsync(IEnumerable{OVRSAnchor},IEnumerable{Guid})"/>.
     /// </remarks>
-    /// <returns>An awaitable <see cref="OVRTask"/> representing the asynchronous request.</returns>
+    /// <returns>An awaitable <see cref="OVRSTask"/> representing the asynchronous request.</returns>
     /// <seealso cref="SaveAsync()"/>
     /// <seealso cref="EraseAsync(IEnumerable{OVRSAnchor},IEnumerable{Guid})"/>
-    public OVRTask<OVRResult<EraseResult>> EraseAsync()
+    public OVRSTask<OVRSResult<EraseResult>> EraseAsync()
     {
         var uuid = Uuid;
         unsafe
@@ -863,15 +864,15 @@ public class OVRSAnchor : MonoBehaviour
     /// <remarks>
     /// This method removes anchors from persistent storage.
     ///
-    /// This operation is asynchronous. Use the returned <see cref="OVRTask"/> to track the result of the
+    /// This operation is asynchronous. Use the returned <see cref="OVRSTask"/> to track the result of the
     /// asynchronous operation.
     /// </remarks>
     /// <param name="anchors">(Optional) A collection of anchors to remove from persistent storage.</param>
     /// <param name="uuids">(Optional) A collection of uuids to remove from persistent storage.</param>
-    /// <returns>Returns an awaitable <see cref="OVRTask"/> representing the asynchronous request.</returns>
+    /// <returns>Returns an awaitable <see cref="OVRSTask"/> representing the asynchronous request.</returns>
     /// <exception cref="ArgumentException">Thrown if both <paramref name="anchors"/> and <paramref name="uuids"/> are `null`.</exception>
     /// <seealso cref="SaveAsync(IEnumerable{OVRSAnchor})"/>
-    public static OVRTask<OVRResult<EraseResult>> EraseAsync(IEnumerable<OVRSAnchor> anchors, IEnumerable<Guid> uuids)
+    public static OVRSTask<OVRSResult<EraseResult>> EraseAsync(IEnumerable<OVRSAnchor> anchors, IEnumerable<Guid> uuids)
     {
         if (anchors == null && uuids == null)
             throw new ArgumentException($"One of {nameof(anchors)} or {nameof(uuids)} must not be null.");
@@ -886,13 +887,13 @@ public class OVRSAnchor : MonoBehaviour
 
         if (spaces.Count == 0 && ids.Count == 0)
         {
-            return OVRTask.FromResult(OVRResult.From(EraseResult.Success));
+            return OVRSTask.FromResult(OVRSResult.From(EraseResult.Success));
         }
 
         return EraseSpacesAsync(spaces, ids);
     }
 
-    private static unsafe OVRTask<OVRResult<EraseResult>> EraseSpacesAsync(ReadOnlySpan<ulong> spaces, ReadOnlySpan<Guid> uuids)
+    private static unsafe OVRSTask<OVRSResult<EraseResult>> EraseSpacesAsync(ReadOnlySpan<ulong> spaces, ReadOnlySpan<Guid> uuids)
     {
         var telemetryMarker = OVRTelemetry
             .Start((int)Telemetry.MarkerId.EraseSpaces)
@@ -905,7 +906,7 @@ public class OVRSAnchor : MonoBehaviour
             var result = EraseSpaces((uint)spaces.Length, spacesPtr, (uint)uuids.Length, uuidsPtr, out var requestId);
             Telemetry.SetSyncResult(telemetryMarker, requestId, result);
 
-            return OVRTask.Build(result, requestId).ToResultTask<EraseResult>();
+            return OVRSTask.Build(result, requestId).ToResultTask<EraseResult>();
         }
     }
 
@@ -919,15 +920,15 @@ public class OVRSAnchor : MonoBehaviour
     ///
     /// This method shares the anchor with a collection of <see cref="OVRSpaceUser"/>.
     ///
-    /// This operation is asynchronous. Use the returned <see cref="OVRTask"/> to track the result of the
+    /// This operation is asynchronous. Use the returned <see cref="OVRSTask"/> to track the result of the
     /// asynchronous operation.
     /// </remarks>
     /// <param name="users"> A collection of users with whom anchors will be shared.</param>
-    /// <returns>An awaitable <see cref="OVRTask"/> representing the asynchronous request.</returns>
+    /// <returns>An awaitable <see cref="OVRSTask"/> representing the asynchronous request.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="users"/> is `null`.</exception>
     /// <exception cref="ArgumentException">Thrown if <paramref name="users"/> count is less than one.</exception>
     /// <seealso cref="ShareAsync(IEnumerable{OVRSAnchor},IEnumerable{OVRSpaceUser})"/>
-    public OVRTask<OVRResult<ShareResult>> ShareAsync(IEnumerable<OVRSpaceUser> users)
+    public OVRSTask<OVRSResult<ShareResult>> ShareAsync(IEnumerable<OVRSpaceUser> users)
     {
         if (users == null)
             throw new ArgumentNullException(nameof(users));
@@ -954,16 +955,16 @@ public class OVRSAnchor : MonoBehaviour
     /// <remarks>
     /// This method shares a collection of anchors with a collection of users.
     ///
-    /// This operation is asynchronous. Use the returned <see cref="OVRTask"/> to track the result of the
+    /// This operation is asynchronous. Use the returned <see cref="OVRSTask"/> to track the result of the
     /// asynchronous operation.
     /// </remarks>
     /// <param name="anchors">A collection of anchors to share.</param>
     /// <param name="users"> A collection of users with whom anchors will be shared.</param>
-    /// <returns>Returns an awaitable <see cref="OVRTask"/> representing the asynchronous request.</returns>
+    /// <returns>Returns an awaitable <see cref="OVRSTask"/> representing the asynchronous request.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="anchors"/> or <paramref name="users"/> are `null`.</exception>
     /// <exception cref="ArgumentException">Thrown if <paramref name="users"/> count is less than one.</exception>
     /// <seealso cref="ShareAsync(IEnumerable{OVRSpaceUser})"/>
-    public static OVRTask<OVRResult<ShareResult>> ShareAsync(
+    public static OVRSTask<OVRSResult<ShareResult>> ShareAsync(
         IEnumerable<OVRSAnchor> anchors,
         IEnumerable<OVRSpaceUser> users)
     {
@@ -989,12 +990,12 @@ public class OVRSAnchor : MonoBehaviour
             throw new ArgumentException($"{nameof(users)} must contain at least one user.");
 
         if (spaceList.Count == 0)
-            return OVRTask.FromResult(OVRResult.From(ShareResult.Success));
+            return OVRSTask.FromResult(OVRSResult.From(ShareResult.Success));
 
         return ShareSpacesAsync(spaces: spaceList, users: userList);
     }
 
-    private static unsafe OVRTask<OVRResult<ShareResult>> ShareSpacesAsync(ReadOnlySpan<ulong> spaces,
+    private static unsafe OVRSTask<OVRSResult<ShareResult>> ShareSpacesAsync(ReadOnlySpan<ulong> spaces,
         ReadOnlySpan<ulong> users)
     {
         fixed (ulong* spacePtr = spaces)
@@ -1007,7 +1008,7 @@ public class OVRSAnchor : MonoBehaviour
                 numUsers: (uint)users.Length,
                 out var requestId);
 
-            return OVRTask.Build(result, requestId).ToResultTask<ShareResult>();
+            return OVRSTask.Build(result, requestId).ToResultTask<ShareResult>();
         }
     }
 
@@ -1025,15 +1026,15 @@ public class OVRSAnchor : MonoBehaviour
     /// <seealso cref="OVRColocationSession.StartAdvertisementAsync"/>
     /// <seealso cref="OVRColocationSession.Data.AdvertisementUuid"/>
     /// <returns>
-    /// Returns an <see cref="OVRResult"/>&lt;<see cref="OVRSAnchor.ShareResult"/>&gt; indicating the status of the share
+    /// Returns an <see cref="OVRSResult"/>&lt;<see cref="OVRSAnchor.ShareResult"/>&gt; indicating the status of the share
     /// operation.
     /// </returns>
     /// <remarks>
-    /// This method is asynchronous; use the returned <see cref="OVRTask"/> wrapper to be notified of completion.
+    /// This method is asynchronous; use the returned <see cref="OVRSTask"/> wrapper to be notified of completion.
     ///
     /// The <paramref name="groupUuid"/> parameter can be any valid Guid, which excludes the default value Guid, AKA
     /// <see cref="Guid.Empty"/>.
-    public OVRTask<OVRResult<ShareResult>> ShareAsync(Guid groupUuid)
+    public OVRSTask<OVRSResult<ShareResult>> ShareAsync(Guid groupUuid)
     {
         ulong handle = Handle;
         unsafe
@@ -1059,17 +1060,17 @@ public class OVRSAnchor : MonoBehaviour
     /// UUIDs provided by colocation APIs such as in <see cref="OVRColocationSession"/>.
     /// </param>
     /// <returns>
-    /// Returns an <see cref="OVRResult"/>&lt;<see cref="OVRSAnchor.ShareResult"/>&gt; indicating the status of the share
+    /// Returns an <see cref="OVRSResult"/>&lt;<see cref="OVRSAnchor.ShareResult"/>&gt; indicating the status of the share
     /// operation.
     /// </returns>
     /// <remarks>
-    /// This method is asynchronous; use the returned <see cref="OVRTask"/> wrapper to be notified of completion.
+    /// This method is asynchronous; use the returned <see cref="OVRSTask"/> wrapper to be notified of completion.
     /// <br/><br/>
     /// The <paramref name="groupUuid"/> parameter can be any valid Guid, which excludes the default value Guid, AKA
     /// <see cref="Guid.Empty"/>.
     /// </remarks>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="anchors"/> is null.</exception>
-    public static OVRTask<OVRResult<ShareResult>> ShareAsync(IEnumerable<OVRSAnchor> anchors, Guid groupUuid)
+    public static OVRSTask<OVRSResult<ShareResult>> ShareAsync(IEnumerable<OVRSAnchor> anchors, Guid groupUuid)
     {
         if (anchors is null)
             throw new ArgumentNullException(nameof(anchors));
@@ -1087,7 +1088,7 @@ public class OVRSAnchor : MonoBehaviour
         }
     }
 
-    internal static unsafe OVRTask<OVRResult<ShareResult>> ShareAsyncInternal(ReadOnlySpan<ulong> anchors,
+    internal static unsafe OVRSTask<OVRSResult<ShareResult>> ShareAsyncInternal(ReadOnlySpan<ulong> anchors,
         ReadOnlySpan<Guid> groupUuids)
     {
         var info = new OVRPlugin.ShareSpacesInfo();
@@ -1105,7 +1106,7 @@ public class OVRSAnchor : MonoBehaviour
             };
 
             info.RecipientInfo = (ShareSpacesRecipientInfoBase*)(&shareSpacesGroupRecipientInfo);
-            return OVRTask
+            return OVRSTask
                 .Build(ShareSpaces(in info, out var requestId), requestId)
                 .ToResultTask<ShareResult>();
         }
@@ -1113,7 +1114,7 @@ public class OVRSAnchor : MonoBehaviour
 
     internal static void OnShareAnchorsToGroupsComplete(UInt64 requestId, Result result)
     {
-        OVRTask.SetResult(requestId, OVRResult.From((ShareResult)result));
+        OVRSTask.SetResult(requestId, OVRSResult.From((ShareResult)result));
     }
 
     internal ulong Handle { get; }
@@ -1279,7 +1280,7 @@ public class OVRSAnchor : MonoBehaviour
         Telemetry.OnInit();
     }
 
-    internal static OVRTask<Result> FetchAnchors(IList<OVRSAnchor> anchors, SpaceQueryInfo2 queryInfo)
+    internal static OVRSTask<Result> FetchAnchors(IList<OVRSAnchor> anchors, SpaceQueryInfo2 queryInfo)
     {
         if (anchors == null)
         {
@@ -1318,7 +1319,7 @@ public class OVRSAnchor : MonoBehaviour
         var result = QuerySpaces2(queryInfo, out var requestId);
         Telemetry.SetSyncResult(telemetryMarker, requestId, result);
 
-        return OVRTask
+        return OVRSTask
             .Build(result, requestId)
             .ToTask()
             .WithInternalData(anchors);

@@ -148,7 +148,7 @@ public class OVRSObjectPool
         public void Dispose() => Return(_list);
     }
 
-   /*public struct TaskScope<T> : IDisposable
+   public struct TaskScope<T> : IDisposable
     {
         ListScope<OVRSTask<T>> _tasks;
         ListScope<T> _results;
@@ -165,7 +165,7 @@ public class OVRSObjectPool
             _results.Dispose();
         }
     }
-    */
+    
     public readonly struct DictionaryScope<TKey, TValue> : IDisposable
     {
         readonly Dictionary<TKey, TValue> _dictionary;

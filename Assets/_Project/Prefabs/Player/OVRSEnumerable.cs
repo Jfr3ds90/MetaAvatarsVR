@@ -43,23 +43,6 @@ internal readonly struct OVRSEnumerable<T> : IEnumerable<T>
         _ => null,
     };
 
-    /// <summary>This is an internal member.</summary>
-   /* [Obsolete("This method may enumerate the collection. Consider " + nameof(Count) + " or " +
-              nameof(TryGetCount) + " instead.")]
-    public int GetCount()
-    {
-        if (!TryGetCount(out var count))
-        {
-            count = 0;
-            foreach (var item in _enumerable)
-            {
-                count++;
-            }
-        }
-
-        return count;
-    }*/
-
     /// <summary>This is an internal type.</summary>
     public struct Enumerator : IEnumerator<T>
     {

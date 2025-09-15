@@ -8,19 +8,19 @@ using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
 /// <summary>
-/// Static methods related to <see cref="OVRTask"/>&lt;TResult&gt;
+/// Static methods related to <see cref="OVRSTask"/>&lt;TResult&gt;
 /// </summary>
 /// <remarks>
-/// The static class `OVRTask` provides some utilities for working with tasks.
+/// The static class `OVRSTask` provides some utilities for working with tasks.
 ///
-/// Many asynchronous methods in the Core SDK return an awaitable <see cref="OVRTask"/>&lt;TResult&gt;. The methods in this
+/// Many asynchronous methods in the Core SDK return an awaitable <see cref="OVRSTask"/>&lt;TResult&gt;. The methods in this
 /// class provide functionality to combine multiple tasks (see <see cref="WhenAll{T1,T2}"/>) and create your own
-/// <see cref="OVRTask"/>&lt;TResult&gt; (see <see cref="Create{TResult}"/>). For more information
+/// <see cref="OVRSTask"/>&lt;TResult&gt; (see <see cref="Create{TResult}"/>). For more information
 /// on tasks, see [Asynchronous Tasks](https://developer.oculus.com/documentation/unity/unity-async-tasks/).
 /// </remarks>
 
-public class OVRSTask 
-{/*
+public static partial class OVRSTask 
+{
     /// <summary>
     /// Creates a task that completes when all of the supplied tasks have completed.
     /// </summary>
@@ -105,20 +105,13 @@ public class OVRSTask
     /// \cond
     internal static OVRSTask<TResult> FromGuid<TResult>(Guid id) => Create<TResult>(id);
 
-    [Obsolete("Consider OVRSTask.Build instead.")]
-    internal static OVRSTask<TResult> FromRequest<TResult>(ulong id) => Create<TResult>(GetId(id));
-
-    [Obsolete("Consider OVRSTask.Build instead.")]
-    internal static OVRSTask<TResult> FromRequest<TResult>(ulong id, OVRPlugin.EventType eventType)
-        => Create<TResult>(GetId(id, eventType));
-
-    internal static Builder Build(bool success, ulong requestId)
+    internal static BuilderS Build(bool success, ulong requestId)
         => new(success ? OVRPlugin.Result.Success : OVRPlugin.Result.Failure, GetId(requestId));
 
-    internal static Builder Build(OVRPlugin.Result result, ulong requestId)
+    internal static BuilderS Build(OVRPlugin.Result result, ulong requestId)
         => new(result, GetId(requestId));
 
-    internal static Builder Build(OVRPlugin.Result result, ulong requestId, OVRPlugin.EventType eventType)
+    internal static BuilderS Build(OVRPlugin.Result result, ulong requestId, OVRPlugin.EventType eventType)
         => new(result, GetId(requestId, eventType));
     /// \endcond
 
@@ -139,17 +132,12 @@ public class OVRSTask
     }
 
     /// \cond
-    [Obsolete("This method does not ensure the task exists; it just returns an OVRSTask with the given id. Use TryGetPending instead.", error: true)]
-    internal static OVRSTask<TResult> GetExisting<TResult>(Guid id) => Get<TResult>(id);
 
     internal static bool TryGetPendingTask<TResult>(Guid id, out OVRSTask<TResult> task)
     {
         task = Get<TResult>(id);
         return task.IsPending;
     }
-
-    [Obsolete("This method does not ensure the task exists; it just returns an OVRSTask with the given id. Use TryGetPending instead.", error: true)]
-    internal static OVRSTask<TResult> GetExisting<TResult>(ulong id) => Get<TResult>(GetId(id));
 
     internal static bool TryGetPendingTask<TResult>(ulong id, out OVRSTask<TResult> task) => TryGetPendingTask(GetId(id), out task);
     /// \endcond
@@ -281,7 +269,7 @@ public class OVRSTask
 
         DomainReloadMethods.Clear();
     }
-#endif*/
+#endif
 }
 
 /// <summary>
@@ -307,8 +295,8 @@ public class OVRSTask
 /// [Asynchronous Tasks](https://developer.oculus.com/documentation/unity/unity-async-tasks/).
 /// </remarks>
 /// <typeparam name="TResult">The type of result being awaited.</typeparam>
-/*[AsyncMethodBuilder(typeof(OVRSTaskBuilder<>))]*/
-/*public readonly struct OVRSTask<TResult> : IEquatable<OVRSTask<TResult>>, IDisposable
+[AsyncMethodBuilder(typeof(OVRSTaskBuilder<>))]
+public readonly struct OVRSTask<TResult> : IEquatable<OVRSTask<TResult>>, IDisposable
 {
     /// \cond
     #region static
@@ -1430,7 +1418,7 @@ public class OVRSTask
 
     #endregion
 }
-*/
+
 #region Task builder
 /// <summary>
 /// The AsyncMethodBuilder for <see cref="OVRSTask"/>&lt;TResult&gt;.
@@ -1443,7 +1431,7 @@ public class OVRSTask
 /// </remarks>
 /// <typeparam name="T">The type of the result of an asynchronous operation.</typeparam>
 /// <seealso cref="OVRSTask"/>
-/*public struct OVRSTaskBuilder<T>
+public struct OVRSTaskBuilder<T>
 {
     /// \cond
     private abstract class PooledStateMachine : IDisposable
@@ -1564,5 +1552,5 @@ public class OVRSTask
     public void SetStateMachine(IAsyncStateMachine stateMachine)
     { }
     /// \endcond
-}*/
+}
 #endregion
