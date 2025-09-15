@@ -63,7 +63,7 @@ public class OVRSTask
     public static OVRSTask<List<TResult>> WhenAll<TResult>(IEnumerable<OVRSTask<TResult>> tasks, List<TResult> results)
         => OVRSTask<TResult>.WhenAll(tasks, results);
 
-    private class MultiTaskData<T> : OVRObjectPool.IPoolObject
+    private class MultiTaskData<T> : OVRSObjectPool.IPoolObject
     {
         protected OVRSTask<T> CombinedTask;
 
@@ -71,17 +71,17 @@ public class OVRSTask
 
         protected HashSet<Guid> Remaining;
 
-        void OVRObjectPool.IPoolObject.OnGet()
+        void OVRSObjectPool.IPoolObject.OnGet()
         {
             CombinedTask = FromGuid<T>(Guid.NewGuid());
             Result = default;
-            Remaining = OVRObjectPool.HashSet<Guid>();
+            Remaining = OVRSObjectPool.HashSet<Guid>();
         }
 
-        void OVRObjectPool.IPoolObject.OnReturn()
+        void OVRSObjectPool.IPoolObject.OnReturn()
         {
             Result = default;
-            OVRObjectPool.Return(Remaining);
+            OVRSObjectPool.Return(Remaining);
         }
 
         protected void AddTask(Guid id) => Remaining.Add(id);
@@ -97,7 +97,7 @@ public class OVRSTask
             }
             finally
             {
-                OVRObjectPool.Return(this);
+                OVRSObjectPool.Return(this);
             }
         }
     }
@@ -379,13 +379,13 @@ public class OVRSTask
 
         foreach (var source in Sources.Values)
         {
-            OVRObjectPool.Return(source);
+            OVRSObjectPool.Return(source);
         }
         Sources.Clear();
 
         foreach (var source in AwaitableSources.Values)
         {
-            OVRObjectPool.Return(source);
+            OVRSObjectPool.Return(source);
         }
         AwaitableSources.Clear();
     };
@@ -668,14 +668,14 @@ public class OVRSTask
         public CombinedTaskData(IEnumerable<OVRSTask<TResult>> tasks, List<TResult> userOwnedResultList)
         {
             Task = OVRSTask.FromGuid<List<TResult>>(Guid.NewGuid());
-            _remainingTaskIds = OVRObjectPool.HashSet<Guid>();
-            _originalTaskOrder = OVRObjectPool.List<Guid>();
-            _completedTasks = OVRObjectPool.Dictionary<Guid, TResult>();
+            _remainingTaskIds = OVRSObjectPool.HashSet<Guid>();
+            _originalTaskOrder = OVRSObjectPool.List<Guid>();
+            _completedTasks = OVRSObjectPool.Dictionary<Guid, TResult>();
             _userOwnedResultList = userOwnedResultList;
             _userOwnedResultList.Clear();
 
             // Copy the provided tasks to a temp list to avoid double enumeration
-            using (new OVRObjectPool.ListScope<OVRSTask<TResult>>(out var taskList))
+            using (new OVRSObjectPool.ListScope<OVRSTask<TResult>>(out var taskList))
             {
                 foreach (var task in tasks.ToNonAlloc())
                 {
@@ -707,9 +707,9 @@ public class OVRSTask
 
         public void Dispose()
         {
-            OVRObjectPool.Return(_remainingTaskIds);
-            OVRObjectPool.Return(_originalTaskOrder);
-            OVRObjectPool.Return(_completedTasks);
+            OVRSObjectPool.Return(_remainingTaskIds);
+            OVRSObjectPool.Return(_originalTaskOrder);
+            OVRSObjectPool.Return(_completedTasks);
         }
     }
 
@@ -736,7 +736,7 @@ public class OVRSTask
             throw new ArgumentNullException(nameof(tasks));
 
         var task = OVRSTask.FromGuid<TResult[]>(Guid.NewGuid());
-        var results = OVRObjectPool.List<TResult>();
+        var results = OVRSObjectPool.List<TResult>();
         WhenAll(tasks, results).ContinueWith(_onCombinedTaskCompleted, task);
         return task;
     }
@@ -744,7 +744,7 @@ public class OVRSTask
     private static readonly Action<List<TResult>, OVRSTask<TResult[]>> _onCombinedTaskCompleted = (resultsFromPool, task) =>
     {
         var resultsArray = resultsFromPool.ToArray();
-        OVRObjectPool.Return(resultsFromPool);
+        OVRSObjectPool.Return(resultsFromPool);
         task.SetResult(resultsArray);
     };
     /// \endcond
@@ -881,7 +881,7 @@ public class OVRSTask
     #endregion
 
     /// \cond
-    private class TaskSource : IValueTaskSource<TResult>, OVRObjectPool.IPoolObject
+    private class TaskSource : IValueTaskSource<TResult>, OVRSObjectPool.IPoolObject
     {
         private ManualResetValueTaskSourceCore<TResult> _manualSource;
 
@@ -895,7 +895,7 @@ public class OVRSTask
             }
             finally
             {
-                OVRObjectPool.Return(this);
+                OVRSObjectPool.Return(this);
             }
         }
 
@@ -904,13 +904,13 @@ public class OVRSTask
         public void OnCompleted(Action<object> continuation, object state, short token, ValueTaskSourceOnCompletedFlags flags)
             => _manualSource.OnCompleted(continuation, state, token, flags);
 
-        void OVRObjectPool.IPoolObject.OnGet()
+        void OVRSObjectPool.IPoolObject.OnGet()
         {
             _manualSource.Reset();
             Task = new(this, _manualSource.Version);
         }
 
-        void OVRObjectPool.IPoolObject.OnReturn()
+        void OVRSObjectPool.IPoolObject.OnReturn()
         { }
 
         public void SetResult(TResult result) => _manualSource.SetResult(result);
@@ -961,7 +961,7 @@ public class OVRSTask
                 return new ValueTask<TResult>(result);
             }
 
-            var source = OVRObjectPool.Get<TaskSource>();
+            var source = OVRSObjectPool.Get<TaskSource>();
             Sources.Add(_id, source);
             return source.Task;
         }
@@ -981,7 +981,7 @@ public class OVRSTask
     /// \endcond
 #endif
 
-    private class AwaitableSource : AwaitableCompletionSource<TResult>, OVRObjectPool.IPoolObject
+    private class AwaitableSource : AwaitableCompletionSource<TResult>, OVRSObjectPool.IPoolObject
     {
         public void OnGet()
         {
@@ -999,7 +999,7 @@ public class OVRSTask
             }
             finally
             {
-                OVRObjectPool.Return(this);
+                OVRSObjectPool.Return(this);
             }
         }
     }
@@ -1037,7 +1037,7 @@ public class OVRSTask
 
         using (this)
         {
-            var source = OVRObjectPool.Get<AwaitableSource>();
+            var source = OVRSObjectPool.Get<AwaitableSource>();
             if (hasResult)
             {
                 source.SetResult(in result);
@@ -1429,8 +1429,8 @@ public class OVRSTask
     public override string ToString() => _id.ToString();
 
     #endregion
-}*/
-
+}
+*/
 #region Task builder
 /// <summary>
 /// The AsyncMethodBuilder for <see cref="OVRSTask"/>&lt;TResult&gt;.
@@ -1453,26 +1453,26 @@ public class OVRSTask
         public abstract void Dispose();
     }
 
-    private class PooledStateMachine<TStateMachine> : PooledStateMachine, OVRObjectPool.IPoolObject
+    private class PooledStateMachine<TStateMachine> : PooledStateMachine, OVRSObjectPool.IPoolObject
         where TStateMachine : IAsyncStateMachine
     {
         public TStateMachine StateMachine;
 
-        public static PooledStateMachine<TStateMachine> Get() => OVRObjectPool.Get<PooledStateMachine<TStateMachine>>();
+        public static PooledStateMachine<TStateMachine> Get() => OVRSObjectPool.Get<PooledStateMachine<TStateMachine>>();
 
-        public override void Dispose() => OVRObjectPool.Return(this);
+        public override void Dispose() => OVRSObjectPool.Return(this);
 
         public PooledStateMachine() => MoveNext = ExecuteMoveNext;
 
         private void ExecuteMoveNext() => StateMachine.MoveNext();
 
-        void OVRObjectPool.IPoolObject.OnGet()
+        void OVRSObjectPool.IPoolObject.OnGet()
         {
             StateMachine = default;
             Task = null;
         }
 
-        void OVRObjectPool.IPoolObject.OnReturn()
+        void OVRSObjectPool.IPoolObject.OnReturn()
         {
             StateMachine = default;
             Task = null;
