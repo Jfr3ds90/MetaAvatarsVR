@@ -2,6 +2,13 @@ using System;
 using System.Collections.Generic;
 using Unity.Collections.LowLevel.Unsafe;
 
+/// \cond
+/// <summary>
+/// (Internal) Represents an attribute for marking enums to indicate their association with internal results.
+/// </summary>
+/// <remarks>
+/// This attribute is used internally and is necessary to enforce conversions from internal results to the enum this attribute is applied to.
+/// </remarks>
 [AttributeUsage(AttributeTargets.Enum)]
 internal class OVRSResultStatus : Attribute { }
 
@@ -24,7 +31,7 @@ internal static class OVRSResult
 /// success and to distinguish between a real value and a default-initialized value. This is important because an
 /// `enum` constant of zero is often used to indicate <see cref="Success"/>.
 ///
-/// Many asynchronous methods return an <see cref="OVRSResult"/>, for example many <see cref="OVRSAnchor"/> and
+/// Many asynchronous methods return an <see cref="OVRSResult"/>, for example many <see cref="OVRAnchor"/> and
 /// <see cref="OVRSpatialAnchor"/> methods are asynchronous.
 ///
 /// For results that also contain a value, see <see cref="OVRSResult"/>&lt;TValue, TStatus&gt;.
@@ -481,4 +488,3 @@ public struct OVRSResult<TValue, TStatus> : IEquatable<OVRSResult<TValue, TStatu
     public static implicit operator OVRSResult<TValue, TStatus>(OVRPlugin.Result result)
         => FromFailure(UnsafeUtility.As<OVRPlugin.Result, TStatus>(ref result));
 }
-

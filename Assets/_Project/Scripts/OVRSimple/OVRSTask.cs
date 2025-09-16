@@ -18,8 +18,7 @@ using UnityEngine;
 /// <see cref="OVRSTask"/>&lt;TResult&gt; (see <see cref="Create{TResult}"/>). For more information
 /// on tasks, see [Asynchronous Tasks](https://developer.oculus.com/documentation/unity/unity-async-tasks/).
 /// </remarks>
-
-public static partial class OVRSTask 
+public static partial class OVRSTask
 {
     /// <summary>
     /// Creates a task that completes when all of the supplied tasks have completed.
@@ -105,6 +104,13 @@ public static partial class OVRSTask
     /// \cond
     internal static OVRSTask<TResult> FromGuid<TResult>(Guid id) => Create<TResult>(id);
 
+    [Obsolete("Consider OVRSTask.Build instead.")]
+    internal static OVRSTask<TResult> FromRequest<TResult>(ulong id) => Create<TResult>(GetId(id));
+
+    [Obsolete("Consider OVRSTask.Build instead.")]
+    internal static OVRSTask<TResult> FromRequest<TResult>(ulong id, OVRPlugin.EventType eventType)
+        => Create<TResult>(GetId(id, eventType));
+
     internal static BuilderS Build(bool success, ulong requestId)
         => new(success ? OVRPlugin.Result.Success : OVRPlugin.Result.Failure, GetId(requestId));
 
@@ -132,12 +138,17 @@ public static partial class OVRSTask
     }
 
     /// \cond
+    [Obsolete("This method does not ensure the task exists; it just returns an OVRSTask with the given id. Use TryGetPending instead.", error: true)]
+    internal static OVRSTask<TResult> GetExisting<TResult>(Guid id) => Get<TResult>(id);
 
     internal static bool TryGetPendingTask<TResult>(Guid id, out OVRSTask<TResult> task)
     {
         task = Get<TResult>(id);
         return task.IsPending;
     }
+
+    [Obsolete("This method does not ensure the task exists; it just returns an OVRSTask with the given id. Use TryGetPending instead.", error: true)]
+    internal static OVRSTask<TResult> GetExisting<TResult>(ulong id) => Get<TResult>(GetId(id));
 
     internal static bool TryGetPendingTask<TResult>(ulong id, out OVRSTask<TResult> task) => TryGetPendingTask(GetId(id), out task);
     /// \endcond

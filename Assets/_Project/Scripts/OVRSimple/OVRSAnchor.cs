@@ -7,7 +7,7 @@ using UnityEngine;
 using static OVRPlugin;
 /*using TaskResult = OVRSResult<System.Collections.Generic.List<OVRSAnchor>, OVRSAnchor.FetchResult>;*/
 
-public class OVRSAnchor : MonoBehaviour
+public readonly partial struct OVRSAnchor /*: IEquatable<OVRSAnchor>, IDisposable*/
 {
     /// <summary>
     /// Possible results of a save operation.
@@ -30,7 +30,6 @@ public class OVRSAnchor : MonoBehaviour
         /// The operation succeeded.
         /// </summary>
         Success = Result.Success,
-
 
         /// <summary>
         /// The operation failed in an unexpected way.
@@ -325,7 +324,7 @@ public class OVRSAnchor : MonoBehaviour
     /// <seealso cref="OVRSpatialAnchor.ShareAsync(IEnumerable{OVRSpatialAnchor}, Guid)"/>
     /// <seealso cref="OVRSpatialAnchor.ShareAsync(IEnumerable{OVRSpatialAnchor}, IEnumerable{Guid})"/>
     [OVRSResultStatus]
-    public enum Shareesult
+    public enum ShareResult
     {
         /// <summary>
         /// The operation succeeded.
@@ -469,7 +468,7 @@ public class OVRSAnchor : MonoBehaviour
     public static readonly OVRSAnchor Null = new(0, Guid.Empty);
 
     // Called by OVRManager event loop
-    internal static void OnSpaceDiscoveryComplete(OVRDeserialize.SpaceDiscoveryCompleteData data)
+    internal static void OnSpaceDiscoveryComplete(OVRSDeserialize.SpaceDiscoveryCompleteData data)
     {
         TaskResult result;
         if (!OVRSTask.TryGetPendingTask<TaskResult>(data.RequestId, out var task))
@@ -634,9 +633,9 @@ public class OVRSAnchor : MonoBehaviour
             throw new ArgumentNullException(nameof(anchors));
         }
 
-        var query = OVRSpaceQuery.ForGroupThrow(groupUuid, nameof(groupUuid));
+      /*  var query = OVRSpaceQuery.ForGroupThrow(groupUuid, nameof(groupUuid));*/
 
-        return OVRSResult.From(anchors, (FetchResult)(await FetchAnchors(anchors, query)));
+    /*    return OVRSResult.From(anchors, (FetchResult)(await FetchAnchors(anchors, query)));
     }
 
     /// <summary>
@@ -801,7 +800,7 @@ public class OVRSAnchor : MonoBehaviour
     /// <seealso cref="EraseAsync(IEnumerable{OVRSAnchor},IEnumerable{Guid})"/>
     public static OVRSTask<OVRSResult<SaveResult>> SaveAsync(IEnumerable<OVRSAnchor> anchors)
     {
-        using var spaces = OVRNativeList.WithSuggestedCapacityFrom(anchors).AllocateEmpty<ulong>(Allocator.Temp);
+        using var spaces = OVRSNativeList.WithSuggestedCapacityFrom(anchors).AllocateEmpty<ulong>(Allocator.Temp);
         foreach (var anchor in anchors.ToNonAlloc())
         {
             spaces.Add(anchor.Handle);
@@ -817,7 +816,7 @@ public class OVRSAnchor : MonoBehaviour
 
     internal static unsafe OVRSTask<OVRSResult<SaveResult>> SaveSpacesAsync(ReadOnlySpan<ulong> spaces)
     {
-        var telemetryMarker = OVRTelemetry
+        var telemetryMarker = OVRSTelemetry
             .Start((int)Telemetry.MarkerId.SaveSpaces)
             .AddAnnotation(Telemetry.Annotation.SpaceCount, (long)spaces.Length);
 
@@ -877,7 +876,7 @@ public class OVRSAnchor : MonoBehaviour
         if (anchors == null && uuids == null)
             throw new ArgumentException($"One of {nameof(anchors)} or {nameof(uuids)} must not be null.");
 
-        using var spaces = OVRNativeList.WithSuggestedCapacityFrom(anchors).AllocateEmpty<ulong>(Allocator.Temp);
+        using var spaces = OVRSNativeList.WithSuggestedCapacityFrom(anchors).AllocateEmpty<ulong>(Allocator.Temp);
         foreach (var anchor in anchors.ToNonAlloc())
         {
             spaces.Add(anchor.Handle);
@@ -895,7 +894,7 @@ public class OVRSAnchor : MonoBehaviour
 
     private static unsafe OVRSTask<OVRSResult<EraseResult>> EraseSpacesAsync(ReadOnlySpan<ulong> spaces, ReadOnlySpan<Guid> uuids)
     {
-        var telemetryMarker = OVRTelemetry
+        var telemetryMarker = OVRSTelemetry
             .Start((int)Telemetry.MarkerId.EraseSpaces)
             .AddAnnotation(Telemetry.Annotation.SpaceCount, spaces.Length)
             .AddAnnotation(Telemetry.Annotation.UuidCount, uuids.Length);
@@ -935,7 +934,7 @@ public class OVRSAnchor : MonoBehaviour
 
         unsafe
         {
-            using var userList = OVRNativeList.WithSuggestedCapacityFrom(users).AllocateEmpty<ulong>(Allocator.Temp);
+            using var userList = OVRSNativeList.WithSuggestedCapacityFrom(users).AllocateEmpty<ulong>(Allocator.Temp);
             foreach (var user in users.ToNonAlloc())
             {
                 userList.Add(user._handle);
@@ -974,13 +973,13 @@ public class OVRSAnchor : MonoBehaviour
         if (users == null)
             throw new ArgumentNullException(nameof(users));
 
-        using var spaceList = OVRNativeList.WithSuggestedCapacityFrom(anchors).AllocateEmpty<ulong>(Allocator.Temp);
+        using var spaceList = OVRSNativeList.WithSuggestedCapacityFrom(anchors).AllocateEmpty<ulong>(Allocator.Temp);
         foreach (var anchor in anchors.ToNonAlloc())
         {
             spaceList.Add(anchor.Handle);
         }
 
-        using var userList = OVRNativeList.WithSuggestedCapacityFrom(users).AllocateEmpty<ulong>(Allocator.Temp);
+        using var userList = OVRSNativeList.WithSuggestedCapacityFrom(users).AllocateEmpty<ulong>(Allocator.Temp);
         foreach (var user in users.ToNonAlloc())
         {
             userList.Add(user._handle);
@@ -1076,7 +1075,7 @@ public class OVRSAnchor : MonoBehaviour
             throw new ArgumentNullException(nameof(anchors));
 
         var anchorIter = anchors.ToNonAlloc();
-        using var anchorNativeList = new OVRNativeList<ulong>(anchorIter.Count, Allocator.Temp);
+        using var anchorNativeList = new OVRSNativeList<ulong>(anchorIter.Count, Allocator.Temp);
         foreach (var a in anchorIter)
         {
             anchorNativeList.Add(a.Handle);
@@ -1289,7 +1288,7 @@ public class OVRSAnchor : MonoBehaviour
 
         anchors.Clear();
 
-        var telemetryMarker = OVRTelemetry
+        var telemetryMarker = OVRSTelemetry
             .Start((int)Telemetry.MarkerId.QuerySpaces)
             .AddAnnotation(Telemetry.Annotation.Timeout, (double)queryInfo.Timeout)
             .AddAnnotation(Telemetry.Annotation.MaxResults, (long)queryInfo.MaxQuerySpaces)
