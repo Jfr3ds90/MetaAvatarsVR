@@ -52,7 +52,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             
             // Configurar Rigidbody
             _rigidbody = GetComponent<Rigidbody>();
-            _rigidbody.useGravity = false;
+            _rigidbody.useGravity = true;
             _rigidbody.isKinematic = false;
             
             // Audio

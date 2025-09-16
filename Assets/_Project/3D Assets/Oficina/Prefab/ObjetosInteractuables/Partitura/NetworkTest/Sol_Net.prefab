@@ -19,7 +19,6 @@ GameObject:
   - component: {fileID: -2077939417731266205}
   - component: {fileID: 8999395837607430848}
   - component: {fileID: -2679827453564766859}
-  - component: {fileID: -856000271367908132}
   m_Layer: 7
   m_Name: Sol_Net
   m_TagString: Untagged
@@ -161,7 +160,6 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 3979852347204307430}
-  - {fileID: -856000271367908132}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &3979852347204307430
 MonoBehaviour:
@@ -203,13 +201,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43f86b14a27b52f4f9298c33015b5c26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _transferOnSecondSelection: 0
+  _transferOnSecondSelection: 1
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
   _oneGrabTransformer: {fileID: 0}
   _twoGrabTransformer: {fileID: 0}
   _targetTransform: {fileID: 0}
-  _maxGrabPoints: -1
+  _maxGrabPoints: 2
   _rigidbody: {fileID: 4183538711661729989}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
@@ -292,20 +290,3 @@ MonoBehaviour:
   _movementProvider: {fileID: 0}
   _handAligment: 1
   _handGrabPoses: []
---- !u!114 &-856000271367908132
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 951382842930164719}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _stateAuthorityChangeErrorCorrectionDelta: 0
-  SyncScale: 0
-  SyncParent: 0
-  _autoAOIOverride: 1
-  DisableSharedModeInterpolation: 0
