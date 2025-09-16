@@ -7,7 +7,13 @@ public class Chemistry : MonoBehaviour
     public bool isSelected;
     [SerializeField] private Switch LeftDoor,RightDoor;
     [SerializeField] private MeshRenderer Chem;
+    [SerializeField] private AudioClip Fill, Drop;
     private Color color;
+    private AudioSource audioS;
+    private void Awake()
+    {
+        audioS = GetComponent<AudioSource>();
+    }
     private void OnTriggerEnter(Collider collision)
     {
         /* if(collision.gameObject.GetComponent<Chemistry>()!=null)
@@ -69,7 +75,7 @@ public class Chemistry : MonoBehaviour
                  }
          }
          else*/
-        Debug.LogWarning(Chem.material.GetColor("_TopColor")+" es el color y el correcto es "+color);
+        Debug.LogWarning(Chem.material.GetColor("_TopColor")+" es el color y el correcto es "+color+" y el objeto que toco es "+collision.gameObject.name+" con el tag "+collision.tag);
         if (collision.gameObject.tag=="cubePuzzle")
             if( Chem.material.GetColor("_TopColor")==FindAnyObjectByType<ValveManager>().keyColor)
         {
@@ -77,7 +83,14 @@ public class Chemistry : MonoBehaviour
             RightDoor.CloseDoorAct();
         }
         if(collision.gameObject.tag == "Finish")
-                Chem.material.SetFloat("_Fill", 0);
+        {
+            Chem.material.SetFloat("_Fill", 0);
+
+                audioS.clip = Drop;
+                audioS.Play();
+        }
+        if (collision.gameObject.tag == "Player")
+            Debug.LogWarning("Detecto al jugador");
     }
     private void OnParticleCollision(GameObject other)
     {
@@ -90,6 +103,8 @@ public class Chemistry : MonoBehaviour
         Chem.material.SetColor("_SideColor",new Color(color.r*0.3f,color.g * 0.3f, color.b * 0.3f, color.a));
         Chem.material.SetColor("_TopColor",color);
         Chem.material.SetFloat("_Fill",0.271f);
+        audioS.clip = Fill;
+        audioS.Play();
     }
     public void onGrab()
     {
@@ -103,4 +118,11 @@ public class Chemistry : MonoBehaviour
             RightDoor.CloseDoorAct();
         }
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.tag == "Player")
+            Debug.LogWarning("Detecto al jugador");
+    }
+
 }
