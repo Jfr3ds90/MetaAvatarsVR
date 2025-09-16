@@ -1,7 +1,3 @@
-
-// ============================================
-// NetworkedPianoKey.cs - Tecla de Piano con Meta XR SDK
-// ============================================
 using Fusion;
 using UnityEngine;
 using UnityEngine.Events;
@@ -9,9 +5,7 @@ using Oculus.Interaction;
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
 {
-    /// <summary>
-    /// Tecla de piano interactuable con Meta XR SDK
-    /// </summary>
+    
     public class NetworkedPianoKey : NetworkBehaviour
     {
         [Header("Key Configuration")]
@@ -36,7 +30,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         
         private void Awake()
         {
-            // Configurar PokeInteractable para teclas de piano
             _pokeInteractable = GetComponent<PokeInteractable>();
             if (_pokeInteractable == null)
             {
@@ -53,7 +46,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         
         private void Start()
         {
-            // Suscribirse a eventos de poke
             if (_pokeInteractable != null)
             {
                 _pokeInteractable.WhenPointerEventRaised += OnPokeEvent;
@@ -85,12 +77,12 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
         private void RPC_OnKeyPress(RpcInfo info = default)
         {
-            if (IsPressed) return; // Evitar múltiples pulsaciones
+            if (IsPressed) return; 
             
             IsPressed = true;
             RPC_NotifyKeyPress();
             
-            // Reset después de un momento
+            
             StartCoroutine(ResetKey());
         }
         

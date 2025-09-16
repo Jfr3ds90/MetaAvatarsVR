@@ -1,15 +1,10 @@
-// ============================================
-// NetworkedNoteSlot.cs - Simplificado
-// ============================================
 using Fusion;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
 {
-    /// <summary>
-    /// Slot donde se coloca una nota musical
-    /// </summary>
+  
     public class NetworkedNoteSlot : NetworkBehaviour
     {
         [Header("Slot Configuration")]
@@ -77,10 +72,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             IsOccupied = true;
             PlacedNoteIndex = note.NoteIndex;
             
-            // Verificar si es correcto
             IsCorrect = (note.ColorIndex == ExpectedColorIndex);
             
-            // Posicionar la nota
             note.transform.position = _noteAnchor.position;
             note.transform.rotation = _noteAnchor.rotation;
             
@@ -140,7 +133,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             PlacedNoteIndex = note.GetNoteIndex();
             IsCorrect = isCorrect;
             
-            // Posicionar la nota
             note.transform.position = transform.position + Vector3.up * 0.2f;
             note.transform.rotation = transform.rotation;
             

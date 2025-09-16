@@ -72,21 +72,18 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 
             TotalValidationChecks++;
             
-            // Check if player is in timeout
             if (IsPlayerInTimeout(player))
             {
                 LogViolation(player, "Action during timeout", actionType);
                 return false;
             }
             
-            // Check interaction rate
             if (!ValidateInteractionRate(player))
             {
                 LogViolation(player, "Excessive interaction rate", actionType);
                 return false;
             }
             
-            // Update player stats
             UpdatePlayerStats(player);
             
             return true;
@@ -99,14 +96,12 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 
             TotalValidationChecks++;
             
-            // Check if player is in timeout
             if (IsPlayerInTimeout(player))
             {
                 LogViolation(player, "Puzzle attempt during timeout", puzzleType);
                 return false;
             }
             
-            // Check sequence completion time (too fast = suspicious)
             if (sequenceTime < 0.5f && sequence.Length > 2)
             {
                 LogViolation(player, "Suspiciously fast sequence completion", $"{puzzleType}: {sequenceTime}s");
@@ -114,7 +109,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 return false;
             }
             
-            // Check maximum sequence time
             if (sequenceTime > _maxSequenceTime)
             {
                 LogViolation(player, "Sequence timeout exceeded", $"{puzzleType}: {sequenceTime}s");
@@ -131,7 +125,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 
             TotalValidationChecks++;
             
-            // Check distance validation (prevent remote interactions)
             float distance = Vector3.Distance(playerPosition, networkObject.transform.position);
             if (distance > 5f) // Max interaction distance
             {
@@ -139,7 +132,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 return false;
             }
             
-            // Check if player is in timeout
             if (IsPlayerInTimeout(player))
             {
                 LogViolation(player, "Interaction during timeout", networkObject.name);
@@ -169,19 +161,16 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             
             var interactions = _recentInteractions[player];
             
-            // Remove old interactions (older than 1 second)
             while (interactions.Count > 0 && currentTime - interactions.Peek() > 1f)
             {
                 interactions.Dequeue();
             }
             
-            // Check if rate limit exceeded
             if (interactions.Count >= _maxInteractionRate)
             {
                 return false;
             }
             
-            // Add current interaction
             interactions.Enqueue(currentTime);
             return true;
         }

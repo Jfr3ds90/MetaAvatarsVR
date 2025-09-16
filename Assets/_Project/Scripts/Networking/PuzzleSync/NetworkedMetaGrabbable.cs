@@ -6,10 +6,7 @@ using Oculus.Interaction.HandGrab;
 
 namespace MetaAvatarsVR.Networking.PuzzleSync
 {
-    /// <summary>
-    /// Wrapper para hacer los objetos Meta Grabbable compatibles con networking
-    /// Resuelve problemas de oscilación desactivando componentes Meta en clientes
-    /// </summary>
+
     [RequireComponent(typeof(NetworkObject))]
     [RequireComponent(typeof(Grabbable))]
     public class NetworkedMetaGrabbable : NetworkBehaviour
@@ -40,7 +37,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         [SerializeField] private float _syncRate = 15f;
         [SerializeField] private float _interpolationSpeed = 10f;
         
-        // Control states
         private bool _isLocallyGrabbed = false;
         private bool _isLocalPlayer = false;
         private Quaternion _lastValidRotation;
@@ -50,7 +46,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         private void Awake()
         {
-            // Obtener componentes Meta
             _grabbable = GetComponent<Grabbable>();
             _pointable = GetComponent<PointableUnityEventWrapper>();
             _handGrabInteractable = GetComponent<HandGrabInteractable>();
@@ -61,7 +56,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 Debug.LogError($"[NetworkedMetaGrabbable] Grabbable is required on {gameObject.name}");
             }
             
-            // Desactivar física para objetos networked
             var rb = GetComponent<Rigidbody>();
             if (rb != null)
             {
@@ -92,7 +86,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             
             if (HasStateAuthority)
             {
-                // Host/Server mantiene control total
                 IsGrabbed = false;
                 IsHovered = false;
                 NetworkedPosition = transform.position;
@@ -100,14 +93,12 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             }
             else
             {
-                // CRÍTICO: Clientes desactivan el transformador Meta inicialmente
                 if (_rotateTransformer != null)
                 {
                     _rotateTransformer.enabled = false;
                     Debug.Log($"[NetworkedMetaGrabbable] Disabled OneGrabRotateTransformer on client for {gameObject.name}");
                 }
                 
-                // Desactivar interacción en HandGrabInteractable para evitar conflictos
                 if (_handGrabInteractable != null)
                 {
                     _handGrabInteractable.enabled = false;
@@ -119,7 +110,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         {
             if (!HasStateAuthority) return;
             
-            // Solo el host actualiza la rotación networked
             if (IsGrabbed || Time.time - _lastSyncTime > (1f / _syncRate))
             {
                 if (_syncPosition)
@@ -134,10 +124,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         public override void Render()
         {
-            // SOLO interpolar si NO está siendo agarrado localmente
             if (!HasStateAuthority && !_isLocallyGrabbed)
             {
-                // Aplicar rotación de red suavemente
                 if (_syncRotation)
                 {
                     transform.rotation = Quaternion.Slerp(
@@ -166,14 +154,12 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         {
             Debug.Log($"[NetworkedMetaGrabbable] Setting up events for {gameObject.name}");
             
-            // Conectar eventos del Grabbable (principal)
             if (_grabbable != null)
             {
                 _grabbable.WhenPointerEventRaised += OnPointerEvent;
                 Debug.Log("[NetworkedMetaGrabbable] Connected to Grabbable events");
             }
             
-            // Conectar eventos del PointableUnityEventWrapper (respaldo)
             if (_pointable != null)
             {
                 _pointable.WhenSelect.AddListener(OnSelect);
@@ -204,7 +190,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         {
             Debug.Log($"[NetworkedMetaGrabbable] {gameObject.name} - Event: {evt.Type}");
             
-            // No verificar HasInputAuthority para objetos de escena
             switch (evt.Type)
             {
                 case PointerEventType.Hover:
@@ -234,7 +219,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             }
         }
         
-        // Métodos para PointableUnityEventWrapper - NO tienen parámetros
         private void OnSelect(PointerEvent pointerEvent)
         {
             Debug.Log($"[NetworkedMetaGrabbable] OnSelect from PointableUnityEventWrapper - Type: {pointerEvent.Type}");
@@ -267,7 +251,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         {
             Debug.Log($"[NetworkedMetaGrabbable] ProcessGrab: {grabbing} on {gameObject.name}");
             
-            // Verificar que Runner existe y está activo
             if (Runner == null || !Runner.IsRunning)
             {
                 Debug.LogWarning("[NetworkedMetaGrabbable] Runner not ready");
@@ -278,12 +261,10 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             _isLocallyGrabbed = grabbing;
             _isLocalPlayer = true;
             
-            // Manejar componentes Meta en clientes
             if (!HasStateAuthority && _rotateTransformer != null)
             {
                 if (grabbing)
                 {
-                    // Habilitar control local temporal
                     _rotateTransformer.enabled = true;
                     if (_handGrabInteractable != null)
                         _handGrabInteractable.enabled = true;
@@ -293,7 +274,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 }
                 else
                 {
-                    // Deshabilitar control local
                     _rotateTransformer.enabled = false;
                     if (_handGrabInteractable != null)
                         _handGrabInteractable.enabled = false;
@@ -302,7 +282,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 }
             }
             
-            // Enviar RPC
             if (grabbing)
             {
                 Debug.Log($"[NetworkedMetaGrabbable] Sending RPC_OnGrabbed for player {localPlayer}");
@@ -339,7 +318,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         {
             if (Runner == null || !Runner.IsRunning) return;
             
-            // Solo enviar updates si somos quien está agarrando
             if (_isLocallyGrabbed && _isLocalPlayer)
             {
                 RPC_UpdateTransform(transform.position, transform.rotation);
@@ -364,7 +342,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             IsGrabbed = true;
             GrabbingPlayer = player;
             
-            // Notificar a todos los clientes quién tiene control
             RPC_BroadcastControlChange(player, true);
         }
         
@@ -378,7 +355,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             IsGrabbed = false;
             GrabbingPlayer = PlayerRef.None;
             
-            // Notificar a todos que se liberó el control
             RPC_BroadcastControlChange(player, false);
         }
         
@@ -387,10 +363,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         {
             if (!HasStateAuthority)
             {
-                // Actualizar estado de control en clientes
                 if (isGrabbing && player != Runner.LocalPlayer)
                 {
-                    // Otro jugador tomó control - desactivar componentes locales
                     if (_rotateTransformer != null)
                         _rotateTransformer.enabled = false;
                     if (_handGrabInteractable != null)
@@ -398,7 +372,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 }
                 else if (!isGrabbing && player != Runner.LocalPlayer)
                 {
-                    // Se liberó el control - mantener desactivado hasta que lo agarremos
                     if (_rotateTransformer != null)
                         _rotateTransformer.enabled = false;
                     if (_handGrabInteractable != null)
@@ -426,7 +399,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
         private void RPC_UpdateTransform(Vector3 position, Quaternion rotation, RpcInfo info = default)
         {
-            // Solo actualizar si el jugador que envía es quien está agarrando
             if (IsGrabbed && info.Source == GrabbingPlayer)
             {
                 if (_syncPosition)

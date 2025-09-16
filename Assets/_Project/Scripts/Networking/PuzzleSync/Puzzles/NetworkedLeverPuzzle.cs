@@ -77,7 +77,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                         ? _leverLetters[i] 
                         : ((char)('A' + i)).ToString();
                     
-                    // Mapear índice a letra para validación
                     _leverIndexToLetter[i] = letter;
                     
                     Debug.Log($"[NetworkedLeverPuzzle] Lever {i} mapped to letter '{letter}'");
@@ -106,9 +105,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             }
         }
         
-        /// <summary>
-        /// Registra una palanca específica en el sistema (llamado desde NetworkedLever.Spawned)
-        /// </summary>
+        
         public void RegisterLever(NetworkedLever lever, int index)
         {
             if (index >= 0 && index < _levers.Length)
@@ -118,20 +115,15 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             }
         }
 
-        /// <summary>
-        /// MÉTODO PRINCIPAL: Recibe cambios de estado de las palancas
-        /// Este método es llamado desde NetworkedLever cuando cambia su estado
-        /// </summary>
+        
         public void OnLeverStateChanged(int leverIndex, bool activated)
         {
-            // Solo el host procesa cambios de estado
             if (!HasStateAuthority)
             {
                 Debug.LogWarning($"[NetworkedLeverPuzzle] OnLeverStateChanged called without authority");
                 return;
             }
             
-            // No procesar si el puzzle ya está resuelto
             if (IsSolved)
             {
                 Debug.Log($"[NetworkedLeverPuzzle] Puzzle already solved, ignoring lever change");
@@ -140,84 +132,65 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             
             Debug.Log($"[NetworkedLeverPuzzle] Lever {leverIndex} state changed to {activated}");
             
-            // Procesar activación o desactivación
             if (activated)
             {
-                // La palanca fue activada - agregar a la secuencia
                 ProcessLeverActivation(leverIndex);
             }
             else
             {
-                // La palanca fue desactivada - remover de la secuencia
                 ProcessLeverDeactivation(leverIndex);
             }
         }
         
-        /// <summary>
-        /// Procesa la activación de una palanca
-        /// </summary>
+        
         private void ProcessLeverActivation(int leverIndex)
         {
-            // Verificar que tengamos el mapeo de letra para este índice
             if (!_leverIndexToLetter.ContainsKey(leverIndex))
             {
                 Debug.LogError($"[NetworkedLeverPuzzle] No letter mapping for lever index {leverIndex}!");
                 return;
             }
             
-            // Si la palanca ya está en la lista, no hacer nada
             if (_activatedLevers.Contains(leverIndex))
             {
                 Debug.LogWarning($"[NetworkedLeverPuzzle] Lever {leverIndex} already in activated list");
                 return;
             }
             
-            // Agregar la palanca a la lista de activadas
             _activatedLevers.Add(leverIndex);
             string letter = _leverIndexToLetter[leverIndex];
             
             Debug.Log($"[NetworkedLeverPuzzle] Added lever {leverIndex} (letter '{letter}') to sequence");
             
-            // Actualizar la secuencia actual
             UpdateCurrentSequence();
             
-            // Validar la secuencia
             ValidateCurrentSequence();
         }
         
-        /// <summary>
-        /// Procesa la desactivación de una palanca
-        /// </summary>
+      
         private void ProcessLeverDeactivation(int leverIndex)
         {
-            // Si la palanca no está en la lista, no hacer nada
             if (!_activatedLevers.Contains(leverIndex))
             {
                 Debug.LogWarning($"[NetworkedLeverPuzzle] Lever {leverIndex} not in activated list");
                 return;
             }
             
-            // Remover la palanca de la lista
             _activatedLevers.Remove(leverIndex);
             
             string letter = _leverIndexToLetter.ContainsKey(leverIndex) ? _leverIndexToLetter[leverIndex] : "?";
             Debug.Log($"[NetworkedLeverPuzzle] Removed lever {leverIndex} (letter '{letter}') from sequence");
             
-            // Actualizar la secuencia actual
             UpdateCurrentSequence();
             
-            // Recalcular el conteo correcto
             RecalculateCorrectCount();
         }
         
-        /// <summary>
-        /// Actualiza la secuencia actual basándose en las palancas activadas
-        /// </summary>
+        
         private void UpdateCurrentSequence()
         {
             string sequence = "";
             
-            // Construir la secuencia con las letras de las palancas activadas en orden
             foreach (int index in _activatedLevers)
             {
                 if (_leverIndexToLetter.ContainsKey(index))
@@ -230,18 +203,14 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             
             Debug.Log($"[NetworkedLeverPuzzle] Current sequence updated: '{sequence}'");
             
-            // Notificar a todos los clientes
             RPC_NotifySequenceUpdated(sequence);
         }
         
-        /// <summary>
-        /// Valida si la secuencia actual es correcta
-        /// </summary>
+     
         private void ValidateCurrentSequence()
         {
             string currentSeq = CurrentSequence.ToString();
             
-            // Si no hay secuencia, no hay nada que validar
             if (string.IsNullOrEmpty(currentSeq))
             {
                 CorrectCount = 0;
@@ -250,7 +219,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             
             Debug.Log($"[NetworkedLeverPuzzle] Validating sequence: '{currentSeq}' vs correct: '{_correctSequence}'");
             
-            // Verificar si la secuencia actual coincide parcialmente con la correcta
             bool isValid = true;
             int correctCount = 0;
             
@@ -262,7 +230,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 }
                 else
                 {
-                    // La secuencia es incorrecta desde este punto
                     isValid = false;
                     break;
                 }
@@ -272,32 +239,26 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             
             if (!isValid)
             {
-                // Secuencia incorrecta - fallo del puzzle
                 Debug.Log($"[NetworkedLeverPuzzle] Incorrect sequence at position {correctCount}");
                 FailPuzzle();
             }
             else if (currentSeq.Length == _correctSequence.Length && correctCount == _correctSequence.Length)
             {
-                // Secuencia completa y correcta - puzzle resuelto
                 Debug.Log($"[NetworkedLeverPuzzle] PUZZLE SOLVED! Sequence complete and correct");
                 SolvePuzzle();
             }
             else
             {
-                // Secuencia parcialmente correcta
                 Debug.Log($"[NetworkedLeverPuzzle] Partial sequence correct: {correctCount}/{_correctSequence.Length}");
                 
                 if (correctCount > 0)
                 {
-                    // Notificar progreso
                     RPC_NotifyCorrectLever(_activatedLevers[correctCount - 1]);
                 }
             }
         }
         
-        /// <summary>
-        /// Recalcula el conteo de letras correctas después de una desactivación
-        /// </summary>
+       
         private void RecalculateCorrectCount()
         {
             int correct = 0;
@@ -351,7 +312,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             
             RPC_NotifyPuzzleFailed();
             
-            // Establecer timer para reset automático
             ResetTimer = TickTimer.CreateFromSeconds(Runner, 2f);
         }
         
@@ -413,7 +373,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             CurrentSequence = "";
             CorrectCount = 0;
             
-            // Resetear todas las palancas
             foreach (var lever in _levers)
             {
                 if (lever != null)
@@ -476,7 +435,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         {
             if (HasStateAuthority)
             {
-                // Check reset timer
                 if (ResetTimer.ExpiredOrNotRunning(Runner) == false && ResetTimer.Expired(Runner))
                 {
                     ResetPuzzle();
@@ -487,12 +445,10 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         
         private void OnDestroy()
         {
-            // Limpiar cualquier referencia si es necesario
             _activatedLevers.Clear();
             _leverIndexToLetter.Clear();
         }
         
-        // Métodos públicos legacy para compatibilidad (si otras partes del código los usan)
         public int RegisterLeverActivation(int leverIndex)
         {
             Debug.LogWarning($"[NetworkedLeverPuzzle] RegisterLeverActivation is deprecated. Use OnLeverStateChanged instead");

@@ -9,9 +9,7 @@ using UnityEditor;
 
 namespace MetaAvatarsVR.Networking.PuzzleSync
 {
-    /// <summary>
-    /// Tipos de randomización soportados
-    /// </summary>
+   
     [Flags]
     public enum RandomizationType
     {
@@ -24,9 +22,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         Rotation = 1 << 5 // Randomizar rotación
     }
 
-    /// <summary>
-    /// Datos de randomización para objetos
-    /// </summary>
+   
     [Serializable]
     public struct RandomizedObjectData : INetworkStruct
     {
@@ -48,10 +44,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         };
     }
 
-    /// <summary>
-    /// Sistema modular de randomización networked para puzzles VR
-    /// Soporta múltiples estrategias de randomización combinables
-    /// </summary>
+    
     public class NetworkedRandomizer : NetworkBehaviour
     {
         #region Configuration Classes
@@ -186,7 +179,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
 
         private void Start()
         {
-            // For non-networked testing
             if (NetworkRunner.Instances.Count == 0 && _randomizeOnStart)
             {
                 Debug.LogWarning("[NetworkedRandomizer] No NetworkRunner found - running in local mode");
@@ -204,7 +196,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             Debug.Log($"[NetworkedRandomizer] Spawned 🧨]");
             if (HasStateAuthority)
             {
-                // Generate or use seed
                 RandomSeed = _useUniqueSeed
                     ? UnityEngine.Random.Range(1000, 99999)
                     : (_customSeed > 0 ? _customSeed : GetSeedFromPuzzleManager());
@@ -216,7 +207,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             }
             else
             {
-                // Clients wait for randomization data
                 if (IsRandomized)
                 {
                     ApplyRandomizationFromNetwork();
@@ -228,7 +218,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
 
         public override void FixedUpdateNetwork()
         {
-            // Check if randomization just completed on client
             if (!HasStateAuthority && IsRandomized && !_isInitialized)
             {
                 ApplyRandomizationFromNetwork();
@@ -240,9 +229,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
 
         #region Public API
 
-        /// <summary>
-        /// Trigger randomization manually
-        /// </summary>
+        
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
         public void RPC_RequestRandomization()
         {
@@ -252,9 +239,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             }
         }
 
-        /// <summary>
-        /// Reset to initial state
-        /// </summary>
+      
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
         public void RPC_RequestReset()
         {
@@ -277,13 +262,11 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             OnRandomizationStarted?.Invoke();
             InitializeRandom(RandomSeed);
 
-            // Clear previous data
             for (int i = 0; i < RandomizedData.Length; i++)
             {
                 RandomizedData.Set(i, RandomizedObjectData.Default);
             }
 
-            // Execute randomization based on types
             if (_randomizationTypes.HasFlag(RandomizationType.SpawnPosition))
             {
                 RandomizeSpawnPositions();
@@ -329,7 +312,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 return;
             }
 
-            // Hide objects if configured
             if (_positionSettings.hideUntilRandomized)
             {
                 foreach (var obj in objects.Where(o => o != null))
@@ -338,11 +320,9 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 }
             }
 
-            // Create shuffled position indices
             List<int> availablePositions = Enumerable.Range(0, positions.Length).ToList();
             ShuffleList(availablePositions);
 
-            // Assign positions to objects
             for (int i = 0; i < objects.Length && i < RandomizedData.Length; i++)
             {
                 if (objects[i] == null) continue;
@@ -353,31 +333,25 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
 
                 Transform targetPosition = positions[posIndex];
 
-                // Mover el objeto usando el método apropiado
                 if (_positionSettings.teleportRigidbodies &&
                     objects[i].TryGetComponent<Rigidbody>(out var rb))
                 {
-                    // Si tiene Rigidbody, usar teleport para evitar problemas de física
                     rb.position = targetPosition.position;
                     rb.rotation = targetPosition.rotation;
                 }
                 else
                 {
-                    // Si no tiene Rigidbody, mover el transform directamente
                     objects[i].transform.position = targetPosition.position;
                     objects[i].transform.rotation = targetPosition.rotation;
                 }
 
-                // Mostrar el objeto si estaba oculto
                 objects[i].SetActive(true);
 
-                // Guardar en el array networkeado
                 var data = RandomizedData.Get(i);
                 data.ObjectIndex = i;
                 data.PositionIndex = posIndex;
                 data.IsActive = true;
 
-                // Add transform randomization if enabled
                 if (_randomizationTypes.HasFlag(RandomizationType.Scale))
                 {
                     data.ScaleMultiplier = Mathf.Lerp(
@@ -386,7 +360,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                         (float)_random.NextDouble()
                     );
 
-                    // APLICAR la escala también
                     objects[i].transform.localScale = Vector3.one * data.ScaleMultiplier;
                 }
 
@@ -397,7 +370,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                         ? _random.Next(0, _transformSettings.rotationPresets.Length)
                         : -1;
 
-                    // APLICAR la rotación si hay preset
                     if (data.RotationPresetIndex >= 0 &&
                         data.RotationPresetIndex < _transformSettings.rotationPresets.Length)
                     {
@@ -410,7 +382,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 RandomizedData.Set(i, data);
                 _objectDataMap[objects[i]] = data;
 
-                // Notificar que el objeto fue randomizado
                 OnObjectRandomized?.Invoke(objects[i]);
 
                 if (_debugMode)
@@ -440,7 +411,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 int prefabIndex = _random.Next(0, prefabs.Length);
                 int posIndex;
 
-                // Find unique position if required
                 do
                 {
                     posIndex = _random.Next(0, positions.Length);
@@ -450,7 +420,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
 
                 usedPositions.Add(posIndex);
 
-                // Spawn object
                 if (Runner != null && prefabs[prefabIndex] != null)
                 {
                     var spawned = Runner.Spawn(
@@ -459,7 +428,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                         positions[posIndex].rotation
                     );
 
-                    // Store data
                     var data = new RandomizedObjectData
                     {
                         ObjectIndex = prefabIndex,
@@ -495,7 +463,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 return;
             }
 
-            // Apply random material to each target
             foreach (var target in targets.Where(t => t != null))
             {
                 int materialIndex = _random.Next(0, materials.Length);
@@ -531,11 +498,9 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 Debug.LogWarning("[NetworkedRandomizer] Not enough unique materials for all meshes!");
             }
 
-            // Create shuffled material indices
             List<int> availableMaterials = Enumerable.Range(0, materials.Length).ToList();
             ShuffleList(availableMaterials);
 
-            // Assign unique material to each mesh
             for (int i = 0; i < meshes.Length; i++)
             {
                 if (meshes[i] == null) continue;
@@ -547,7 +512,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                     continue;
                 }
 
-                // Get material index
                 int materialIndex;
                 if (_materialPerMeshSettings.ensureUniqueMaterials && i < availableMaterials.Count)
                 {
@@ -558,10 +522,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                     materialIndex = _random.Next(0, materials.Length);
                 }
 
-                // Store mapping for network sync
                 _meshMaterialMapping[meshes[i]] = materialIndex;
 
-                // Apply material to specified slot
                 Material[] currentMaterials = renderer.materials;
                 int slot = _materialPerMeshSettings.targetMaterialSlot;
 
@@ -577,7 +539,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                     }
                 }
 
-                // Store in network data if space available
                 if (i < RandomizedData.Length)
                 {
                     var data = RandomizedData.Get(i);
@@ -591,7 +552,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
 
         private void RandomizeScales()
         {
-            // Scale is applied as part of position randomization
             if (_debugMode)
             {
                 Debug.Log($"[NetworkedRandomizer] Scale randomization enabled: {_transformSettings.scaleRange}");
@@ -600,7 +560,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
 
         private void RandomizeRotations()
         {
-            // Rotation is applied as part of position randomization
             if (_debugMode)
             {
                 Debug.Log(
@@ -625,19 +584,16 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
 
         private void ApplyRandomizationFromNetwork()
         {
-            // Apply position randomization
             if (_randomizationTypes.HasFlag(RandomizationType.ExistingPosition))
             {
                 ApplyPositionRandomization();
             }
 
-            // Apply material slot randomization
             if (_randomizationTypes.HasFlag(RandomizationType.Material))
             {
                 ApplyMaterialSlotRandomization();
             }
 
-            // Apply material per mesh randomization
             if (_randomizationTypes.HasFlag(RandomizationType.MaterialPerMesh))
             {
                 ApplyMaterialPerMeshRandomization();
@@ -656,7 +612,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 var data = RandomizedData.Get(i);
                 if (!data.IsActive || objects[i] == null) continue;
 
-                // Apply position
                 if (data.PositionIndex >= 0 && data.PositionIndex < positions.Length)
                 {
                     Transform targetTransform = positions[data.PositionIndex];
@@ -674,13 +629,11 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                     }
                 }
 
-                // Apply scale
                 if (_randomizationTypes.HasFlag(RandomizationType.Scale) && data.ScaleMultiplier > 0)
                 {
                     objects[i].transform.localScale = Vector3.one * data.ScaleMultiplier;
                 }
 
-                // Apply rotation
                 if (_randomizationTypes.HasFlag(RandomizationType.Rotation))
                 {
                     if (data.RotationPresetIndex >= 0 &&
@@ -692,20 +645,16 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                     }
                 }
 
-                // Show object
                 objects[i].SetActive(true);
 
-                // Store mapping
                 _objectDataMap[objects[i]] = data;
 
-                // Notify
                 OnObjectRandomized?.Invoke(objects[i]);
             }
         }
 
         private void ApplyMaterialSlotRandomization()
         {
-            // Re-randomize materials with same seed for consistency
             RandomizeMaterialSlots();
         }
 
@@ -716,7 +665,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
 
             if (meshes == null || materials == null) return;
 
-            // Apply materials based on network data
             for (int i = 0; i < meshes.Length && i < RandomizedData.Length; i++)
             {
                 var data = RandomizedData.Get(i);
@@ -749,11 +697,9 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
 
             foreach (int slot in _materialSettings.materialSlotsToRandomize)
             {
-                // Skip atlas slot if preserved
                 if (_materialSettings.preserveAtlasSlot &&
                     slot == _materialSettings.atlasSlotIndex) continue;
 
-                // Apply material to slot
                 if (slot >= 0 && slot < materials.Length)
                 {
                     materials[slot] = material;
@@ -773,13 +719,11 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
 
             IsRandomized = false;
 
-            // Reset all data
             for (int i = 0; i < RandomizedData.Length; i++)
             {
                 RandomizedData.Set(i, RandomizedObjectData.Default);
             }
 
-            // Reset existing objects
             var objects = _positionSettings.existingObjects;
             if (objects != null)
             {
@@ -842,7 +786,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
 
         private void ExecuteLocalRandomization()
         {
-            // Local mode randomization for testing
             InitializeRandom(_customSeed > 0 ? _customSeed : Time.frameCount);
 
             if (_randomizationTypes.HasFlag(RandomizationType.ExistingPosition))
@@ -885,7 +828,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         {
             bool hasErrors = false;
 
-            // Validate based on randomization type
             if (_randomizationTypes.HasFlag(RandomizationType.SpawnPosition))
             {
                 if (_positionSettings.prefabsToSpawn == null ||
@@ -963,7 +905,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
 
         private void OnDrawGizmosSelected()
         {
-            // Draw position connections
             if (_positionSettings.possiblePositions != null)
             {
                 Gizmos.color = Color.cyan;
@@ -974,7 +915,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 }
             }
 
-            // Draw existing object connections
             if (_positionSettings.existingObjects != null && _positionSettings.possiblePositions != null)
             {
                 Gizmos.color = Color.yellow;
@@ -992,7 +932,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 }
             }
 
-            // Draw material targets
             if (_randomizationTypes.HasFlag(RandomizationType.Material) &&
                 _materialSettings.targetObjects != null)
             {
@@ -1003,7 +942,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 }
             }
 
-            // Draw mesh material targets
             if (_randomizationTypes.HasFlag(RandomizationType.MaterialPerMesh) &&
                 _materialPerMeshSettings.targetMeshes != null)
             {
@@ -1019,7 +957,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
     }
 }
 
-// Custom Property Drawer for better Inspector organization
 #if UNITY_EDITOR
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.Editor
@@ -1029,15 +966,12 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Editor
     {
         public override void OnInspectorGUI()
         {
-            // Draw default inspector but with visual grouping
             serializedObject.Update();
 
-            // Title
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("NETWORKED RANDOMIZER", EditorStyles.boldLabel);
             EditorGUILayout.Space();
 
-            // Core Settings Box
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Core Settings", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("_randomizationTypes"));
@@ -1048,7 +982,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Editor
 
             EditorGUILayout.Space();
 
-            // Position Settings Box
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Position Randomization", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("_positionSettings"), true);
@@ -1056,7 +989,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Editor
 
             EditorGUILayout.Space();
 
-            // Material Slots Box
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Material Randomization (Slot-Based)", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("_materialSettings"), true);
@@ -1064,7 +996,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Editor
 
             EditorGUILayout.Space();
 
-            // Material Per Mesh Box
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Material Per Mesh", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("_materialPerMeshSettings"), true);
@@ -1072,7 +1003,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Editor
 
             EditorGUILayout.Space();
 
-            // Transform Settings Box
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Transform Randomization", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("_transformSettings"), true);
@@ -1080,7 +1010,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Editor
 
             EditorGUILayout.Space();
 
-            // Debug Box
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Debug & Validation", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("_validateSetup"));
@@ -1089,7 +1018,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Editor
 
             EditorGUILayout.Space();
 
-            // Events Box
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Events", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("OnRandomizationStarted"));
@@ -1098,7 +1026,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Editor
             EditorGUILayout.PropertyField(serializedObject.FindProperty("OnRandomizationFailed"));
             EditorGUILayout.EndVertical();
 
-            // Runtime buttons
             if (Application.isPlaying)
             {
                 EditorGUILayout.Space();

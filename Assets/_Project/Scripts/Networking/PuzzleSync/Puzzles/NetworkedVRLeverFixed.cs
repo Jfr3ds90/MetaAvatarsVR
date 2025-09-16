@@ -28,17 +28,14 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         public UnityEvent<string> OnLeverActivated;
         public UnityEvent<string> OnLeverDeactivated;
         
-        // Network State
         [Networked] public float NetworkedAngle { get; set; }
         [Networked] public NetworkBool IsActivated { get; set; }
         [Networked] public NetworkBool IsGrabbed { get; set; }
         
-        // Components
         private Grabbable _grabbable;
         private HandGrabInteractable _handGrabInteractable;
         private Rigidbody _rigidbody;
         
-        // Grab tracking
         private bool _isBeingGrabbed = false;
         private Vector3 _grabStartLocalPoint;
         private float _grabStartAngle;
@@ -56,26 +53,22 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             if (_leverPivot == null)
                 _leverPivot = transform;
             
-            // Setup Rigidbody con constraints
             _rigidbody = GetComponent<Rigidbody>();
             _rigidbody.isKinematic = true;
             _rigidbody.constraints = RigidbodyConstraints.FreezePosition | 
                                     RigidbodyConstraints.FreezeRotationX | 
                                     RigidbodyConstraints.FreezeRotationY;
             
-            // Setup Grabbable
             _grabbable = GetComponent<Grabbable>();
             if (_grabbable == null)
             {
                 _grabbable = gameObject.AddComponent<Grabbable>();
             }
             
-            // IMPORTANTE: NO usar OneGrabRotateTransformer
-            // Crear nuestro propio GrabFreeTransformer
+           
             var freeTransformer = gameObject.AddComponent<GrabFreeTransformer>();
             _grabbable.InjectOptionalOneGrabTransformer(freeTransformer);
             
-            // Setup HandGrabInteractable
             _handGrabInteractable = GetComponent<HandGrabInteractable>();
             if (_handGrabInteractable == null)
             {
@@ -84,7 +77,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 _handGrabInteractable.InjectRigidbody(_rigidbody);
             }
             
-            // Subscribir a eventos
             _grabbable.WhenPointerEventRaised += OnPointerEvent;
         }
         
@@ -116,13 +108,11 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             _isBeingGrabbed = true;
             _grabStartAngle = GetCurrentAngle();
             
-            // Guardar punto de grab inicial en espacio local
             if (evt.Pose.position != Vector3.zero)
             {
                 _grabStartLocalPoint = _leverPivot.InverseTransformPoint(evt.Pose.position);
             }
             
-            // Temporarily unlock rotation
             _rigidbody.isKinematic = false;
             
             if (Runner && Runner.IsRunning)
@@ -137,21 +127,16 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         {
             if (!_isBeingGrabbed || evt.Pose.position == Vector3.zero) return;
             
-            // Calcular nuevo ángulo basado en la posición de la mano
             Vector3 currentLocalPoint = _leverPivot.InverseTransformPoint(evt.Pose.position);
             
-            // Calcular rotación usando atan2 en el plano XY local
             float angleFromStart = Mathf.Atan2(_grabStartLocalPoint.x, _grabStartLocalPoint.y) * Mathf.Rad2Deg;
             float angleFromCurrent = Mathf.Atan2(currentLocalPoint.x, currentLocalPoint.y) * Mathf.Rad2Deg;
             
-            // Calcular delta y aplicar
             float deltaAngle = angleFromCurrent - angleFromStart;
             float targetAngle = _grabStartAngle + deltaAngle;
             
-            // Clampear dentro de límites
             targetAngle = Mathf.Clamp(targetAngle, _minAngle, _maxAngle);
             
-            // Aplicar rotación
             ApplyRotation(targetAngle);
         }
         
@@ -173,7 +158,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         
         private void ApplyRotation(float angle)
         {
-            // IMPORTANTE: Aplicar rotación SOLO en Z
             Vector3 currentEuler = _leverPivot.localEulerAngles;
             _leverPivot.localRotation = Quaternion.Euler(0, 0, angle);
         }
@@ -206,7 +190,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 NetworkedAngle = GetCurrentAngle();
             }
             
-            // Check activation
             bool shouldBeActive = NetworkedAngle >= _activationAngle;
             if (shouldBeActive != _wasActivated)
             {
