@@ -1,249 +1,158 @@
+
+// ============================================
+// NetworkedPianoKey.cs - Tecla de Piano con Meta XR SDK
+// ============================================
 using Fusion;
 using UnityEngine;
 using UnityEngine.Events;
+using Oculus.Interaction;
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
 {
-    public class NetworkedPianoKey : NetworkedInteractable
+    /// <summary>
+    /// Tecla de piano interactuable con Meta XR SDK
+    /// </summary>
+    public class NetworkedPianoKey : NetworkBehaviour
     {
-        [Header("Piano Key Configuration")]
-        [SerializeField] private int _keyIndex;
-        [SerializeField] private string _noteName = "C";
+        [Header("Key Configuration")]
+        [SerializeField] private int _keyIndex = 0;
+        [SerializeField] private string _noteName = "Do";
         [SerializeField] private AudioClip _noteSound;
-        [SerializeField] private float _keyPressDepth = 0.02f;
-        [SerializeField] private float _keyAnimationSpeed = 10f;
         
-        [Header("Visual Feedback")]
+        [Header("Visual")]
+        [SerializeField] private MeshRenderer _keyRenderer;
         [SerializeField] private Material _defaultMaterial;
         [SerializeField] private Material _pressedMaterial;
-        [SerializeField] private Material _successMaterial;
-        [SerializeField] private Material _failureMaterial;
-        [SerializeField] private GameObject _noteIndicator;
-        [SerializeField] private ParticleSystem _keyPressParticles;
         
-        [Header("Key Events")]
-        public UnityEvent OnKeyPressed = new UnityEvent();
-        public UnityEvent OnKeyReleased = new UnityEvent();
+        [Header("Network State")]
+        [Networked] public int KeyIndex { get; set; }
+        [Networked] public NetworkBool IsPressed { get; set; }
         
-        private NetworkedPiano _pianoController;
-        private MeshRenderer _meshRenderer;
-        private Vector3 _defaultPosition;
-        private Vector3 _pressedPosition;
-        private bool _isAnimating = false;
-        private float _currentPressAmount = 0f;
+        [Header("Events")]
+        public UnityEvent<string> OnKeyPressed = new UnityEvent<string>();
         
-        protected override void Awake()
+        private PokeInteractable _pokeInteractable;
+        private AudioSource _audioSource;
+        
+        private void Awake()
         {
-            base.Awake();
+            // Configurar PokeInteractable para teclas de piano
+            _pokeInteractable = GetComponent<PokeInteractable>();
+            if (_pokeInteractable == null)
+            {
+                _pokeInteractable = gameObject.AddComponent<PokeInteractable>();
+            }
             
-            _meshRenderer = GetComponent<MeshRenderer>();
-            if (_meshRenderer == null)
-                _meshRenderer = GetComponentInChildren<MeshRenderer>();
+            _audioSource = GetComponent<AudioSource>();
+            if (_audioSource == null)
+                _audioSource = gameObject.AddComponent<AudioSource>();
                 
-            _defaultPosition = transform.localPosition;
-            _pressedPosition = _defaultPosition - Vector3.up * _keyPressDepth;
-            
-            if (_pianoController == null)
-                _pianoController = GetComponentInParent<NetworkedPiano>();
+            if (_keyRenderer == null)
+                _keyRenderer = GetComponent<MeshRenderer>();
         }
         
-        protected override void PerformActivation(PlayerRef player)
+        private void Start()
         {
-            RPC_PressKey(player);
+            // Suscribirse a eventos de poke
+            if (_pokeInteractable != null)
+            {
+                _pokeInteractable.WhenPointerEventRaised += OnPokeEvent;
+            }
+        }
+        
+        public override void Spawned()
+        {
+            if (HasStateAuthority)
+            {
+                KeyIndex = _keyIndex;
+                IsPressed = false;
+            }
+        }
+        
+        private void OnPokeEvent(PointerEvent evt)
+        {
+            if (evt.Type == PointerEventType.Select)
+            {
+                PressKey();
+            }
+        }
+        
+        private void PressKey()
+        {
+            RPC_OnKeyPress();
         }
         
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-        private void RPC_PressKey(PlayerRef player, RpcInfo info = default)
+        private void RPC_OnKeyPress(RpcInfo info = default)
         {
-            if (_pianoController != null)
-            {
-                _pianoController.RegisterKeyPress(_keyIndex, player);
-            }
+            if (IsPressed) return; // Evitar múltiples pulsaciones
             
-            RPC_NotifyKeyPressed(player);
+            IsPressed = true;
+            RPC_NotifyKeyPress();
+            
+            // Reset después de un momento
+            StartCoroutine(ResetKey());
         }
         
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_NotifyKeyPressed(PlayerRef player)
+        private void RPC_NotifyKeyPress()
         {
-            OnKeyPressed?.Invoke();
-            PlayNote();
-            AnimateKeyPress();
-            
-            Debug.Log($"[NetworkedPianoKey] Key {_noteName} ({_keyIndex}) pressed by player {player}");
+            OnKeyPressed?.Invoke(_noteName);
+            PlaySound();
+            ShowPressedVisual();
         }
         
-        public void PlayNote()
+        private System.Collections.IEnumerator ResetKey()
+        {
+            yield return new WaitForSeconds(0.5f);
+            IsPressed = false;
+            UpdateVisual();
+        }
+        
+        public void SetKeyData(int index, string note)
+        {
+            _keyIndex = index;
+            _noteName = note;
+        }
+        
+        private void PlaySound()
         {
             if (_noteSound != null && _audioSource != null)
             {
-                _audioSource.pitch = 1f + (_keyIndex * 0.1f);
                 _audioSource.PlayOneShot(_noteSound);
             }
         }
         
-        public void AnimateKeyPress()
+        private void ShowPressedVisual()
         {
-            if (_isAnimating)
-                return;
-                
-            StartCoroutine(AnimateKey());
-        }
-        
-        private System.Collections.IEnumerator AnimateKey()
-        {
-            _isAnimating = true;
-            
-            if (_meshRenderer != null && _pressedMaterial != null)
+            if (_keyRenderer != null && _pressedMaterial != null)
             {
-                _meshRenderer.material = _pressedMaterial;
-            }
-            
-            if (_keyPressParticles != null)
-            {
-                _keyPressParticles.Play();
-            }
-            
-            // Animate down
-            while (_currentPressAmount < 1f)
-            {
-                _currentPressAmount += Time.deltaTime * _keyAnimationSpeed;
-                _currentPressAmount = Mathf.Clamp01(_currentPressAmount);
-                
-                transform.localPosition = Vector3.Lerp(_defaultPosition, _pressedPosition, _currentPressAmount);
-                yield return null;
-            }
-            
-            // Hold for a moment
-            yield return new WaitForSeconds(0.1f);
-            
-            // Animate up
-            while (_currentPressAmount > 0f)
-            {
-                _currentPressAmount -= Time.deltaTime * _keyAnimationSpeed;
-                _currentPressAmount = Mathf.Clamp01(_currentPressAmount);
-                
-                transform.localPosition = Vector3.Lerp(_defaultPosition, _pressedPosition, _currentPressAmount);
-                yield return null;
-            }
-            
-            transform.localPosition = _defaultPosition;
-            
-            if (_meshRenderer != null && _defaultMaterial != null)
-            {
-                _meshRenderer.material = _defaultMaterial;
-            }
-            
-            _isAnimating = false;
-            OnKeyReleased?.Invoke();
-        }
-        
-        public void PlaySuccessFeedback()
-        {
-            if (_meshRenderer != null && _successMaterial != null)
-            {
-                StartCoroutine(FlashMaterial(_successMaterial, 0.5f));
-            }
-            
-            if (_noteIndicator != null)
-            {
-                _noteIndicator.SetActive(true);
-                StartCoroutine(HideIndicatorAfterDelay(1f));
+                _keyRenderer.material = _pressedMaterial;
+                StartCoroutine(ResetVisualAfterDelay());
             }
         }
         
-        public void PlayFailureFeedback()
+        private System.Collections.IEnumerator ResetVisualAfterDelay()
         {
-            if (_meshRenderer != null && _failureMaterial != null)
+            yield return new WaitForSeconds(0.2f);
+            UpdateVisual();
+        }
+        
+        private void UpdateVisual()
+        {
+            if (_keyRenderer != null && _defaultMaterial != null)
             {
-                StartCoroutine(FlashMaterial(_failureMaterial, 0.3f));
+                _keyRenderer.material = _defaultMaterial;
             }
         }
         
-        private System.Collections.IEnumerator FlashMaterial(Material material, float duration)
+        private void OnDestroy()
         {
-            if (_meshRenderer == null || material == null)
-                yield break;
-                
-            Material originalMaterial = _meshRenderer.material;
-            _meshRenderer.material = material;
-            
-            yield return new WaitForSeconds(duration);
-            
-            if (_meshRenderer != null && !_isAnimating)
+            if (_pokeInteractable != null)
             {
-                _meshRenderer.material = _defaultMaterial ?? originalMaterial;
+                _pokeInteractable.WhenPointerEventRaised -= OnPokeEvent;
             }
-        }
-        
-        private System.Collections.IEnumerator HideIndicatorAfterDelay(float delay)
-        {
-            yield return new WaitForSeconds(delay);
-            if (_noteIndicator != null)
-                _noteIndicator.SetActive(false);
-        }
-        
-        public void SetKeyData(int index, NetworkedPiano piano)
-        {
-            _keyIndex = index;
-            _pianoController = piano;
-            
-            // Set note name based on index
-            string[] noteNames = { "C", "D", "E", "F", "G", "A", "B" };
-            _noteName = noteNames[index % noteNames.Length];
-        }
-        
-        public void ResetKey()
-        {
-            if (_meshRenderer != null && _defaultMaterial != null)
-            {
-                _meshRenderer.material = _defaultMaterial;
-            }
-            
-            if (_noteIndicator != null)
-            {
-                _noteIndicator.SetActive(false);
-            }
-            
-            transform.localPosition = _defaultPosition;
-            _currentPressAmount = 0f;
-            _isAnimating = false;
-            
-            CurrentState = InteractableState.Idle;
-        }
-        
-        public int GetKeyIndex()
-        {
-            return _keyIndex;
-        }
-        
-        public string GetNoteName()
-        {
-            return _noteName;
-        }
-        
-        protected override void UpdateVisualState(InteractableState state)
-        {
-            base.UpdateVisualState(state);
-            
-            if (state == InteractableState.Hovering && _meshRenderer != null)
-            {
-                // Could add hover glow effect here
-            }
-        }
-        
-        private void OnDrawGizmosSelected()
-        {
-            if (Application.isPlaying)
-                return;
-                
-            Gizmos.color = Color.cyan;
-            Vector3 currentPos = transform.position;
-            Vector3 pressedPos = currentPos - Vector3.up * _keyPressDepth;
-            
-            Gizmos.DrawWireCube(currentPos, Vector3.one * 0.1f);
-            Gizmos.DrawLine(currentPos, pressedPos);
-            Gizmos.DrawWireCube(pressedPos, Vector3.one * 0.08f);
         }
     }
 }
+

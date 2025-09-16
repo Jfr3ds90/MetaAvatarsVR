@@ -1,63 +1,42 @@
+// ============================================
+// NetworkedPiano.cs - Simplificado para Meta XR SDK
+// ============================================
 using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
 using UnityEngine.Events;
+using Oculus.Interaction;
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
 {
+    /// <summary>
+    /// Piano networkeado simplificado para el puzzle musical
+    /// </summary>
     public class NetworkedPiano : NetworkBehaviour
     {
-        [Header("Piano Configuration")]
+        [Header("Configuration")]
         [SerializeField] private NetworkedPianoKey[] _pianoKeys;
-        [SerializeField] private int[] _correctSequence = { 0, 1, 2, 3 };
-        [SerializeField] private NetworkedDoor _puzzleDoor;
-        [SerializeField] private int _puzzleId = 1;
-        [SerializeField] private float _sequenceResetDelay = 3f;
+        [SerializeField] private int _maxAttempts = 3;
         
         [Header("Audio")]
-        [SerializeField] private AudioClip _successMelody;
-        [SerializeField] private AudioClip _failureSound;
-        [SerializeField] private bool _playbackCorrectSequence = true;
-        
-        [Header("Visual Feedback")]
-        [SerializeField] private GameObject _successIndicator;
-        [SerializeField] private GameObject _failureIndicator;
-        [SerializeField] private GameObject[] _progressIndicators;
+        [SerializeField] private AudioClip _correctSound;
+        [SerializeField] private AudioClip _wrongSound;
         
         [Header("Network State")]
+        [Networked] public NetworkBool IsActive { get; set; }
+        [Networked] public int CurrentAttempt { get; set; }
         [Networked, Capacity(20)]
-        public NetworkArray<int> PlayedNotes { get; }
-        
-        [Networked]
-        public int CurrentNoteIndex { get; set; }
-        
-        [Networked]
-        public NetworkBool IsSolved { get; set; }
-        
-        [Networked]
-        public int AttemptCount { get; set; }
-        
-        [Networked]
-        public float LastNoteTime { get; set; }
-        
-        [Networked]
-        public TickTimer DoorOpenTimer { get; set; }
-        
-        [Networked]
-        public TickTimer ResetTimer { get; set; }
+        public NetworkString<_32> ExpectedSequence { get; set; }
+        [Networked, Capacity(20)]
+        public NetworkString<_32> CurrentSequence { get; set; }
         
         [Header("Events")]
-        public UnityEvent<int> OnNotePressed = new UnityEvent<int>();
-        public UnityEvent<int> OnCorrectNote = new UnityEvent<int>();
-        public UnityEvent<int> OnWrongNote = new UnityEvent<int>();
-        public UnityEvent OnSequenceComplete = new UnityEvent();
+        public UnityEvent OnSequenceCompleted = new UnityEvent();
         public UnityEvent OnSequenceFailed = new UnityEvent();
-        public UnityEvent OnPianoReset = new UnityEvent();
         
         private AudioSource _audioSource;
-        private List<int> _currentSequence = new List<int>();
-        private bool _isProcessing = false;
-        private float _sequenceStartTime = 0f;
+        private List<string> _currentNotes = new List<string>();
+        private string[] _noteNames = { "Do", "Re", "Mi", "Fa", "Sol", "La", "Si" };
         
         private void Awake()
         {
@@ -65,24 +44,20 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             if (_audioSource == null)
                 _audioSource = gameObject.AddComponent<AudioSource>();
                 
-            SetupPianoKeys();
+            SetupKeys();
         }
         
-        private void SetupPianoKeys()
+        private void SetupKeys()
         {
             if (_pianoKeys == null || _pianoKeys.Length == 0)
-            {
                 _pianoKeys = GetComponentsInChildren<NetworkedPianoKey>();
-            }
-            
+                
             for (int i = 0; i < _pianoKeys.Length; i++)
             {
                 if (_pianoKeys[i] != null)
                 {
-                    _pianoKeys[i].SetKeyData(i, this);
-                    
-                    int keyIndex = i;
-                    _pianoKeys[i].OnKeyPressed.AddListener(() => OnKeyPressed(keyIndex));
+                    _pianoKeys[i].SetKeyData(i, i < _noteNames.Length ? _noteNames[i] : $"Key{i}");
+                    _pianoKeys[i].OnKeyPressed.AddListener(OnKeyPressed);
                 }
             }
         }
@@ -91,274 +66,89 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         {
             if (HasStateAuthority)
             {
-                CurrentNoteIndex = 0;
-                IsSolved = false;
-                AttemptCount = 0;
-                LastNoteTime = 0f;
-                
-                for (int i = 0; i < PlayedNotes.Length; i++)
-                {
-                    PlayedNotes.Set(i, -1);
-                }
-                
-                RegisterWithPuzzleManager();
-            }
-            
-            UpdateProgressIndicators();
-        }
-        
-        private void RegisterWithPuzzleManager()
-        {
-            if (NetworkedPuzzleManager.Instance != null)
-            {
-                if (NetworkedPuzzleManager.Instance.CanStartPuzzle(_puzzleId))
-                {
-                    NetworkedPuzzleManager.Instance.RPC_RequestStartPuzzle(_puzzleId);
-                }
+                IsActive = false;
+                CurrentAttempt = 0;
+                CurrentSequence = "";
             }
         }
         
-        private void OnKeyPressed(int keyIndex)
+        public void SetExpectedSequence(string sequence)
         {
-            if (!HasStateAuthority || _isProcessing || IsSolved)
-                return;
-                
-            ProcessKeyPress(keyIndex);
-        }
-        
-        public void RegisterKeyPress(int keyIndex, PlayerRef player)
-        {
-            if (!HasStateAuthority || IsSolved)
-                return;
-                
-            ProcessKeyPress(keyIndex);
-        }
-        
-        private void ProcessKeyPress(int keyIndex)
-        {
-            if (CurrentNoteIndex == 0)
+            if (HasStateAuthority)
             {
-                _sequenceStartTime = Runner.SimulationTime;
+                ExpectedSequence = sequence;
             }
-            
-            PlayedNotes.Set(CurrentNoteIndex, keyIndex);
-            LastNoteTime = Runner.SimulationTime;
-            
-            bool isCorrect = CheckNote(keyIndex, CurrentNoteIndex);
-            
-            if (isCorrect)
+        }
+        
+        public void ActivatePiano()
+        {
+            if (HasStateAuthority)
             {
-                CurrentNoteIndex++;
-                RPC_NotifyCorrectNote(keyIndex, CurrentNoteIndex - 1);
-                
-                if (NetworkedPuzzleManager.Instance != null)
+                IsActive = true;
+                CurrentAttempt = 0;
+                CurrentSequence = "";
+                _currentNotes.Clear();
+            }
+        }
+        
+        private void OnKeyPressed(string noteName)
+        {
+            if (!IsActive) return;
+            
+            RPC_ProcessKey(noteName);
+        }
+        
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        private void RPC_ProcessKey(string noteName, RpcInfo info = default)
+        {
+            if (!IsActive) return;
+            
+            _currentNotes.Add(noteName);
+            CurrentSequence = string.Join("", _currentNotes);
+            
+            // Verificar secuencia
+            string expected = ExpectedSequence.ToString();
+            
+            if (CurrentSequence.ToString() == expected)
+            {
+                // Éxito!
+                IsActive = false;
+                RPC_SequenceComplete();
+            }
+            else if (_currentNotes.Count >= expected.Length / 2) // Asumiendo 2 chars por nota
+            {
+                // Fallo
+                CurrentAttempt++;
+                if (CurrentAttempt >= _maxAttempts)
                 {
-                    NetworkedPuzzleManager.Instance.RPC_UpdatePuzzleProgress(_puzzleId, CurrentNoteIndex);
+                    RPC_SequenceFailed();
                 }
-                
-                if (CurrentNoteIndex >= _correctSequence.Length)
+                else
                 {
-                    CompletePuzzle();
+                    ResetSequence();
                 }
             }
-            else
-            {
-                RPC_NotifyWrongNote(keyIndex);
-                FailSequence();
-            }
-        }
-        
-        private bool CheckNote(int keyIndex, int sequenceIndex)
-        {
-            if (sequenceIndex < 0 || sequenceIndex >= _correctSequence.Length)
-                return false;
-                
-            return _correctSequence[sequenceIndex] == keyIndex;
-        }
-        
-        private void CompletePuzzle()
-        {
-            IsSolved = true;
-            _isProcessing = true;
-            
-            if (NetworkedPuzzleManager.Instance != null)
-            {
-                NetworkedPuzzleManager.Instance.RPC_CompletePuzzle(_puzzleId);
-            }
-            
-            if (_puzzleDoor != null)
-            {
-                _puzzleDoor.RPC_UnlockDoor();
-                DoorOpenTimer = TickTimer.CreateFromSeconds(Runner, 1f);
-            }
-            
-            RPC_NotifySequenceComplete();
-        }
-        
-        private void FailSequence()
-        {
-            AttemptCount++;
-            _isProcessing = true;
-            
-            if (NetworkedPuzzleManager.Instance != null)
-            {
-                NetworkedPuzzleManager.Instance.RPC_UpdatePuzzleProgress(_puzzleId, 0);
-            }
-            
-            RPC_NotifySequenceFailed();
-            
-            ResetTimer = TickTimer.CreateFromSeconds(Runner, _sequenceResetDelay);
         }
         
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_NotifyCorrectNote(int keyIndex, int sequenceIndex)
+        private void RPC_SequenceComplete()
         {
-            OnCorrectNote?.Invoke(keyIndex);
-            
-            if (_pianoKeys[keyIndex] != null)
-            {
-                _pianoKeys[keyIndex].PlaySuccessFeedback();
-            }
-            
-            UpdateProgressIndicators();
-            
-            Debug.Log($"[NetworkedPiano] Correct note! Key {keyIndex} at position {sequenceIndex}");
+            OnSequenceCompleted?.Invoke();
+            PlaySound(_correctSound);
         }
         
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_NotifyWrongNote(int keyIndex)
-        {
-            OnWrongNote?.Invoke(keyIndex);
-            
-            if (_pianoKeys[keyIndex] != null)
-            {
-                _pianoKeys[keyIndex].PlayFailureFeedback();
-            }
-            
-            PlaySound(_failureSound);
-            
-            if (_failureIndicator != null)
-            {
-                _failureIndicator.SetActive(true);
-                StartCoroutine(HideIndicatorAfterDelay(_failureIndicator, 2f));
-            }
-            
-            Debug.Log($"[NetworkedPiano] Wrong note! Key {keyIndex}");
-        }
-        
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_NotifySequenceComplete()
-        {
-            OnSequenceComplete?.Invoke();
-            
-            if (_playbackCorrectSequence)
-            {
-                PlaybackSequence();
-            }
-            
-            PlaySound(_successMelody);
-            
-            if (_successIndicator != null)
-                _successIndicator.SetActive(true);
-                
-            foreach (var key in _pianoKeys)
-            {
-                if (key != null)
-                    key.PlaySuccessFeedback();
-            }
-            
-            Debug.Log("[NetworkedPiano] Sequence completed successfully!");
-        }
-        
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_NotifySequenceFailed()
+        private void RPC_SequenceFailed()
         {
             OnSequenceFailed?.Invoke();
-            
-            foreach (var key in _pianoKeys)
-            {
-                if (key != null)
-                    key.PlayFailureFeedback();
-            }
-            
-            Debug.Log("[NetworkedPiano] Sequence failed! Resetting...");
+            PlaySound(_wrongSound);
+            ResetSequence();
         }
         
-        private void ResetPiano()
+        public void ResetSequence()
         {
-            if (!HasStateAuthority)
-                return;
-                
-            CurrentNoteIndex = 0;
-            _isProcessing = false;
-            _currentSequence.Clear();
-            
-            for (int i = 0; i < PlayedNotes.Length; i++)
-            {
-                PlayedNotes.Set(i, -1);
-            }
-            
-            foreach (var key in _pianoKeys)
-            {
-                if (key != null)
-                    key.ResetKey();
-            }
-            
-            RPC_NotifyPianoReset();
-        }
-        
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_NotifyPianoReset()
-        {
-            OnPianoReset?.Invoke();
-            
-            if (_failureIndicator != null)
-                _failureIndicator.SetActive(false);
-                
-            UpdateProgressIndicators();
-            
-            Debug.Log("[NetworkedPiano] Piano reset");
-        }
-        
-        private void PlaybackSequence()
-        {
-            StartCoroutine(PlaybackSequenceCoroutine());
-        }
-        
-        private System.Collections.IEnumerator PlaybackSequenceCoroutine()
-        {
-            yield return new WaitForSeconds(0.5f);
-            
-            foreach (int keyIndex in _correctSequence)
-            {
-                if (keyIndex >= 0 && keyIndex < _pianoKeys.Length && _pianoKeys[keyIndex] != null)
-                {
-                    _pianoKeys[keyIndex].PlayNote();
-                    _pianoKeys[keyIndex].AnimateKeyPress();
-                    yield return new WaitForSeconds(0.4f);
-                }
-            }
-        }
-        
-        private void UpdateProgressIndicators()
-        {
-            if (_progressIndicators != null)
-            {
-                for (int i = 0; i < _progressIndicators.Length; i++)
-                {
-                    if (_progressIndicators[i] != null)
-                    {
-                        _progressIndicators[i].SetActive(i < CurrentNoteIndex);
-                    }
-                }
-            }
-        }
-        
-        private System.Collections.IEnumerator HideIndicatorAfterDelay(GameObject indicator, float delay)
-        {
-            yield return new WaitForSeconds(delay);
-            if (indicator != null)
-                indicator.SetActive(false);
+            _currentNotes.Clear();
+            CurrentSequence = "";
         }
         
         private void PlaySound(AudioClip clip)
@@ -366,61 +156,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             if (clip != null && _audioSource != null)
             {
                 _audioSource.PlayOneShot(clip);
-            }
-        }
-        
-        public void SetCorrectSequence(int[] sequence)
-        {
-            _correctSequence = sequence;
-        }
-        
-        public int[] GetCorrectSequence()
-        {
-            return _correctSequence;
-        }
-        
-        public void ShowHint()
-        {
-            if (_playbackCorrectSequence && !IsSolved)
-            {
-                PlaybackSequence();
-            }
-        }
-        
-        public override void FixedUpdateNetwork()
-        {
-            if (HasStateAuthority)
-            {
-                // Check door open timer
-                if (DoorOpenTimer.ExpiredOrNotRunning(Runner) == false && DoorOpenTimer.Expired(Runner) && _puzzleDoor != null)
-                {
-                    _puzzleDoor.RPC_RequestOpen();
-                    DoorOpenTimer = TickTimer.None;
-                }
-                
-                // Check reset timer
-                if (ResetTimer.ExpiredOrNotRunning(Runner) == false && ResetTimer.Expired(Runner))
-                {
-                    ResetPiano();
-                    ResetTimer = TickTimer.None;
-                }
-                
-                // Auto-reset if no input for too long
-                if (!IsSolved && CurrentNoteIndex > 0 && Runner.SimulationTime - LastNoteTime > 10f)
-                {
-                    ResetPiano();
-                }
-            }
-        }
-        
-        private void OnDestroy()
-        {
-            foreach (var key in _pianoKeys)
-            {
-                if (key != null)
-                {
-                    key.OnKeyPressed.RemoveAllListeners();
-                }
             }
         }
     }
