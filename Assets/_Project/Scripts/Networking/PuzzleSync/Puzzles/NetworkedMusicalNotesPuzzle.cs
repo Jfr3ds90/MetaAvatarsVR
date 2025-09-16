@@ -292,7 +292,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         {
             if (_patternDisplay != null)
             {
-                _patternDisplay.SetActive(false);
+                //_patternDisplay.SetActive(false);
             }
             
             Debug.Log("[NetworkedMusicalNotesPuzzle] Pattern hidden, note collection phase started");
