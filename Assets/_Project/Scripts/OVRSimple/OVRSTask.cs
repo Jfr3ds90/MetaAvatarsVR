@@ -781,7 +781,7 @@ public readonly struct OVRSTask<TResult> : IEquatable<OVRSTask<TResult>>, IDispo
     /// directly, as in the following example:
     /// <example><code><![CDATA[
     /// async OVRSTask<bool> DoSomethingAsync() {
-    ///   var anchor = await OVRAnchor.CreateSpatialAnchorAsync(pose); // <-- implicitly generated OVRSTask<bool>
+    ///   var anchor = await OVRSAnchor.CreateSpatialAnchorAsync(pose); // <-- implicitly generated OVRSTask<bool>
     ///   SomeMethodThatThrows();
     ///   return true;
     /// }
@@ -1231,8 +1231,8 @@ public readonly struct OVRSTask<TResult> : IEquatable<OVRSTask<TResult>>, IDispo
     /// <see cref="ContinueWith"/>. Most Meta XR Core SDK calls that return an OVRSTask do not throw, but it is possible
     /// to return an <see cref="OVRSTask"/>&lt;TResult&gt; from your own async method, which can still throw. For example,
     /// <code><![CDATA[
-    /// async OVRSTask<OVRAnchor> DoSomethingAsync() {
-    ///   var anchor = await OVRAnchor.CreateSpatialAnchorAsync(pose); // doesn't throw
+    /// async OVRSTask<OVRSAnchor> DoSomethingAsync() {
+    ///   var anchor = await OVRSAnchor.CreateSpatialAnchorAsync(pose); // doesn't throw
     ///   throw new Exception(); // Cannot be caught if using ContinueWith
     ///   return anchor;
     /// }

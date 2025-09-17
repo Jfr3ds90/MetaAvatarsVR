@@ -5,9 +5,9 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using static OVRPlugin;
-/*using TaskResult = OVRSResult<System.Collections.Generic.List<OVRSAnchor>, OVRSAnchor.FetchResult>;*/
+using TaskResult = OVRSResult<System.Collections.Generic.List<OVRSAnchor>, OVRSAnchor.FetchResult>;
 
-public readonly partial struct OVRSAnchor /*: IEquatable<OVRSAnchor>, IDisposable*/
+public readonly partial struct OVRSAnchor : IEquatable<OVRSAnchor>, IDisposable
 {
     /// <summary>
     /// Possible results of a save operation.
@@ -23,7 +23,7 @@ public readonly partial struct OVRSAnchor /*: IEquatable<OVRSAnchor>, IDisposabl
     /// </remarks>
     /// <seealso cref="OVRSAnchor.SaveAsync()"/>
     /// <seealso cref="OVRSAnchor.SaveAsync(IEnumerable{OVRSAnchor})"/>
-  /*  [OVRSResultStatus]
+    [OVRSResultStatus]
     public enum SaveResult
     {
         /// <summary>
@@ -244,7 +244,7 @@ public readonly partial struct OVRSAnchor /*: IEquatable<OVRSAnchor>, IDisposabl
         /// </summary>
         /// <remarks>
         /// This can happen, for example, if you query for an invalid component type, or if you try requesting more than
-        /// <see cref="OVRSpaceQuery.MaxResultsForAnchors"/> anchors in a single call.
+        /// <see cref="OVRSSpaceQuery.MaxResultsForAnchors"/> anchors in a single call.
         /// </remarks>
         FailureInvalidOption = Result.Failure_InvalidParameter,
 
@@ -313,14 +313,14 @@ public readonly partial struct OVRSAnchor /*: IEquatable<OVRSAnchor>, IDisposabl
     /// Sharing an anchor is an asynchronous operation that can fail for a number of reasons, enumerated here.
     ///
     /// <see cref="ShareResult"/> is used as the status for the <see cref="OVRSResult"/> returned by
-    /// <see cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSpaceUser})"/>,
-    /// <see cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSAnchor},IEnumerable{OVRSpaceUser})"/>,
+    /// <see cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSSpaceUser})"/>,
+    /// <see cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSAnchor},IEnumerable{OVRSSpaceUser})"/>,
     /// <see cref="OVRSpatialAnchor.ShareAsync(Guid)"/>,
     /// <see cref="OVRSpatialAnchor.ShareAsync(IEnumerable{OVRSpatialAnchor}, Guid)"/>, and
     /// <see cref="OVRSpatialAnchor.ShareAsync(IEnumerable{OVRSpatialAnchor}, IEnumerable{Guid})"/>
     /// </remarks>
-    /// <seealso cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSpaceUser})"/>
-    /// <seealso cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSAnchor},IEnumerable{OVRSpaceUser})"/>
+    /// <seealso cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSSpaceUser})"/>
+    /// <seealso cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSAnchor},IEnumerable{OVRSSpaceUser})"/>
     /// <seealso cref="OVRSpatialAnchor.ShareAsync(IEnumerable{OVRSpatialAnchor}, Guid)"/>
     /// <seealso cref="OVRSpatialAnchor.ShareAsync(IEnumerable{OVRSpatialAnchor}, IEnumerable{Guid})"/>
     [OVRSResultStatus]
@@ -633,9 +633,9 @@ public readonly partial struct OVRSAnchor /*: IEquatable<OVRSAnchor>, IDisposabl
             throw new ArgumentNullException(nameof(anchors));
         }
 
-      /*  var query = OVRSpaceQuery.ForGroupThrow(groupUuid, nameof(groupUuid));*/
+        var query = OVRSSpaceQuery.ForGroupThrow(groupUuid, nameof(groupUuid));
 
-    /*    return OVRSResult.From(anchors, (FetchResult)(await FetchAnchors(anchors, query)));
+        return OVRSResult.From(anchors, (FetchResult)(await FetchAnchors(anchors, query)));
     }
 
     /// <summary>
@@ -668,7 +668,7 @@ public readonly partial struct OVRSAnchor /*: IEquatable<OVRSAnchor>, IDisposabl
     /// <br/>
     /// This result's Status will be <see cref="FetchResult.FailureInvalidOption"/> if <paramref name="groupUuid"/>
     /// is <see cref="Guid.Empty"/>, or <paramref name="allowedAnchorUuids"/> is larger than
-    /// <see cref="OVRSpaceQuery.MaxResultsForAnchors"/>.
+    /// <see cref="OVRSSpaceQuery.MaxResultsForAnchors"/>.
     /// </returns>
     /// <remarks>
     /// This method is asynchronous. The returned <see cref="OVRSTask"/> wrapper completes when all results are
@@ -694,7 +694,7 @@ public readonly partial struct OVRSAnchor /*: IEquatable<OVRSAnchor>, IDisposabl
             throw new ArgumentNullException(nameof(anchors));
         }
 
-        var query = OVRSpaceQuery.ForGroupThrow(groupUuid, nameof(groupUuid), allowedAnchorUuids);
+        var query = OVRSSpaceQuery.ForGroupThrow(groupUuid, nameof(groupUuid), allowedAnchorUuids);
 
         return OVRSResult.From(anchors, (FetchResult)(await FetchAnchors(anchors, query)));
     }
@@ -917,7 +917,7 @@ public readonly partial struct OVRSAnchor /*: IEquatable<OVRSAnchor>, IDisposabl
     /// </summary>
     /// <remarks>
     ///
-    /// This method shares the anchor with a collection of <see cref="OVRSpaceUser"/>.
+    /// This method shares the anchor with a collection of <see cref="OVRSSpaceUser"/>.
     ///
     /// This operation is asynchronous. Use the returned <see cref="OVRSTask"/> to track the result of the
     /// asynchronous operation.
@@ -926,8 +926,8 @@ public readonly partial struct OVRSAnchor /*: IEquatable<OVRSAnchor>, IDisposabl
     /// <returns>An awaitable <see cref="OVRSTask"/> representing the asynchronous request.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="users"/> is `null`.</exception>
     /// <exception cref="ArgumentException">Thrown if <paramref name="users"/> count is less than one.</exception>
-    /// <seealso cref="ShareAsync(IEnumerable{OVRSAnchor},IEnumerable{OVRSpaceUser})"/>
-    public OVRSTask<OVRSResult<ShareResult>> ShareAsync(IEnumerable<OVRSpaceUser> users)
+    /// <seealso cref="ShareAsync(IEnumerable{OVRSAnchor},IEnumerable{OVRSSpaceUser})"/>
+    public OVRSTask<OVRSResult<ShareResult>> ShareAsync(IEnumerable<OVRSSpaceUser> users)
     {
         if (users == null)
             throw new ArgumentNullException(nameof(users));
@@ -962,10 +962,10 @@ public readonly partial struct OVRSAnchor /*: IEquatable<OVRSAnchor>, IDisposabl
     /// <returns>Returns an awaitable <see cref="OVRSTask"/> representing the asynchronous request.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="anchors"/> or <paramref name="users"/> are `null`.</exception>
     /// <exception cref="ArgumentException">Thrown if <paramref name="users"/> count is less than one.</exception>
-    /// <seealso cref="ShareAsync(IEnumerable{OVRSpaceUser})"/>
+    /// <seealso cref="ShareAsync(IEnumerable{OVRSSpaceUser})"/>
     public static OVRSTask<OVRSResult<ShareResult>> ShareAsync(
         IEnumerable<OVRSAnchor> anchors,
-        IEnumerable<OVRSpaceUser> users)
+        IEnumerable<OVRSSpaceUser> users)
     {
         if (anchors == null)
             throw new ArgumentNullException(nameof(anchors));
@@ -1161,10 +1161,10 @@ public readonly partial struct OVRSAnchor /*: IEquatable<OVRSAnchor>, IDisposabl
     public bool TryGetComponent<T>(out T component) where T : struct, IOVRSAnchorComponent<T>
     {
         component = default;
-        if (!GetSpaceComponentStatusInternal(Handle, component.Type, out _, out _).IsSuccess())
+       /* if (!GetSpaceComponentStatusInternal(Handle, component.Type, out _, out _).IsSuccess())
         {
             return false;
-        }
+        }*/
 
         component = component.FromAnchor(this);
         return true;
@@ -1183,8 +1183,8 @@ public readonly partial struct OVRSAnchor /*: IEquatable<OVRSAnchor>, IDisposabl
     /// </remarks>
     /// <typeparam name="T">The type of the component.</typeparam>
     /// <returns>Whether or not the specified type of component is supported.</returns>
-    public bool SupportsComponent<T>() where T : struct, IOVRSAnchorComponent<T>
-        => GetSpaceComponentStatusInternal(Handle, default(T).Type, out _, out _).IsSuccess();
+    /*public bool SupportsComponent<T>() where T : struct, IOVRSAnchorComponent<T>
+        => GetSpaceComponentStatusInternal(Handle, default(T).Type, out _, out _).IsSuccess();*/
 
     /// <summary>
     /// Get all the supported components of an anchor.
@@ -1322,5 +1322,5 @@ public readonly partial struct OVRSAnchor /*: IEquatable<OVRSAnchor>, IDisposabl
             .Build(result, requestId)
             .ToTask()
             .WithInternalData(anchors);
-    }*/
+    }
 }

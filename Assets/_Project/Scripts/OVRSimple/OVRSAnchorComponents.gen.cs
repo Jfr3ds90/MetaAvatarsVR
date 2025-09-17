@@ -10,7 +10,7 @@ public readonly partial struct OVRSLocatable : IOVRSAnchorComponent<OVRSLocatabl
 
     ulong IOVRSAnchorComponent<OVRSLocatable>.Handle => Handle;
 
-  /*  OVRSLocatable IOVRSAnchorComponent<OVRSLocatable>.FromAnchor(OVRSAnchor anchor) => new OVRSLocatable(anchor);*/
+    OVRSLocatable IOVRSAnchorComponent<OVRSLocatable>.FromAnchor(OVRSAnchor anchor) => new OVRSLocatable(anchor);
 
     /// @endcond
 
@@ -59,7 +59,7 @@ public readonly partial struct OVRSLocatable : IOVRSAnchorComponent<OVRSLocatabl
 
         if (changePending)
         {
-           /* return OVRSAnchor.CreateDeferredSpaceComponentStatusTask(Handle, Type, enabled, timeout);*/
+            return OVRSAnchor.CreateDeferredSpaceComponentStatusTask(Handle, Type, enabled, timeout);
         }
 
         return isEnabled == enabled
@@ -127,10 +127,10 @@ public readonly partial struct OVRSLocatable : IOVRSAnchorComponent<OVRSLocatabl
 
     internal ulong Handle { get; }
 
-   /* private OVRSLocatable(OVRSAnchor anchor) => Handle = anchor.Handle;*/
+    private OVRSLocatable(OVRSAnchor anchor) => Handle = anchor.Handle;
 }
 
-/*public readonly partial struct OVRSStorable : IOVRSAnchorComponent<OVRSStorable>, IEquatable<OVRSStorable>
+public readonly partial struct OVRSStorable : IOVRSAnchorComponent<OVRSStorable>, IEquatable<OVRSStorable>
 {
     /// @cond
 
@@ -385,8 +385,8 @@ public readonly partial struct OVRSSharable : IOVRSAnchorComponent<OVRSSharable>
 
    private OVRSSharable(OVRSAnchor anchor) => Handle = anchor.Handle;
 }
-*/
-/*public readonly partial struct OVRSBounded2D : IOVRSAnchorComponent<OVRSBounded2D>, IEquatable<OVRSBounded2D>
+
+public readonly partial struct OVRSBounded2D : IOVRSAnchorComponent<OVRSBounded2D>, IEquatable<OVRSBounded2D>
 {
     /// @cond
 
@@ -471,10 +471,10 @@ public readonly partial struct OVRSSharable : IOVRSAnchorComponent<OVRSSharable>
 
     internal ulong Handle { get; }
 
-    /*private OVRSBounded2D(OVRSAnchor anchor) => Handle = anchor.Handle;
-}*/
+    private OVRSBounded2D(OVRSAnchor anchor) => Handle = anchor.Handle;
+}
 
-/*public readonly partial struct OVRSBounded3D : IOVRSAnchorComponent<OVRSBounded3D>, IEquatable<OVRSBounded3D>
+public readonly partial struct OVRSBounded3D : IOVRSAnchorComponent<OVRSBounded3D>, IEquatable<OVRSBounded3D>
 {
     /// @cond
 
@@ -647,10 +647,10 @@ public readonly partial struct OVRSSemanticLabels : IOVRSAnchorComponent<OVRSSem
 
     internal ulong Handle { get; }
 
-   /* private OVRSSemanticLabels(OVRSAnchor anchor) => Handle = anchor.Handle;
-}*/
+    private OVRSSemanticLabels(OVRSAnchor anchor) => Handle = anchor.Handle;
+}
 
-/*public readonly partial struct OVRSRoomLayout : IOVRSAnchorComponent<OVRSRoomLayout>, IEquatable<OVRSRoomLayout>
+public readonly partial struct OVRSRoomLayout : IOVRSAnchorComponent<OVRSRoomLayout>, IEquatable<OVRSRoomLayout>
 {
     /// @cond
 
@@ -736,9 +736,9 @@ public readonly partial struct OVRSSemanticLabels : IOVRSAnchorComponent<OVRSSem
     internal ulong Handle { get; }
 
     private OVRSRoomLayout(OVRSAnchor anchor) => Handle = anchor.Handle;
-}*/
+}
 
-/*public readonly partial struct OVRSAnchorContainer : IOVRSAnchorComponent<OVRSAnchorContainer>, IEquatable<OVRSAnchorContainer>
+public readonly partial struct OVRSAnchorContainer : IOVRSAnchorComponent<OVRSAnchorContainer>, IEquatable<OVRSAnchorContainer>
 {
     /// @cond
 
@@ -825,8 +825,8 @@ public readonly partial struct OVRSSemanticLabels : IOVRSAnchorComponent<OVRSSem
 
     private OVRSAnchorContainer(OVRSAnchor anchor) => Handle = anchor.Handle;
 }
-*/
-/*public readonly partial struct OVRSTriangleMesh : IOVRSAnchorComponent<OVRSTriangleMesh>, IEquatable<OVRSTriangleMesh>
+
+public readonly partial struct OVRSTriangleMesh : IOVRSAnchorComponent<OVRSTriangleMesh>, IEquatable<OVRSTriangleMesh>
 {
     /// @cond
 
@@ -913,9 +913,9 @@ public readonly partial struct OVRSSemanticLabels : IOVRSAnchorComponent<OVRSSem
 
     private OVRSTriangleMesh(OVRSAnchor anchor) => Handle = anchor.Handle;
 }
-*/
 
-/*
+
+
 public readonly partial struct OVRSDynamicObject : IOVRSAnchorComponent<OVRSDynamicObject>, IEquatable<OVRSDynamicObject>
 {
     /// @cond
@@ -1001,17 +1001,17 @@ public readonly partial struct OVRSDynamicObject : IOVRSAnchorComponent<OVRSDyna
 
     internal ulong Handle { get; }
 
-    /*private OVRSDynamicObject(OVRSAnchor anchor) => Handle = anchor.Handle;
+    private OVRSDynamicObject(OVRSAnchor anchor) => Handle = anchor.Handle;
 }
-*/
 
-/*
+
+
 partial struct OVRSAnchor
 {
     internal static readonly Dictionary<Type, SpaceComponentType> _typeMap = new()
     {
         { typeof(OVRSLocatable), SpaceComponentType.Locatable },
-      /*  { typeof(OVRSStorable), SpaceComponentType.Storable },
+        { typeof(OVRSStorable), SpaceComponentType.Storable },
         { typeof(OVRSSharable), SpaceComponentType.Sharable },
         { typeof(OVRSBounded2D), SpaceComponentType.Bounded2D },
         { typeof(OVRSBounded3D), SpaceComponentType.Bounded3D },
@@ -1021,5 +1021,5 @@ partial struct OVRSAnchor
         { typeof(OVRSTriangleMesh), SpaceComponentType.TriangleMesh },
         { typeof(OVRSDynamicObject), SpaceComponentType.DynamicObject },
     };
-}*/
+}
 

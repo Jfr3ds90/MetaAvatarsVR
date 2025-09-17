@@ -273,7 +273,7 @@ internal struct OVRSTelemetryMarker : IDisposable
     {
 
         AddAnnotation(OVRSTelemetryConstants.OVRSManager.AnnotationTypes.ProjectName, ApplicationIdentifier, OVRSTelemetryConstants.Editor.AnnotationVariant.Optional);
-        AddAnnotation(OVRSTelemetryConstants.OVRSManager.AnnotationTypes.ProjectGuid, OVRRuntimeSettings.Instance.TelemetryProjectGuid);
+        AddAnnotation(OVRSTelemetryConstants.OVRSManager.AnnotationTypes.ProjectGuid, OVRSRuntimeSettings.Instance.TelemetryProjectGuid);
         AddAnnotation(OVRSTelemetryConstants.OVRSManager.AnnotationTypes.BatchMode, IsBatchMode);
         AddAnnotation(OVRSTelemetryConstants.OVRSManager.AnnotationTypes.ProcessorType, SystemInfo.processorType);
 
