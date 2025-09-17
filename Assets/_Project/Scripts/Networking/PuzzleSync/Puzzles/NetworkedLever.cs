@@ -27,30 +27,25 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         public UnityEvent<string> OnLeverActivated;
         public UnityEvent<string> OnLeverDeactivated;
         
-        // Network State
         [Networked] public float NetworkedAngle { get; set; }
         [Networked] public NetworkBool IsActivated { get; set; }
         [Networked] public NetworkBool IsGrabbed { get; set; }
         
-        // Components
         private IGrabbable _grabbable;
-        private Transform _parentReference; // El padre que define la orientación
+        private Transform _parentReference; 
         private Vector3 _fixedWorldPosition;
         
-        // Grab state
         private bool _isTransforming = false;
         private float _grabStartAngle;
-        private Vector3 _grabStartDirectionLocal; // En espacio del padre
+        private Vector3 _grabStartDirectionLocal; 
         private bool _wasActivated = false;
         
         private void Awake()
         {
-            // Obtener referencia al padre
             _parentReference = transform.parent;
             if (_parentReference == null)
             {
                 Debug.LogError($"[Lever {_leverLetter}] Must be child of a parent transform!");
-                // Crear un padre automáticamente si no existe
                 GameObject parent = new GameObject($"LeverParent_{_leverLetter}");
                 parent.transform.position = transform.position;
                 parent.transform.rotation = transform.rotation;
@@ -58,7 +53,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 _parentReference = parent.transform;
             }
             
-            // Guardar posición mundial fija
             _fixedWorldPosition = transform.position;
             
             SetupComponents();
@@ -67,21 +61,17 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         
         private void SetupComponents()
         {
-            // Configurar Rigidbody
             var rb = GetComponent<Rigidbody>();
             rb.isKinematic = true;
             
-            // Agregar Grabbable
             var grabbable = GetComponent<Grabbable>();
             if (grabbable == null)
             {
                 grabbable = gameObject.AddComponent<Grabbable>();
             }
             
-            // Inyectar este script como transformer
             grabbable.InjectOptionalOneGrabTransformer(this);
             
-            // Agregar HandGrabInteractable
             var handGrab = GetComponent<HandGrabInteractable>();
             if (handGrab == null)
             {
@@ -176,7 +166,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         
         private void ApplyLocalAngle(float angle)
         {
-            // Aplicar rotación LOCAL relativa al padre
             transform.localRotation = Quaternion.Euler(0, 0, angle);
         }
         
@@ -200,7 +189,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         {
             if (!HasStateAuthority) return;
             
-            // Mantener posición fija
             transform.position = _fixedWorldPosition;
             
             if (IsGrabbed && _isTransforming)
@@ -208,7 +196,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 NetworkedAngle = transform.localEulerAngles.z;
             }
             
-            // Verificar activación
             bool shouldBeActive = NetworkedAngle <= _activationAngle;
             if (shouldBeActive != _wasActivated)
             {
@@ -226,10 +213,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         
         public override void Render()
         {
-            // Mantener posición fija
             transform.position = _fixedWorldPosition;
             
-            // Interpolar rotación si no estamos controlando localmente
             if (!_isTransforming)
             {
                 float current = transform.localEulerAngles.z;
@@ -265,7 +250,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             ApplyLocalAngle(_restAngle);
         }
         
-        // Accessors
         public int GetLeverIndex() => _leverIndex;
         public string GetLeverLetter() => _leverLetter;
         public bool GetIsActivated() => IsActivated;
@@ -274,7 +258,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
 
 private void OnDrawGizmosSelected()
 {
-    // Si no tenemos padre, no podemos dibujar correctamente
     if (_parentReference == null && transform.parent != null)
         _parentReference = transform.parent;
         
@@ -285,14 +268,12 @@ private void OnDrawGizmosSelected()
 
 private void OnDrawGizmos()
 {
-    // Indicador simple cuando no está seleccionada
     if (_parentReference != null)
     {
         Gizmos.color = new Color(0.5f, 0.5f, 1f, 0.3f);
         Gizmos.DrawWireCube(transform.position, Vector3.one * 0.05f);
         
         #if UNITY_EDITOR
-        // Mostrar letra de la palanca siempre
         UnityEditor.Handles.Label(
             transform.position + _parentReference.up * 0.2f, 
             _leverLetter,
@@ -312,29 +293,24 @@ private void DrawLeverDebugVisuals()
     Vector3 pivotPos = transform.position;
     float radius = 0.7f;
     
-    // Obtener el ángulo actual
     float currentAngle = Application.isPlaying ? transform.localEulerAngles.z : _restAngle;
     
     #if UNITY_EDITOR
     
-    // === ARCO COMPLETO DE MOVIMIENTO ===
-    // Dibujar el arco en el espacio local del padre
+    
     UnityEditor.Handles.color = new Color(0.8f, 0.8f, 0.8f, 0.3f);
     
-    // Calcular vectores en espacio local del padre y convertir a mundo
     Vector3 minDirection = _parentReference.rotation * Quaternion.Euler(0, 0, _minAngle) * Vector3.up;
     float totalArc = _maxAngle - _minAngle;
     
-    // Dibujar arco de movimiento permitido
     UnityEditor.Handles.DrawWireArc(
         pivotPos,
-        _parentReference.forward,  // Normal del plano en espacio mundo
-        minDirection,               // Dirección inicial
-        totalArc,                   // Ángulo total
+        _parentReference.forward,  
+        minDirection,               
+        totalArc,                   
         radius
     );
     
-    // === ZONA DE ACTIVACIÓN (Sombreada) ===
     UnityEditor.Handles.color = new Color(0f, 1f, 0f, 0.15f);
     Vector3 activationStart = _parentReference.rotation * Quaternion.Euler(0, 0, _minAngle) * Vector3.up;
     float activationArc = _activationAngle - _minAngle;
@@ -347,7 +323,6 @@ private void DrawLeverDebugVisuals()
         radius * 0.95f
     );
     
-    // === ZONA DE DESACTIVACIÓN (Sombreada) ===
     UnityEditor.Handles.color = new Color(1f, 0f, 0f, 0.1f);
     Vector3 deactivationStart = _parentReference.rotation * Quaternion.Euler(0, 0, _activationAngle) * Vector3.up;
     float deactivationArc = _maxAngle - _activationAngle;
@@ -362,43 +337,32 @@ private void DrawLeverDebugVisuals()
     
     #endif
     
-    // === LÍNEAS DE ÁNGULOS IMPORTANTES ===
     
-    // Límite Mínimo (45°) - Cyan
     DrawAngleLine(pivotPos, _minAngle, radius * 0.8f, Color.cyan, "MIN", 2f);
     
-    // Límite Máximo (130°) - Azul
     DrawAngleLine(pivotPos, _maxAngle, radius * 0.8f, Color.blue, "MAX", 2f);
     
-    // Ángulo de Reposo (120°) - Rojo
     DrawAngleLine(pivotPos, _restAngle, radius * 1.0f, Color.red, "REST", 3f);
     
-    // Punto en el extremo de la línea de reposo
     Vector3 restEndPoint = pivotPos + (_parentReference.rotation * Quaternion.Euler(0, 0, _restAngle) * Vector3.up) * radius;
     Gizmos.color = Color.red;
     Gizmos.DrawWireSphere(restEndPoint, 0.02f);
     
-    // Ángulo de Activación (55°) - Amarillo
     DrawAngleLine(pivotPos, _activationAngle, radius * 1.0f, Color.yellow, "ACTIVATE", 3f);
     
-    // === ÁNGULO ACTUAL ===
     bool isCurrentlyActive = currentAngle <= _activationAngle;
     Color currentColor = isCurrentlyActive ? Color.green : Color.magenta;
     DrawAngleLine(pivotPos, currentAngle, radius * 1.2f, currentColor, $"{currentAngle:F1}°", 4f);
     
-    // Esfera en la punta del ángulo actual
     Vector3 currentEndPoint = pivotPos + (_parentReference.rotation * Quaternion.Euler(0, 0, currentAngle) * Vector3.up) * (radius * 1.2f);
     Gizmos.color = currentColor;
     float sphereSize = IsGrabbed ? 0.04f : 0.025f;
     Gizmos.DrawWireSphere(currentEndPoint, sphereSize);
     
-    // === PANEL DE INFORMACIÓN ===
     DrawInfoPanel(pivotPos, currentAngle, isCurrentlyActive);
     
-    // === INDICADORES DE ESTADO ===
     if (Application.isPlaying && IsGrabbed)
     {
-        // Mostrar indicador de que está siendo agarrada
         Gizmos.color = Color.white;
         Gizmos.DrawWireCube(pivotPos, Vector3.one * 0.15f);
     }
@@ -406,16 +370,13 @@ private void DrawLeverDebugVisuals()
 
 private void DrawAngleLine(Vector3 origin, float angle, float length, Color color, string label, float width)
 {
-    // Calcular dirección en espacio mundo usando la rotación del padre
     Vector3 direction = _parentReference.rotation * Quaternion.Euler(0, 0, angle) * Vector3.up;
     Vector3 endPoint = origin + direction * length;
     
     Gizmos.color = color;
     
-    // Dibujar línea principal
     Gizmos.DrawLine(origin, endPoint);
     
-    // Dibujar líneas adicionales para grosor visual
     if (width > 1f)
     {
         Vector3 perpendicular = _parentReference.right * 0.01f;
@@ -427,7 +388,6 @@ private void DrawAngleLine(Vector3 origin, float angle, float length, Color colo
         }
     }
     
-    // Dibujar etiqueta
     #if UNITY_EDITOR
     if (!string.IsNullOrEmpty(label))
     {
@@ -454,7 +414,6 @@ private void DrawInfoPanel(Vector3 position, float currentAngle, bool isActive)
         info += $"Grabbed: {(IsGrabbed ? "YES" : "NO")}\n";
         info += $"Network: {NetworkedAngle:F1}°\n";
         
-        // Mostrar progreso hacia activación
         float progress = Mathf.InverseLerp(_maxAngle, _activationAngle, currentAngle);
         info += $"Progress: {(progress * 100f):F0}%";
     }
@@ -474,21 +433,17 @@ private void DrawInfoPanel(Vector3 position, float currentAngle, bool isActive)
     #endif
 }
 
-// GUI en pantalla opcional (solo en editor y cuando debug está activo)
 private void OnGUI()
 {
-    // Solo mostrar si está en editor y hay una tecla presionada
     if (!Application.isEditor || !Input.GetKey(KeyCode.L)) return;
     
     float currentAngle = transform.localEulerAngles.z;
     
-    // Panel minimalista
     GUI.Box(new Rect(10, Screen.height - 100, 180, 80), $"Lever {_leverLetter}");
     
     GUI.Label(new Rect(15, Screen.height - 75, 170, 20), 
         $"Angle: {currentAngle:F1}° / {_activationAngle}°");
     
-    // Barra de progreso
     float progress = Mathf.InverseLerp(_maxAngle, _minAngle, currentAngle);
     GUI.color = currentAngle <= _activationAngle ? Color.green : Color.red;
     GUI.HorizontalSlider(new Rect(15, Screen.height - 50, 160, 20), progress, 0f, 1f);

@@ -31,16 +31,12 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         {
             LogDebug("Setting up Puzzle Sync System...");
             
-            // Find or create required components
             FindOrCreateComponents();
             
-            // Setup NetworkedPuzzleManager
             SetupPuzzleManager();
             
-            // Setup NetworkedRandomizers
             SetupRandomizers();
             
-            // Validate setup
             if (_validateSetup)
             {
                 ValidateSetup();
@@ -51,7 +47,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         private void FindOrCreateComponents()
         {
-            // Find NetworkedPuzzleManager
             if (_puzzleManager == null)
             {
                 _puzzleManager = FindObjectOfType<NetworkedPuzzleManager>();
@@ -65,7 +60,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 }
             }
             
-            // Find NetworkedPuzzleValidator
             if (_puzzleValidator == null)
             {
                 _puzzleValidator = FindObjectOfType<NetworkedPuzzleValidator>();
@@ -79,7 +73,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 }
             }
             
-            // Find all NetworkedRandomizers
             if (_randomizers == null || _randomizers.Length == 0)
             {
                 _randomizers = FindObjectsOfType<NetworkedRandomizer>();
@@ -94,11 +87,10 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 
             LogDebug("Setting up NetworkedPuzzleManager...");
             
-            // Register puzzle completion events with doors
             var doors = FindObjectsOfType<NetworkedDoor>();
             foreach (var door in doors)
             {
-                int doorPuzzleId = door.GetComponent<NetworkedDoor>().GetHashCode() % 10; // Simple mapping
+                int doorPuzzleId = door.GetComponent<NetworkedDoor>().GetHashCode() % 10; 
                 
                 _puzzleManager.OnPuzzleCompleted.AddListener(puzzleId => {
                     if (puzzleId == doorPuzzleId)
@@ -122,12 +114,10 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             {
                 if (randomizer != null)
                 {
-                    // Setup randomizer events
                     randomizer.OnRandomizationComplete.AddListener(() => {
                         LogDebug($"Randomizer {randomizer.name} completed randomization");
                     });
                     
-                    // Ensure NetworkObject component
                     if (randomizer.GetComponent<NetworkObject>() == null)
                     {
                         randomizer.gameObject.AddComponent<NetworkObject>();
@@ -143,7 +133,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             
             bool isValid = true;
             
-            // Check NetworkedPuzzleManager
             if (_puzzleManager == null)
             {
                 Debug.LogError("[PuzzleSyncSetup] NetworkedPuzzleManager is missing!");
@@ -155,7 +144,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 isValid = false;
             }
             
-            // Check NetworkedPuzzleValidator
             if (_puzzleValidator == null)
             {
                 Debug.LogWarning("[PuzzleSyncSetup] NetworkedPuzzleValidator is missing (optional)");
@@ -166,7 +154,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 isValid = false;
             }
             
-            // Check NetworkedRandomizers
             foreach (var randomizer in _randomizers)
             {
                 if (randomizer != null && randomizer.GetComponent<NetworkObject>() == null)
@@ -176,7 +163,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 }
             }
             
-            // Check for NetworkRunner
             var networkRunner = FindObjectOfType<NetworkRunner>();
             if (networkRunner == null)
             {
@@ -208,7 +194,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         private void ConvertLevers()
         {
-            // Find existing Levers scripts
             var oldLevers = FindObjectsOfType<Levers>();
             
             foreach (var oldLever in oldLevers)
@@ -217,20 +202,17 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 
                 var go = oldLever.gameObject;
                 
-                // Add NetworkObject if missing
                 if (go.GetComponent<NetworkObject>() == null)
                 {
                     go.AddComponent<NetworkObject>();
                 }
                 
-                // Add NetworkedLever
                 var networkedLever = go.GetComponent<NetworkedLever>();
                 if (networkedLever == null)
                 {
                     networkedLever = go.AddComponent<NetworkedLever>();
                 }
                 
-                // Disable old script (don't destroy to preserve settings)
                 oldLever.enabled = false;
                 
                 LogDebug($"Converted lever: {oldLever.name}");
@@ -239,7 +221,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         private void ConvertPiano()
         {
-            // Find existing Piano scripts
             var oldPianos = FindObjectsOfType<Piano>();
             
             foreach (var oldPiano in oldPianos)
@@ -248,20 +229,17 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 
                 var go = oldPiano.gameObject;
                 
-                // Add NetworkObject if missing
                 if (go.GetComponent<NetworkObject>() == null)
                 {
                     go.AddComponent<NetworkObject>();
                 }
                 
-                // Add NetworkedPiano
                 var networkedPiano = go.GetComponent<NetworkedPiano>();
                 if (networkedPiano == null)
                 {
                     networkedPiano = go.AddComponent<NetworkedPiano>();
                 }
                 
-                // Disable old script
                 oldPiano.enabled = false;
                 
                 LogDebug($"Converted piano: {oldPiano.name}");
@@ -270,7 +248,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         private void ConvertRandomizers()
         {
-            // Find existing spawnRandomLogic scripts
             var oldRandomizers = FindObjectsOfType<spawnRandomLogic>();
             
             foreach (var oldRandomizer in oldRandomizers)
@@ -279,20 +256,17 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 
                 var go = oldRandomizer.gameObject;
                 
-                // Add NetworkObject if missing
                 if (go.GetComponent<NetworkObject>() == null)
                 {
                     go.AddComponent<NetworkObject>();
                 }
                 
-                // Add NetworkedRandomizer
                 var networkedRandomizer = go.GetComponent<NetworkedRandomizer>();
                 if (networkedRandomizer == null)
                 {
                     networkedRandomizer = go.AddComponent<NetworkedRandomizer>();
                 }
                 
-                // Disable old script
                 oldRandomizer.enabled = false;
                 
                 LogDebug($"Converted randomizer: {oldRandomizer.name}");

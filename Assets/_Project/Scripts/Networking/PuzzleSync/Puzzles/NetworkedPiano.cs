@@ -1,6 +1,3 @@
-// ============================================
-// NetworkedPiano.cs - Simplificado para Meta XR SDK
-// ============================================
 using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
@@ -9,9 +6,6 @@ using Oculus.Interaction;
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
 {
-    /// <summary>
-    /// Piano networkeado simplificado para el puzzle musical
-    /// </summary>
     public class NetworkedPiano : NetworkBehaviour
     {
         [Header("Configuration")]
@@ -106,18 +100,15 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             _currentNotes.Add(noteName);
             CurrentSequence = string.Join("", _currentNotes);
             
-            // Verificar secuencia
             string expected = ExpectedSequence.ToString();
             
             if (CurrentSequence.ToString() == expected)
             {
-                // Éxito!
                 IsActive = false;
                 RPC_SequenceComplete();
             }
-            else if (_currentNotes.Count >= expected.Length / 2) // Asumiendo 2 chars por nota
+            else if (_currentNotes.Count >= expected.Length / 2)
             {
-                // Fallo
                 CurrentAttempt++;
                 if (CurrentAttempt >= _maxAttempts)
                 {

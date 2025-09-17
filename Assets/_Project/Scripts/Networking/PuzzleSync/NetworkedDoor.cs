@@ -5,11 +5,7 @@ using UnityEngine.Events;
 
 namespace MetaAvatarsVR.Networking.PuzzleSync
 {
-    /// <summary>
-    /// Puerta networked con animación procedural optimizada para VR multijugador
-    /// Usa interpolación suave sin Animator para mejor performance y sincronización
-    /// Compatible con el sistema de PuzzleProgress para callbacks de puzzles completados
-    /// </summary>
+ 
     [RequireComponent(typeof(NetworkObject))]
     public class NetworkedDoor : NetworkBehaviour
     {
@@ -55,8 +51,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         #region Network State
         
-        // Minimal network state for efficiency
-        [Networked] public float DoorProgress { get; set; }  // 0 = closed, 1 = open
+        [Networked] public float DoorProgress { get; set; }  
         [Networked] public NetworkBool IsMoving { get; set; }
         [Networked] public NetworkBool TargetOpen { get; set; }
         [Networked] public NetworkBool IsUnlocked { get; set; }
@@ -89,7 +84,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         private float _localProgress;
         private bool _isInitialized = false;
         
-        // Cache para evitar allocations
         private Quaternion _cachedClosedQuat;
         private Quaternion _cachedOpenQuat;
         
@@ -99,7 +93,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         private void Awake()
         {
-            // Setup references
             if (_doorTransform == null)
                 _doorTransform = transform;
             
@@ -109,22 +102,17 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             if (_audioSource == null)
                 _audioSource = gameObject.AddComponent<AudioSource>();
             
-            // Cache initial positions
             _closedRotation = _doorTransform.localEulerAngles;
             _closedPosition = _doorTransform.localPosition;
             
-            // Calculate open positions
             _openRotation = _closedRotation + (_rotationAxis * _openAngle);
             _openPosition = _closedPosition + _openOffset;
             
-            // Cache quaternions for performance
             _cachedClosedQuat = Quaternion.Euler(_closedRotation);
             _cachedOpenQuat = Quaternion.Euler(_openRotation);
             
-            // Calculate animation speed
             _animationSpeed = 1f / _animationDuration;
             
-            // Disable any Animator if present (legacy support)
             var animator = GetComponent<Animator>();
             if (animator != null)
             {
@@ -142,7 +130,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         {
             if (HasStateAuthority)
             {
-                // Initialize network state
                 DoorProgress = 0f;
                 IsMoving = false;
                 TargetOpen = false;
@@ -150,14 +137,12 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 OpenCount = 0;
                 AutoCloseTimer = TickTimer.None;
                 
-                // Register with puzzle system if needed
                 if (_requiresPuzzleCompletion && !_startUnlocked)
                 {
                     RegisterPuzzleCallback();
                 }
             }
             
-            // Set initial visual state
             _localProgress = DoorProgress;
             UpdateDoorTransform(_localProgress);
             UpdateVisualIndicators();
@@ -172,7 +157,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         {
             if (!HasStateAuthority) return;
             
-            // Update door animation
             if (IsMoving)
             {
                 float target = TargetOpen ? 1f : 0f;
@@ -186,7 +170,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                         Debug.Log($"[NetworkedDoor] Progress: {DoorProgress:F2}");
                 }
                 
-                // Check if animation complete
                 if (Mathf.Approximately(DoorProgress, target))
                 {
                     DoorProgress = target;
@@ -197,7 +180,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                         OpenCount++;
                         RPC_NotifyOpened();
                         
-                        // Start auto-close timer if enabled
                         if (_autoClose)
                         {
                             AutoCloseTimer = TickTimer.CreateFromSeconds(Runner, _autoCloseDelay);
@@ -210,7 +192,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 }
             }
             
-            // Check auto-close timer
             if (_autoClose && AutoCloseTimer.Expired(Runner))
             {
                 AutoCloseTimer = TickTimer.None;
@@ -220,19 +201,14 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         public override void Render()
         {
-            // Smooth interpolation for all clients
             if (_isInitialized)
             {
-                // Interpolate local progress for smooth visuals
                 _localProgress = Mathf.Lerp(_localProgress, DoorProgress, Time.deltaTime * 10f);
                 
-                // Apply animation curve for more natural motion
                 float curvedProgress = _animationCurve.Evaluate(_localProgress);
                 
-                // Update transform
                 UpdateDoorTransform(curvedProgress);
                 
-                // Notify progress listeners
                 OnDoorProgressChanged?.Invoke(_localProgress);
             }
         }
@@ -241,9 +217,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         #region Door Control
         
-        /// <summary>
-        /// Request to open the door (checks if unlocked)
-        /// </summary>
+       
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
         public void RPC_RequestOpen()
         {
@@ -259,9 +233,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             }
         }
         
-        /// <summary>
-        /// Request to close the door
-        /// </summary>
+        
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
         public void RPC_RequestClose()
         {
@@ -273,9 +245,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             }
         }
         
-        /// <summary>
-        /// Request to toggle door state
-        /// </summary>
+       
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
         public void RPC_RequestToggle()
         {
@@ -296,7 +266,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             TargetOpen = true;
             IsMoving = true;
             
-            // Cancel auto-close if reopening
             if (AutoCloseTimer.IsRunning)
                 AutoCloseTimer = TickTimer.None;
             
@@ -323,9 +292,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         #region Lock/Unlock System
         
-        /// <summary>
-        /// Unlock the door (usually called when puzzle is completed)
-        /// </summary>
+        
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
         public void RPC_UnlockDoor()
         {
@@ -341,9 +308,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             }
         }
         
-        /// <summary>
-        /// Lock the door
-        /// </summary>
+        
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
         public void RPC_LockDoor()
         {
@@ -353,7 +318,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             {
                 IsUnlocked = false;
                 
-                // Close if open
                 if (TargetOpen || IsMoving)
                 {
                     CloseDoor();
@@ -376,7 +340,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             {
                 NetworkedPuzzleManager.Instance.RegisterPuzzleCallback(_requiredPuzzleId, OnPuzzleCompleted);
                 
-                // Check if puzzle is already completed
                 if (NetworkedPuzzleManager.Instance.IsPuzzleCompleted(_requiredPuzzleId))
                 {
                     RPC_UnlockDoor();
@@ -391,17 +354,13 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             }
         }
         
-        /// <summary>
-        /// Callback cuando un puzzle se completa - usa PuzzleProgress struct
-        /// </summary>
+       
         private void OnPuzzleCompleted(PuzzleProgress progress)
         {
-            // Check if this is the puzzle we're waiting for and if it's completed
             if (progress.PuzzleId == _requiredPuzzleId && progress.State == PuzzleState.Completed)
             {
                 RPC_UnlockDoor();
                 
-                // Optional: Auto-open when puzzle is solved
                 if (HasStateAuthority)
                 {
                     StartCoroutine(DelayedOpen());
@@ -426,13 +385,11 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         {
             if (_useRotation)
             {
-                // Use quaternion lerp for smooth rotation
                 _doorTransform.localRotation = Quaternion.Lerp(_cachedClosedQuat, _cachedOpenQuat, progress);
             }
             
             if (_usePosition)
             {
-                // Use vector lerp for smooth position
                 _doorTransform.localPosition = Vector3.Lerp(_closedPosition, _openPosition, progress);
             }
         }
@@ -495,7 +452,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             PlaySound(_unlockSound);
             UpdateVisualIndicators();
             
-            // Flash indicator
             if (_unlockedIndicator != null)
             {
                 StartCoroutine(FlashIndicator(_unlockedIndicator, Color.green));
@@ -559,9 +515,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         #region Public API
         
-        /// <summary>
-        /// Force open the door (bypasses lock check)
-        /// </summary>
+       
         public void ForceOpen()
         {
             if (HasStateAuthority)
@@ -571,9 +525,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             }
         }
         
-        /// <summary>
-        /// Force close the door
-        /// </summary>
+        
         public void ForceClose()
         {
             if (HasStateAuthority)
@@ -582,9 +534,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             }
         }
         
-        /// <summary>
-        /// Get current door state
-        /// </summary>
+       
         public bool IsOpen => DoorProgress >= 0.99f;
         public bool IsClosed => DoorProgress <= 0.01f;
         public bool IsTransitioning => IsMoving;
@@ -596,7 +546,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         private void OnDestroy()
         {
-            // Unregister from puzzle manager
             if (NetworkedPuzzleManager.Instance != null)
             {
                 NetworkedPuzzleManager.Instance.UnregisterPuzzleCallback(_requiredPuzzleId, OnPuzzleCompleted);
@@ -612,20 +561,16 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             if (_doorTransform == null)
                 _doorTransform = transform;
             
-            // Draw closed position
             Gizmos.color = Color.red;
             Gizmos.DrawWireCube(_doorTransform.position, Vector3.one * 0.1f);
             
-            // Draw open position/rotation
             Gizmos.color = Color.green;
             
             if (_useRotation)
             {
-                // Draw arc showing rotation path
                 Vector3 closedDir = _doorTransform.forward;
                 Vector3 openDir = Quaternion.Euler(_rotationAxis * _openAngle) * closedDir;
                 
-                // Draw rotation arc
                 for (int i = 0; i <= 10; i++)
                 {
                     float t = i / 10f;
@@ -633,7 +578,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                     Gizmos.DrawRay(_doorTransform.position, dir * 2f);
                 }
                 
-                // Draw final position
                 Gizmos.DrawLine(_doorTransform.position, _doorTransform.position + openDir * 2f);
             }
             
@@ -644,7 +588,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 Gizmos.DrawLine(_doorTransform.position, openWorldPos);
             }
             
-            // Draw lock state
             Gizmos.color = IsUnlocked ? Color.green : Color.red;
             Gizmos.DrawWireSphere(_doorTransform.position + Vector3.up * 2f, 0.2f);
         }

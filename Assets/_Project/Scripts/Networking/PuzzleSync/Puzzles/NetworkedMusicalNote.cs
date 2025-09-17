@@ -1,6 +1,3 @@
-// ============================================
-// NetworkedMusicalNote.cs - Simplificado para Meta XR SDK
-// ============================================
 using System;
 using Fusion;
 using UnityEngine;
@@ -9,14 +6,12 @@ using Oculus.Interaction;
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
 {
-    /// <summary>
-    /// Nota musical que puede ser agarrada y colocada usando Meta XR SDK
-    /// </summary>
+    
     [RequireComponent(typeof(Rigidbody))]
     public class NetworkedMusicalNote : NetworkBehaviour
     {
         [Header("Note Configuration")]
-        [SerializeField] private int _noteIndex = 0; // 0=Do, 1=Re, 2=Mi...
+        [SerializeField] private int _noteIndex = 0; 
         [SerializeField] private string _noteName = "Do";
         [SerializeField] private AudioClip _noteSound;
         
@@ -43,37 +38,31 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         
         private void Awake()
         {
-            // Configurar Grabbable
             _grabbable = GetComponent<Grabbable>();
             if (_grabbable == null)
             {
                 _grabbable = gameObject.AddComponent<Grabbable>();
             }
             
-            // Configurar Rigidbody
             _rigidbody = GetComponent<Rigidbody>();
             _rigidbody.useGravity = true;
             _rigidbody.isKinematic = false;
             
-            // Audio
             _audioSource = GetComponent<AudioSource>();
             if (_audioSource == null)
             {
                 _audioSource = gameObject.AddComponent<AudioSource>();
             }
             
-            // Renderer
             if (_meshRenderer == null)
                 _meshRenderer = GetComponent<MeshRenderer>();
                 
-            // Guardar posición original
             _originalPosition = transform.position;
             _originalRotation = transform.rotation;
         }
         
         private void Start()
         {
-            // Suscribirse a eventos de Grabbable
             if (_grabbable != null)
             {
                 _grabbable.WhenPointerEventRaised += OnGrabbableEvent;
@@ -112,7 +101,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         
         private void OnReleased()
         {
-            // Verificar si hay un slot cerca
             CheckNearbySlot();
         }
         
@@ -130,7 +118,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 }
             }
             
-            // No hay slot cerca, volver a posición original
             StartCoroutine(ReturnToOriginAfterDelay());
         }
         
