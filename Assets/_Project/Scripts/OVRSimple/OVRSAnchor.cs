@@ -496,7 +496,7 @@ public readonly partial struct OVRSAnchor : IEquatable<OVRSAnchor>, IDisposable
     }
 
     // Called by OVRManager event loop
-    internal static void OnSpaceDiscoveryResultsAvailable(OVRDeserialize.SpaceDiscoveryResultsData data)
+    internal static void OnSpaceDiscoveryResultsAvailable(OVRSDeserialize.SpaceDiscoveryResultsData data)
     {
         var requestId = data.RequestId;
 
@@ -830,7 +830,7 @@ public readonly partial struct OVRSAnchor : IEquatable<OVRSAnchor>, IDisposable
     }
 
     // Invoked by OVRManager event loop
-    internal static void OnSaveSpacesResult(OVRDeserialize.SpacesSaveResultData eventData)
+    internal static void OnSaveSpacesResult(OVRSDeserialize.SpacesSaveResultData eventData)
         => Telemetry.SetAsyncResultAndSend(Telemetry.MarkerId.SaveSpaces, eventData.RequestId, (long)eventData.Result);
 
     /// <summary>
@@ -909,7 +909,7 @@ public readonly partial struct OVRSAnchor : IEquatable<OVRSAnchor>, IDisposable
         }
     }
 
-    internal static void OnEraseSpacesResult(OVRDeserialize.SpacesEraseResultData eventData)
+    internal static void OnEraseSpacesResult(OVRSDeserialize.SpacesEraseResultData eventData)
         => Telemetry.SetAsyncResultAndSend(Telemetry.MarkerId.EraseSpaces, eventData.RequestId, (long)eventData.Result);
 
     /// <summary>

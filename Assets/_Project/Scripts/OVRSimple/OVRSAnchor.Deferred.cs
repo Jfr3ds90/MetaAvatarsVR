@@ -18,7 +18,7 @@ partial struct OVRSAnchor
     {
         public ulong Space;
         public SpaceComponentType ComponentType;
-        public static DeferredKey FromEvent(OVRDeserialize.SpaceSetComponentStatusCompleteData eventData) => new()
+        public static DeferredKey FromEvent(OVRSDeserialize.SpaceSetComponentStatusCompleteData eventData) => new()
         {
             Space = eventData.Space,
             ComponentType = eventData.ComponentType,
@@ -59,7 +59,7 @@ partial struct OVRSAnchor
         return task;
     }
 
-    internal static void OnSpaceSetComponentStatusComplete(OVRDeserialize.SpaceSetComponentStatusCompleteData eventData)
+    internal static void OnSpaceSetComponentStatusComplete(OVRSDeserialize.SpaceSetComponentStatusCompleteData eventData)
     {
         var key = DeferredKey.FromEvent(eventData);
         if (!_deferredTasks.TryGetValue(key, out var list)) return;
