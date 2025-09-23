@@ -272,10 +272,10 @@ internal struct OVRSTelemetryMarker : IDisposable
     public OVRSTelemetryMarker Send()
     {
 
-        AddAnnotation(OVRSTelemetryConstants.OVRSManager.AnnotationTypes.ProjectName, ApplicationIdentifier, OVRSTelemetryConstants.Editor.AnnotationVariant.Optional);
-        AddAnnotation(OVRSTelemetryConstants.OVRSManager.AnnotationTypes.ProjectGuid, OVRSRuntimeSettings.Instance.TelemetryProjectGuid);
-        AddAnnotation(OVRSTelemetryConstants.OVRSManager.AnnotationTypes.BatchMode, IsBatchMode);
-        AddAnnotation(OVRSTelemetryConstants.OVRSManager.AnnotationTypes.ProcessorType, SystemInfo.processorType);
+        AddAnnotation(OVRSTelemetryConstants.OVRSimple.AnnotationTypes.ProjectName, ApplicationIdentifier, OVRSTelemetryConstants.Editor.AnnotationVariant.Optional);
+        AddAnnotation(OVRSTelemetryConstants.OVRSimple.AnnotationTypes.ProjectGuid, OVRSRuntimeSettings.Instance.TelemetryProjectGuid);
+        AddAnnotation(OVRSTelemetryConstants.OVRSimple.AnnotationTypes.BatchMode, IsBatchMode);
+        AddAnnotation(OVRSTelemetryConstants.OVRSimple.AnnotationTypes.ProcessorType, SystemInfo.processorType);
 
         State = new OVRSTelemetryMarkerState(true, Result);
         _client.MarkerEnd(MarkerId, Result, InstanceKey);

@@ -3,7 +3,7 @@ using static OVRSTelemetry;
 
 internal static class OVRSTelemetryConstants
 {
-    public static class OVRSManager
+    public static class OVRSimple
     {
         [Markers]
         public static class MarkerId

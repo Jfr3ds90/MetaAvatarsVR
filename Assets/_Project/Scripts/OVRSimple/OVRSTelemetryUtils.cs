@@ -27,7 +27,7 @@ internal static partial class OVRSTelemetry
 
     public static OVRSTelemetryMarker AddPlayModeOrigin(this OVRSTelemetryMarker marker)
     {
-        return marker.AddAnnotation(OVRSTelemetryConstants.OVRSManager.AnnotationTypes.Origin, GetPlayModeOrigin());
+        return marker.AddAnnotation(OVRSTelemetryConstants.OVRSimple.AnnotationTypes.Origin, GetPlayModeOrigin());
     }
 
     public static string GetTelemetrySettingString(bool value) => value ? "enabled" : "disabled";
