@@ -1047,7 +1047,7 @@ public class OVRSimple : MonoBehaviour
         dynamicResolutionVersion = MaxDynamicResolutionVersion;
     }
 
-    public static bool OVRSimpleinitialized = false;
+    public static bool OVRSSimpleinitialized = false;
 
     private void InitOVRSimple()
     {
@@ -1220,7 +1220,7 @@ public class OVRSimple : MonoBehaviour
 #endif
 
 
-        OVRSimpleinitialized = true;
+        OVRSSimpleinitialized = true;
     }
 
     private void InitPermissionRequest()
@@ -1364,7 +1364,7 @@ public class OVRSimple : MonoBehaviour
         //Only if we're using the XR SDK do we have to check if OVRSimple isn't yet initialized, and init it.
         //If we're on legacy, we know initialization occurred properly in Awake()
 #if USING_XR_SDK
-        if (!OVRSimpleinitialized)
+        if (!OVRSSimpleinitialized)
         {
             XRDisplaySubsystem currentDisplaySubsystem = GetCurrentDisplaySubsystem();
             XRDisplaySubsystemDescriptor currentDisplaySubsystemDescriptor = GetCurrentDisplaySubsystemDescriptor();
@@ -2130,7 +2130,7 @@ public class OVRSimple : MonoBehaviour
 #if UNITY_EDITOR
         OVRPlugin.SetLogCallback2(null);
 #endif
-        OVRSimpleinitialized = false;
+        OVRSSimpleinitialized = false;
     }
 
     #endregion // Unity Messages

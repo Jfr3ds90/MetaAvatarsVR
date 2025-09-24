@@ -136,7 +136,7 @@ public class OVRSControllerHelper : MonoBehaviour,
 
     void Start()
     {
-        if (OVRSimple.OVRSimpleinitialized)
+        if (OVRSimple.OVRSSimpleinitialized)
         {
             InitializeControllerModels();
         }
@@ -257,7 +257,7 @@ public class OVRSControllerHelper : MonoBehaviour,
         m_isActive = false;
         if (!m_controllerModelsInitialized)
         {
-            if (OVRSimple.OVRSimpleinitialized)
+            if (OVRSimple.OVRSSimpleinitialized)
             {
                 InitializeControllerModels();
             }
