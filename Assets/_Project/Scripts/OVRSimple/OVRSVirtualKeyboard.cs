@@ -401,7 +401,7 @@ public class OVRSVirtualKeyboard : MonoBehaviour
         }
     }
 
-    private class KeyboardEventListener : OVRManager.EventListener
+    private class KeyboardEventListener : OVRSimple.EventListener
     {
         private readonly OVRSVirtualKeyboard keyboard_;
 
@@ -706,10 +706,10 @@ public class OVRSVirtualKeyboard : MonoBehaviour
         }
 
         singleton_ = this;
-        if (OVRManager.instance)
+        if (OVRSimple.instance)
         {
             keyboardEventListener_ = new KeyboardEventListener(this);
-            OVRManager.instance.RegisterEventListener(keyboardEventListener_);
+            OVRSimple.instance.RegisterEventListener(keyboardEventListener_);
         }
 
         // Initialize serialized text commit field
@@ -747,9 +747,9 @@ public class OVRSVirtualKeyboard : MonoBehaviour
         TextHandler = null;
         if (singleton_ == this)
         {
-            if (OVRManager.instance != null)
+            if (OVRSimple.instance != null)
             {
-                OVRManager.instance.DeregisterEventListener(keyboardEventListener_);
+                OVRSimple.instance.DeregisterEventListener(keyboardEventListener_);
             }
             singleton_ = null;
         }
@@ -1234,7 +1234,7 @@ public class OVRSVirtualKeyboard : MonoBehaviour
         bool isPressed, Transform interactorRootTransform = null)
     {
         var inputInfo = new OVRPlugin.VirtualKeyboardInputInfo();
-        inputInfo.inputTrackingOriginType = (OVRPlugin.TrackingOrigin)OVRManager.instance.trackingOriginType;
+        inputInfo.inputTrackingOriginType = (OVRPlugin.TrackingOrigin)OVRSimple.instance.trackingOriginType;
         inputInfo.inputSource = inputSource;
         inputInfo.inputPose = pose.ToPosef();
         inputInfo.inputState = (isPressed) ? OVRPlugin.VirtualKeyboardInputStateFlags.IsPressed : 0;
@@ -1569,7 +1569,7 @@ public class OVRSVirtualKeyboard : MonoBehaviour
 
         if (leftControllerRootTransform == null || rightControllerRootTransform == null)
         {
-            OVRControllerHelper[] controllers = camRig.GetComponentsInChildren<OVRControllerHelper>();
+            OVRSControllerHelper[] controllers = camRig.GetComponentsInChildren<OVRSControllerHelper>();
 
             for (int i = 0; i < controllers.Length; i++)
             {
