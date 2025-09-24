@@ -5675,6 +5675,14 @@ PrefabInstance:
       propertyPath: m_Height
       value: 1.85
       objectReference: {fileID: 0}
+    - target: {fileID: 5568758620505594007, guid: 46fdef3df9a5a354caf7692f85e5eff2, type: 3}
+      propertyPath: m_IsKinematic
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5568758620505594007, guid: 46fdef3df9a5a354caf7692f85e5eff2, type: 3}
+      propertyPath: m_CollisionDetection
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 6561596850968630206, guid: 46fdef3df9a5a354caf7692f85e5eff2, type: 3}
       propertyPath: _leftEyeAnchor
       value: 
@@ -6378,7 +6386,7 @@ MonoBehaviour:
   SimultaneousHandsAndControllersEnabled: 0
   _readOnlyWideMotionModeHandPosesEnabled: 0
   wideMotionModeHandPosesEnabled: 0
-  dynamicResolutionVersion: 1
+  dynamicResolutionVersion: 0
 --- !u!20 &3848378001973728027 stripped
 Camera:
   m_CorrespondingSourceObject: {fileID: 6029929497369246028, guid: ffe3be6b11cb93446bff4c254b6d9148, type: 3}
