@@ -22,7 +22,10 @@ namespace HackMonkeys.Core
         
         public static LobbyController Instance { get; private set; }
         
-        public bool IsHost => _networkBootstrapper?.IsHost ?? false;
+        // En Shared Mode, usamos IsRoomCreator en lugar de IsHost
+        public bool IsRoomCreator => _networkBootstrapper?.IsRoomCreator ?? false;
+        // DEPRECATED: Mantener IsHost para compatibilidad
+        public bool IsHost => IsRoomCreator;
         public bool IsInLobby => _networkBootstrapper?.IsInRoom ?? false;
         public bool CanStartGame => ValidateCanStartGame();
         public bool CanLeaveLobby => IsInLobby;
@@ -75,14 +78,14 @@ namespace HackMonkeys.Core
         // ========================================
         
         /// <summary>
-        /// ✅ Iniciar partida (solo host)
+        /// ✅ Iniciar partida (cualquier jugador puede iniciar en Shared Mode)
         /// </summary>
         public async void StartGame()
         {
             Debug.Log("[LobbyController] 🚀 === STARTING GAME SEQUENCE ===");
             
             // Debug de estado actual
-            //Debug.Log($"[LobbyController] IsHost: {IsHost}, IsInRoom: {IsInRoom}");
+            Debug.Log($"[LobbyController] IsRoomCreator: {IsRoomCreator}, IsInRoom: {IsInLobby}");
             Debug.Log($"[LobbyController] AllPlayersReady: {_lobbyState?.AllPlayersReady}");
             Debug.Log($"[LobbyController] PlayerCount: {_lobbyState?.PlayerCount}");
             
@@ -264,14 +267,14 @@ namespace HackMonkeys.Core
         }
         
         /// <summary>
-        /// Kick player (solo host)
+        /// Kick player (solo el creador de la sala puede kickear en Shared Mode)
         /// </summary>
         public void KickPlayer(LobbyPlayer playerToKick)
         {
-            if (!IsHost)
+            if (!IsRoomCreator)
             {
-                Debug.LogError("[LobbyController] ❌ Only host can kick players");
-                OnActionFailed?.Invoke("Only host can kick players");
+                Debug.LogError("[LobbyController] ❌ Only room creator can kick players");
+                OnActionFailed?.Invoke("Only room creator can kick players");
                 return;
             }
             
@@ -308,8 +311,8 @@ namespace HackMonkeys.Core
         {
             if (_networkBootstrapper == null || _lobbyState == null) return false;
             
-            return _networkBootstrapper.IsHost &&
-                   _networkBootstrapper.IsInRoom &&
+            // En Shared Mode, cualquier jugador puede iniciar si todos están listos
+            return _networkBootstrapper.IsInRoom &&
                    _lobbyState.AllPlayersReady &&
                    _lobbyState.PlayerCount >= 1;
         }
@@ -322,7 +325,8 @@ namespace HackMonkeys.Core
             if (_networkBootstrapper == null) return "Network not available";
             if (_lobbyState == null) return "Lobby state not available";
             
-            if (!_networkBootstrapper.IsHost) return "Only host can start game";
+            // En Shared Mode, no hay restricción de host
+            // if (!_networkBootstrapper.IsRoomCreator) return "Only room creator can start game";
             if (!_networkBootstrapper.IsInRoom) return "Not in a room";
             if (_lobbyState.PlayerCount < 2) return "Need at least 2 players";
             if (!_lobbyState.AllPlayersReady) return "Not all players are ready";
@@ -346,7 +350,7 @@ namespace HackMonkeys.Core
                 CurrentPlayers = stats.TotalPlayers,
                 MaxPlayers = stats.MaxPlayers,
                 ReadyPlayers = stats.ReadyPlayers,
-                IsHost = IsHost,
+                IsHost = IsRoomCreator, // Usar IsRoomCreator para UI
                 IsInLobby = IsInLobby,
                 AllReady = stats.AllReady,
                 CanStart = CanStartGame,
@@ -359,11 +363,11 @@ namespace HackMonkeys.Core
         }
         
         /// <summary>
-        /// ¿Es el jugador local el host?
+        /// ¿Es el jugador local el creador de la sala?
         /// </summary>
         public bool IsLocalPlayerHost()
         {
-            return IsHost && _lobbyState?.LocalPlayer?.IsHost == true;
+            return IsRoomCreator && _lobbyState?.LocalPlayer?.IsRoomCreator == true;
         }
         
         /// <summary>
@@ -393,7 +397,7 @@ namespace HackMonkeys.Core
             Debug.Log($"Instance: {Instance != null}");
             Debug.Log($"LobbyState: {_lobbyState != null}");
             Debug.Log($"NetworkBootstrapper: {_networkBootstrapper != null}");
-            Debug.Log($"Is Host: {IsHost}");
+            Debug.Log($"Is Room Creator: {IsRoomCreator}");
             Debug.Log($"Is In Lobby: {IsInLobby}");
             Debug.Log($"Can Start Game: {CanStartGame}");
             Debug.Log($"Can Leave Lobby: {CanLeaveLobby}");
@@ -448,7 +452,7 @@ namespace HackMonkeys.Core
         public int CurrentPlayers;
         public int MaxPlayers;
         public int ReadyPlayers;
-        public bool IsHost;
+        public bool IsHost; // En Shared Mode, representa IsRoomCreator
         public bool IsInLobby;
         public bool AllReady;
         public bool CanStart;

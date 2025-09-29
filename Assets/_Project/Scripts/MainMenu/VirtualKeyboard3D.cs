@@ -10,6 +10,8 @@ namespace HackMonkeys.UI.Spatial
 {
     /// <summary>
     /// Componente helper para mantener referencia al icono de una tecla
+    ///
+    /// 
     /// </summary>
     public class KeyIconReference : MonoBehaviour
     {

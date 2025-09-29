@@ -123,13 +123,32 @@ namespace MetaAvatarsVR.Networking.Pragmatic
         
         public override void Spawned()
         {
-            if (HasStateAuthority)
+            // SOLUCIÓN: En modo Shared, TODOS los clientes deben ver la posición inicial
+            // No solo el que tiene StateAuthority
+            if (Runner.GameMode == GameMode.Shared)
             {
+                // En Shared mode, inicializar para todos los clientes
+                if (!IsGrabbed) // Solo si no está siendo agarrado
+                {
+                    SyncedPosition = transform.position;
+                    SyncedRotation = transform.rotation;
+                }
+                
+                if (Object.HasStateAuthority)
+                {
+                    IsGrabbed = false;
+                    GrabbingPlayer = PlayerRef.None;
+                    HasAuthority = false; // No one has authority initially
+                }
+            }
+            else if (Object.HasStateAuthority)
+            {
+                // Para otros modos (Host/Server)
                 IsGrabbed = false;
                 GrabbingPlayer = PlayerRef.None;
                 SyncedPosition = transform.position;
                 SyncedRotation = transform.rotation;
-                HasAuthority = true;
+                HasAuthority = false;
             }
         }
         
@@ -163,6 +182,43 @@ namespace MetaAvatarsVR.Networking.Pragmatic
             // Calcular offset relativo al punto de grab
             CalculateGrabOffset();
             
+            // SOLUCIÓN CRÍTICA: NO marcar como agarrado localmente hasta tener autoridad
+            // Esto previene que el objeto se mueva antes de tener autoridad
+            
+            // En modo Shared, verificar StateAuthority, no InputAuthority
+            bool hasAuthority = (Runner.GameMode == GameMode.Shared) ? 
+                                Object.HasStateAuthority : 
+                                HasInputAuthority;
+            
+            if (!hasAuthority)
+            {
+                // Guardar la posición actual antes de solicitar autoridad
+                Vector3 currentPos = transform.position;
+                Quaternion currentRot = transform.rotation;
+                
+                if (_debugMode) 
+                {
+                    Debug.Log($"[PragmaticNetworkedGrabbable] No authority, requesting first...");
+                    Debug.Log($"  - GameMode: {Runner.GameMode}");
+                    Debug.Log($"  - HasStateAuthority: {Object.HasStateAuthority}");
+                    Debug.Log($"  - HasInputAuthority: {HasInputAuthority}");
+                    Debug.Log($"  - Object at: {currentPos}");
+                }
+                
+                // Solicitar autoridad ANTES de hacer cualquier cambio
+                RequestInputAuthorityForGrabAsync(evt).Forget();
+            }
+            else
+            {
+                // Ya tenemos autoridad, proceder normalmente
+                if (_debugMode) Debug.Log($"[PragmaticNetworkedGrabbable] Already have authority, proceeding with grab");
+                CompleteLocalGrab();
+                SetGrabbedState();
+            }
+        }
+        
+        private void CompleteLocalGrab()
+        {
             _isLocallyGrabbed = true;
             
             // SOLUCIÓN CLAVE #1: Desactivar NetworkTransform inmediatamente
@@ -182,16 +238,6 @@ namespace MetaAvatarsVR.Networking.Pragmatic
             if (_grabbedLayer != -1)
             {
                 gameObject.layer = (int)Mathf.Log(_grabbedLayer.value, 2);
-            }
-            
-            // Solicitar autoridad
-            if (!HasStateAuthority)
-            {
-                RequestAuthorityAsync().Forget();
-            }
-            else
-            {
-                SetGrabbedState();
             }
         }
         
@@ -310,11 +356,16 @@ namespace MetaAvatarsVR.Networking.Pragmatic
             }
         }
         
-        private async UniTaskVoid RequestAuthorityAsync()
+        private async UniTaskVoid RequestInputAuthorityForGrabAsync(PointerEvent evt)
         {
-            if (_debugMode) Debug.Log($"[PragmaticNetworkedGrabbable] Requesting authority...");
+            if (_debugMode) Debug.Log($"[PragmaticNetworkedGrabbable] Requesting input authority for grab...");
             
-            Object.RequestStateAuthority();
+            // Guardar la posición actual del objeto ANTES de cualquier cambio
+            Vector3 originalPosition = transform.position;
+            Quaternion originalRotation = transform.rotation;
+            
+            // Send RPC to request authority transfer
+            RPC_RequestAuthorityTransfer(Runner.LocalPlayer);
             
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource = new CancellationTokenSource();
@@ -324,34 +375,72 @@ namespace MetaAvatarsVR.Networking.Pragmatic
                 float timeout = 0.5f;
                 float elapsed = 0f;
                 
-                while (!HasStateAuthority && elapsed < timeout && !_cancellationTokenSource.Token.IsCancellationRequested)
+                // Verificar el tipo correcto de autoridad según el modo
+                bool waitingForAuthority = (Runner.GameMode == GameMode.Shared) ? 
+                                          !Object.HasStateAuthority : 
+                                          !HasInputAuthority;
+                
+                // IMPORTANTE: Mantener el objeto en su posición original mientras esperamos autoridad
+                while (waitingForAuthority && elapsed < timeout && !_cancellationTokenSource.Token.IsCancellationRequested)
                 {
+                    // Forzar la posición original para evitar que se mueva
+                    transform.position = originalPosition;
+                    transform.rotation = originalRotation;
+                    
                     await UniTask.Yield(PlayerLoopTiming.Update, _cancellationTokenSource.Token);
                     elapsed += Time.deltaTime;
+                    
+                    // Actualizar verificación
+                    waitingForAuthority = (Runner.GameMode == GameMode.Shared) ? 
+                                         !Object.HasStateAuthority : 
+                                         !HasInputAuthority;
                 }
                 
-                if (HasStateAuthority)
+                bool hasAuthority = (Runner.GameMode == GameMode.Shared) ? 
+                                   Object.HasStateAuthority : 
+                                   HasInputAuthority;
+                
+                if (hasAuthority)
                 {
-                    if (_debugMode) Debug.Log($"[PragmaticNetworkedGrabbable] Authority acquired!");
+                    if (_debugMode) Debug.Log($"[PragmaticNetworkedGrabbable] Authority acquired! Completing grab.");
+                    
+                    // IMPORTANTE: Sincronizar la posición ACTUAL antes de empezar a mover
+                    // Esto evita que otros clientes vean el objeto en una posición incorrecta
+                    SyncedPosition = transform.position;
+                    SyncedRotation = transform.rotation;
+                    
+                    // Ahora sí completar el grab con autoridad confirmada
+                    CompleteLocalGrab();
                     SetGrabbedState();
+                    
+                    // Actualizar nuevamente después de configurar el estado
+                    SyncedPosition = transform.position;
+                    SyncedRotation = transform.rotation;
                 }
                 else
                 {
-                    Debug.LogWarning($"[PragmaticNetworkedGrabbable] Authority timeout - forcing release");
-                    ForceRelease();
+                    Debug.LogWarning($"[PragmaticNetworkedGrabbable] Input authority timeout - cancelling grab");
+                    // No hacer nada, el objeto permanece donde estaba
+                    _grabberTransform = null;
+                    _handTransform = null;
                 }
             }
             catch (System.OperationCanceledException)
             {
                 if (_debugMode) Debug.Log($"[PragmaticNetworkedGrabbable] Authority request cancelled");
+                _grabberTransform = null;
+                _handTransform = null;
             }
         }
+        
+        // Método legacy para compatibilidad
+     
         
         private void SetGrabbedState()
         {
             IsGrabbed = true;
             GrabbingPlayer = Runner.LocalPlayer;
-            HasAuthority = true;
+            HasAuthority = HasInputAuthority;
             
             if (_debugMode)
             {
@@ -389,14 +478,15 @@ namespace MetaAvatarsVR.Networking.Pragmatic
                 _rigidbody.angularDamping = 1f;
             }
             
-            if (HasStateAuthority)
+            if (HasInputAuthority)
             {
-                // Sincronizar posición final
+                // Sync final position
                 SyncedPosition = transform.position;
                 SyncedRotation = transform.rotation;
                 
                 IsGrabbed = false;
                 GrabbingPlayer = PlayerRef.None;
+                HasAuthority = false;
             }
         }
         
@@ -477,8 +567,13 @@ namespace MetaAvatarsVR.Networking.Pragmatic
         
         public override void FixedUpdateNetwork()
         {
-            // Sincronizar posición para otros jugadores
-            if (HasStateAuthority && IsGrabbed)
+            // SOLUCIÓN: En modo Shared usar StateAuthority, no InputAuthority
+            bool hasAuthority = (Runner.GameMode == GameMode.Shared) ? 
+                               Object.HasStateAuthority : 
+                               HasInputAuthority;
+            
+            // Sync position for other players when we have authority
+            if (hasAuthority && IsGrabbed)
             {
                 SyncedPosition = transform.position;
                 SyncedRotation = transform.rotation;
@@ -487,12 +582,26 @@ namespace MetaAvatarsVR.Networking.Pragmatic
         
         public override void Render()
         {
-            // Interpolar para otros jugadores
+            // SOLUCIÓN CRÍTICA: Solo interpolar si tenemos una posición válida sincronizada
+            // Evitar mover el objeto a (0,0,0) o posiciones incorrectas
             if (!_isLocallyGrabbed && IsGrabbed && GrabbingPlayer != Runner.LocalPlayer)
             {
-                float lerpSpeed = Time.deltaTime * 10f;
-                transform.position = Vector3.Lerp(transform.position, SyncedPosition, lerpSpeed);
-                transform.rotation = Quaternion.Slerp(transform.rotation, SyncedRotation, lerpSpeed);
+                // Verificar que la posición sincronizada es válida (no es el origen por defecto)
+                // y que no está demasiado lejos (más de 50 metros es sospechoso)
+                float distanceToSynced = Vector3.Distance(transform.position, SyncedPosition);
+                bool isValidPosition = SyncedPosition != Vector3.zero || transform.position == Vector3.zero;
+                bool isReasonableDistance = distanceToSynced < 50f;
+                
+                if (isValidPosition && isReasonableDistance)
+                {
+                    float lerpSpeed = Time.deltaTime * 10f;
+                    transform.position = Vector3.Lerp(transform.position, SyncedPosition, lerpSpeed);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, SyncedRotation, lerpSpeed);
+                }
+                else if (_debugMode && Time.frameCount % 60 == 0)
+                {
+                    Debug.LogWarning($"[PragmaticNetworkedGrabbable] Skipping suspicious sync - Distance: {distanceToSynced:F2}m, SyncedPos: {SyncedPosition}");
+                }
             }
         }
         
@@ -514,6 +623,74 @@ namespace MetaAvatarsVR.Networking.Pragmatic
             
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
+        }
+        
+        [Rpc(RpcSources.All, RpcTargets.All)]
+        private void RPC_RequestAuthorityTransfer(PlayerRef player, RpcInfo info = default)
+        {
+            // IMPORTANTE: Antes de transferir autoridad, sincronizar la posición actual
+            // Esto evita que el objeto salte a una posición incorrecta
+            if (Object.HasStateAuthority || (Runner.GameMode != GameMode.Shared && Object.HasInputAuthority))
+            {
+                SyncedPosition = transform.position;
+                SyncedRotation = transform.rotation;
+                
+                if (_debugMode)
+                {
+                    Debug.Log($"[PragmaticNetworkedGrabbable] Pre-transfer sync: {SyncedPosition}");
+                }
+            }
+            
+            // En modo Shared, necesitamos manejar la transferencia de manera diferente
+            if (Runner.GameMode == GameMode.Shared)
+            {
+                // En Shared mode, cualquier cliente puede tener StateAuthority
+                // El primero en agarrar obtiene la autoridad
+                if (!IsGrabbed || GrabbingPlayer == PlayerRef.None)
+                {
+                    // Transferir StateAuthority al jugador que solicita
+                    if (Object.HasStateAuthority && Object.StateAuthority != info.Source)
+                    {
+                        // Sincronizar una última vez antes de liberar autoridad
+                        SyncedPosition = transform.position;
+                        SyncedRotation = transform.rotation;
+                        Object.ReleaseStateAuthority();
+                    }
+                    
+                    // El jugador solicitante tomará StateAuthority
+                    if (info.Source == Runner.LocalPlayer)
+                    {
+                        Object.RequestStateAuthority();
+                        HasAuthority = true;
+                        
+                        // Mantener la posición actual
+                        SyncedPosition = transform.position;
+                        SyncedRotation = transform.rotation;
+                        
+                        if (_debugMode)
+                        {
+                            Debug.Log($"[PragmaticNetworkedGrabbable] State authority requested by player {info.Source}");
+                        }
+                    }
+                }
+                else if (_debugMode)
+                {
+                    Debug.LogWarning($"[PragmaticNetworkedGrabbable] Cannot transfer authority - object already grabbed by {GrabbingPlayer}");
+                }
+            }
+            else
+            {
+                // Para Host/Server mode, usar InputAuthority
+                if (Object.HasStateAuthority)
+                {
+                    Object.AssignInputAuthority(info.Source);
+                    HasAuthority = true;
+                    if (_debugMode)
+                    {
+                        Debug.Log($"[PragmaticNetworkedGrabbable] Input authority transferred to player {info.Source}");
+                    }
+                }
+            }
         }
         
         void OnDrawGizmosSelected()

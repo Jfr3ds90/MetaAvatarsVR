@@ -127,7 +127,8 @@ namespace MetaAvatarsVR.Networking
         
         public override void Spawned()
         {
-            if (HasStateAuthority)
+            // In Shared mode, initialize for all clients
+            if (Object.HasStateAuthority)
             {
                 IsGrabbed = false;
                 GrabbingPlayer = PlayerRef.None;
@@ -178,23 +179,23 @@ namespace MetaAvatarsVR.Networking
             
             Debug.Log($"[NetworkGrabbable] Local grab started - Requesting authority");
             
-            // Solicitar autoridad y esperar
-            if (!HasStateAuthority)
+            // Request input authority in Shared mode
+            if (!HasInputAuthority)
             {
                 _waitingForAuthority = true;
-                Object.RequestStateAuthority();
+                RPC_RequestAuthorityTransfer(Runner.LocalPlayer, offset, rotOffset);
                 
-                // Cancelar task anterior si existe
+                // Cancel previous task if exists
                 _authorityCts?.Cancel();
                 _authorityCts = new CancellationTokenSource();
                 
-                // Esperar autoridad con timeout
+                // Wait for input authority with timeout
                 bool authorityAcquired = await WaitForAuthorityAsync(offset, rotOffset, _authorityCts.Token);
                 
                 if (!authorityAcquired && _isBeingGrabbedLocally)
                 {
-                    // Falló la adquisición de autoridad
-                    Debug.LogWarning($"[NetworkGrabbable] Failed to acquire authority - releasing grab");
+                    // Failed to acquire input authority
+                    Debug.LogWarning($"[NetworkGrabbable] Failed to acquire input authority - releasing grab");
                     _isBeingGrabbedLocally = false;
                     _localGrabberTransform = null;
                 }
@@ -212,12 +213,12 @@ namespace MetaAvatarsVR.Networking
                 // Esperar hasta que tengamos autoridad o timeout
                 float startTime = Time.time;
                 
-                while (!HasStateAuthority && (Time.time - startTime) < (_authorityTimeout / 1000f))
+                while (!HasInputAuthority && (Time.time - startTime) < (_authorityTimeout / 1000f))
                 {
-                    // Esperar un frame
+                    // Wait for a frame
                     await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken);
                     
-                    // Verificar si todavía estamos esperando
+                    // Check if we're still waiting
                     if (!_waitingForAuthority || !_isBeingGrabbedLocally)
                     {
                         Debug.Log("[NetworkGrabbable] Authority wait cancelled - grab released");
@@ -227,15 +228,15 @@ namespace MetaAvatarsVR.Networking
                 
                 _waitingForAuthority = false;
                 
-                if (HasStateAuthority)
+                if (HasInputAuthority)
                 {
-                    Debug.Log($"[NetworkGrabbable] Authority acquired in {(Time.time - startTime) * 1000f:F0}ms");
+                    Debug.Log($"[NetworkGrabbable] Input authority acquired in {(Time.time - startTime) * 1000f:F0}ms");
                     SetGrabbedState(offset, rotOffset);
                     return true;
                 }
                 else
                 {
-                    Debug.LogWarning($"[NetworkGrabbable] Authority timeout after {_authorityTimeout}ms");
+                    Debug.LogWarning($"[NetworkGrabbable] Input authority timeout after {_authorityTimeout}ms");
                     return false;
                 }
             }
@@ -281,7 +282,7 @@ namespace MetaAvatarsVR.Networking
             _localGrabberTransform = null;
             _waitingForAuthority = false;
             
-            if (HasStateAuthority)
+            if (HasInputAuthority)
             {
                 IsGrabbed = false;
                 GrabbingPlayer = PlayerRef.None;
@@ -295,16 +296,16 @@ namespace MetaAvatarsVR.Networking
         
         public override void FixedUpdateNetwork()
         {
-            // Solo actualizar si tenemos autoridad y está agarrado
-            if (!HasStateAuthority || !IsGrabbed) return;
+            // Only update if we have input authority and object is grabbed
+            if (!HasInputAuthority || !IsGrabbed) return;
             
-            // Para el jugador local, actualizar la posición networkeada
+            // For local player, update networked position
             if (_isBeingGrabbedLocally && _localGrabberTransform != null)
             {
                 Vector3 targetPos = _localGrabberTransform.TransformPoint(LocalPositionOffset);
                 Quaternion targetRot = _localGrabberTransform.rotation * LocalRotationOffset;
                 
-                // Actualizar el transform principal (networkeado)
+                // Update main transform (networked)
                 transform.position = targetPos;
                 transform.rotation = targetRot;
             }
@@ -379,6 +380,17 @@ namespace MetaAvatarsVR.Networking
             // Limpiar cancellation token
             _authorityCts?.Cancel();
             _authorityCts?.Dispose();
+        }
+        
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        private void RPC_RequestAuthorityTransfer(PlayerRef player, Vector3 localOffset, Quaternion localRotation, RpcInfo info = default)
+        {
+            // Transfer input authority to the requesting player
+            if (Object.HasStateAuthority)
+            {
+                Object.AssignInputAuthority(info.Source);
+                Debug.Log($"[NetworkGrabbable] Input authority transferred to player {info.Source}");
+            }
         }
         
         void OnDrawGizmosSelected()

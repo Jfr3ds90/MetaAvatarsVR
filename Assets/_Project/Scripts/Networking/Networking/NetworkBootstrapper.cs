@@ -712,6 +712,51 @@ namespace HackMonkeys.Core
         
         // ... [Resto de métodos helper sin cambios significativos] ...
         
+        /// <summary>
+        /// Sale de la sala actual y limpia todos los recursos de red
+        /// </summary>
+        public async Task LeaveRoom()
+        {
+            LogDebug("🚪 [SHARED MODE] Leaving room...");
+            
+            if (!_isInRoom)
+            {
+                LogWarning("Not in a room to leave");
+                return;
+            }
+            
+            try
+            {
+                // Limpiar objetos de red locales antes de salir
+                CleanupAllNetworkObjects();
+                
+                // Marcar que ya no estamos en la sala
+                _isInRoom = false;
+                _isRoomCreator = false;
+                _currentRoomName = "";
+                _currentMaxPlayers = 0;
+                _selectedSceneName = "";
+                
+                // Notificar que estamos saliendo
+                OnRoomLeft?.Invoke();
+                
+                // Limpiar datos del jugador
+                if (PlayerDataManager.Instance != null)
+                {
+                    PlayerDataManager.Instance.ClearSessionData();
+                }
+                
+                // Shutdown del runner y limpieza
+                await ShutdownRunner();
+                
+                LogDebug("✅ [SHARED MODE] Successfully left room");
+            }
+            catch (Exception e)
+            {
+                LogError($"Error leaving room: {e.Message}");
+            }
+        }
+        
         #endregion
         
         #region Cleanup & Utilities
@@ -901,6 +946,21 @@ namespace HackMonkeys.Core
         public SceneInfo GetSceneInfo(string sceneName)
         {
             return availableScenes.FirstOrDefault(s => s.sceneName == sceneName);
+        }
+        
+        /// <summary>
+        /// Obtiene el nombre de la escena por defecto
+        /// </summary>
+        public string GetDefaultSceneName()
+        {
+            // Si hay escenas disponibles configuradas, usar la primera
+            if (availableScenes != null && availableScenes.Count > 0)
+            {
+                return availableScenes[0].sceneName;
+            }
+            
+            // Si no, usar la escena de juego por defecto
+            return gameSceneName;
         }
         
         private SceneRef GetSceneIndex(string sceneName)

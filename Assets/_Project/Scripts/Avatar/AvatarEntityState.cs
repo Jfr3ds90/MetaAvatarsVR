@@ -29,26 +29,49 @@ public class AvatarEntityState : OvrAvatarEntity
     {
         ConfigureAvatarEntity();
         base.Awake();
-        SetActiveView(_networkObject.HasStateAuthority
+        
+        // En Shared Mode, comparamos InputAuthority con LocalPlayer
+        NetworkRunner runner = NetworkRunner.GetRunnerForGameObject(gameObject);
+        bool isLocalAvatar = runner != null && _networkObject.InputAuthority == runner.LocalPlayer;
+        
+        SetActiveView(isLocalAvatar
             ? CAPI.ovrAvatar2EntityViewFlags.FirstPerson
             : CAPI.ovrAvatar2EntityViewFlags.ThirdPerson);
+            
+        Debug.Log($"[AvatarEntityState] View set to: {(isLocalAvatar ? "FirstPerson" : "ThirdPerson")}");
         StartCoroutine(LoadAvatarID());
     }
 
     private void ConfigureAvatarEntity()
     {
-        if (_networkObject.HasStateAuthority)
+        // En Shared Mode, verificamos InputAuthority comparando con LocalPlayer
+        NetworkRunner runner = NetworkRunner.GetRunnerForGameObject(gameObject);
+        bool isLocalAvatar = runner != null && _networkObject.InputAuthority == runner.LocalPlayer;
+        
+        if (isLocalAvatar)
         {
             SetIsLocal(true);
             _creationInfo.features = CAPI.ovrAvatar2EntityFeatures.Preset_Default;
-            SetBodyTracking(OvrAvatarManager.Instance.gameObject.GetComponent<SampleInputManager>());
-            gameObject.name = "Local Avatar";
+            
+            var sampleInputManager = OvrAvatarManager.Instance?.gameObject.GetComponent<SampleInputManager>();
+            if (sampleInputManager != null)
+            {
+                SetBodyTracking(sampleInputManager);
+            }
+            else
+            {
+                Debug.LogWarning("[AvatarEntityState] SampleInputManager not found for local avatar");
+            }
+            
+            gameObject.name = $"Local Avatar ({_networkObject.InputAuthority})";
+            Debug.Log($"[AvatarEntityState] ✅ Configured as LOCAL avatar");
         }
         else
         {
             SetIsLocal(false);
             _creationInfo.features = CAPI.ovrAvatar2EntityFeatures.Preset_Remote;
-            gameObject.name = "Remote Avatar";
+            gameObject.name = $"Remote Avatar ({_networkObject.InputAuthority})";
+            Debug.Log($"[AvatarEntityState] 👥 Configured as REMOTE avatar");
         }
     }
 

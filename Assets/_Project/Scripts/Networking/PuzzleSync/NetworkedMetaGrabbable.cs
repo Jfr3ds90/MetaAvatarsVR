@@ -84,19 +84,35 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                      $"HasStateAuthority: {HasStateAuthority}, " +
                      $"HasInputAuthority: {HasInputAuthority}");
             
-            if (HasStateAuthority)
+            // Initialize state for all clients in Shared mode
+            if (Object.HasStateAuthority)
             {
                 IsGrabbed = false;
                 IsHovered = false;
                 NetworkedPosition = transform.position;
                 NetworkedRotation = transform.rotation;
             }
+            
+            // In Shared mode, enable interaction components for local player only
+            if (HasInputAuthority)
+            {
+                if (_rotateTransformer != null)
+                {
+                    _rotateTransformer.enabled = true;
+                    Debug.Log($"[NetworkedMetaGrabbable] Enabled OneGrabRotateTransformer for local player for {gameObject.name}");
+                }
+                
+                if (_handGrabInteractable != null)
+                {
+                    _handGrabInteractable.enabled = true;
+                }
+            }
             else
             {
                 if (_rotateTransformer != null)
                 {
                     _rotateTransformer.enabled = false;
-                    Debug.Log($"[NetworkedMetaGrabbable] Disabled OneGrabRotateTransformer on client for {gameObject.name}");
+                    Debug.Log($"[NetworkedMetaGrabbable] Disabled OneGrabRotateTransformer for remote player for {gameObject.name}");
                 }
                 
                 if (_handGrabInteractable != null)
@@ -108,7 +124,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         public override void FixedUpdateNetwork()
         {
-            if (!HasStateAuthority) return;
+            // In Shared mode, only sync position when local player is grabbing
+            if (!HasInputAuthority || !_isLocallyGrabbed) return;
             
             if (IsGrabbed || Time.time - _lastSyncTime > (1f / _syncRate))
             {
@@ -124,7 +141,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         public override void Render()
         {
-            if (!HasStateAuthority && !_isLocallyGrabbed)
+            // In Shared mode, interpolate for remote objects only
+            if (!HasInputAuthority && !_isLocallyGrabbed)
             {
                 if (_syncRotation)
                 {
@@ -261,24 +279,17 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             _isLocallyGrabbed = grabbing;
             _isLocalPlayer = true;
             
-            if (!HasStateAuthority && _rotateTransformer != null)
+            // In Shared mode, control is always enabled for local input authority
+            if (HasInputAuthority && _rotateTransformer != null)
             {
                 if (grabbing)
                 {
-                    _rotateTransformer.enabled = true;
-                    if (_handGrabInteractable != null)
-                        _handGrabInteractable.enabled = true;
-                    
                     _lastValidRotation = transform.rotation;
-                    Debug.Log($"[NetworkedMetaGrabbable] Enabled local control for {gameObject.name}");
+                    Debug.Log($"[NetworkedMetaGrabbable] Starting local grab control for {gameObject.name}");
                 }
                 else
                 {
-                    _rotateTransformer.enabled = false;
-                    if (_handGrabInteractable != null)
-                        _handGrabInteractable.enabled = false;
-                    
-                    Debug.Log($"[NetworkedMetaGrabbable] Disabled local control for {gameObject.name}");
+                    Debug.Log($"[NetworkedMetaGrabbable] Ending local grab control for {gameObject.name}");
                 }
             }
             
@@ -328,7 +339,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         #region RPCs
         
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
         private void RPC_OnGrabbed(PlayerRef player, RpcInfo info = default)
         {
             Debug.Log($"[NetworkedMetaGrabbable RPC] {gameObject.name} grabbed by player {player}");
@@ -339,13 +350,19 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 return;
             }
             
+            // Request authority transfer to grabbing player
+            if (Object.HasStateAuthority && info.Source != Object.InputAuthority)
+            {
+                Object.AssignInputAuthority(info.Source);
+            }
+            
             IsGrabbed = true;
             GrabbingPlayer = player;
             
             RPC_BroadcastControlChange(player, true);
         }
         
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
         private void RPC_OnReleased(PlayerRef player, RpcInfo info = default)
         {
             Debug.Log($"[NetworkedMetaGrabbable RPC] {gameObject.name} released by player {player}");
@@ -358,36 +375,34 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             RPC_BroadcastControlChange(player, false);
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_BroadcastControlChange(PlayerRef player, bool isGrabbing)
         {
-            if (!HasStateAuthority)
+            // In Shared mode, only the player with InputAuthority controls the object
+            if (player != Runner.LocalPlayer && !HasInputAuthority)
             {
-                if (isGrabbing && player != Runner.LocalPlayer)
-                {
-                    if (_rotateTransformer != null)
-                        _rotateTransformer.enabled = false;
-                    if (_handGrabInteractable != null)
-                        _handGrabInteractable.enabled = false;
-                }
-                else if (!isGrabbing && player != Runner.LocalPlayer)
-                {
-                    if (_rotateTransformer != null)
-                        _rotateTransformer.enabled = false;
-                    if (_handGrabInteractable != null)
-                        _handGrabInteractable.enabled = false;
-                }
+                if (_rotateTransformer != null)
+                    _rotateTransformer.enabled = false;
+                if (_handGrabInteractable != null)
+                    _handGrabInteractable.enabled = false;
+            }
+            else if (HasInputAuthority)
+            {
+                if (_rotateTransformer != null)
+                    _rotateTransformer.enabled = true;
+                if (_handGrabInteractable != null)
+                    _handGrabInteractable.enabled = true;
             }
         }
         
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
         private void RPC_OnHovered(PlayerRef player, RpcInfo info = default)
         {
             IsHovered = true;
             HoveringPlayer = player;
         }
         
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
         private void RPC_OnUnhovered(PlayerRef player, RpcInfo info = default)
         {
             if (HoveringPlayer != player) return;
@@ -396,7 +411,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             HoveringPlayer = PlayerRef.None;
         }
         
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
         private void RPC_UpdateTransform(Vector3 position, Quaternion rotation, RpcInfo info = default)
         {
             if (IsGrabbed && info.Source == GrabbingPlayer)
