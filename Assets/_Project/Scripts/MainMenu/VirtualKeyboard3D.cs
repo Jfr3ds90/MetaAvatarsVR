@@ -116,7 +116,9 @@ namespace HackMonkeys.UI.Spatial
         private bool _isShiftActive = false;
         private bool _isCapsLockActive = false;
         private Transform _currentLayoutPanel;
-        
+
+        [SerializeField] private ManualKey[] manualKeys;
+
         // Keyboard layouts definition
         private readonly string[] QWERTY_LAYOUT = new string[]
         {
@@ -172,6 +174,7 @@ namespace HackMonkeys.UI.Spatial
             
             // Initialize symbols layout
             _keyboardLayouts[KeyboardLayout.Symbols] = CreateSymbolsLayout();
+   
         }
         
         private List<KeyboardKey> CreateAlphabeticLayout()
@@ -257,7 +260,8 @@ namespace HackMonkeys.UI.Spatial
                 height = 1f,
                 iconSprite = enterIcon
             });
-            
+
+            CreateOutLayout();
             return keys;
         }
         
@@ -307,7 +311,7 @@ namespace HackMonkeys.UI.Spatial
                 height = 1f,
                 iconSprite = symbolsIcon
             });
-            
+
             return keys;
         }
         
@@ -328,7 +332,28 @@ namespace HackMonkeys.UI.Spatial
                     height = 1f
                 });
             }
-            
+
+            return keys;
+        }
+
+        private List<KeyboardKey> CreateOutLayout()
+        {
+            List<KeyboardKey> keys = new List<KeyboardKey>();
+
+            for (int i = 0; i < manualKeys.Length; i++)
+           {
+                keys.Add(new KeyboardKey
+                {
+                    character = manualKeys[i]._character,
+                    shiftCharacter = manualKeys[i]._shiftCharacter,
+                    keyType = manualKeys[i]._keyType,
+                    width = 1f,
+                    height = 1f,
+                });
+
+                Debug.LogWarning("Existe el valor "+keys.Count);
+            }
+
             return keys;
         }
         
@@ -392,6 +417,7 @@ namespace HackMonkeys.UI.Spatial
             {
                 GenerateSymbolsGrid();
             }
+            
         }
         
         private void GenerateQWERTYLayout()
@@ -543,7 +569,7 @@ namespace HackMonkeys.UI.Spatial
             }
         }
         
-        private GameObject CreateKey(KeyboardKey keyData, Vector3 centerPosition)
+        public GameObject CreateKey(KeyboardKey keyData, Vector3 centerPosition)
         {
             GameObject keyObj = Instantiate(keyPrefab, keysContainer);
             
@@ -819,6 +845,7 @@ namespace HackMonkeys.UI.Spatial
                     OnClose?.Invoke();
                     break;
             }
+
         }
         
         private void ToggleShift()
