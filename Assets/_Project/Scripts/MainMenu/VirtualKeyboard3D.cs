@@ -174,11 +174,11 @@ namespace HackMonkeys.UI.Spatial
             
             // Initialize symbols layout
             _keyboardLayouts[KeyboardLayout.Symbols] = CreateSymbolsLayout();
-   
+
         }
         
         private List<KeyboardKey> CreateAlphabeticLayout()
-        {
+        {           
             List<KeyboardKey> keys = new List<KeyboardKey>();
             
             // Create keys from QWERTY layout
@@ -312,6 +312,8 @@ namespace HackMonkeys.UI.Spatial
                 iconSprite = symbolsIcon
             });
 
+            CreateOutLayout();
+
             return keys;
         }
         
@@ -332,6 +334,8 @@ namespace HackMonkeys.UI.Spatial
                     height = 1f
                 });
             }
+
+            CreateOutLayout();
 
             return keys;
         }
@@ -513,6 +517,10 @@ namespace HackMonkeys.UI.Spatial
                 
                 CreateKey(enterKey, centerPosition);
             }
+
+           // for (int i = 0; i < manualKeys.Length; i++) CONTINUAR DESDE ACA
+
+
         }
         
         private void GenerateNumericPad()
