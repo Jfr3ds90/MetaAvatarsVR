@@ -15,7 +15,7 @@ namespace MetaAvatarsVR.Networking
     [RequireComponent(typeof(NetworkRigidbody3D))]
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(Grabbable))]
-    public class FusionVRGrabbable : NetworkBehaviour
+    public class FusionVRGrabbable : NetworkBehaviour, IStateAuthorityChanged
     {
         [Header("Grab Configuration")]
         [SerializeField] private bool _allowMultipleGrabbers = true;
@@ -93,6 +93,16 @@ namespace MetaAvatarsVR.Networking
         
         public override void Spawned()
         {
+            // SOLUCIÓN: Inicializar y sincronizar posición para TODOS los clientes
+            if (_networkRigidbody != null)
+            {
+                // Teleport inicial para sincronizar la posición en todos los clientes
+                _networkRigidbody.Teleport(transform.position, transform.rotation);
+                
+                if (_debugMode)
+                    Debug.Log($"[FusionVRGrabbable] Initial teleport to sync position: {transform.position}");
+            }
+            
             if (HasStateAuthority)
             {
                 IsGrabbed = false;
@@ -106,19 +116,32 @@ namespace MetaAvatarsVR.Networking
                 Debug.Log($"[FusionVRGrabbable] Spawned. StateAuth: {Object.StateAuthority}, InputAuth: {Object.InputAuthority}, AllowOverride: {Object.Flags.HasFlag(NetworkObjectFlags.AllowStateAuthorityOverride)}");
         }
         
+        // Implementación de IStateAuthorityChanged
         public void StateAuthorityChanged()
         {
             if (_debugMode)
                 Debug.Log($"[FusionVRGrabbable] StateAuthority changed to: {Object.StateAuthority}. IsGrabbed: {IsGrabbed}");
             
+            // SOLUCIÓN: Cuando perdemos autoridad mientras el objeto está siendo agarrado
             if (!HasStateAuthority && IsGrabbed)
             {
+                // Hacer el rigidbody kinematic para evitar conflictos de física
                 _rigidbody.isKinematic = true;
                 
+                // Desactivar colliders para evitar interferencias
                 foreach (var col in _colliders)
                 {
                     if (col != null)
                         col.enabled = false;
+                }
+                
+                // IMPORTANTE: Teleport para sincronizar con el nuevo estado
+                if (_networkRigidbody != null)
+                {
+                    _networkRigidbody.Teleport(transform.position, transform.rotation);
+                    
+                    if (_debugMode)
+                        Debug.Log($"[FusionVRGrabbable] Teleported on authority loss to sync position");
                 }
             }
         }
@@ -127,7 +150,7 @@ namespace MetaAvatarsVR.Networking
         {
             if (!HasStateAuthority) return;
             
-            // Actualizar estado de física
+            // Actualizar estado de física solo si tenemos autoridad
             if (IsGrabbed && _localGrabber != null)
             {
                 // Aplicar movimiento siguiendo al grabber
@@ -135,11 +158,8 @@ namespace MetaAvatarsVR.Networking
                 
                 // Rastrear velocidad para el lanzamiento
                 TrackVelocity();
-            }
-            
-            // Verificar distancia de ruptura
-            if (IsGrabbed && _localGrabber != null)
-            {
+                
+                // Verificar distancia de ruptura
                 float distance = Vector3.Distance(transform.position, _localGrabber.position);
                 if (distance > _grabBreakDistance)
                 {
@@ -153,7 +173,9 @@ namespace MetaAvatarsVR.Networking
         
         public override void Render()
         {
-            // No necesitamos hacer nada aquí, la sincronización se maneja en los callbacks
+            // SOLUCIÓN SIMPLE: NO interpolar si NetworkRigidbody3D ya está manejando la interpolación
+            // NetworkRigidbody3D ya maneja su propia interpolación, no debemos interferir
+            // Solo dejar que NetworkRigidbody3D haga su trabajo
         }
         
         #endregion
@@ -184,6 +206,7 @@ namespace MetaAvatarsVR.Networking
                 if (_debugMode)
                     Debug.Log($"[FusionVRGrabbable] Local grab started. HasStateAuthority: {HasStateAuthority}");
                 
+                // Calcular offsets basados en la posición actual
                 GrabOffset = _localGrabber.InverseTransformPoint(transform.position);
                 GrabRotationOffset = Quaternion.Inverse(_localGrabber.rotation) * transform.rotation;
                 
@@ -191,6 +214,7 @@ namespace MetaAvatarsVR.Networking
                 
                 if (!HasStateAuthority)
                 {
+                    // Solicitar autoridad sin hacer cambios prematuros
                     if (_authorityRequestCoroutine != null)
                         StopCoroutine(_authorityRequestCoroutine);
                     
@@ -225,17 +249,16 @@ namespace MetaAvatarsVR.Networking
             if (_debugMode)
                 Debug.Log($"[FusionVRGrabbable] Requesting state authority... (Current: {Object.StateAuthority})");
             
-            if (Object.HasStateAuthority)
-            {
-                Object.ReleaseStateAuthority();
-                yield return new WaitForSeconds(0.1f);
-            }
+            // Guardar posición actual antes de solicitar autoridad
+            Vector3 currentPos = transform.position;
+            Quaternion currentRot = transform.rotation;
             
             Object.RequestStateAuthority();
             
             float timeout = 1f;
             float elapsed = 0f;
             
+            // Esperar autoridad sin mover el objeto
             while (!HasStateAuthority && elapsed < timeout)
             {
                 yield return null;
@@ -247,21 +270,30 @@ namespace MetaAvatarsVR.Networking
                 if (_debugMode)
                     Debug.Log($"[FusionVRGrabbable] State authority acquired in {elapsed:F2}s!");
                 
+                // SOLUCIÓN CRÍTICA: Teleport después de obtener autoridad
+                // Esto sincroniza la posición correctamente con todos los clientes
+                if (_networkRigidbody != null)
+                {
+                    _networkRigidbody.Teleport(currentPos, currentRot);
+                    
+                    if (_debugMode)
+                        Debug.Log($"[FusionVRGrabbable] Teleported to sync position after authority transfer: {currentPos}");
+                }
+                
+                // Pequeña espera para que el teleport se propague
+                yield return null;
+                
+                // Ahora aplicar el grab
                 ApplyGrab();
             }
             else
             {
                 if (_debugMode)
-                    Debug.LogWarning($"[FusionVRGrabbable] Failed to acquire authority after {timeout}s. Check NetworkObject.AllowStateAuthorityOverride!");
+                    Debug.LogWarning($"[FusionVRGrabbable] Failed to acquire authority after {timeout}s");
                 
+                // No pudimos obtener autoridad, cancelar el grab
                 _isLocallyGrabbed = false;
                 _localGrabber = null;
-                
-                if (_metaGrabbable != null)
-                {
-                    _metaGrabbable.enabled = false;
-                    _metaGrabbable.enabled = true;
-                }
             }
             
             _authorityRequestCoroutine = null;
@@ -284,17 +316,12 @@ namespace MetaAvatarsVR.Networking
                 gameObject.layer = (int)Mathf.Log(_grabbedLayer.value, 2);
             }
             
-            if (_networkRigidbody != null)
-            {
-                _networkRigidbody.Teleport();
-            }
-            
             IsGrabbed = true;
             CurrentGrabber = Runner.LocalPlayer;
             IsKinematic = true;
             
             if (_debugMode)
-                Debug.Log($"[FusionVRGrabbable] Grab applied - Player {Runner.LocalPlayer}, teleported to current position");
+                Debug.Log($"[FusionVRGrabbable] Grab applied - Player {Runner.LocalPlayer}");
         }
         
         private void ReleaseObject()
@@ -356,8 +383,21 @@ namespace MetaAvatarsVR.Networking
             Vector3 targetPosition = _localGrabber.TransformPoint(GrabOffset);
             Quaternion targetRotation = _localGrabber.rotation * GrabRotationOffset;
             
+            // SOLUCIÓN: Usar asignación directa para movimiento continuo
+            // NetworkRigidbody3D sincronizará esto automáticamente
             transform.position = targetPosition;
             transform.rotation = targetRotation;
+            
+            // Si la distancia es muy grande, puede ser un salto no deseado
+            float distance = Vector3.Distance(transform.position, targetPosition);
+            if (distance > 1f && _networkRigidbody != null)
+            {
+                // Para saltos grandes, usar Teleport para evitar interpolación incorrecta
+                _networkRigidbody.Teleport(targetPosition, targetRotation);
+                
+                if (_debugMode)
+                    Debug.Log($"[FusionVRGrabbable] Large movement detected ({distance:F2}m), using Teleport");
+            }
         }
         
         private void TrackVelocity()
@@ -420,6 +460,7 @@ namespace MetaAvatarsVR.Networking
             if (_debugMode)
                 Debug.Log($"[FusionVRGrabbable] IsGrabbed changed to: {IsGrabbed} by {CurrentGrabber}");
             
+            // Solo actualizar física para clientes remotos
             if (!_isLocallyGrabbed)
             {
                 if (IsGrabbed)
