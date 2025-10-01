@@ -28,7 +28,7 @@ public class ManualKey : MonoBehaviour
     public float _height = 1f; 
     public Sprite _iconSprite; 
     public InteractableButton3D _button;
-    public KeyboardKey Key;
+    private KeyboardKey Key;
     public void SingularKey()
     {
         Key.character = _character;

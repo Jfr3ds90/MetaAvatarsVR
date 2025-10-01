@@ -267,9 +267,11 @@ namespace HackMonkeys.UI.Spatial
                 {
                     character = manualKeys[i]._character,
                     shiftCharacter = manualKeys[i]._shiftCharacter,
+                    keyCode = manualKeys[i]._keyCode,
                     keyType = manualKeys[i]._keyType,
-                    width = 1f,
-                    height = 1f,
+                    width = manualKeys[i]._width,
+                    height = manualKeys[i]._height,
+                    iconSprite = manualKeys[i]._iconSprite,
                 });
 
                 Debug.LogWarning("Existe el valor " + keys.Count);
@@ -541,29 +543,29 @@ namespace HackMonkeys.UI.Spatial
                 {
                     case 0:
                         Vector3 centerPosition0 = new Vector3(
-                   currentX + (keyWidth / 2f) - 40,
-                   currentY - (keyHeight / 2f) + 11,
+                   currentX + (keyWidth / 2f) - 29.5f,
+                   currentY - (keyHeight / 2f) + 10.4f,
                    0
                ); 
                         CreateKey(extraKey, centerPosition0); j++; continue;
                     case 2:
                         Vector3 centerPosition2 = new Vector3(
-                   currentX + (keyWidth / 2f) -40,
-                   currentY - (keyHeight / 2f) + 6,
+                   currentX + (keyWidth / 2f) - 29.5f,
+                   currentY - (keyHeight / 2f) + 5.3f,
                    0
                ); 
                         CreateKey(extraKey, centerPosition2); j++; continue;
                     case 1:
                         Vector3 centerPosition1 = new Vector3(
-                    currentX + (keyWidth / 2f) + 15,
-                    currentY - (keyHeight / 2f) + 11,
+                    currentX + (keyWidth / 2f) + 14.5f,
+                    currentY - (keyHeight / 2f) + 10.5f,
                     0
                 ); 
                         CreateKey(extraKey, centerPosition1); j++; continue;
                     case 3:
                         Vector3 centerPosition3 = new Vector3(
-                   currentX + (keyWidth / 2f) + 15,
-                   currentY - (keyHeight / 2f) + 6,
+                   currentX + (keyWidth / 2f) + 14.5f,
+                   currentY - (keyHeight / 2f) + 5.1f,
                    0
                ); 
                         CreateKey(extraKey, centerPosition3); j++; continue;
