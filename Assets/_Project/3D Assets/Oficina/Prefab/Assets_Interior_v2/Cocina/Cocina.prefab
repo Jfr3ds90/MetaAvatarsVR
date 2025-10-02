@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7677365651702527140}
   - component: {fileID: 7940848151792626329}
   - component: {fileID: 7461227963672962444}
-  - component: {fileID: 8855632422210808598}
+  - component: {fileID: 6440273985533218735}
   m_Layer: 0
   m_Name: Cocina
   m_TagString: Untagged
@@ -87,8 +87,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &8855632422210808598
-MeshCollider:
+--- !u!65 &6440273985533218735
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -105,7 +105,6 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -5204169048649590102, guid: 27483dbdb2b55524bb89aa33f62f8eb2, type: 3}
+  serializedVersion: 3
+  m_Size: {x: 3.1035972, y: 1.0809277, z: 1.0153962}
+  m_Center: {x: -0.019201994, y: 0.5404635, z: -0.00000059604645}
