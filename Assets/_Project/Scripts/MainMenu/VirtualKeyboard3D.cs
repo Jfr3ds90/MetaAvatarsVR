@@ -125,7 +125,7 @@ namespace HackMonkeys.UI.Spatial
             "1234567890",
             "qwertyuiop",
             "asdfghjkl",
-            "^zxcvbnm<"
+            "^zxcvbnm"
         };
         
         private readonly string[] NUMBERS_LAYOUT = new string[]
@@ -202,7 +202,7 @@ namespace HackMonkeys.UI.Spatial
                             iconSprite = shiftIcon
                         });
                     }
-                    else if (c == '<') // Backspace key
+                    /*else if (c == '<') // Backspace key
                     {
                         keys.Add(new KeyboardKey
                         {
@@ -213,7 +213,7 @@ namespace HackMonkeys.UI.Spatial
                             height = 1f,
                             iconSprite = backspaceIcon
                         });
-                    }
+                    }*/
                     else
                     {
                         // Regular character key
@@ -246,12 +246,12 @@ namespace HackMonkeys.UI.Spatial
                 character = "Space",
                 shiftCharacter = "Space",
                 keyType = KeyType.Space,
-                width = 5f,
+                width = 9f,
                 height = 1f,
                 iconSprite = spaceIcon
             });
             
-            keys.Add(new KeyboardKey
+          /*  keys.Add(new KeyboardKey
             {
                 character = "Enter",
                 shiftCharacter = "Enter",
@@ -259,7 +259,7 @@ namespace HackMonkeys.UI.Spatial
                 width = 2f,
                 height = 1f,
                 iconSprite = enterIcon
-            });
+            });*/
 
             for (int i = 0; i < manualKeys.Length; i++)
             {
@@ -518,7 +518,7 @@ namespace HackMonkeys.UI.Spatial
             }
             
             // Enter key
-            if (keyIndex < _currentKeys.Count)
+            /*if (keyIndex < _currentKeys.Count)
             {
                 KeyboardKey enterKey = _currentKeys[keyIndex++];
                 float keyWidth = baseKeyWidth * enterKey.width;
@@ -531,7 +531,7 @@ namespace HackMonkeys.UI.Spatial
                 );
                 
                 CreateKey(enterKey, centerPosition);
-            }
+            }*/
             int i = keyIndex;
             int j = 0;
             for (; i < _currentKeys.Count;i++) 
@@ -543,28 +543,28 @@ namespace HackMonkeys.UI.Spatial
                 {
                     case 0:
                         Vector3 centerPosition0 = new Vector3(
-                   currentX + (keyWidth / 2f) - 29.5f,
+                   currentX + (keyWidth / 2f) - 41.5f,
                    currentY - (keyHeight / 2f) + 10.4f,
                    0
                ); 
                         CreateKey(extraKey, centerPosition0); j++; continue;
                     case 2:
                         Vector3 centerPosition2 = new Vector3(
-                   currentX + (keyWidth / 2f) - 29.5f,
+                   currentX + (keyWidth / 2f) - 41.5f,
                    currentY - (keyHeight / 2f) + 5.3f,
                    0
                ); 
                         CreateKey(extraKey, centerPosition2); j++; continue;
                     case 1:
                         Vector3 centerPosition1 = new Vector3(
-                    currentX + (keyWidth / 2f) + 14.5f,
+                    currentX + (keyWidth / 2f) + 2.5f,
                     currentY - (keyHeight / 2f) + 10.5f,
                     0
                 ); 
                         CreateKey(extraKey, centerPosition1); j++; continue;
                     case 3:
                         Vector3 centerPosition3 = new Vector3(
-                   currentX + (keyWidth / 2f) + 14.5f,
+                   currentX + (keyWidth / 2f) + 2.5f,
                    currentY - (keyHeight / 2f) + 5.1f,
                    0
                ); 
