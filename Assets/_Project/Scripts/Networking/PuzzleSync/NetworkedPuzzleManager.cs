@@ -86,7 +86,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         {
             _runner = Runner;
             
-            if (HasStateAuthority)
+            // En Shared Mode, el primer jugador (ID 0) inicializa los puzzles
+            if (Runner.LocalPlayer.PlayerId == 0)
             {
                 InitializePuzzles();
                 GenerateRandomizationSeed();
@@ -338,7 +339,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         public override void FixedUpdateNetwork()
         {
-            if (HasStateAuthority)
+            // En Shared Mode, el primer jugador actualiza el tiempo total
+            if (Runner.LocalPlayer.PlayerId == 0)
             {
                 TotalPlayTime += Runner.DeltaTime;
             }

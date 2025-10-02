@@ -15,8 +15,8 @@ using System.Collections;
 namespace HackMonkeys.Core
 {
     /// <summary>
-    /// NetworkBootstrapper - Sistema central de networking con Photon Fusion
-    /// Versión refactorizada con optimizaciones de rendimiento y gestión de memoria
+    /// NetworkBootstrapper - Sistema central de networking con Photon Fusion en SHARED MODE
+    /// Arquitectura peer-to-peer con autoridad distribuida para VR multijugador
     /// </summary>
     public class NetworkBootstrapper : MonoBehaviour, INetworkRunnerCallbacks
     {
@@ -72,7 +72,7 @@ namespace HackMonkeys.Core
         private bool _isInRoom = false;
         private GameCore _gameCore;
         
-        // Player tracking
+        // Player tracking - En Shared Mode todos los jugadores son iguales
         private Dictionary<PlayerRef, NetworkObject> _playerObjects = new Dictionary<PlayerRef, NetworkObject>();
         private readonly object _playerObjectsLock = new object();
         
@@ -85,11 +85,12 @@ namespace HackMonkeys.Core
         private Coroutine _sessionFinderCleanupCoroutine;
         private int _consecutiveSessionFailures = 0;
         
-        // Room state
+        // Room state - No hay distinción Host/Client en Shared Mode
         private string _selectedSceneName = "";
         private string _currentRoomName = "";
         private int _currentMaxPlayers = 0;
         private SessionInfo _currentSessionInfo;
+        private bool _isRoomCreator = false; // Quien creó la sala (para UI/UX, no autoridad)
         
         // Singleton
         private static NetworkBootstrapper _instance;
@@ -102,7 +103,13 @@ namespace HackMonkeys.Core
         public NetworkRunner Runner => _runner;
         public bool IsConnected => _runner != null && _runner.IsRunning;
         public bool IsInRoom => _isInRoom;
-        public bool IsHost => _runner != null && _runner.IsServer;
+        
+        // En Shared Mode no hay Host real, pero mantenemos para compatibilidad UI
+        public bool IsRoomCreator => _isRoomCreator;
+        
+        // DEPRECATED: Mantener para compatibilidad pero redirigir
+        public bool IsHost => IsRoomCreator;
+        
         public string CurrentRoomName => _currentRoomName;
         public int CurrentMaxPlayers => _currentMaxPlayers;
         public string SelectedSceneName
@@ -126,7 +133,7 @@ namespace HackMonkeys.Core
             _instance = this;
             DontDestroyOnLoad(gameObject);
             
-            LogDebug("NetworkBootstrapper initialized");
+            LogDebug("NetworkBootstrapper initialized - SHARED MODE");
         }
         
         private void Start()
@@ -164,10 +171,10 @@ namespace HackMonkeys.Core
         
         #endregion
         
-        #region Room Management
+        #region Room Management - Shared Mode
         
         /// <summary>
-        /// Creates a new room and becomes the host
+        /// Creates a new room in SHARED MODE - No host, just the first player
         /// </summary>
         public async Task<bool> CreateRoom(string roomName, int maxPlayers = 0, string sceneName = null)
         {
@@ -179,24 +186,26 @@ namespace HackMonkeys.Core
     
             roomName = SanitizeRoomName(roomName);
     
-            Debug.Log($"Creating room with sanitized name: '{roomName}'");
+            Debug.Log($"[SHARED MODE] Creating room: '{roomName}'");
 
             _isInRoom = true;
+            _isRoomCreator = true; // Marcamos como creador para UI/UX
             _currentRoomName = roomName;
             _currentMaxPlayers = maxPlayers <= 0 ? defaultMaxPlayers : maxPlayers;
     
             _runner = Instantiate(runnerPrefab);
-            _runner.name = "NetworkRunner_Host";
+            _runner.name = "NetworkRunner_Shared";
             _runner.AddCallbacks(this);
             
             _sceneManager = Instantiate(sceneManagerPrefab);
-            _sceneManager.name = "NetworkSceneManager_Host";
+            _sceneManager.name = "NetworkSceneManager_Shared";
             DontDestroyOnLoad(_sceneManager.gameObject);
     
             var startGameArgs = new StartGameArgs()
             {
-                GameMode = GameMode.Host,
-                SessionName = roomName, 
+                // CAMBIO CLAVE: Usar GameMode.Shared en lugar de GameMode.Host
+                GameMode = GameMode.Shared,
+                SessionName = roomName,
                 PlayerCount = _currentMaxPlayers,
                 SceneManager = _sceneManager,
                 CustomLobbyName = "HackMonkeys_Lobby",
@@ -205,63 +214,36 @@ namespace HackMonkeys.Core
                 SessionProperties = CreateEnhancedSessionProperties(roomName, _selectedSceneName)
             };
     
-            Debug.Log($"StartGameArgs configured:");
+            Debug.Log($"[SHARED MODE] StartGameArgs configured:");
+            Debug.Log($"  - GameMode: SHARED");
             Debug.Log($"  - SessionName: '{startGameArgs.SessionName}'");
             Debug.Log($"  - CustomLobbyName: '{startGameArgs.CustomLobbyName}'");
-            Debug.Log($"  - IsVisible: {startGameArgs.IsVisible}");
     
             var result = await _runner.StartGame(startGameArgs);
     
             if (result.Ok)
             {
-                Debug.Log($"✅ Room created successfully with name: '{roomName}'");
-        
-                VerifySessionName();
+                Debug.Log($"✅ [SHARED MODE] Room created: '{roomName}'");
+                OnRoomCreated?.Invoke();
+                
+                // En Shared Mode, esperamos a estar conectados para spawnear
+                await Task.Delay(100);
+                
+                // Spawn del jugador local inmediatamente
+                SpawnLocalPlayer();
+            }
+            else
+            {
+                LogError($"Failed to create room: {result.ShutdownReason}");
+                _isRoomCreator = false;
+                OnConnectionFailed?.Invoke(result.ShutdownReason.ToString());
             }
     
             return result.Ok;
         }
         
-        private string SanitizeRoomName(string name)
-        {
-            name = name.Trim();
-            name = System.Text.RegularExpressions.Regex.Replace(name, @"[^\w\s-.]", "");
-    
-            if (name.Length > 32)
-                name = name.Substring(0, 32);
-    
-            return name;
-        }
-        
-        private Dictionary<string, SessionProperty> CreateEnhancedSessionProperties(string roomName, string sceneName)
-        {
-            var properties = new Dictionary<string, SessionProperty>();
-    
-            properties["displayName"] = roomName; 
-            properties["hostName"] = PlayerDataManager.Instance?.GetPlayerName() ?? "Host";
-    
-            if (!string.IsNullOrEmpty(sceneName))
-            {
-                properties["scene"] = sceneName;
-            }
-    
-            properties["version"] = Application.version;
-            properties["timestamp"] = System.DateTime.Now.Ticks.ToString();
-    
-            return properties;
-        }
-        
-        private void VerifySessionName()
-        {
-            if (_runner != null && _runner.SessionInfo.IsValid)
-            {
-                Debug.Log($"[VERIFY] Session Name in Runner: '{_runner.SessionInfo.Name}'");
-                Debug.Log($"[VERIFY] Is Session Valid: {_runner.SessionInfo.IsValid}");
-            }
-        }
-        
         /// <summary>
-        /// Joins an existing room
+        /// Joins an existing room in SHARED MODE
         /// </summary>
         public async Task<bool> JoinRoom(SessionInfo session)
         {
@@ -273,26 +255,25 @@ namespace HackMonkeys.Core
             
             try
             {
-                LogDebug($"Joining room: {session.Name}");
+                LogDebug($"[SHARED MODE] Joining room: {session.Name}");
                 
                 _currentRoomName = session.Name;
                 _currentMaxPlayers = session.MaxPlayers;
                 _currentSessionInfo = session;
+                _isRoomCreator = false; // No somos el creador
                 
                 _runner = Instantiate(runnerPrefab);
-                _runner.name = "NetworkRunner_Client";
+                _runner.name = "NetworkRunner_Shared";
                 _runner.AddCallbacks(this);
                 
                 _sceneManager = Instantiate(sceneManagerPrefab);
-                _sceneManager.name = "NetworkSceneManager_Client";
+                _sceneManager.name = "NetworkSceneManager_Shared";
                 DontDestroyOnLoad(_sceneManager.gameObject);
                 
-                LogDebug("CLIENT SceneManager created and set to DontDestroyOnLoad");
-                
-                // Configure start arguments
+                // CAMBIO CLAVE: Usar GameMode.Shared para unirse también
                 var startGameArgs = new StartGameArgs()
                 {
-                    GameMode = GameMode.Client,
+                    GameMode = GameMode.Shared,
                     SessionName = session.Name,
                     SceneManager = _sceneManager,
                     CustomLobbyName = "HackMonkeys_Lobby"
@@ -302,13 +283,17 @@ namespace HackMonkeys.Core
                 
                 if (result.Ok)
                 {
-                    LogDebug("✅ Joined room successfully!");
+                    LogDebug("✅ [SHARED MODE] Joined room successfully!");
                     _isInRoom = true;
                     
                     OnConnectedToServerEvent?.Invoke();
                     OnRoomJoined?.Invoke();
                     
                     PlayerDataManager.Instance?.SetSessionData(PlayerRef.None, false, session.Name);
+                    
+                    // En Shared Mode, spawn del jugador local
+                    await Task.Delay(100);
+                    SpawnLocalPlayer();
                     
                     return true;
                 }
@@ -330,68 +315,69 @@ namespace HackMonkeys.Core
         }
         
         /// <summary>
-        /// Leaves the current room
+        /// Spawns the local player in SHARED MODE
         /// </summary>
-        public async Task LeaveRoom()
+        private void SpawnLocalPlayer()
         {
-            if (_runner == null || !_isInRoom) return;
-            
-            LogDebug("Leaving room...");
-            
-            try
+            if (!_runner.IsRunning || lobbyPlayerPrefab == null)
             {
-                // Cleanup network objects first
-                if (_runner.IsRunning)
-                {
-                    if (_runner.IsServer)
-                    {
-                        CleanupAllNetworkObjects();
-                    }
-                    else
-                    {
-                        CleanupLocalPlayerObjects();
-                    }
-                    
-                    // Give time for despawn messages
-                    await Task.Delay(100);
-                }
+                LogError("Cannot spawn player - runner not ready or prefab missing");
+                return;
+            }
+            
+            // En Shared Mode, cada jugador spawna su propio objeto con autoridad local
+            Vector3 spawnPosition = GetSpawnPosition(_runner.LocalPlayer);
+            
+            NetworkObject networkPlayerObject = _runner.Spawn(
+                lobbyPlayerPrefab.gameObject,
+                spawnPosition,
+                Quaternion.identity,
+                _runner.LocalPlayer // Autoridad local en Shared Mode
+            );
+            
+            if (networkPlayerObject != null)
+            {
+                LogDebug($"✅ [SHARED MODE] Spawned local player with authority");
                 
-                await ShutdownRunner();
-                
-                _isInRoom = false;
-                _currentRoomName = "";
-                _currentMaxPlayers = 0;
-                _currentSessionInfo = null;
-                
-                // Clear player objects
                 lock (_playerObjectsLock)
                 {
-                    _playerObjects.Clear();
+                    _playerObjects[_runner.LocalPlayer] = networkPlayerObject;
                 }
                 
-                OnRoomLeft?.Invoke();
-                
-                LogDebug("✅ Left room successfully");
+                OnPlayerSpawned?.Invoke(_runner.LocalPlayer);
             }
-            catch (Exception e)
+            else
             {
-                LogError($"Error leaving room: {e.Message}");
+                LogError("Failed to spawn local player");
             }
         }
         
         /// <summary>
-        /// Starts the game (Host only)
+        /// Gets spawn position for a player (distributed spawning)
+        /// </summary>
+        private Vector3 GetSpawnPosition(PlayerRef player)
+        {
+            // Distribuir spawn positions basado en PlayerRef
+            float angle = player.PlayerId * (360f / _currentMaxPlayers);
+            float radius = 2f;
+            
+            float x = Mathf.Sin(angle * Mathf.Deg2Rad) * radius;
+            float z = Mathf.Cos(angle * Mathf.Deg2Rad) * radius;
+            
+            return new Vector3(x, 0, z);
+        }
+        
+        /// <summary>
+        /// Starts the game scene transition (cualquier jugador puede iniciar en Shared Mode)
         /// </summary>
         public async Task<bool> StartGame(string overrideSceneName = null)
         {
-            LogDebug("=== START GAME CALLED ===");
-            LogDebug($"IsHost: {IsHost}, IsInRoom: {IsInRoom}");
-            LogDebug($"Runner exists: {_runner != null}");
-            LogDebug($"SceneManager exists: {_sceneManager != null}");
+            LogDebug("=== START GAME (SHARED MODE) ===");
+            LogDebug($"IsInRoom: {IsInRoom}, Runner exists: {_runner != null}");
             
-            if (!IsHost || !_isInRoom)
+            if (!_isInRoom)
             {
-                LogError("Only host can start the game!");
+                LogError("Must be in a room to start the game!");
                 return false;
             }
             
@@ -399,19 +385,7 @@ namespace HackMonkeys.Core
             {
                 string sceneToLoad = !string.IsNullOrEmpty(overrideSceneName) ? overrideSceneName : SelectedSceneName;
                 
-                LogDebug($"🚀 Starting game with scene: {sceneToLoad}");
-                
-                if (_runner == null)
-                {
-                    LogError("Runner is null!");
-                    return false;
-                }
-                
-                if (_sceneManager == null)
-                {
-                    LogError("NetworkSceneManagerDefault is null!");
-                    return false;
-                }
+                LogDebug($"🚀 [SHARED MODE] Loading scene: {sceneToLoad}");
                 
                 var sceneIndex = GetSceneIndex(sceneToLoad);
                 if (sceneIndex.IsValid == false)
@@ -420,32 +394,120 @@ namespace HackMonkeys.Core
                     return false;
                 }
                 
-                LogDebug($"Loading scene index: {sceneIndex}");
-                
+                // En Shared Mode, cualquier jugador puede iniciar la transición de escena
+                // Photon Fusion sincronizará automáticamente la escena para todos
                 await _runner.LoadScene(sceneIndex);
                 
-                LogDebug("✅ LoadScene completed");
+                LogDebug("✅ Scene load initiated in SHARED MODE");
                 
                 return true;
             }
             catch (Exception e)
             {
                 LogError($"Failed to start game: {e.Message}");
-                LogError($"Stack trace: {e.StackTrace}");
                 return false;
             }
         }
         
         #endregion
         
-        #region Optimized Session Discovery
+        #region Player Management - Shared Mode
         
-        /// <summary>
-        /// Gets available sessions with caching and optimization
-        /// </summary>
+        public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
+        {
+            LogDebug($"🎯 [SHARED MODE] Player {player} joined the room");
+            
+            // En Shared Mode, cada jugador maneja su propio spawn
+            // No hacemos spawn automático aquí, cada cliente spawna su propio objeto
+            
+            if (player == runner.LocalPlayer)
+            {
+                LogDebug("Local player joined - spawn handled separately");
+            }
+            else
+            {
+                LogDebug($"Remote player {player} joined");
+            }
+        }
+        
+        public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
+        {
+            LogDebug($"👋 [SHARED MODE] Player {player} left the room");
+            
+            // En Shared Mode, limpiamos objetos del jugador que se fue
+            CleanupPlayerObjects(runner, player);
+        }
+        
+        private void CleanupPlayerObjects(NetworkRunner runner, PlayerRef player)
+        {
+            LogDebug($"🧹 [SHARED MODE] Cleaning up objects for player {player}");
+            
+            lock (_playerObjectsLock)
+            {
+                if (_playerObjects.TryGetValue(player, out NetworkObject playerObject))
+                {
+                    if (playerObject != null && playerObject.IsValid)
+                    {
+                        // En Shared Mode, solo despawnear si tenemos autoridad o el objeto es huérfano
+                        if (playerObject.HasInputAuthority || !playerObject.IsValid)
+                        {
+                            LogDebug($"Despawning object for player {player}");
+                            runner.Despawn(playerObject);
+                        }
+                    }
+                    _playerObjects.Remove(player);
+                }
+            }
+            
+            // Buscar objetos huérfanos
+            var allLobbyPlayers = FindObjectsOfType<LobbyPlayer>();
+            foreach (var lobbyPlayer in allLobbyPlayers)
+            {
+                if (lobbyPlayer.PlayerRef == player)
+                {
+                    var netObj = lobbyPlayer.GetComponent<NetworkObject>();
+                    if (netObj != null && netObj.IsValid && !netObj.HasInputAuthority)
+                    {
+                        LogDebug($"Found orphaned LobbyPlayer for player {player}");
+                        // En Shared Mode, Photon manejará la limpieza automáticamente
+                    }
+                }
+            }
+            
+            OnPlayerDespawned?.Invoke(player);
+        }
+        
+        private void CleanupAllNetworkObjects()
+        {
+            LogDebug("🧹 [SHARED MODE] Cleaning up all local network objects");
+            
+            if (_runner == null || !_runner.IsRunning) return;
+            
+            // En Shared Mode, solo limpiamos objetos con autoridad local
+            var allLobbyPlayers = FindObjectsOfType<LobbyPlayer>();
+            foreach (var lobbyPlayer in allLobbyPlayers)
+            {
+                var netObj = lobbyPlayer.GetComponent<NetworkObject>();
+                if (netObj != null && netObj.IsValid && netObj.HasInputAuthority)
+                {
+                    LogDebug($"Despawning local LobbyPlayer: {lobbyPlayer.PlayerName}");
+                    _runner.Despawn(netObj);
+                }
+            }
+            
+            lock (_playerObjectsLock)
+            {
+                _playerObjects.Clear();
+            }
+        }
+        
+        #endregion
+        
+        #region Session Discovery - Sin cambios para Shared Mode
+        
         public async Task<List<SessionInfo>> GetAvailableSessions()
         {
-            // Check cache first
+            // La búsqueda de sesiones funciona igual en Shared Mode
             lock (_sessionCacheLock)
             {
                 if (_cachedSessions != null && 
@@ -456,7 +518,6 @@ namespace HackMonkeys.Core
                 }
             }
             
-            // Prevent multiple simultaneous discoveries
             if (_isSessionFinderActive)
             {
                 LogDebug("Session finder already active, waiting...");
@@ -481,30 +542,25 @@ namespace HackMonkeys.Core
             
             try
             {
-                LogDebug("🔍 Starting optimized session discovery...");
+                LogDebug("🔍 [SHARED MODE] Starting session discovery...");
                 
-                // Create or reuse persistent runner
                 if (_persistentSessionFinderRunner == null || !_persistentSessionFinderRunner.IsRunning)
                 {
                     await CreatePersistentSessionFinder();
                 }
                 
-                // Reset idle cleanup timer
                 ResetSessionFinderCleanupTimer();
                 
-                // Use persistent runner to get sessions
                 var sessionListCallback = new OptimizedSessionListCallback();
                 
                 _persistentSessionFinderRunner.AddCallbacks(sessionListCallback);
                 
-                // Wait for session list
                 await Task.Delay(1500);
                 
                 var sessions = sessionListCallback.GetSessions();
                 
                 _persistentSessionFinderRunner.RemoveCallbacks(sessionListCallback);
                 
-                // Update cache
                 lock (_sessionCacheLock)
                 {
                     _cachedSessions = sessions;
@@ -513,7 +569,7 @@ namespace HackMonkeys.Core
                 
                 _consecutiveSessionFailures = 0;
                 
-                LogDebug($"✅ Found {sessions.Count} available sessions");
+                LogDebug($"✅ Found {sessions.Count} available SHARED MODE sessions");
                 
                 OnSessionListUpdatedEvent?.Invoke(sessions);
                 
@@ -535,14 +591,10 @@ namespace HackMonkeys.Core
             }
         }
         
-        /// <summary>
-        /// Creates the persistent session finder runner
-        /// </summary>
         private async Task CreatePersistentSessionFinder()
         {
-            LogDebug("Creating persistent session finder runner...");
+            LogDebug("Creating persistent session finder for SHARED MODE...");
             
-            // Cleanup existing runner if any
             if (_persistentSessionFinderRunner != null)
             {
                 if (_persistentSessionFinderRunner.IsRunning)
@@ -553,20 +605,271 @@ namespace HackMonkeys.Core
                 _persistentSessionFinderRunner = null;
             }
             
-            // Create new persistent runner
             _persistentSessionFinderRunner = Instantiate(runnerPrefab);
-            _persistentSessionFinderRunner.name = "NetworkRunner_SessionFinder_Persistent";
+            _persistentSessionFinderRunner.name = "NetworkRunner_SessionFinder_Shared";
             DontDestroyOnLoad(_persistentSessionFinderRunner.gameObject);
             
-            // Join session lobby
             await _persistentSessionFinderRunner.JoinSessionLobby(SessionLobby.Custom, "HackMonkeys_Lobby");
             
-            LogDebug("✅ Persistent session finder created");
+            LogDebug("✅ Session finder created for SHARED MODE");
         }
         
+        #endregion
+        
+        #region INetworkRunnerCallbacks - Adaptado para Shared Mode
+        
+        public void OnConnectedToServer(NetworkRunner runner)
+        {
+            LogDebug("🌐 [SHARED MODE] Connected to Photon Cloud");
+            
+            if (PlayerDataManager.Instance != null)
+            {
+                PlayerDataManager.Instance.UpdateLocalPlayerRef(runner.LocalPlayer);
+                LogDebug($"✅ LocalPlayerRef updated: {runner.LocalPlayer}");
+            }
+            
+            LogDebug($"🌐 OnConnectedToServer - SHARED MODE active");
+        }
+        
+        public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
+        {
+            LogDebug($"📡 [SHARED MODE] Disconnected from server: {reason}");
+            
+            if (runner.IsRunning)
+            {
+                CleanupAllNetworkObjects();
+            }
+            
+            _isInRoom = false;
+            _isRoomCreator = false;
+            
+            lock (_playerObjectsLock)
+            {
+                _playerObjects.Clear();
+            }
+            
+            if (_gameCore != null)
+            {
+                _gameCore.OnNetworkDisconnected();
+            }
+        }
+        
+        public void OnSceneLoadDone(NetworkRunner runner)
+        {
+            LogDebug($"🎬 [SHARED MODE] Scene load done");
+            LogDebug($"- Current Scene: {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
+            LogDebug($"- Local Player: {runner.LocalPlayer}");
+            
+            if (_gameCore != null)
+            {
+                LogDebug("✅ Notifying GameCore that scene loaded");
+                _gameCore.OnGameSceneLoaded();
+            }
+        }
+        
+        public void OnSceneLoadStart(NetworkRunner runner)
+        {
+            LogDebug($"🎬 [SHARED MODE] Scene load starting");
+            
+            _gameCore?.TransitionToState(GameCore.GameState.LoadingMatch);
+            
+            PlayerDataManager.Instance?.UpdateSelectedMapFromLobbyPlayer();
+        }
+        
+        #endregion
+        
+        #region Helper Methods - Sin cambios significativos
+        
+        private string SanitizeRoomName(string name)
+        {
+            name = name.Trim();
+            name = System.Text.RegularExpressions.Regex.Replace(name, @"[^\w\s-.]", "");
+            
+            if (name.Length > 32)
+                name = name.Substring(0, 32);
+            
+            return name;
+        }
+        
+        private Dictionary<string, SessionProperty> CreateEnhancedSessionProperties(string roomName, string sceneName)
+        {
+            var properties = new Dictionary<string, SessionProperty>();
+            
+            properties["displayName"] = roomName;
+            properties["hostName"] = PlayerDataManager.Instance?.GetPlayerName() ?? "Player";
+            properties["mode"] = "shared"; // Indicar que es Shared Mode
+            
+            if (!string.IsNullOrEmpty(sceneName))
+            {
+                properties["scene"] = sceneName;
+            }
+            
+            properties["version"] = Application.version;
+            properties["timestamp"] = System.DateTime.Now.Ticks.ToString();
+            
+            return properties;
+        }
+        
+        // ... [Resto de métodos helper sin cambios significativos] ...
+        
         /// <summary>
-        /// Resets the idle cleanup timer for session finder
+        /// Sale de la sala actual y limpia todos los recursos de red
         /// </summary>
+        public async Task LeaveRoom()
+        {
+            LogDebug("🚪 [SHARED MODE] Leaving room...");
+            
+            if (!_isInRoom)
+            {
+                LogWarning("Not in a room to leave");
+                return;
+            }
+            
+            try
+            {
+                // Limpiar objetos de red locales antes de salir
+                CleanupAllNetworkObjects();
+                
+                // Marcar que ya no estamos en la sala
+                _isInRoom = false;
+                _isRoomCreator = false;
+                _currentRoomName = "";
+                _currentMaxPlayers = 0;
+                _selectedSceneName = "";
+                
+                // Notificar que estamos saliendo
+                OnRoomLeft?.Invoke();
+                
+                // Limpiar datos del jugador
+                if (PlayerDataManager.Instance != null)
+                {
+                    PlayerDataManager.Instance.ClearSessionData();
+                }
+                
+                // Shutdown del runner y limpieza
+                await ShutdownRunner();
+                
+                LogDebug("✅ [SHARED MODE] Successfully left room");
+            }
+            catch (Exception e)
+            {
+                LogError($"Error leaving room: {e.Message}");
+            }
+        }
+        
+        #endregion
+        
+        #region Cleanup & Utilities
+        
+        private async Task ShutdownRunner()
+        {
+            if (_runner != null)
+            {
+                LogDebug("🔄 [SHARED MODE] Shutting down runner...");
+                await _runner.Shutdown();
+                await CleanupRunner();
+            }
+        }
+        
+        private async Task CleanupRunner()
+        {
+            if (_runner != null)
+            {
+                _runner.RemoveCallbacks(this);
+                Destroy(_runner.gameObject);
+                _runner = null;
+                LogDebug("✅ Runner cleaned up");
+            }
+            
+            if (_sceneManager != null)
+            {
+                Destroy(_sceneManager.gameObject);
+                _sceneManager = null;
+                LogDebug("✅ SceneManager cleaned up");
+            }
+            
+            _isRoomCreator = false;
+            
+            await Task.Delay(100);
+        }
+        
+        // ... [Resto de métodos sin cambios] ...
+        
+        #endregion
+        
+        #region Remaining INetworkRunnerCallbacks
+        
+        public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
+        {
+            LogError($"[SHARED MODE] Connect failed: {reason}");
+            OnConnectionFailed?.Invoke(reason.ToString());
+        }
+        
+        public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
+        {
+            if (runner.name.Contains("SessionFinder"))
+            {
+                LogDebug($"📋 [SHARED MODE] Session list updated: {sessionList.Count} sessions");
+                OnSessionListUpdatedEvent?.Invoke(sessionList);
+            }
+        }
+        
+        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
+        {
+            LogDebug($"🔄 [SHARED MODE] Runner shutdown: {shutdownReason}");
+            
+            lock (_playerObjectsLock)
+            {
+                _playerObjects.Clear();
+            }
+            
+            var orphanedPlayers = FindObjectsOfType<LobbyPlayer>();
+            foreach (var player in orphanedPlayers)
+            {
+                if (player.GetComponent<NetworkObject>()?.HasInputAuthority == true)
+                {
+                    LogDebug($"Destroying local orphaned LobbyPlayer: {player.name}");
+                    Destroy(player.gameObject);
+                }
+            }
+        }
+        
+        // Empty implementations
+        public void OnInput(NetworkRunner runner, NetworkInput input) { }
+        public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
+        public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
+        public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
+        public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
+        public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
+        public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
+        public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
+        public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
+        public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
+        
+        #endregion
+        
+        #region Logging Utilities
+        
+        private void LogDebug(string message)
+        {
+            if (enableDebugLogs)
+                Debug.Log($"[NetworkBootstrapper-SHARED] {message}");
+        }
+        
+        private void LogWarning(string message)
+        {
+            Debug.LogWarning($"[NetworkBootstrapper-SHARED] {message}");
+        }
+        
+        private void LogError(string message)
+        {
+            Debug.LogError($"[NetworkBootstrapper-SHARED] {message}");
+        }
+        
+        #endregion
+        
+        #region Session Finder Cleanup
+        
         private void ResetSessionFinderCleanupTimer()
         {
             if (!autoCleanupSessionFinder) return;
@@ -579,9 +882,6 @@ namespace HackMonkeys.Core
             _sessionFinderCleanupCoroutine = StartCoroutine(SessionFinderIdleCleanup());
         }
         
-        /// <summary>
-        /// Coroutine to cleanup idle session finder
-        /// </summary>
         private IEnumerator SessionFinderIdleCleanup()
         {
             yield return new WaitForSeconds(sessionFinderIdleTimeout);
@@ -593,9 +893,6 @@ namespace HackMonkeys.Core
             }
         }
         
-        /// <summary>
-        /// Immediately cleans up the session finder
-        /// </summary>
         private void CleanupSessionFinderImmediate()
         {
             if (_sessionFinderCleanupCoroutine != null)
@@ -623,145 +920,12 @@ namespace HackMonkeys.Core
             }
         }
         
-        /// <summary>
-        /// Invalidates the session cache
-        /// </summary>
         public void InvalidateSessionCache()
         {
             lock (_sessionCacheLock)
             {
                 _cachedSessions = null;
                 _lastSessionListTime = DateTime.MinValue;
-            }
-        }
-        
-        #endregion
-        
-        #region Player Management
-        
-        public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
-        {
-            LogDebug($"🎯 Player {player} joined the room");
-            
-            if (runner.IsServer)
-            {
-                SpawnLobbyPlayer(player);
-            }
-        }
-        
-        public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
-        {
-            LogDebug($"👋 Player {player} left the room");
-            
-            if (runner.IsServer)
-            {
-                CleanupPlayerObjects(runner, player);
-            }
-        }
-        
-        private void SpawnLobbyPlayer(PlayerRef player)
-        {
-            if (lobbyPlayerPrefab == null)
-            {
-                LogError("LobbyPlayer prefab not assigned!");
-                return;
-            }
-            
-            Vector3 spawnPosition = Vector3.zero;
-            NetworkObject networkPlayerObject = _runner.Spawn(
-                lobbyPlayerPrefab.gameObject,
-                spawnPosition,
-                Quaternion.identity,
-                player
-            );
-            
-            if (networkPlayerObject != null)
-            {
-                LogDebug($"✅ Spawned LobbyPlayer for player {player}");
-                
-                lock (_playerObjectsLock)
-                {
-                    _playerObjects[player] = networkPlayerObject;
-                }
-                
-                OnPlayerSpawned?.Invoke(player);
-            }
-            else
-            {
-                LogError($"Failed to spawn LobbyPlayer for player {player}");
-            }
-        }
-        
-        private void CleanupPlayerObjects(NetworkRunner runner, PlayerRef player)
-        {
-            LogDebug($"🧹 Cleaning up objects for player {player}");
-            
-            // Use tracked reference
-            lock (_playerObjectsLock)
-            {
-                if (_playerObjects.TryGetValue(player, out NetworkObject playerObject))
-                {
-                    if (playerObject != null && playerObject.IsValid)
-                    {
-                        LogDebug($"Despawning tracked object for player {player}");
-                        runner.Despawn(playerObject);
-                    }
-                    _playerObjects.Remove(player);
-                }
-            }
-            
-            // Fallback: search for orphaned LobbyPlayers
-            var allLobbyPlayers = FindObjectsOfType<LobbyPlayer>();
-            foreach (var lobbyPlayer in allLobbyPlayers)
-            {
-                if (lobbyPlayer.PlayerRef == player)
-                {
-                    var netObj = lobbyPlayer.GetComponent<NetworkObject>();
-                    if (netObj != null && netObj.IsValid)
-                    {
-                        LogDebug($"Despawning found LobbyPlayer for player {player}");
-                        runner.Despawn(netObj);
-                    }
-                }
-            }
-            
-            OnPlayerDespawned?.Invoke(player);
-        }
-        
-        private void CleanupAllNetworkObjects()
-        {
-            LogDebug("🧹 Cleaning up all network objects");
-            
-            if (_runner == null || !_runner.IsRunning) return;
-            
-            // Despawn all LobbyPlayers
-            var allLobbyPlayers = FindObjectsOfType<LobbyPlayer>();
-            foreach (var lobbyPlayer in allLobbyPlayers)
-            {
-                var netObj = lobbyPlayer.GetComponent<NetworkObject>();
-                if (netObj != null && netObj.IsValid)
-                {
-                    LogDebug($"Despawning LobbyPlayer: {lobbyPlayer.PlayerName}");
-                    _runner.Despawn(netObj);
-                }
-            }
-            
-            lock (_playerObjectsLock)
-            {
-                _playerObjects.Clear();
-            }
-        }
-        
-        private void CleanupLocalPlayerObjects()
-        {
-            LogDebug("🧹 Cleaning up local player objects");
-            
-            if (_runner == null || !_runner.IsRunning) return;
-            
-            var localPlayer = _runner.LocalPlayer;
-            if (localPlayer.IsRealPlayer)
-            {
-                CleanupPlayerObjects(_runner, localPlayer);
             }
         }
         
@@ -784,21 +948,19 @@ namespace HackMonkeys.Core
             return availableScenes.FirstOrDefault(s => s.sceneName == sceneName);
         }
         
+        /// <summary>
+        /// Obtiene el nombre de la escena por defecto
+        /// </summary>
         public string GetDefaultSceneName()
         {
-            if (!string.IsNullOrEmpty(_selectedSceneName))
-                return _selectedSceneName;
-            
+            // Si hay escenas disponibles configuradas, usar la primera
             if (availableScenes != null && availableScenes.Count > 0)
             {
-                _selectedSceneName = availableScenes[0].sceneName;
-                LogDebug($"Using first available scene: {_selectedSceneName}");
-                return _selectedSceneName;
+                return availableScenes[0].sceneName;
             }
             
-            _selectedSceneName = gameSceneName;
-            LogDebug($"Using default scene: {_selectedSceneName}");
-            return _selectedSceneName;
+            // Si no, usar la escena de juego por defecto
+            return gameSceneName;
         }
         
         private SceneRef GetSceneIndex(string sceneName)
@@ -818,184 +980,9 @@ namespace HackMonkeys.Core
             return SceneRef.FromIndex(0);
         }
         
-        private Dictionary<string, SessionProperty> CreateSessionProperties(string sceneName)
-        {
-            var properties = new Dictionary<string, SessionProperty>();
-            
-            if (!string.IsNullOrEmpty(sceneName))
-            {
-                properties["scene"] = sceneName;
-            }
-            
-            properties["version"] = Application.version;
-            properties["gamemode"] = "default";
-            
-            return properties;
-        }
-        
         #endregion
         
-        #region INetworkRunnerCallbacks
-        
-        public void OnConnectedToServer(NetworkRunner runner)
-        {
-            LogDebug("🌐 Connected to Photon Cloud");
-            
-            if (PlayerDataManager.Instance != null)
-            {
-                PlayerDataManager.Instance.UpdateLocalPlayerRef(runner.LocalPlayer);
-                LogDebug($"✅ LocalPlayerRef updated: {runner.LocalPlayer}");
-            }
-            
-            LogDebug($"🌐 OnConnectedToServer - Callbacks registered: {runner.name}");
-        }
-        
-        public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
-        {
-            LogDebug($"📡 Disconnected from server: {reason}");
-            
-            if (runner.IsRunning)
-            {
-                CleanupAllNetworkObjects();
-            }
-            
-            _isInRoom = false;
-            lock (_playerObjectsLock)
-            {
-                _playerObjects.Clear();
-            }
-            
-            if (_gameCore != null)
-            {
-                _gameCore.OnNetworkDisconnected();
-            }
-        }
-        
-        public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
-        {
-            LogError($"Connect failed: {reason}");
-            OnConnectionFailed?.Invoke(reason.ToString());
-        }
-        
-        public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
-        {
-            if (runner.name.Contains("SessionFinder"))
-            {
-                LogDebug($"📋 Session list updated: {sessionList.Count} sessions");
-                OnSessionListUpdatedEvent?.Invoke(sessionList);
-            }
-        }
-        
-        public void OnInput(NetworkRunner runner, NetworkInput input) { }
-        
-        public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
-        
-        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
-        {
-            LogDebug($"🔄 Runner shutdown: {shutdownReason}");
-            
-            lock (_playerObjectsLock)
-            {
-                _playerObjects.Clear();
-            }
-            
-            // Cleanup orphaned LobbyPlayers
-            var orphanedPlayers = FindObjectsOfType<LobbyPlayer>();
-            foreach (var player in orphanedPlayers)
-            {
-                LogDebug($"Destroying orphaned LobbyPlayer: {player.name}");
-                Destroy(player.gameObject);
-            }
-        }
-        
-        public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
-        
-        public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
-        
-        public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
-        
-        public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
-        
-        public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
-        
-        public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
-        
-        public void OnSceneLoadDone(NetworkRunner runner)
-        {
-            LogDebug($"🎬 === OnSceneLoadDone - {runner.GameMode} ===");
-            LogDebug($"- New Scene: {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
-            LogDebug($"- Is Server: {runner.IsServer}");
-            LogDebug($"- Is Client: {runner.IsClient}");
-            LogDebug($"- Runner name: {runner.name}");
-            LogDebug($"- SelectedSceneName: {SelectedSceneName}");
-            
-            if (_gameCore != null)
-            {
-                LogDebug("✅ Notifying GameCore that scene loaded");
-                _gameCore.OnGameSceneLoaded();
-            }
-            else
-            {
-                LogDebug("❌ GameCore is null!");
-            }
-        }
-        
-        public void OnSceneLoadStart(NetworkRunner runner)
-        {
-            LogDebug($"🎬 === OnSceneLoadStart - {runner.GameMode} ===");
-            LogDebug($"- IsServer: {runner.IsServer}");
-            LogDebug($"- IsClient: {runner.IsClient}");
-            LogDebug($"- Current Scene: {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
-            LogDebug($"- SelectedSceneName: {SelectedSceneName}");
-            
-            _gameCore?.TransitionToState(GameCore.GameState.LoadingMatch);
-            
-            if (!runner.IsServer && _gameCore != null)
-            {
-                LogDebug("📱 CLIENT: Scene change detected - notifying GameCore");
-                _gameCore.OnClientSceneChangeStarted();
-            }
-            
-            PlayerDataManager.Instance?.UpdateSelectedMapFromLobbyPlayer();
-        }
-        
-        public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
-        
-        public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
-        
-        #endregion
-        
-        #region Cleanup & Utilities
-        
-        private async Task ShutdownRunner()
-        {
-            if (_runner != null)
-            {
-                LogDebug("🔄 Shutting down runner...");
-                await _runner.Shutdown();
-                await CleanupRunner();
-            }
-        }
-        
-        private async Task CleanupRunner()
-        {
-            if (_runner != null)
-            {
-                _runner.RemoveCallbacks(this);
-                Destroy(_runner.gameObject);
-                _runner = null;
-                LogDebug("✅ Runner cleaned up");
-            }
-            
-            if (_sceneManager != null)
-            {
-                Destroy(_sceneManager.gameObject);
-                _sceneManager = null;
-                LogDebug("✅ SceneManager cleaned up");
-            }
-            
-            await Task.Delay(100);
-        }
+        #region Validation
         
         private void ValidateConfiguration()
         {
@@ -1011,104 +998,8 @@ namespace HackMonkeys.Core
         
         #endregion
         
-        #region Logging Utilities
-        
-        private void LogDebug(string message)
-        {
-            if (enableDebugLogs)
-                Debug.Log($"[NetworkBootstrapper] {message}");
-        }
-        
-        private void LogWarning(string message)
-        {
-            Debug.LogWarning($"[NetworkBootstrapper] {message}");
-        }
-        
-        private void LogError(string message)
-        {
-            Debug.LogError($"[NetworkBootstrapper] {message}");
-        }
-        
-        #endregion
-        
-        #region Debug Menu
-        
-        [ContextMenu("Debug: Validate Configuration")]
-        private void DebugValidateConfiguration()
-        {
-            Debug.Log("=== NetworkBootstrapper Validation ===");
-            
-            if (runnerPrefab == null)
-                Debug.LogError("❌ Runner Prefab not assigned!");
-            else
-                Debug.Log("✅ Runner Prefab assigned");
-            
-            if (sceneManagerPrefab == null)
-                Debug.LogError("❌ Scene Manager Prefab not assigned!");
-            else
-                Debug.Log("✅ Scene Manager Prefab assigned");
-            
-            if (lobbyPlayerPrefab == null)
-                Debug.LogError("❌ LobbyPlayer Prefab not assigned!");
-            else
-                Debug.Log("✅ LobbyPlayer Prefab assigned");
-            
-            Debug.Log($"Default Max Players: {defaultMaxPlayers}");
-            Debug.Log($"Current Room: {CurrentRoomName ?? "None"}");
-            Debug.Log($"Is In Room: {IsInRoom}");
-            Debug.Log($"Is Host: {IsHost}");
-            Debug.Log($"Available Scenes: {availableScenes.Count}");
-            Debug.Log($"Session Cache Duration: {sessionCacheDuration}s");
-            Debug.Log($"Auto Cleanup Enabled: {autoCleanupSessionFinder}");
-            Debug.Log("================================");
-        }
-        
-        [ContextMenu("Debug: Print Session Cache")]
-        private void DebugPrintSessionCache()
-        {
-            Debug.Log("=== Session Cache Status ===");
-            lock (_sessionCacheLock)
-            {
-                if (_cachedSessions != null)
-                {
-                    Debug.Log($"Cached Sessions: {_cachedSessions.Count}");
-                    Debug.Log($"Cache Age: {(DateTime.Now - _lastSessionListTime).TotalSeconds}s");
-                    foreach (var session in _cachedSessions)
-                    {
-                        Debug.Log($"  - {session.Name}: {session.PlayerCount}/{session.MaxPlayers}");
-                    }
-                }
-                else
-                {
-                    Debug.Log("No cached sessions");
-                }
-            }
-            Debug.Log($"Session Finder Active: {_isSessionFinderActive}");
-            Debug.Log($"Persistent Runner Exists: {_persistentSessionFinderRunner != null}");
-            Debug.Log("==========================");
-        }
-        
-        [ContextMenu("Debug: Force Clear Cache")]
-        private void DebugForceClearCache()
-        {
-            InvalidateSessionCache();
-            Debug.Log("Session cache cleared");
-        }
-        
-        [ContextMenu("Debug: Force Cleanup Session Finder")]
-        private void DebugForceCleanupSessionFinder()
-        {
-            CleanupSessionFinderImmediate();
-            Debug.Log("Session finder cleaned up");
-        }
-        
-        #endregion
-        
         #region Helper Classes
         
-        /// <summary>
-        /// Optimized callback for session list updates
-        /// </summary>
         private class OptimizedSessionListCallback : INetworkRunnerCallbacks
         {
             private List<SessionInfo> _sessions = new List<SessionInfo>();
@@ -1127,11 +1018,11 @@ namespace HackMonkeys.Core
                 lock (_lock)
                 {
                     _sessions = new List<SessionInfo>(sessionList);
-                    Debug.Log($"[OptimizedSessionListCallback] Received {sessionList.Count} sessions");
+                    Debug.Log($"[OptimizedSessionListCallback-SHARED] Received {sessionList.Count} sessions");
                 }
             }
             
-            // Empty implementations for other callbacks
+            // Empty implementations
             public void OnConnectedToServer(NetworkRunner runner) { }
             public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
             public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
@@ -1155,9 +1046,6 @@ namespace HackMonkeys.Core
         #endregion
     }
     
-    /// <summary>
-    /// Scene information for available maps/levels
-    /// </summary>
     [System.Serializable]
     public class SceneInfo
     {

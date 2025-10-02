@@ -14,7 +14,7 @@ namespace HackMonkeys.Core
         #region Networked Properties
         [Networked] public NetworkString<_32> PlayerName { get; set; }
         [Networked] public NetworkBool IsReady { get; set; }
-        [Networked] public NetworkBool IsHost { get; set; }
+        [Networked] public NetworkBool IsRoomCreator { get; set; } // En Shared Mode, quien creó la sala
         [Networked] public Color PlayerColor { get; set; }
         [Networked] public NetworkString<_64> SelectedMap { get; set; }
         [Networked] public NetworkBool DataInitialized { get; set; }
@@ -31,6 +31,8 @@ namespace HackMonkeys.Core
         #region Properties
         public PlayerRef PlayerRef => Object.InputAuthority;
         public bool IsLocalPlayer => HasInputAuthority;
+        // DEPRECATED: Mantener IsHost para compatibilidad  
+        public bool IsHost => IsRoomCreator;
         #endregion
 
         #region Network Lifecycle
@@ -122,7 +124,8 @@ namespace HackMonkeys.Core
                 // Obtener datos validados
                 string playerName = _dataManager.GetPlayerName();
                 Color playerColor = _dataManager.GetPlayerColor();
-                bool isHost = Runner.IsServer;
+                // En Shared Mode, verificar si somos el creador de la sala
+                bool isRoomCreator = NetworkBootstrapper.Instance != null && NetworkBootstrapper.Instance.IsRoomCreator;
                 
                 // Validación adicional
                 if (string.IsNullOrEmpty(playerName))
@@ -133,10 +136,10 @@ namespace HackMonkeys.Core
                 
                 _cachedPlayerName = playerName;
                 
-                Debug.Log($"[LOBBYPLAYER] 📤 Sending player data - Name: {playerName}, IsHost: {isHost}");
+                Debug.Log($"[LOBBYPLAYER] 📤 Sending player data - Name: {playerName}, IsRoomCreator: {isRoomCreator}");
                 
                 // Enviar datos via RPC
-                RPC_SetPlayerData(playerName, playerColor, isHost);
+                RPC_SetPlayerData(playerName, playerColor, isRoomCreator);
                 
                 // Esperar confirmación de sincronización
                 await WaitForDataSyncAsync(cancellationToken);
@@ -144,10 +147,10 @@ namespace HackMonkeys.Core
                 // Registrar en LobbyState
                 RegisterInLobbyState();
                 
-                // Si es cliente, sincronizar con el mapa del host
-                if (!Runner.IsServer)
+                // Si no somos el creador, sincronizar con el mapa del creador
+                if (!isRoomCreator)
                 {
-                    await SyncWithHostMapAsync(cancellationToken);
+                    await SyncWithCreatorMapAsync(cancellationToken);
                 }
                 
                 Debug.Log($"[LOBBYPLAYER] ✅ Local player initialization complete: {playerName}");
@@ -239,19 +242,19 @@ namespace HackMonkeys.Core
         }
 
         /// <summary>
-        /// Sincroniza con el mapa seleccionado por el host
+        /// Sincroniza con el mapa seleccionado por el creador de la sala
         /// </summary>
-        private async UniTask SyncWithHostMapAsync(CancellationToken cancellationToken)
+        private async UniTask SyncWithCreatorMapAsync(CancellationToken cancellationToken)
         {
             // Esperar un momento para que LobbyState esté listo
             await UniTask.Delay(500, cancellationToken: cancellationToken);
             
             if (LobbyState.Instance != null)
             {
-                var hostPlayer = LobbyState.Instance.HostPlayer;
+                var hostPlayer = LobbyState.Instance.RoomCreatorPlayer; // Usar RoomCreatorPlayer en lugar de HostPlayer
                 if (hostPlayer != null && !string.IsNullOrEmpty(hostPlayer.SelectedMap.ToString()))
                 {
-                    Debug.Log($"[LOBBYPLAYER] 🗺️ Client syncing with host map: {hostPlayer.SelectedMap}");
+                    Debug.Log($"[LOBBYPLAYER] 🗺️ Player syncing with room creator's map: {hostPlayer.SelectedMap}");
                     
                     var networkBootstrapper = NetworkBootstrapper.Instance;
                     if (networkBootstrapper != null)
@@ -338,10 +341,17 @@ namespace HackMonkeys.Core
         /// <summary>
         /// RPC para establecer datos del jugador con confirmación
         /// </summary>
-        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-        private void RPC_SetPlayerData(NetworkString<_32> name, Color color, NetworkBool isHost)
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)] // En Shared Mode, enviamos a todos
+        private void RPC_SetPlayerData(NetworkString<_32> name, Color color, NetworkBool isRoomCreator)
         {
-            Debug.Log($"[LOBBYPLAYER-RPC] 📥 Setting player data - Name: {name}, IsHost: {isHost}, PlayerRef: {Object.InputAuthority}");
+            Debug.Log($"[LOBBYPLAYER-RPC] 📥 Setting player data - Name: {name}, IsRoomCreator: {isRoomCreator}, PlayerRef: {Object.InputAuthority}");
+            
+            // En Shared Mode, cada jugador actualiza sus propios datos
+            if (!HasInputAuthority)
+            {
+                Debug.Log("[LOBBYPLAYER-RPC] Received remote player data");
+                return;
+            }
             
             // Validar y establecer datos
             string validName = !string.IsNullOrEmpty(name.ToString()) 
@@ -350,20 +360,20 @@ namespace HackMonkeys.Core
             
             PlayerName = validName;
             PlayerColor = color;
-            IsHost = isHost;
+            IsRoomCreator = isRoomCreator;
             DataInitialized = true;
             
             _cachedPlayerName = validName;
             
-            // Si es el host, inicializar con el mapa por defecto
-            if (isHost && string.IsNullOrEmpty(SelectedMap.ToString()))
+            // Si es el creador, inicializar con el mapa por defecto
+            if (isRoomCreator && string.IsNullOrEmpty(SelectedMap.ToString()))
             {
                 var networkBootstrapper = NetworkBootstrapper.Instance;
                 if (networkBootstrapper != null)
                 {
                     string defaultMap = networkBootstrapper.GetDefaultSceneName();
                     SelectedMap = defaultMap;
-                    Debug.Log($"[LOBBYPLAYER-RPC] Host initialized with default map: {defaultMap}");
+                    Debug.Log($"[LOBBYPLAYER-RPC] Room creator initialized with default map: {defaultMap}");
                     
                     // Notificar a todos del mapa
                     RPC_NotifyMapChange(defaultMap);
@@ -377,7 +387,7 @@ namespace HackMonkeys.Core
         /// <summary>
         /// Notifica a todos los clientes que los datos están listos
         /// </summary>
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)] // En Shared Mode, cualquiera puede notificar
         private void RPC_NotifyDataReady(PlayerRef playerRef, NetworkString<_32> playerName)
         {
             Debug.Log($"[LOBBYPLAYER-RPC] 📢 Data ready notification - Player: {playerName} ({playerRef})");
@@ -416,15 +426,17 @@ namespace HackMonkeys.Core
         [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
         private void RPC_SetReady(NetworkBool ready)
         {
-            if (HasStateAuthority)
+            // En Shared Mode, cada jugador actualiza su propio estado
+            if (HasInputAuthority)
             {
                 IsReady = ready;
-                // AÑADIR: Notificar el cambio desde el servidor
+                Debug.Log($"[LOBBYPLAYER] Ready state set to: {ready}");
+                // Notificar a todos del cambio
                 RPC_NotifyReadyStateChanged(Object.InputAuthority, ready);
             }
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)] // En Shared Mode
         private void RPC_NotifyReadyStateChanged(PlayerRef playerRef, NetworkBool ready)
         {
             // Actualizar display solo cuando el servidor confirma el cambio
@@ -445,41 +457,39 @@ namespace HackMonkeys.Core
         }
 
         /// <summary>
-        /// Cambiar mapa (solo host)
+        /// Cambiar mapa (solo el creador de la sala puede cambiar el mapa)
         /// </summary>
-        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)] // En Shared Mode
         public void RPC_ChangeMap(NetworkString<_64> mapName)
         {
-            Debug.Log($"[LOBBYPLAYER-RPC] 📤 RPC_ChangeMap received: {mapName}, IsHost: {IsHost}, HasStateAuth: {HasStateAuthority}");
+            Debug.Log($"[LOBBYPLAYER-RPC] 📤 RPC_ChangeMap received: {mapName}, IsRoomCreator: {IsRoomCreator}");
             
-            if (!IsHost)
+            // Solo el creador de la sala puede cambiar el mapa
+            if (!IsRoomCreator)
             {
-                Debug.LogWarning("[LOBBYPLAYER] Non-host tried to change map!");
+                Debug.LogWarning("[LOBBYPLAYER] Non-room-creator tried to change map!");
                 return;
             }
             
-            // Solo el servidor puede cambiar el estado networked
-            if (HasStateAuthority)
+            // En Shared Mode, el creador actualiza su propio estado y notifica a todos
+            if (HasInputAuthority && IsRoomCreator)
             {
                 SelectedMap = mapName;
-                Debug.Log($"[LOBBYPLAYER-RPC] ✅ Server updated SelectedMap to: {mapName}");
+                Debug.Log($"[LOBBYPLAYER-RPC] ✅ Room creator updated SelectedMap to: {mapName}");
                 
-                // Notificar a todos los clientes
+                // Notificar a todos los jugadores
                 RPC_NotifyMapChange(mapName);
             }
         }
 
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)] // En Shared Mode
         private void RPC_NotifyMapChange(NetworkString<_64> mapName)
         {
-            Debug.Log($"[LOBBYPLAYER-RPC] 📥 Map change notification received: {mapName}, IsHost: {IsHost}, HasStateAuth: {HasStateAuthority}");
+            Debug.Log($"[LOBBYPLAYER-RPC] 📥 Map change notification received: {mapName}, IsRoomCreator: {IsRoomCreator}");
             
-            // CRITICO: Todos los jugadores actualizan su SelectedMap
-            if (HasStateAuthority)
-            {
-                SelectedMap = mapName;
-                Debug.Log($"[LOBBYPLAYER-RPC] ✅ Updated SelectedMap to: {mapName}");
-            }
+            // En Shared Mode, todos actualizan la selección del mapa localmente
+            SelectedMap = mapName;
+            Debug.Log($"[LOBBYPLAYER-RPC] ✅ Updated SelectedMap to: {mapName}");
             
             if (LobbyState.Instance != null)
             {
@@ -499,7 +509,8 @@ namespace HackMonkeys.Core
         #region Change Detection
         public override void FixedUpdateNetwork()
         {
-            if (HasInputAuthority || HasStateAuthority)
+            // En Shared Mode, solo verificamos InputAuthority
+            if (HasInputAuthority)
             {
                 foreach (var change in _changeDetector.DetectChanges(this))
                 {
@@ -515,7 +526,7 @@ namespace HackMonkeys.Core
                             
                         case nameof(SelectedMap):
                             Debug.Log($"[LOBBYPLAYER] Map changed: {SelectedMap}");
-                            if (IsHost && LobbyState.Instance != null)
+                            if (IsRoomCreator && LobbyState.Instance != null)
                             {
                                 LobbyState.Instance.UpdateMapSelection(SelectedMap.ToString());
                             }

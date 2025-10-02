@@ -28,7 +28,10 @@ namespace HackMonkeys.Core
         public int PlayerCount => _players.Count;
         public bool AllPlayersReady => _players.Count > 0 && _players.Values.All(p => p.IsReady);
         
-        public LobbyPlayer HostPlayer => _players.Values.FirstOrDefault(p => p.IsHost);
+        // En Shared Mode, usamos RoomCreatorPlayer
+        public LobbyPlayer RoomCreatorPlayer => _players.Values.FirstOrDefault(p => p.IsRoomCreator);
+        // DEPRECATED: Mantener HostPlayer para compatibilidad
+        public LobbyPlayer HostPlayer => RoomCreatorPlayer;
         public LobbyPlayer LocalPlayer => _players.Values.FirstOrDefault(p => p.IsLocalPlayer);
         private string _lastKnownMap = "";
         private void Awake()
@@ -132,9 +135,9 @@ namespace HackMonkeys.Core
             OnPlayerUpdated?.Invoke(player);
             CheckAllPlayersReady();
             
-            if (player.IsHost)
+            if (player.IsRoomCreator)
             {
-                CheckHostMapChange();
+                CheckRoomCreatorMapChange();
             }
         }
         
@@ -146,7 +149,7 @@ namespace HackMonkeys.Core
         
         public string GetSelectedMap()
         {
-            var host = HostPlayer;
+            var host = RoomCreatorPlayer;
             if (host != null)
             {
                 return host.SelectedMap.ToString();
@@ -189,7 +192,7 @@ namespace HackMonkeys.Core
     
             if (hostFirst)
             {
-                return playersList.OrderByDescending(p => p.IsHost ? 1 : 0)
+                return playersList.OrderByDescending(p => p.IsRoomCreator ? 1 : 0)
                     .ThenByDescending(p => p.IsLocalPlayer ? 1 : 0)
                     .ThenBy(p => {
                         string name = p.PlayerName.ToString();
@@ -238,9 +241,9 @@ namespace HackMonkeys.Core
             OnAllPlayersReady?.Invoke(allReady);
         }
         
-        public void CheckHostMapChange()
+        public void CheckRoomCreatorMapChange()
         {
-            var host = HostPlayer;
+            var host = RoomCreatorPlayer;
             if (host != null)
             {
                 string currentMap = host.SelectedMap.ToString();
@@ -333,13 +336,13 @@ namespace HackMonkeys.Core
                 var player = kvp.Value;
                 string status = $"- {player.GetDisplayName()} | Ready: {player.IsReady} | Local: {player.IsLocalPlayer}";
                 
-                if (player.IsHost) status += " | HOST";
+                if (player.IsRoomCreator) status += " | ROOM CREATOR";
                 
                 Debug.Log(status);
             }
             
             Debug.Log($"All Ready: {AllPlayersReady}");
-            Debug.Log($"Host Player: {HostPlayer?.GetDisplayName() ?? "None"}");
+            Debug.Log($"Room Creator: {RoomCreatorPlayer?.GetDisplayName() ?? "None"}");
             Debug.Log($"Local Player: {LocalPlayer?.GetDisplayName() ?? "None"}");
             Debug.Log("================================");
         }
@@ -407,9 +410,9 @@ namespace HackMonkeys.Core
                 MaxPlayers = GetMaxPlayers(),
                 ReadyPlayers = _players.Values.Count(p => p.IsReady),
                 AllReady = AllPlayersReady,
-                HasHost = HostPlayer != null,
+                HasHost = RoomCreatorPlayer != null, // Represents room creator in Shared Mode
                 HasLocalPlayer = LocalPlayer != null,
-                HostName = HostPlayer?.GetDisplayName() ?? "None",
+                HostName = RoomCreatorPlayer?.GetDisplayName() ?? "None", // Room creator name
                 LocalPlayerName = LocalPlayer?.GetDisplayName() ?? "None"
             };
         }

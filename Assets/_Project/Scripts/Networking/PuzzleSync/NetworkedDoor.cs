@@ -128,7 +128,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         public override void Spawned()
         {
-            if (HasStateAuthority)
+            // In Shared mode, initialize state for all clients
+            if (Object.IsValid && Object.InputAuthority == Runner.LocalPlayer)
             {
                 DoorProgress = 0f;
                 IsMoving = false;
@@ -136,11 +137,12 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 IsUnlocked = _startUnlocked;
                 OpenCount = 0;
                 AutoCloseTimer = TickTimer.None;
-                
-                if (_requiresPuzzleCompletion && !_startUnlocked)
-                {
-                    RegisterPuzzleCallback();
-                }
+            }
+            
+            // All clients should register for puzzle callbacks in Shared mode
+            if (_requiresPuzzleCompletion && !_startUnlocked)
+            {
+                RegisterPuzzleCallback();
             }
             
             _localProgress = DoorProgress;
@@ -155,8 +157,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         public override void FixedUpdateNetwork()
         {
-            if (!HasStateAuthority) return;
-            
+            // In Shared mode, all clients can update the door state
             if (IsMoving)
             {
                 float target = TargetOpen ? 1f : 0f;
@@ -218,11 +219,10 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         #region Door Control
         
        
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         public void RPC_RequestOpen()
         {
-            if (!HasStateAuthority) return;
-            
+            // In Shared mode, any client can process this request
             if (IsUnlocked && !IsMoving && !TargetOpen)
             {
                 OpenDoor();
@@ -234,11 +234,10 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         }
         
         
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         public void RPC_RequestClose()
         {
-            if (!HasStateAuthority) return;
-            
+            // In Shared mode, any client can process this request
             if (!IsMoving && TargetOpen)
             {
                 CloseDoor();
@@ -246,11 +245,10 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         }
         
        
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         public void RPC_RequestToggle()
         {
-            if (!HasStateAuthority) return;
-            
+            // In Shared mode, any client can process this request
             if (TargetOpen)
                 CloseDoor();
             else if (IsUnlocked)
@@ -261,8 +259,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         private void OpenDoor()
         {
-            if (!HasStateAuthority) return;
-            
+            // In Shared mode, any client can open the door
             TargetOpen = true;
             IsMoving = true;
             
@@ -277,8 +274,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         private void CloseDoor()
         {
-            if (!HasStateAuthority) return;
-            
+            // In Shared mode, any client can close the door
             TargetOpen = false;
             IsMoving = true;
             
@@ -293,11 +289,10 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         #region Lock/Unlock System
         
         
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         public void RPC_UnlockDoor()
         {
-            if (!HasStateAuthority) return;
-            
+            // In Shared mode, any client can process unlock requests
             if (!IsUnlocked)
             {
                 IsUnlocked = true;
@@ -309,11 +304,10 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         }
         
         
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         public void RPC_LockDoor()
         {
-            if (!HasStateAuthority) return;
-            
+            // In Shared mode, any client can process lock requests
             if (IsUnlocked)
             {
                 IsUnlocked = false;
@@ -361,7 +355,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             {
                 RPC_UnlockDoor();
                 
-                if (HasStateAuthority)
+                // In Shared mode, allow any client to trigger delayed open
+                if (Object.IsValid)
                 {
                     StartCoroutine(DelayedOpen());
                 }
@@ -407,7 +402,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         #region RPC Notifications
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_NotifyOpening()
         {
             OnDoorOpening?.Invoke();
@@ -417,7 +412,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 _openParticles.Play();
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_NotifyOpened()
         {
             OnDoorOpened?.Invoke();
@@ -426,7 +421,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 Debug.Log($"[NetworkedDoor] {name} opened (Count: {OpenCount})");
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_NotifyClosing()
         {
             OnDoorClosing?.Invoke();
@@ -436,7 +431,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 _closeParticles.Play();
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_NotifyClosed()
         {
             OnDoorClosed?.Invoke();
@@ -445,7 +440,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 Debug.Log($"[NetworkedDoor] {name} closed");
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_NotifyUnlocked()
         {
             OnDoorUnlocked?.Invoke();
@@ -458,14 +453,14 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             }
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_NotifyLocked()
         {
             OnDoorLocked?.Invoke();
             UpdateVisualIndicators();
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_PlayLockedFeedback()
         {
             PlaySound(_lockedSound);
@@ -518,7 +513,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
        
         public void ForceOpen()
         {
-            if (HasStateAuthority)
+            // In Shared mode, any client can force open
+            if (Object.IsValid)
             {
                 IsUnlocked = true;
                 OpenDoor();
@@ -528,7 +524,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         public void ForceClose()
         {
-            if (HasStateAuthority)
+            // In Shared mode, any client can force close
+            if (Object.IsValid)
             {
                 CloseDoor();
             }

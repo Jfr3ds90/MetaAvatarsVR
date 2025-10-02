@@ -35,6 +35,10 @@ namespace HackMonkeys.Gameplay
         #endregion
 
         #region Components References
+        [Header("Meta Avatar")]
+        [SerializeField] private NetworkPrefabRef metaAvatarPrefab;
+        [SerializeField] private Transform avatarSpawnPoint;
+        
         [Header("Avatar Components")]
         [SerializeField] private Transform headTransform;
         [SerializeField] private Transform leftHandTransform;
@@ -69,6 +73,10 @@ namespace HackMonkeys.Gameplay
         private bool _isLocalPlayer;
         private bool _hasCheckedAuthority = false;
         private PlayerDataManager _playerDataManager;
+        
+        private NetworkObject _metaAvatarNetworkObject;
+        private AvatarEntityState _avatarEntity;
+        private bool _avatarSpawned = false;
         
         // Input local
         private NetworkPlayerInput _localInput;
@@ -113,6 +121,8 @@ namespace HackMonkeys.Gameplay
             }
             
             StartCoroutine(InitializePlayerData());
+            
+            SpawnMetaAvatar();
         }
 
         public override void Despawned(NetworkRunner runner, bool hasState)
@@ -211,6 +221,67 @@ namespace HackMonkeys.Gameplay
             else
             {
                 Debug.LogError("[NetworkPlayer] ❌ No se encontró VR Rig en la escena!");
+            }
+        }
+        #endregion
+
+        #region Meta Avatar Spawning
+        private void SpawnMetaAvatar()
+        {
+            if (_avatarSpawned)
+            {
+                Debug.LogWarning("[NetworkPlayer] Avatar already spawned!");
+                return;
+            }
+            
+            if (metaAvatarPrefab == null)
+            {
+                Debug.LogWarning("[NetworkPlayer] No Meta Avatar prefab assigned, skipping avatar spawn");
+                return;
+            }
+            
+            if (Runner == null || !Runner.IsRunning)
+            {
+                Debug.LogError("[NetworkPlayer] Cannot spawn avatar - Runner not ready");
+                return;
+            }
+            
+            Vector3 spawnPos = avatarSpawnPoint != null ? avatarSpawnPoint.position : transform.position;
+            Quaternion spawnRot = avatarSpawnPoint != null ? avatarSpawnPoint.rotation : transform.rotation;
+            
+            Debug.Log($"[NetworkPlayer] Spawning Meta Avatar for player {Object.InputAuthority}");
+            
+            _metaAvatarNetworkObject = Runner.Spawn(
+                metaAvatarPrefab,
+                spawnPos,
+                spawnRot,
+                inputAuthority: Object.InputAuthority,
+                onBeforeSpawned: (runner, obj) =>
+                {
+                    Debug.Log($"[NetworkPlayer] Avatar pre-spawn for {Object.InputAuthority}");
+                }
+            );
+            
+            if (_metaAvatarNetworkObject != null)
+            {
+                _metaAvatarNetworkObject.transform.SetParent(transform);
+                _avatarEntity = _metaAvatarNetworkObject.GetComponent<AvatarEntityState>();
+                
+                if (_avatarEntity != null)
+                {
+                    Debug.Log($"[NetworkPlayer] ✅ Meta Avatar spawned successfully for {Object.InputAuthority}");
+                    Debug.Log($"  - Local player: {_isLocalPlayer}");
+                    Debug.Log($"  - Avatar InputAuthority: {_metaAvatarNetworkObject.InputAuthority}");
+                    _avatarSpawned = true;
+                }
+                else
+                {
+                    Debug.LogError("[NetworkPlayer] Avatar spawned but AvatarEntityState not found!");
+                }
+            }
+            else
+            {
+                Debug.LogError($"[NetworkPlayer] Failed to spawn Meta Avatar for {Object.InputAuthority}");
             }
         }
         #endregion
@@ -372,8 +443,8 @@ namespace HackMonkeys.Gameplay
                 // Solo si el VR está conectado en el input
                 if (data.isVRConnected)
                 {
-                    // El HOST escribe para todos, el CLIENTE predice localmente
-                    if (HasStateAuthority || HasInputAuthority)
+                    // En Shared Mode, cada jugador actualiza sus propios datos
+                    if (HasInputAuthority)
                     {
                         // Aplicar el input a las propiedades networked
                         HeadPosition = data.headPosition;
@@ -414,6 +485,13 @@ namespace HackMonkeys.Gameplay
                     transform.rotation = Quaternion.LookRotation(forward);
                 }
             }
+            
+            // Actualizar posición del avatar Meta si existe
+            if (_metaAvatarNetworkObject != null)
+            {
+                _metaAvatarNetworkObject.transform.localPosition = Vector3.zero;
+                _metaAvatarNetworkObject.transform.localRotation = Quaternion.identity;
+            }
         }
 
         private void UpdateRemotePlayer()
@@ -447,7 +525,7 @@ namespace HackMonkeys.Gameplay
                 }
             }
             
-            // Actualizar posición del cuerpo
+            // Actualizar posición del cuerpo basado en la cabeza
             Vector3 bodyPosition = HeadPosition;
             bodyPosition.y = transform.position.y;
             transform.position = bodyPosition;
@@ -458,6 +536,13 @@ namespace HackMonkeys.Gameplay
             if (headForward.magnitude > 0.1f)
             {
                 transform.rotation = Quaternion.LookRotation(headForward);
+            }
+            
+            // Actualizar posición del avatar Meta para jugadores remotos
+            if (_metaAvatarNetworkObject != null)
+            {
+                _metaAvatarNetworkObject.transform.localPosition = Vector3.zero;
+                _metaAvatarNetworkObject.transform.localRotation = Quaternion.identity;
             }
         }
         #endregion
@@ -585,19 +670,25 @@ namespace HackMonkeys.Gameplay
         #endregion
 
         #region RPCs
-        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
         private void RPC_SetPlayerData(NetworkString<_32> name, Color color)
         {
-            PlayerName = name;
-            PlayerColor = color;
-            
-            Debug.Log($"[NetworkPlayer] Player data set: {name}");
+            if (HasStateAuthority || Runner.GameMode == GameMode.Shared)
+            {
+                PlayerName = name;
+                PlayerColor = color;
+                
+                Debug.Log($"[NetworkPlayer] Player data set: {name}");
+            }
         }
 
-        [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
         public void RPC_SetReady(NetworkBool ready)
         {
-            IsReady = ready;
+            if (HasStateAuthority || Runner.GameMode == GameMode.Shared)
+            {
+                IsReady = ready;
+            }
         }
         #endregion
 

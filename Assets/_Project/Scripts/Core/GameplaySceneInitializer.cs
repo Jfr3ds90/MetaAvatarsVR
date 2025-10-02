@@ -98,19 +98,136 @@ namespace HackMonkeys.Core
             if (debugMode)
                 Debug.Log($"[GameplaySceneInitializer] ✅ NetworkRunner encontrado - IsServer: {runner.IsServer}");
 
-            // 2. Bifurcación HOST/CLIENTE
-            if (runner.IsServer)
+            // 2. Bifurcación según modo de red
+            if (runner.GameMode == GameMode.Shared)
             {
-                // HOST: Spawnear GameplayManager y manejar jugadores
+                await HandleSharedModeInitialization(runner, cancellationToken);
+            }
+            else if (runner.IsServer)
+            {
                 await HandleHostInitialization(runner, cancellationToken);
             }
             else
             {
-                // CLIENTE: Solo preparar el VR Rig para auto-detección
                 PrepareClientVRRig();
             }
         }
 
+        #region Shared Mode Logic
+        private async Task HandleSharedModeInitialization(NetworkRunner runner, CancellationToken cancellationToken)
+        {
+            if (debugMode) Debug.Log("[GameplaySceneInitializer] 🤝 SHARED MODE: Inicializando...");
+            
+            await WaitForSimulationReady(runner, cancellationToken);
+            
+            // En Shared Mode, verificar si ya existe un GameplayManager
+            var existingManager = FindObjectOfType<GameplayManager>();
+            
+            if (existingManager == null)
+            {
+                // En Shared Mode, usar una estrategia más robusta para determinar quién spawna
+                // Opción 1: El jugador con el PlayerId más bajo que esté activo spawna
+                // Opción 2: Si somos el único jugador o el primero, spawneamos
+                bool shouldSpawn = false;
+                
+                // Verificar si somos el jugador con el PlayerId más bajo activo
+                var activePlayersList = runner.ActivePlayers.ToList();
+                if (activePlayersList.Count > 0)
+                {
+                    activePlayersList.Sort((a, b) => a.PlayerId.CompareTo(b.PlayerId));
+                    shouldSpawn = activePlayersList[0] == runner.LocalPlayer;
+                    
+                    if (debugMode) 
+                    {
+                        Debug.Log($"[GameplaySceneInitializer] 📊 SHARED: Active players: {activePlayersList.Count}");
+                        Debug.Log($"[GameplaySceneInitializer] 📊 SHARED: Local PlayerId: {runner.LocalPlayer.PlayerId}");
+                        Debug.Log($"[GameplaySceneInitializer] 📊 SHARED: Lowest PlayerId: {activePlayersList[0].PlayerId}");
+                        Debug.Log($"[GameplaySceneInitializer] 📊 SHARED: Should spawn: {shouldSpawn}");
+                    }
+                }
+                else
+                {
+                    // Si no hay jugadores activos (raro), intentamos spawnear
+                    shouldSpawn = true;
+                    if (debugMode) Debug.Log("[GameplaySceneInitializer] 📊 SHARED: No active players detected, attempting spawn");
+                }
+                
+                if (shouldSpawn)
+                {
+                    if (debugMode) Debug.Log("[GameplaySceneInitializer] 🎯 SHARED: Spawneando GameplayManager...");
+                    
+                    // Pequeña espera para evitar condiciones de carrera
+                    await Task.Delay(100, cancellationToken);
+                    
+                    // Doble verificación antes de spawnear
+                    existingManager = FindObjectOfType<GameplayManager>();
+                    if (existingManager == null)
+                    {
+                        NetworkObject spawnedManager = await SpawnGameplayManager(runner);
+                        
+                        if (spawnedManager != null)
+                        {
+                            NotifyGameCore();
+                            if (debugMode) Debug.Log("[GameplaySceneInitializer] ✅ SHARED: GameplayManager spawneado y listo");
+                        }
+                        else
+                        {
+                            Debug.LogError("[GameplaySceneInitializer] ❌ SHARED: Fallo al spawnear GameplayManager");
+                        }
+                    }
+                    else
+                    {
+                        if (debugMode) Debug.Log("[GameplaySceneInitializer] ✅ SHARED: GameplayManager ya fue spawneado por otro jugador");
+                        NotifyGameCore();
+                    }
+                }
+                else
+                {
+                    // Esperar a que otro jugador lo spawne
+                    if (debugMode) Debug.Log("[GameplaySceneInitializer] 👥 SHARED: Esperando que otro jugador spawne el GameplayManager...");
+                    await WaitForGameplayManager(cancellationToken);
+                    NotifyGameCore();
+                }
+            }
+            else
+            {
+                if (debugMode) Debug.Log("[GameplaySceneInitializer] ✅ SHARED: GameplayManager ya existe");
+                NotifyGameCore();
+            }
+            
+            PrepareClientVRRig();
+            
+            // En modo Shared, manejar el spawn de jugadores existentes
+            var gameplayManager = GameplayManager.Instance;
+            if (gameplayManager != null)
+            {
+                if (debugMode) Debug.Log("[GameplaySceneInitializer] 🎮 SHARED: Procesando jugadores para spawn...");
+                
+                // Esperar un poco para asegurar que todo esté listo
+                await Task.Delay(500, cancellationToken);
+                
+                // Procesar todos los jugadores activos (incluyéndonos)
+                foreach (var player in runner.ActivePlayers)
+                {
+                    if (player.IsRealPlayer)
+                    {
+                        if (debugMode) Debug.Log($"[GameplaySceneInitializer] 👤 SHARED: Notificando GameplayManager sobre jugador {player}");
+                        gameplayManager.PlayerJoined(player);
+                        await Task.Delay(100, cancellationToken);
+                    }
+                }
+                
+                if (debugMode) Debug.Log($"[GameplaySceneInitializer] ✅ SHARED: {runner.ActivePlayers.Count()} jugadores procesados");
+            }
+            else
+            {
+                Debug.LogError("[GameplaySceneInitializer] ❌ SHARED: GameplayManager.Instance es null!");
+            }
+            
+            if (debugMode) Debug.Log("[GameplaySceneInitializer] ✅ SHARED: Inicialización completa");
+        }
+        #endregion
+        
         #region Host Logic
         private async Task HandleHostInitialization(NetworkRunner runner, CancellationToken cancellationToken)
         {
@@ -167,6 +284,77 @@ namespace HackMonkeys.Core
         #endregion
 
         #region Wait Methods
+        private async Task WaitForGameplayManager(CancellationToken cancellationToken)
+        {
+            float elapsedTime = 0f;
+            float timeout = 10f; // Aumentar timeout a 10 segundos
+            int checkCount = 0;
+            
+            while (elapsedTime < timeout)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                
+                var manager = FindObjectOfType<GameplayManager>();
+                if (manager != null && GameplayManager.Instance != null)
+                {
+                    if (debugMode) Debug.Log($"[GameplaySceneInitializer] ✅ GameplayManager encontrado y listo después de {checkCount} verificaciones ({elapsedTime:F1}s)");
+                    return;
+                }
+                
+                checkCount++;
+                if (debugMode && checkCount % 10 == 0) // Log cada 10 verificaciones (1 segundo)
+                {
+                    Debug.Log($"[GameplaySceneInitializer] ⏳ Esperando GameplayManager... ({elapsedTime:F1}s / {timeout:F1}s)");
+                }
+                
+                await Task.Delay(100);
+                elapsedTime += 0.1f;
+            }
+            
+            // Si llegamos aquí, intentar spawnearlo nosotros como fallback
+            Debug.LogWarning($"[GameplaySceneInitializer] ⚠️ Timeout esperando GameplayManager después de {timeout}s");
+            Debug.Log("[GameplaySceneInitializer] 🔄 Intentando spawnear GameplayManager como fallback...");
+            
+            var runner = NetworkRunner.GetRunnerForScene(gameObject.scene);
+            if (runner != null && runner.IsRunning)
+            {
+                var spawnedManager = await SpawnGameplayManager(runner);
+                if (spawnedManager != null)
+                {
+                    Debug.Log("[GameplaySceneInitializer] ✅ GameplayManager spawneado exitosamente como fallback");
+                }
+                else
+                {
+                    Debug.LogError("[GameplaySceneInitializer] ❌ Fallo crítico: No se pudo spawnear GameplayManager incluso como fallback");
+                }
+            }
+        }
+        
+        private async Task WaitForGameplayManagerReady(GameplayManager manager, CancellationToken cancellationToken)
+        {
+            float elapsedTime = 0f;
+            float timeout = 2f;
+            
+            while (elapsedTime < timeout)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                
+                // Verificar que el Instance esté asignado (indica que Awake se ejecutó)
+                if (GameplayManager.Instance == manager)
+                {
+                    // Pequeña espera adicional para asegurar que Spawned() se complete
+                    await Task.Delay(100);
+                    if (debugMode) Debug.Log("[GameplaySceneInitializer] ✅ GameplayManager completamente inicializado");
+                    return;
+                }
+                
+                await Task.Delay(50);
+                elapsedTime += 0.05f;
+            }
+            
+            Debug.LogWarning("[GameplaySceneInitializer] ⚠️ Timeout esperando que GameplayManager esté listo");
+        }
+        
         private async Task<NetworkRunner> WaitForNetworkRunner(CancellationToken cancellationToken)
         {
             float elapsedTime = 0f;
@@ -223,25 +411,64 @@ namespace HackMonkeys.Core
         {
             try
             {
-                if (!runner.CanSpawn)
+                // En modo Shared, todos pueden spawnear pero verificamos primero
+                if (runner.GameMode == GameMode.Shared)
+                {
+                    if (debugMode) Debug.Log($"[GameplaySceneInitializer] 🔍 SHARED MODE - Verificando capacidad de spawn");
+                    if (debugMode) Debug.Log($"[GameplaySceneInitializer] 🔍 Runner.IsRunning: {runner.IsRunning}");
+                    if (debugMode) Debug.Log($"[GameplaySceneInitializer] 🔍 Runner.Tick: {runner.Tick}");
+                    if (debugMode) Debug.Log($"[GameplaySceneInitializer] 🔍 LocalPlayer: {runner.LocalPlayer}");
+                }
+                else if (!runner.CanSpawn)
                 {
                     Debug.LogError("[GameplaySceneInitializer] ❌ Runner no puede spawnear objetos!");
                     return null;
                 }
 
-                NetworkObject spawnedObject = await runner.SpawnAsync(
-                    gameplayManagerPrefab,
-                    Vector3.zero,
-                    Quaternion.identity
-                );
+                // En modo Shared, usar Spawn sin InputAuthority específico para objetos de scene
+                NetworkObject spawnedObject = null;
+                
+                if (runner.GameMode == GameMode.Shared)
+                {
+                    // Para objetos de scene en Shared Mode, no especificar InputAuthority
+                    spawnedObject = runner.Spawn(
+                        gameplayManagerPrefab,
+                        Vector3.zero,
+                        Quaternion.identity,
+                        PlayerRef.None  // Sin autoridad específica para el GameplayManager
+                    );
+                }
+                else
+                {
+                    // Para otros modos, usar SpawnAsync
+                    spawnedObject = await runner.SpawnAsync(
+                        gameplayManagerPrefab,
+                        Vector3.zero,
+                        Quaternion.identity
+                    );
+                }
 
                 if (spawnedObject != null)
                 {
+                    if (debugMode) Debug.Log($"[GameplaySceneInitializer] ✅ NetworkObject spawneado: {spawnedObject.name}");
+                    
                     var gm = spawnedObject.GetComponent<GameplayManager>();
                     if (gm != null)
                     {
+                        if (debugMode) Debug.Log("[GameplaySceneInitializer] ✅ GameplayManager component encontrado");
+                        
+                        // Esperar a que el GameplayManager complete su inicialización
+                        await WaitForGameplayManagerReady(gm, _cancellationTokenSource.Token);
                         return spawnedObject;
                     }
+                    else
+                    {
+                        Debug.LogError("[GameplaySceneInitializer] ❌ GameplayManager component no encontrado en el prefab!");
+                    }
+                }
+                else
+                {
+                    Debug.LogError("[GameplaySceneInitializer] ❌ Fallo al spawnear NetworkObject!");
                 }
 
                 return null;
@@ -249,6 +476,7 @@ namespace HackMonkeys.Core
             catch (System.Exception e)
             {
                 Debug.LogError($"[GameplaySceneInitializer] ❌ Excepción en SpawnGameplayManager: {e.Message}");
+                Debug.LogError($"[GameplaySceneInitializer] ❌ StackTrace: {e.StackTrace}");
                 return null;
             }
         }

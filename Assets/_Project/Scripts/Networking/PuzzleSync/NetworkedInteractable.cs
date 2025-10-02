@@ -66,7 +66,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         public override void Spawned()
         {
-            if (HasStateAuthority)
+            // In Shared mode, initialize for all clients
+            if (Object.HasStateAuthority)
             {
                 CurrentState = InteractableState.Idle;
                 IsLocked = false;
@@ -97,7 +98,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         protected virtual void OnLocalHoverEnter(HoverEnterEventArgs args)
         {
-            if (!CanInteract())
+            if (!CanInteract() || !HasInputAuthority)
                 return;
                 
             RPC_RequestStateChange(InteractableState.Hovering, Runner.LocalPlayer);
@@ -105,7 +106,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         protected virtual void OnLocalHoverExit(HoverExitEventArgs args)
         {
-            if (_isLocallyInteracting)
+            if (_isLocallyInteracting || !HasInputAuthority)
                 return;
                 
             RPC_RequestStateChange(InteractableState.Idle, Runner.LocalPlayer);
@@ -113,7 +114,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         protected virtual void OnLocalSelectEnter(SelectEnterEventArgs args)
         {
-            if (!CanInteract())
+            if (!CanInteract() || !HasInputAuthority)
                 return;
                 
             _isLocallyInteracting = true;
@@ -122,13 +123,16 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         protected virtual void OnLocalSelectExit(SelectExitEventArgs args)
         {
+            if (!HasInputAuthority)
+                return;
+                
             _isLocallyInteracting = false;
             RPC_RequestStateChange(InteractableState.Idle, Runner.LocalPlayer);
         }
         
         protected virtual void OnLocalActivate(ActivateEventArgs args)
         {
-            if (!CanInteract())
+            if (!CanInteract() || !HasInputAuthority)
                 return;
                 
             RPC_RequestActivation(Runner.LocalPlayer);
@@ -136,10 +140,13 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         protected virtual void OnLocalDeactivate(DeactivateEventArgs args)
         {
+            if (!HasInputAuthority)
+                return;
+                
             RPC_RequestDeactivation(Runner.LocalPlayer);
         }
         
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
         protected virtual void RPC_RequestStateChange(InteractableState newState, PlayerRef player, RpcInfo info = default)
         {
             if (!ValidateStateChange(newState, player))
@@ -152,7 +159,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             RPC_NotifyStateChange(newState, player);
         }
         
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
         protected virtual void RPC_RequestActivation(PlayerRef player, RpcInfo info = default)
         {
             if (!CanActivate(player))
@@ -168,7 +175,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             RPC_NotifyActivation(player);
         }
         
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
         protected virtual void RPC_RequestDeactivation(PlayerRef player, RpcInfo info = default)
         {
             if (CurrentUser != player && CurrentUser != PlayerRef.None)
@@ -182,7 +189,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             RPC_NotifyDeactivation(player);
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         protected virtual void RPC_NotifyStateChange(InteractableState newState, PlayerRef player)
         {
             UpdateVisualState(newState);
@@ -211,7 +218,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             _previousState = newState;
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         protected virtual void RPC_NotifyActivation(PlayerRef player)
         {
             OnNetworkActivate?.Invoke(player);
@@ -221,7 +228,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             Debug.Log($"[NetworkedInteractable] {gameObject.name} activated by player {player}");
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         protected virtual void RPC_NotifyDeactivation(PlayerRef player)
         {
             OnNetworkDeactivate?.Invoke(player);
@@ -297,7 +304,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
         public void RPC_SetLocked(NetworkBool locked, RpcInfo info = default)
         {
-            if (HasStateAuthority)
+            if (Object.HasStateAuthority)
             {
                 IsLocked = locked;
                 
@@ -315,7 +322,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             }
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         protected virtual void RPC_NotifyLockStateChanged(NetworkBool locked)
         {
             if (_xrInteractable != null)
@@ -330,7 +337,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         public void ResetInteractable()
         {
-            if (HasStateAuthority)
+            if (Object.HasStateAuthority)
             {
                 CurrentState = InteractableState.Idle;
                 CurrentUser = PlayerRef.None;

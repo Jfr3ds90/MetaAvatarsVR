@@ -21,12 +21,19 @@ public class AvatarStateSync : NetworkBehaviour
 
     public override void Spawned()
     {
-        if (Object.HasStateAuthority) OculusID = UserEntitlement.OculusID;
+        Debug.Log($"[AvatarStateSync] Spawned - InputAuthority: {Object.InputAuthority}, LocalPlayer: {Runner.LocalPlayer}");
+        
         _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
 
-        if (!HasStateAuthority)
+        // En Shared Mode, cada jugador con InputAuthority establece su propio OculusID
+        if (Object.InputAuthority == Runner.LocalPlayer)
         {
-            // Primera aplicación de datos para inicialización
+            OculusID = UserEntitlement.OculusID;
+            Debug.Log($"[AvatarStateSync] ✅ Local avatar - Setting OculusID: {OculusID}");
+        }
+        else
+        {
+            Debug.Log($"[AvatarStateSync] 👥 Remote avatar - Will wait for OculusID from network");
             ApplyAvatarData();
         }
     }
@@ -48,8 +55,8 @@ public class AvatarStateSync : NetworkBehaviour
     // Registra datos del avatar local para sincronización
     public void RecordAvatarState(OvrAvatarEntity.StreamLOD streamLOD)
     {
-        // Solo el StateAuthority debe registrar datos
-        if (!HasStateAuthority) return;
+        // En Shared Mode, solo el jugador local registra sus propios datos
+        if (Object.InputAuthority != Runner.LocalPlayer) return;
         
         // Registra los datos del avatar en el buffer
         AvatarDataCount = _avatarEntityState.RecordStreamData_AutoBuffer(streamLOD, ref _byteArray);
@@ -61,8 +68,10 @@ public class AvatarStateSync : NetworkBehaviour
     // Procesa datos del avatar recibidos de la red
     private void ApplyAvatarData()
     {
-        // Solo los clientes remotos (no autoridades) aplican datos
-        if (!HasStateAuthority && AvatarDataCount > 0)
+        // En Shared Mode, aplicamos datos de avatares remotos (no locales)
+        bool isLocalAvatar = Object.InputAuthority == Runner.LocalPlayer;
+        
+        if (!isLocalAvatar && AvatarDataCount > 0)
         {
             // Copia datos de la NetworkArray al buffer temporal
             for (int i = 0; i < AvatarDataCount; i++)
