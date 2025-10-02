@@ -118,7 +118,9 @@ namespace HackMonkeys.UI.Spatial
         private bool _isShiftActive = false;
         private bool _isCapsLockActive = false;
         private Transform _currentLayoutPanel;
-        
+
+        [SerializeField] private ManualKey[] manualKeys;
+
         // Keyboard layouts definition
         private readonly string[] QWERTY_LAYOUT = new string[]
         {
@@ -143,7 +145,7 @@ namespace HackMonkeys.UI.Spatial
             "_+{}|:\"<>?",
             "~`"
         };
-        
+
         private void Awake()
         {
             InitializeKeyboardLayouts();
@@ -155,7 +157,7 @@ namespace HackMonkeys.UI.Spatial
                 audioSource.maxDistance = 5f;
             }
         }
-        
+                
         private void Start()
         {
             // Create initial layout
@@ -174,10 +176,11 @@ namespace HackMonkeys.UI.Spatial
             
             // Initialize symbols layout
             _keyboardLayouts[KeyboardLayout.Symbols] = CreateSymbolsLayout();
+
         }
         
         private List<KeyboardKey> CreateAlphabeticLayout()
-        {
+        {           
             List<KeyboardKey> keys = new List<KeyboardKey>();
             
             // Create keys from QWERTY layout
@@ -259,7 +262,23 @@ namespace HackMonkeys.UI.Spatial
                 height = 1f,
                 iconSprite = enterIcon
             });
-            
+
+            for (int i = 0; i < manualKeys.Length; i++)
+            {
+                keys.Add(new KeyboardKey
+                {
+                    character = manualKeys[i]._character,
+                    shiftCharacter = manualKeys[i]._shiftCharacter,
+                    keyCode = manualKeys[i]._keyCode,
+                    keyType = manualKeys[i]._keyType,
+                    width = manualKeys[i]._width,
+                    height = manualKeys[i]._height,
+                    iconSprite = manualKeys[i]._iconSprite,
+                });
+
+                Debug.LogWarning("Existe el valor " + keys.Count);
+            }
+            //CreateOutLayout();
             return keys;
         }
         
@@ -309,7 +328,9 @@ namespace HackMonkeys.UI.Spatial
                 height = 1f,
                 iconSprite = symbolsIcon
             });
-            
+
+            CreateOutLayout();
+
             return keys;
         }
         
@@ -330,7 +351,30 @@ namespace HackMonkeys.UI.Spatial
                     height = 1f
                 });
             }
-            
+
+            CreateOutLayout();
+
+            return keys;
+        }
+
+        private List<KeyboardKey> CreateOutLayout()
+        {
+            List<KeyboardKey> keys = new List<KeyboardKey>();
+
+            for (int i = 0; i < manualKeys.Length; i++)
+           {
+                keys.Add(new KeyboardKey
+                {
+                    character = manualKeys[i]._character,
+                    shiftCharacter = manualKeys[i]._shiftCharacter,
+                    keyType = manualKeys[i]._keyType,
+                    width = 1f,
+                    height = 1f,
+                });
+
+                Debug.LogWarning("Existe el valor "+keys.Count);
+            }
+
             return keys;
         }
         
@@ -394,6 +438,7 @@ namespace HackMonkeys.UI.Spatial
             {
                 GenerateSymbolsGrid();
             }
+            
         }
         
         private void GenerateQWERTYLayout()
@@ -489,6 +534,49 @@ namespace HackMonkeys.UI.Spatial
                 
                 CreateKey(enterKey, centerPosition);
             }
+            int i = keyIndex;
+            int j = 0;
+            for (; i < _currentKeys.Count;i++) 
+            {
+                KeyboardKey extraKey = _currentKeys[keyIndex++];
+                float keyWidth = baseKeyWidth * extraKey.width;
+                float keyHeight = baseKeyHeight * extraKey.height;
+                 switch (j)
+                {
+                    case 0:
+                        Vector3 centerPosition0 = new Vector3(
+                   currentX + (keyWidth / 2f) - 29.5f,
+                   currentY - (keyHeight / 2f) + 10.4f,
+                   0
+               ); 
+                        CreateKey(extraKey, centerPosition0); j++; continue;
+                    case 2:
+                        Vector3 centerPosition2 = new Vector3(
+                   currentX + (keyWidth / 2f) - 29.5f,
+                   currentY - (keyHeight / 2f) + 5.3f,
+                   0
+               ); 
+                        CreateKey(extraKey, centerPosition2); j++; continue;
+                    case 1:
+                        Vector3 centerPosition1 = new Vector3(
+                    currentX + (keyWidth / 2f) + 14.5f,
+                    currentY - (keyHeight / 2f) + 10.5f,
+                    0
+                ); 
+                        CreateKey(extraKey, centerPosition1); j++; continue;
+                    case 3:
+                        Vector3 centerPosition3 = new Vector3(
+                   currentX + (keyWidth / 2f) + 14.5f,
+                   currentY - (keyHeight / 2f) + 5.1f,
+                   0
+               ); 
+                        CreateKey(extraKey, centerPosition3); j++; continue;
+                   
+                }
+                
+            }
+
+
         }
         
         private void GenerateNumericPad()
@@ -545,7 +633,7 @@ namespace HackMonkeys.UI.Spatial
             }
         }
         
-        private GameObject CreateKey(KeyboardKey keyData, Vector3 centerPosition)
+        public GameObject CreateKey(KeyboardKey keyData, Vector3 centerPosition)
         {
             GameObject keyObj = Instantiate(keyPrefab, keysContainer);
             
@@ -821,6 +909,7 @@ namespace HackMonkeys.UI.Spatial
                     OnClose?.Invoke();
                     break;
             }
+
         }
         
         private void ToggleShift()

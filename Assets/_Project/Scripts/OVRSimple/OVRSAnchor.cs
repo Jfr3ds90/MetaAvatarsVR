@@ -5,9 +5,9 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using static OVRPlugin;
-/*using TaskResult = OVRSResult<System.Collections.Generic.List<OVRSAnchor>, OVRSAnchor.FetchResult>;*/
+using TaskResult = OVRSResult<System.Collections.Generic.List<OVRSAnchor>, OVRSAnchor.FetchResult>;
 
-public class OVRSAnchor : MonoBehaviour
+public readonly partial struct OVRSAnchor : IEquatable<OVRSAnchor>, IDisposable
 {
     /// <summary>
     /// Possible results of a save operation.
@@ -23,14 +23,13 @@ public class OVRSAnchor : MonoBehaviour
     /// </remarks>
     /// <seealso cref="OVRSAnchor.SaveAsync()"/>
     /// <seealso cref="OVRSAnchor.SaveAsync(IEnumerable{OVRSAnchor})"/>
-  /*  [OVRSResultStatus]
+    [OVRSResultStatus]
     public enum SaveResult
     {
         /// <summary>
         /// The operation succeeded.
         /// </summary>
         Success = Result.Success,
-
 
         /// <summary>
         /// The operation failed in an unexpected way.
@@ -245,7 +244,7 @@ public class OVRSAnchor : MonoBehaviour
         /// </summary>
         /// <remarks>
         /// This can happen, for example, if you query for an invalid component type, or if you try requesting more than
-        /// <see cref="OVRSpaceQuery.MaxResultsForAnchors"/> anchors in a single call.
+        /// <see cref="OVRSSpaceQuery.MaxResultsForAnchors"/> anchors in a single call.
         /// </remarks>
         FailureInvalidOption = Result.Failure_InvalidParameter,
 
@@ -314,18 +313,18 @@ public class OVRSAnchor : MonoBehaviour
     /// Sharing an anchor is an asynchronous operation that can fail for a number of reasons, enumerated here.
     ///
     /// <see cref="ShareResult"/> is used as the status for the <see cref="OVRSResult"/> returned by
-    /// <see cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSpaceUser})"/>,
-    /// <see cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSAnchor},IEnumerable{OVRSpaceUser})"/>,
+    /// <see cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSSpaceUser})"/>,
+    /// <see cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSAnchor},IEnumerable{OVRSSpaceUser})"/>,
     /// <see cref="OVRSpatialAnchor.ShareAsync(Guid)"/>,
     /// <see cref="OVRSpatialAnchor.ShareAsync(IEnumerable{OVRSpatialAnchor}, Guid)"/>, and
     /// <see cref="OVRSpatialAnchor.ShareAsync(IEnumerable{OVRSpatialAnchor}, IEnumerable{Guid})"/>
     /// </remarks>
-    /// <seealso cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSpaceUser})"/>
-    /// <seealso cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSAnchor},IEnumerable{OVRSpaceUser})"/>
+    /// <seealso cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSSpaceUser})"/>
+    /// <seealso cref="OVRSAnchor.ShareAsync(IEnumerable{OVRSAnchor},IEnumerable{OVRSSpaceUser})"/>
     /// <seealso cref="OVRSpatialAnchor.ShareAsync(IEnumerable{OVRSpatialAnchor}, Guid)"/>
     /// <seealso cref="OVRSpatialAnchor.ShareAsync(IEnumerable{OVRSpatialAnchor}, IEnumerable{Guid})"/>
     [OVRSResultStatus]
-    public enum Shareesult
+    public enum ShareResult
     {
         /// <summary>
         /// The operation succeeded.
@@ -469,7 +468,7 @@ public class OVRSAnchor : MonoBehaviour
     public static readonly OVRSAnchor Null = new(0, Guid.Empty);
 
     // Called by OVRManager event loop
-    internal static void OnSpaceDiscoveryComplete(OVRDeserialize.SpaceDiscoveryCompleteData data)
+    internal static void OnSpaceDiscoveryComplete(OVRSDeserialize.SpaceDiscoveryCompleteData data)
     {
         TaskResult result;
         if (!OVRSTask.TryGetPendingTask<TaskResult>(data.RequestId, out var task))
@@ -497,7 +496,7 @@ public class OVRSAnchor : MonoBehaviour
     }
 
     // Called by OVRManager event loop
-    internal static void OnSpaceDiscoveryResultsAvailable(OVRDeserialize.SpaceDiscoveryResultsData data)
+    internal static void OnSpaceDiscoveryResultsAvailable(OVRSDeserialize.SpaceDiscoveryResultsData data)
     {
         var requestId = data.RequestId;
 
@@ -634,7 +633,7 @@ public class OVRSAnchor : MonoBehaviour
             throw new ArgumentNullException(nameof(anchors));
         }
 
-        var query = OVRSpaceQuery.ForGroupThrow(groupUuid, nameof(groupUuid));
+        var query = OVRSSpaceQuery.ForGroupThrow(groupUuid, nameof(groupUuid));
 
         return OVRSResult.From(anchors, (FetchResult)(await FetchAnchors(anchors, query)));
     }
@@ -669,7 +668,7 @@ public class OVRSAnchor : MonoBehaviour
     /// <br/>
     /// This result's Status will be <see cref="FetchResult.FailureInvalidOption"/> if <paramref name="groupUuid"/>
     /// is <see cref="Guid.Empty"/>, or <paramref name="allowedAnchorUuids"/> is larger than
-    /// <see cref="OVRSpaceQuery.MaxResultsForAnchors"/>.
+    /// <see cref="OVRSSpaceQuery.MaxResultsForAnchors"/>.
     /// </returns>
     /// <remarks>
     /// This method is asynchronous. The returned <see cref="OVRSTask"/> wrapper completes when all results are
@@ -695,7 +694,7 @@ public class OVRSAnchor : MonoBehaviour
             throw new ArgumentNullException(nameof(anchors));
         }
 
-        var query = OVRSpaceQuery.ForGroupThrow(groupUuid, nameof(groupUuid), allowedAnchorUuids);
+        var query = OVRSSpaceQuery.ForGroupThrow(groupUuid, nameof(groupUuid), allowedAnchorUuids);
 
         return OVRSResult.From(anchors, (FetchResult)(await FetchAnchors(anchors, query)));
     }
@@ -801,7 +800,7 @@ public class OVRSAnchor : MonoBehaviour
     /// <seealso cref="EraseAsync(IEnumerable{OVRSAnchor},IEnumerable{Guid})"/>
     public static OVRSTask<OVRSResult<SaveResult>> SaveAsync(IEnumerable<OVRSAnchor> anchors)
     {
-        using var spaces = OVRNativeList.WithSuggestedCapacityFrom(anchors).AllocateEmpty<ulong>(Allocator.Temp);
+        using var spaces = OVRSNativeList.WithSuggestedCapacityFrom(anchors).AllocateEmpty<ulong>(Allocator.Temp);
         foreach (var anchor in anchors.ToNonAlloc())
         {
             spaces.Add(anchor.Handle);
@@ -817,7 +816,7 @@ public class OVRSAnchor : MonoBehaviour
 
     internal static unsafe OVRSTask<OVRSResult<SaveResult>> SaveSpacesAsync(ReadOnlySpan<ulong> spaces)
     {
-        var telemetryMarker = OVRTelemetry
+        var telemetryMarker = OVRSTelemetry
             .Start((int)Telemetry.MarkerId.SaveSpaces)
             .AddAnnotation(Telemetry.Annotation.SpaceCount, (long)spaces.Length);
 
@@ -831,7 +830,7 @@ public class OVRSAnchor : MonoBehaviour
     }
 
     // Invoked by OVRManager event loop
-    internal static void OnSaveSpacesResult(OVRDeserialize.SpacesSaveResultData eventData)
+    internal static void OnSaveSpacesResult(OVRSDeserialize.SpacesSaveResultData eventData)
         => Telemetry.SetAsyncResultAndSend(Telemetry.MarkerId.SaveSpaces, eventData.RequestId, (long)eventData.Result);
 
     /// <summary>
@@ -877,7 +876,7 @@ public class OVRSAnchor : MonoBehaviour
         if (anchors == null && uuids == null)
             throw new ArgumentException($"One of {nameof(anchors)} or {nameof(uuids)} must not be null.");
 
-        using var spaces = OVRNativeList.WithSuggestedCapacityFrom(anchors).AllocateEmpty<ulong>(Allocator.Temp);
+        using var spaces = OVRSNativeList.WithSuggestedCapacityFrom(anchors).AllocateEmpty<ulong>(Allocator.Temp);
         foreach (var anchor in anchors.ToNonAlloc())
         {
             spaces.Add(anchor.Handle);
@@ -895,7 +894,7 @@ public class OVRSAnchor : MonoBehaviour
 
     private static unsafe OVRSTask<OVRSResult<EraseResult>> EraseSpacesAsync(ReadOnlySpan<ulong> spaces, ReadOnlySpan<Guid> uuids)
     {
-        var telemetryMarker = OVRTelemetry
+        var telemetryMarker = OVRSTelemetry
             .Start((int)Telemetry.MarkerId.EraseSpaces)
             .AddAnnotation(Telemetry.Annotation.SpaceCount, spaces.Length)
             .AddAnnotation(Telemetry.Annotation.UuidCount, uuids.Length);
@@ -910,7 +909,7 @@ public class OVRSAnchor : MonoBehaviour
         }
     }
 
-    internal static void OnEraseSpacesResult(OVRDeserialize.SpacesEraseResultData eventData)
+    internal static void OnEraseSpacesResult(OVRSDeserialize.SpacesEraseResultData eventData)
         => Telemetry.SetAsyncResultAndSend(Telemetry.MarkerId.EraseSpaces, eventData.RequestId, (long)eventData.Result);
 
     /// <summary>
@@ -918,7 +917,7 @@ public class OVRSAnchor : MonoBehaviour
     /// </summary>
     /// <remarks>
     ///
-    /// This method shares the anchor with a collection of <see cref="OVRSpaceUser"/>.
+    /// This method shares the anchor with a collection of <see cref="OVRSSpaceUser"/>.
     ///
     /// This operation is asynchronous. Use the returned <see cref="OVRSTask"/> to track the result of the
     /// asynchronous operation.
@@ -927,15 +926,15 @@ public class OVRSAnchor : MonoBehaviour
     /// <returns>An awaitable <see cref="OVRSTask"/> representing the asynchronous request.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="users"/> is `null`.</exception>
     /// <exception cref="ArgumentException">Thrown if <paramref name="users"/> count is less than one.</exception>
-    /// <seealso cref="ShareAsync(IEnumerable{OVRSAnchor},IEnumerable{OVRSpaceUser})"/>
-    public OVRSTask<OVRSResult<ShareResult>> ShareAsync(IEnumerable<OVRSpaceUser> users)
+    /// <seealso cref="ShareAsync(IEnumerable{OVRSAnchor},IEnumerable{OVRSSpaceUser})"/>
+    public OVRSTask<OVRSResult<ShareResult>> ShareAsync(IEnumerable<OVRSSpaceUser> users)
     {
         if (users == null)
             throw new ArgumentNullException(nameof(users));
 
         unsafe
         {
-            using var userList = OVRNativeList.WithSuggestedCapacityFrom(users).AllocateEmpty<ulong>(Allocator.Temp);
+            using var userList = OVRSNativeList.WithSuggestedCapacityFrom(users).AllocateEmpty<ulong>(Allocator.Temp);
             foreach (var user in users.ToNonAlloc())
             {
                 userList.Add(user._handle);
@@ -963,10 +962,10 @@ public class OVRSAnchor : MonoBehaviour
     /// <returns>Returns an awaitable <see cref="OVRSTask"/> representing the asynchronous request.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="anchors"/> or <paramref name="users"/> are `null`.</exception>
     /// <exception cref="ArgumentException">Thrown if <paramref name="users"/> count is less than one.</exception>
-    /// <seealso cref="ShareAsync(IEnumerable{OVRSpaceUser})"/>
+    /// <seealso cref="ShareAsync(IEnumerable{OVRSSpaceUser})"/>
     public static OVRSTask<OVRSResult<ShareResult>> ShareAsync(
         IEnumerable<OVRSAnchor> anchors,
-        IEnumerable<OVRSpaceUser> users)
+        IEnumerable<OVRSSpaceUser> users)
     {
         if (anchors == null)
             throw new ArgumentNullException(nameof(anchors));
@@ -974,13 +973,13 @@ public class OVRSAnchor : MonoBehaviour
         if (users == null)
             throw new ArgumentNullException(nameof(users));
 
-        using var spaceList = OVRNativeList.WithSuggestedCapacityFrom(anchors).AllocateEmpty<ulong>(Allocator.Temp);
+        using var spaceList = OVRSNativeList.WithSuggestedCapacityFrom(anchors).AllocateEmpty<ulong>(Allocator.Temp);
         foreach (var anchor in anchors.ToNonAlloc())
         {
             spaceList.Add(anchor.Handle);
         }
 
-        using var userList = OVRNativeList.WithSuggestedCapacityFrom(users).AllocateEmpty<ulong>(Allocator.Temp);
+        using var userList = OVRSNativeList.WithSuggestedCapacityFrom(users).AllocateEmpty<ulong>(Allocator.Temp);
         foreach (var user in users.ToNonAlloc())
         {
             userList.Add(user._handle);
@@ -1076,7 +1075,7 @@ public class OVRSAnchor : MonoBehaviour
             throw new ArgumentNullException(nameof(anchors));
 
         var anchorIter = anchors.ToNonAlloc();
-        using var anchorNativeList = new OVRNativeList<ulong>(anchorIter.Count, Allocator.Temp);
+        using var anchorNativeList = new OVRSNativeList<ulong>(anchorIter.Count, Allocator.Temp);
         foreach (var a in anchorIter)
         {
             anchorNativeList.Add(a.Handle);
@@ -1162,10 +1161,10 @@ public class OVRSAnchor : MonoBehaviour
     public bool TryGetComponent<T>(out T component) where T : struct, IOVRSAnchorComponent<T>
     {
         component = default;
-        if (!GetSpaceComponentStatusInternal(Handle, component.Type, out _, out _).IsSuccess())
+       /* if (!GetSpaceComponentStatusInternal(Handle, component.Type, out _, out _).IsSuccess())
         {
             return false;
-        }
+        }*/
 
         component = component.FromAnchor(this);
         return true;
@@ -1184,8 +1183,8 @@ public class OVRSAnchor : MonoBehaviour
     /// </remarks>
     /// <typeparam name="T">The type of the component.</typeparam>
     /// <returns>Whether or not the specified type of component is supported.</returns>
-    public bool SupportsComponent<T>() where T : struct, IOVRSAnchorComponent<T>
-        => GetSpaceComponentStatusInternal(Handle, default(T).Type, out _, out _).IsSuccess();
+    /*public bool SupportsComponent<T>() where T : struct, IOVRSAnchorComponent<T>
+        => GetSpaceComponentStatusInternal(Handle, default(T).Type, out _, out _).IsSuccess();*/
 
     /// <summary>
     /// Get all the supported components of an anchor.
@@ -1289,7 +1288,7 @@ public class OVRSAnchor : MonoBehaviour
 
         anchors.Clear();
 
-        var telemetryMarker = OVRTelemetry
+        var telemetryMarker = OVRSTelemetry
             .Start((int)Telemetry.MarkerId.QuerySpaces)
             .AddAnnotation(Telemetry.Annotation.Timeout, (double)queryInfo.Timeout)
             .AddAnnotation(Telemetry.Annotation.MaxResults, (long)queryInfo.MaxQuerySpaces)
@@ -1323,5 +1322,5 @@ public class OVRSAnchor : MonoBehaviour
             .Build(result, requestId)
             .ToTask()
             .WithInternalData(anchors);
-    }*/
+    }
 }

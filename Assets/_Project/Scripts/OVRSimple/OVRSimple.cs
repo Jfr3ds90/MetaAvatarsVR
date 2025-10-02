@@ -1047,7 +1047,7 @@ public class OVRSimple : MonoBehaviour
         dynamicResolutionVersion = MaxDynamicResolutionVersion;
     }
 
-    public static bool OVRSimpleinitialized = false;
+    public static bool OVRSSimpleinitialized = false;
 
     private void InitOVRSimple()
     {
@@ -1220,7 +1220,7 @@ public class OVRSimple : MonoBehaviour
 #endif
 
 
-        OVRSimpleinitialized = true;
+        OVRSSimpleinitialized = true;
     }
 
     private void InitPermissionRequest()
@@ -1364,7 +1364,7 @@ public class OVRSimple : MonoBehaviour
         //Only if we're using the XR SDK do we have to check if OVRSimple isn't yet initialized, and init it.
         //If we're on legacy, we know initialization occurred properly in Awake()
 #if USING_XR_SDK
-        if (!OVRSimpleinitialized)
+        if (!OVRSSimpleinitialized)
         {
             XRDisplaySubsystem currentDisplaySubsystem = GetCurrentDisplaySubsystem();
             XRDisplaySubsystemDescriptor currentDisplaySubsystemDescriptor = GetCurrentDisplaySubsystemDescriptor();
@@ -1387,14 +1387,14 @@ public class OVRSimple : MonoBehaviour
         
 #endif
 
-#if UNITY_EDITOR
+/*#if UNITY_EDITOR
         if (_scriptsReloaded)
         {
             _scriptsReloaded = false;
             instance = this;
             Initialize();
         }
-#endif
+#endif*/
 
         SetCurrentXRDevice();
 
@@ -1727,15 +1727,15 @@ public class OVRSimple : MonoBehaviour
 
         OVRInput.Update();
 
-        UpdateHMDEvents();//Revizaar
+      /*  UpdateHMDEvents();*/
 
-        UpdateInsightPassthrough(isInsightPassthroughEnabled);//Revizar
-        UpdateBoundary();//Revizar
+        /*UpdateInsightPassthrough(isInsightPassthroughEnabled);//Revizar*/
+       /* UpdateBoundary();//Revizar*/
 
     }
 
-    private void UpdateHMDEvents()
-    {/*
+   /* private void UpdateHMDEvents()
+    {
         while (OVRPlugin.PollEvent(ref eventDataBuffer))
         {
             switch (eventDataBuffer.EventType)
@@ -1755,8 +1755,8 @@ public class OVRSimple : MonoBehaviour
                             OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpatialAnchorCreateCompleteData>(
                                 eventDataBuffer.EventData);
 
-                        OVRTask.SetResult(data.RequestId,
-                            data.Result >= 0 ? new OVRAnchor(data.Space, data.Uuid) : OVRAnchor.Null);
+                        OVRSTask.SetResult(data.RequestId,
+                            data.Result >= 0 ? new OVRSAnchor(data.Space, data.Uuid) : OVRSAnchor.Null);
                         SpatialAnchorCreateComplete?.Invoke(data.RequestId, data.Result >= 0, data.Space, data.Uuid);
                         break;
                     }
@@ -1768,8 +1768,8 @@ public class OVRSimple : MonoBehaviour
                         SpaceSetComponentStatusComplete?.Invoke(data.RequestId, data.Result >= 0, data.Space, data.Uuid,
                             data.ComponentType, data.Enabled != 0);
 
-                        OVRTask.SetResult(data.RequestId, data.Result >= 0);
-                        OVRAnchor.OnSpaceSetComponentStatusComplete(data);
+                        OVRSTask.SetResult(data.RequestId, data.Result >= 0);
+                        OVRSAnchor.OnSpaceSetComponentStatusComplete(data);
                         break;
                     }
                 case OVRPlugin.EventType.SpaceQueryResults:
@@ -1787,7 +1787,7 @@ public class OVRSimple : MonoBehaviour
                         var data = OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpaceQueryCompleteData>(
                             eventDataBuffer.EventData);
                         SpaceQueryComplete?.Invoke(data.RequestId, data.Result >= 0);
-                        OVRAnchor.OnSpaceQueryComplete(data);
+                        OVRSAnchor.OnSpaceQueryComplete(data);
                         break;
                     }
                 case OVRPlugin.EventType.SpaceSaveComplete:
@@ -1806,9 +1806,9 @@ public class OVRSimple : MonoBehaviour
                                 .EventData);
 
                         var result = data.Result >= 0;
-                        OVRAnchor.OnSpaceEraseComplete(data);
+                        OVRSAnchor.OnSpaceEraseComplete(data);
                         SpaceEraseComplete?.Invoke(data.RequestId, result, data.Uuid, data.Location);
-                        OVRTask.SetResult(data.RequestId, result);
+                        OVRSTask.SetResult(data.RequestId, result);
                         break;
                     }
                 case OVRPlugin.EventType.SpaceShareResult:
@@ -1817,7 +1817,7 @@ public class OVRSimple : MonoBehaviour
                             OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpaceShareResultData>(
                                 eventDataBuffer.EventData);
 
-                        OVRTask.SetResult(data.RequestId, OVRResult.From((OVRAnchor.ShareResult)data.Result));
+                        OVRSTask.SetResult(data.RequestId, OVRSResult.From((OVRSAnchor.ShareResult)data.Result));
                         ShareSpacesComplete?.Invoke(data.RequestId, (OVRSpatialAnchor.OperationResult)data.Result);
                         break;
                     }
@@ -1827,14 +1827,14 @@ public class OVRSimple : MonoBehaviour
                             OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpaceListSaveResultData>(
                                 eventDataBuffer.EventData);
 
-                        OVRAnchor.OnSpaceListSaveResult(data);
+                        OVRSAnchor.OnSpaceListSaveResult(data);
                         SpaceListSaveComplete?.Invoke(data.RequestId, (OVRSpatialAnchor.OperationResult)data.Result);
                         break;
                     }
                 case OVRPlugin.EventType.SpaceShareToGroupsComplete:
                     {
                         var data = eventDataBuffer.MarshalEntireStructAs<OVRSDeserialize.ShareSpacesToGroupsCompleteData>();
-                        OVRAnchor.OnShareAnchorsToGroupsComplete(data.RequestId, data.Result);
+                        OVRSAnchor.OnShareAnchorsToGroupsComplete(data.RequestId, data.Result);
                         break;
                     }
                 case OVRPlugin.EventType.SceneCaptureComplete:
@@ -1843,7 +1843,7 @@ public class OVRSimple : MonoBehaviour
                             OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SceneCaptureCompleteData>(eventDataBuffer
                                 .EventData);
                         SceneCaptureComplete?.Invoke(data.RequestId, data.Result >= 0);
-                        OVRTask.SetResult(data.RequestId, data.Result >= 0);
+                        OVRSTask.SetResult(data.RequestId, data.Result >= 0);
                     }
 
                     break;
@@ -1913,30 +1913,30 @@ public class OVRSimple : MonoBehaviour
                     {
                         var data = OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpaceDiscoveryCompleteData>(
                             eventDataBuffer.EventData);
-                        OVRAnchor.OnSpaceDiscoveryComplete(data);
+                        OVRSAnchor.OnSpaceDiscoveryComplete(data);
                         break;
                     }
                 case OVRPlugin.EventType.SpaceDiscoveryResultsAvailable:
                     {
                         var data = OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpaceDiscoveryResultsData>(
                             eventDataBuffer.EventData);
-                        OVRAnchor.OnSpaceDiscoveryResultsAvailable(data);
+                        OVRSAnchor.OnSpaceDiscoveryResultsAvailable(data);
                         break;
                     }
                 case OVRPlugin.EventType.SpacesSaveResult:
                     {
                         var data = OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpacesSaveResultData>(
                             eventDataBuffer.EventData);
-                        OVRAnchor.OnSaveSpacesResult(data);
-                        OVRTask.SetResult(data.RequestId, OVRResult.From(data.Result));
+                        OVRSAnchor.OnSaveSpacesResult(data);
+                        OVRSTask.SetResult(data.RequestId, OVRSResult.From(data.Result));
                         break;
                     }
                 case OVRPlugin.EventType.SpacesEraseResult:
                     {
                         var data = OVRSDeserialize.ByteArrayToStructure<OVRSDeserialize.SpacesEraseResultData>(
                             eventDataBuffer.EventData);
-                        OVRAnchor.OnEraseSpacesResult(data);
-                        OVRTask.SetResult(data.RequestId, OVRResult.From(data.Result));
+                        OVRSAnchor.OnEraseSpacesResult(data);
+                        OVRSTask.SetResult(data.RequestId, OVRSResult.From(data.Result));
                         break;
                     }
                 case OVRPlugin.EventType.PassthroughLayerResumed:
@@ -1963,17 +1963,17 @@ public class OVRSimple : MonoBehaviour
                 case OVRPlugin.EventType.CreateDynamicObjectTrackerResult:
                     {
                         var data = eventDataBuffer.MarshalEntireStructAs<OVRSDeserialize.CreateDynamicObjectTrackerResultData>();
-                        OVRTask.SetResult(
-                            OVRTask.GetId(data.Tracker, data.EventType),
-                            OVRResult<ulong, OVRPlugin.Result>.From(data.Tracker, data.Result));
+                        OVRSTask.SetResult(
+                            OVRSTask.GetId(data.Tracker, data.EventType),
+                            OVRSResult<ulong, OVRPlugin.Result>.From(data.Tracker, data.Result));
                         break;
                     }
                 case OVRPlugin.EventType.SetDynamicObjectTrackedClassesResult:
                     {
                         var data = eventDataBuffer.MarshalEntireStructAs<OVRSDeserialize.SetDynamicObjectTrackedClassesResultData>();
-                        OVRTask.SetResult(
-                            OVRTask.GetId(data.Tracker, data.EventType),
-                            OVRResult<OVRPlugin.Result>.From(data.Result));
+                        OVRSTask.SetResult(
+                            OVRSTask.GetId(data.Tracker, data.EventType),
+                            OVRSResult<OVRPlugin.Result>.From(data.Result));
                         break;
                     }
                 default:
@@ -1984,8 +1984,8 @@ public class OVRSimple : MonoBehaviour
 
                     break;
             }
-        }*/
-    }
+        }
+    }*/
 
     public void UpdateDynamicResolutionVersion()
     {
@@ -2130,7 +2130,7 @@ public class OVRSimple : MonoBehaviour
 #if UNITY_EDITOR
         OVRPlugin.SetLogCallback2(null);
 #endif
-        OVRSimpleinitialized = false;
+        OVRSSimpleinitialized = false;
     }
 
     #endregion // Unity Messages

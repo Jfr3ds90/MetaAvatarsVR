@@ -16,7 +16,7 @@ static partial class OVRSTask
     /// <![CDATA[
     /// return OVRSTask
     ///   .Build(OVRPlugin.SomeAsyncOperation(out var requestId), requestId) // no type information
-    ///   .ToTask<TValue, TStatus>(); // <-- returns an OVRResult<TValue, TStatus>
+    ///   .ToTask<TValue, TStatus>(); // <-- returns an OVRSResult<TValue, TStatus>
     /// ]]>
     ///
     /// Note the type information is only required once.
@@ -59,17 +59,17 @@ static partial class OVRSTask
 
         /// <summary>
         /// Same as <see cref="ToTask{TStatus}()"/> but returns an <see cref="OVRSTask{TResult}"/> whose result is an
-        /// <see cref="OVRResult{TStatus}"/>.
+        /// <see cref="OVRSResult{TStatus}"/>.
         /// </summary>
-        public OVRSTask<OVRResult<TStatus>> ToResultTask<TStatus>() where TStatus : struct, Enum
-            => ToTask(_synchronousResult.IsSuccess() ? default : OVRResult<TStatus>.FromFailure(CastResult<TStatus>()));
+        public OVRSTask<OVRSResult<TStatus>> ToResultTask<TStatus>() where TStatus : struct, Enum
+            => ToTask(_synchronousResult.IsSuccess() ? default : OVRSResult<TStatus>.FromFailure(CastResult<TStatus>()));
 
         /// <summary>
-        /// Creates a new <see cref="OVRSTask{TResult}"/> where `TResult` is an <see cref="OVRResult{TValue,TStatus}"/>.
+        /// Creates a new <see cref="OVRSTask{TResult}"/> where `TResult` is an <see cref="OVRSResult{TValue,TStatus}"/>.
         /// <typeparamref name="TStatus"/> must be castable from an <see cref="OVRPlugin.Result"/>.
         /// </summary>
-        public OVRSTask<OVRResult<TValue, TStatus>> ToTask<TValue, TStatus>() where TStatus : struct, Enum
-            => ToTask(_synchronousResult.IsSuccess() ? default : OVRResult<TValue, TStatus>.FromFailure(CastResult<TStatus>()));
+        public OVRSTask<OVRSResult<TValue, TStatus>> ToTask<TValue, TStatus>() where TStatus : struct, Enum
+            => ToTask(_synchronousResult.IsSuccess() ? default : OVRSResult<TValue, TStatus>.FromFailure(CastResult<TStatus>()));
 
         private TResult CastResult<TResult>() where TResult : struct, Enum
         {
