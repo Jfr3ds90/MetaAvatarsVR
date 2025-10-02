@@ -543,28 +543,28 @@ namespace HackMonkeys.UI.Spatial
                 {
                     case 0:
                         Vector3 centerPosition0 = new Vector3(
-                   currentX + (keyWidth / 2f) - 41.5f,
+                   currentX + (keyWidth / 2f) - 39.5f,
                    currentY - (keyHeight / 2f) + 10.4f,
                    0
                ); 
                         CreateKey(extraKey, centerPosition0); j++; continue;
                     case 2:
                         Vector3 centerPosition2 = new Vector3(
-                   currentX + (keyWidth / 2f) - 41.5f,
+                   currentX + (keyWidth / 2f) - 39.5f,
                    currentY - (keyHeight / 2f) + 5.3f,
                    0
                ); 
                         CreateKey(extraKey, centerPosition2); j++; continue;
                     case 1:
                         Vector3 centerPosition1 = new Vector3(
-                    currentX + (keyWidth / 2f) + 2.5f,
+                    currentX + (keyWidth / 2f) + 4.5f,
                     currentY - (keyHeight / 2f) + 10.5f,
                     0
                 ); 
                         CreateKey(extraKey, centerPosition1); j++; continue;
                     case 3:
                         Vector3 centerPosition3 = new Vector3(
-                   currentX + (keyWidth / 2f) + 2.5f,
+                   currentX + (keyWidth / 2f) + 4.5f,
                    currentY - (keyHeight / 2f) + 5.1f,
                    0
                ); 
