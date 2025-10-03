@@ -46,7 +46,8 @@ namespace HackMonkeys.UI.Spatial
             Shift,
             Numbers,
             Symbols,
-            Close
+            Close,
+            Language
         }
         
         public enum KeyboardLayout
@@ -72,6 +73,7 @@ namespace HackMonkeys.UI.Spatial
         [SerializeField] private Sprite numbersIcon;
         [SerializeField] private Sprite symbolsIcon;
         [SerializeField] private Sprite closeIcon;
+        [SerializeField] private Sprite languageIcon;
         
         [Header("Visual Settings")]
         [SerializeField] private Material normalKeyMaterial;
@@ -242,26 +244,49 @@ namespace HackMonkeys.UI.Spatial
                 height = 1f,
                 iconSprite = numbersIcon
             });
+            keys.Add(new KeyboardKey
+            {
+                keyType = KeyType.Language,
+                width = 1.5f,
+                height = 1f,
+                iconSprite = languageIcon
+            });
             
             keys.Add(new KeyboardKey
             {
                 character = "Space",
                 shiftCharacter = "Space",
                 keyType = KeyType.Space,
-                width = 9f,
+                width = 5f,
                 height = 1f,
                 iconSprite = spaceIcon
             });
-            
-          /*  keys.Add(new KeyboardKey
+            keys.Add(new KeyboardKey
             {
-                character = "Enter",
-                shiftCharacter = "Enter",
-                keyType = KeyType.Enter,
-                width = 2f,
-                height = 1f,
-                iconSprite = enterIcon
-            });*/
+                character = ",",
+                shiftCharacter = ",",
+                keyType = KeyType.Character,
+                width = 1f,
+                height = 1f
+            });
+            keys.Add(new KeyboardKey
+            {
+                character = ".",
+                shiftCharacter = ".",
+                keyType = KeyType.Character,
+                width = 1f,
+                height = 1f
+            });
+
+            /*  keys.Add(new KeyboardKey
+              {
+                  character = "Enter",
+                  shiftCharacter = "Enter",
+                  keyType = KeyType.Enter,
+                  width = 2f,
+                  height = 1f,
+                  iconSprite = enterIcon
+              });*/
 
             for (int i = 0; i < manualKeys.Length; i++)
             {
@@ -501,6 +526,22 @@ namespace HackMonkeys.UI.Spatial
                 CreateKey(numbersKey, centerPosition);
                 currentX += keyWidth + keySpacing;
             }
+            // Language key
+            if (keyIndex < _currentKeys.Count)
+            {
+                KeyboardKey languageKey = _currentKeys[keyIndex++];
+                float keyWidth = baseKeyWidth * languageKey.width;
+                float keyHeight = baseKeyHeight * languageKey.height;
+                
+                Vector3 centerPosition = new Vector3(
+                    currentX + (keyWidth / 2f),
+                    currentY - (keyHeight / 2f),
+                    0
+                );
+                
+                CreateKey(languageKey, centerPosition);
+                currentX += keyWidth + keySpacing;
+            }
             
             // Space bar
             if (keyIndex < _currentKeys.Count)
@@ -516,6 +557,38 @@ namespace HackMonkeys.UI.Spatial
                 );
                 
                 CreateKey(spaceKey, centerPosition);
+                currentX += keyWidth + keySpacing;
+            }
+            // Simbole
+            if (keyIndex < _currentKeys.Count)
+            {
+                KeyboardKey simboleKey = _currentKeys[keyIndex++];
+                float keyWidth = baseKeyWidth * simboleKey.width;
+                float keyHeight = baseKeyHeight * simboleKey.height;
+                
+                Vector3 centerPosition = new Vector3(
+                    currentX + (keyWidth / 2f),
+                    currentY - (keyHeight / 2f),
+                    0
+                );
+                
+                CreateKey(simboleKey, centerPosition);
+                currentX += keyWidth + keySpacing;
+            }
+            // Simbole
+            if (keyIndex < _currentKeys.Count)
+            {
+                KeyboardKey simboleKey = _currentKeys[keyIndex++];
+                float keyWidth = baseKeyWidth * simboleKey.width;
+                float keyHeight = baseKeyHeight * simboleKey.height;
+                
+                Vector3 centerPosition = new Vector3(
+                    currentX + (keyWidth / 2f),
+                    currentY - (keyHeight / 2f),
+                    0
+                );
+                
+                CreateKey(simboleKey, centerPosition);
                 currentX += keyWidth + keySpacing;
             }
             
@@ -545,28 +618,28 @@ namespace HackMonkeys.UI.Spatial
                 {
                     case 0:
                         Vector3 centerPosition0 = new Vector3(
-                   currentX + (keyWidth / 2f) - 39.5f,
+                   currentX + (keyWidth / 2f) - 38.1f,
                    currentY - (keyHeight / 2f) + 10.4f,
                    0
                ); 
                         CreateKey(extraKey, centerPosition0); j++; continue;
-                    case 2:
+                  /*  case 2:
                         Vector3 centerPosition2 = new Vector3(
-                   currentX + (keyWidth / 2f) - 39.5f,
+                   currentX + (keyWidth / 2f) - 27.5f,
                    currentY - (keyHeight / 2f) + 5.3f,
                    0
                ); 
-                        CreateKey(extraKey, centerPosition2); j++; continue;
+                        CreateKey(extraKey, centerPosition2); j++; continue;*/
                     case 1:
                         Vector3 centerPosition1 = new Vector3(
-                    currentX + (keyWidth / 2f) + 4.5f,
+                    currentX + (keyWidth / 2f) + 5.9f,
                     currentY - (keyHeight / 2f) + 10.5f,
                     0
                 ); 
                         CreateKey(extraKey, centerPosition1); j++; continue;
-                    case 3:
+                    case 2:
                         Vector3 centerPosition3 = new Vector3(
-                   currentX + (keyWidth / 2f) + 4.5f,
+                   currentX + (keyWidth / 2f) + 5.9f,
                    currentY - (keyHeight / 2f) + 5.1f,
                    0
                ); 
