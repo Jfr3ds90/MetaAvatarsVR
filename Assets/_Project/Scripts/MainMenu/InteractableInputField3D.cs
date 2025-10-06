@@ -7,6 +7,7 @@ using System.Text;
 using System.Collections;
 using Oculus.Interaction.Surfaces;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace HackMonkeys.UI.Spatial
 {
@@ -456,10 +457,15 @@ namespace HackMonkeys.UI.Spatial
         }
         
         private void UpdateText()
-        {
+        {Ray ray = new Ray();
+            SurfaceHit hit;
             if (inputText != null)
             {
                 inputText.text = _currentText;
+                Debug.LogWarning("La posición es " +GetComponent<TMP_InputField>().caretPosition+" del texto "+GetComponent<TMP_InputField>().text
+                    +" en la posición "+ GetComponent<ColliderSurface>().Bounds  //revizar RayInteractor como ver que posicion exacta toca al inputfield
+                    /*GetComponent<ColliderSurface>().Raycast(ray,out hit)*/
+                    /*GetComponent<RayInteractable>().Surface*//*GetComponent<ColliderSurface>().Transform.position*/);
             }
             
             // Validate if needed
