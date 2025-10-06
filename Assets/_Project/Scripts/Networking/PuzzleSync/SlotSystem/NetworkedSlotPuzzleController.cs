@@ -124,6 +124,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
                     {
                         _slots[i].SetExpectedItem(_expectedPattern[i]);
                     }
+                    
+                    Debug.Log($"[{GetType().Name}] Configured slot {i}: {_slots[i].name} with controller");
                 }
             }
         }
@@ -136,6 +138,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
                 {
                     _items[i].SetPuzzleController(this);
                     _items[i].SetItemId(i);
+                    Debug.Log($"[{GetType().Name}] Configured item {i}: {_items[i].name} with controller");
                 }
             }
         }
@@ -484,11 +487,32 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
             if (_slots == null || _slots.Length == 0)
             {
                 _slots = GetComponentsInChildren<NetworkedSlot>();
+                Debug.Log($"[{GetType().Name}] Auto-detected {_slots.Length} slots in children");
+            }
+            else
+            {
+                Debug.Log($"[{GetType().Name}] Using {_slots.Length} manually configured slots");
             }
             
             if (_items == null || _items.Length == 0)
             {
+                // IMPORTANTE: FindObjectsOfType encontrará TODOS los items en la escena
+                // Es mejor configurar manualmente los items en el inspector
                 _items = FindObjectsOfType<NetworkedSlottableItem>();
+                Debug.LogWarning($"[{GetType().Name}] Auto-detected {_items.Length} items in ENTIRE SCENE - Consider manually assigning items!");
+            }
+            else
+            {
+                Debug.Log($"[{GetType().Name}] Using {_items.Length} manually configured items");
+            }
+            
+            // Log de los items encontrados/configurados
+            for (int i = 0; i < _items.Length; i++)
+            {
+                if (_items[i] != null)
+                {
+                    Debug.Log($"[{GetType().Name}] Item {i}: {_items[i].name}");
+                }
             }
         }
         

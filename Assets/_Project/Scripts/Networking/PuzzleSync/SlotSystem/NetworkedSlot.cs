@@ -41,7 +41,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         
         protected ISlottable _currentItem;
         protected AudioSource _audioSource;
-        protected NetworkedSlotPuzzleController _puzzleController;
+        [SerializeField] protected NetworkedSlotPuzzleController _puzzleController;
         
         public int SlotId => _slotId;
         public bool CanAcceptItem => !IsOccupied;

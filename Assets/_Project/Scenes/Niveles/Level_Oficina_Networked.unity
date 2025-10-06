@@ -685,6 +685,7 @@ GameObject:
   - component: {fileID: 79132600}
   - component: {fileID: 79132602}
   - component: {fileID: 79132601}
+  - component: {fileID: 79132603}
   m_Layer: 0
   m_Name: MusicalNotes
   m_TagString: Untagged
@@ -752,6 +753,7 @@ MonoBehaviour:
   - {fileID: 2137564660}
   NetworkedBehaviours:
   - {fileID: 79132602}
+  - {fileID: 79132603}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &79132602
 MonoBehaviour:
@@ -760,7 +762,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 79132599}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f322b507df11af44bb074b7bf04abc27, type: 3}
   m_Name: 
@@ -816,6 +818,101 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   _debugMode: 0
+--- !u!114 &79132603
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 79132599}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0249f7b87007dd5418f1d19d41f9e574, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _config:
+    puzzleId: 1
+    requireAllSlotsFilled: 1
+    requireCorrectOrder: 1
+    allowPartialCompletion: 0
+    validationDelay: 0.5
+    maxAttempts: -1
+    autoReset: 0
+    resetDelay: 3
+  _slots:
+  - {fileID: 6845676863432452873}
+  - {fileID: 6927572812782343558}
+  - {fileID: 7966181231778279632}
+  - {fileID: 6651279513740841399}
+  - {fileID: 8100086656326779411}
+  - {fileID: 5178570095541635175}
+  - {fileID: 7942795927341094935}
+  _items:
+  - {fileID: 1697859061}
+  - {fileID: 1737078714}
+  - {fileID: 553715645}
+  - {fileID: 1960755790}
+  - {fileID: 1577813611}
+  - {fileID: 1616000127}
+  - {fileID: 1189122417}
+  _puzzleDoor: {fileID: 8254403027331891175}
+  _objectsToActivate: []
+  _objectsToDeactivate: []
+  _puzzleCompleteSound: {fileID: 0}
+  _puzzleFailSound: {fileID: 0}
+  _progressSound: {fileID: 0}
+  _CurrentState: 0
+  _IsSolved:
+    _value: 0
+  _CorrectItemsPlaced: 0
+  _TotalItemsPlaced: 0
+  _CurrentAttempts: 0
+  _CompletionTime: 0
+  OnPuzzleStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnProgressUpdated:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPuzzleCompleted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPuzzleFailed:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPuzzleReset:
+    m_PersistentCalls:
+      m_Calls: []
+  _debugMode: 0
+  _patternDisplayDuration: 10
+  _patternDisplay: {fileID: 1424322434082347949}
+  _patternRenderer: {fileID: 1424322434082347948}
+  _colorMaterials:
+  - {fileID: 2100000, guid: 428a1788d52bac346bca49fee1152431, type: 2}
+  - {fileID: 2100000, guid: 50739a9ad6ce8af4eb3671c014be13a5, type: 2}
+  - {fileID: 2100000, guid: efc4c7475ab60d24e97dd1c7e458fc7d, type: 2}
+  - {fileID: 2100000, guid: 4db8b15b10c6b8941856db2670ac366d, type: 2}
+  - {fileID: 2100000, guid: 54c7f6514e63f1a4c81d430717a8fdf2, type: 2}
+  - {fileID: 2100000, guid: 4f9ae090c264656408b0dbc84e52ee3f, type: 2}
+  - {fileID: 2100000, guid: 90fdb3772d924e346a403e15c19ac6bd, type: 2}
+  _piano: {fileID: 1642719046}
+  _requirePianoSequence: 0
+  OnPatternDisplayStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPatternDisplayEnded:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPianoPhaseStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  _PatternShown:
+    _value: 0
+  _PianoPhaseActive:
+    _value: 0
 --- !u!4 &81809399 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8519876289749315390, guid: b657881be91c71b49bdbd4d52d8c64e5, type: 3}
@@ -1361,7 +1458,7 @@ GameObject:
   m_Component:
   - component: {fileID: 127117290}
   m_Layer: 0
-  m_Name: Net workingSystems
+  m_Name: NetworkingSystems
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5671,7 +5768,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1272724688355475315, guid: 0728d71ae1a190942b5d96e69fef93f9, type: 3}
       propertyPath: NetworkedBehaviours.Array.size
-      value: 3
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 1272724688355475315, guid: 0728d71ae1a190942b5d96e69fef93f9, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[1]'
@@ -5681,9 +5778,17 @@ PrefabInstance:
       propertyPath: 'NetworkedBehaviours.Array.data[2]'
       value: 
       objectReference: {fileID: 553715644}
+    - target: {fileID: 1272724688355475315, guid: 0728d71ae1a190942b5d96e69fef93f9, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[3]'
+      value: 
+      objectReference: {fileID: 553715645}
+    - target: {fileID: 1272724688355475315, guid: 0728d71ae1a190942b5d96e69fef93f9, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[4]'
+      value: 
+      objectReference: {fileID: 553715646}
     - target: {fileID: 3979852347204307430, guid: 0728d71ae1a190942b5d96e69fef93f9, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4183538711661729989, guid: 0728d71ae1a190942b5d96e69fef93f9, type: 3}
       propertyPath: m_Drag
@@ -5741,7 +5846,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7089633228314078097, guid: 0728d71ae1a190942b5d96e69fef93f9, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -5751,6 +5857,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: 0728d71ae1a190942b5d96e69fef93f9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 553715644}
+    - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: 0728d71ae1a190942b5d96e69fef93f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 553715645}
+    - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: 0728d71ae1a190942b5d96e69fef93f9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 553715646}
   m_SourcePrefab: {fileID: 100100000, guid: 0728d71ae1a190942b5d96e69fef93f9, type: 3}
 --- !u!4 &553715639 stripped
 Transform:
@@ -5763,7 +5875,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 553715638}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 553715642}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83df842e125f0cd4cb93003fc376ee44, type: 3}
   m_Name: 
@@ -5826,7 +5938,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   _maintainVelocityOnRelease: 1
   _throwForceMultiplier: 1.5
-  _useSnapSlots: 0
+  _useSnapSlots: 1
   _snapDistance: 0.3
   _slotTag: SnapSlot
   _debugMode: 1
@@ -5838,6 +5950,103 @@ MonoBehaviour:
     _value: 0
   _LastVelocity: {x: 0, y: 0, z: 0}
   _LastAngularVelocity: {x: 0, y: 0, z: 0}
+--- !u!114 &553715645
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 553715642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe55e089521161147ac1e2e38dcb7c63, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _itemId: 0
+  _snapDistance: 0.3
+  _slotLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _correctPlacementEffect: {fileID: 0}
+  _incorrectPlacementEffect: {fileID: 0}
+  _meshRenderer: {fileID: 0}
+  _placementSound: {fileID: 0}
+  _removalSound: {fileID: 0}
+  _NetworkedItemId: 0
+  _IsPlacedInSlot:
+    _value: 0
+  _PlacedSlotIndex: 0
+  _IsCorrectlyPlaced:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _noteName: Mi
+  _noteSound: {fileID: 0}
+  _noteMaterial: {fileID: 0}
+--- !u!114 &553715646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 553715642}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7406994537c4f14a933d769b1a959d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _itemId: 0
+  _snapDistance: 0.5
+  _slotTag: SnapSlot
+  _slotLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  _returnToOriginOnFailedPlacement: 0
+  _returnToOriginDelay: 2
+  _useTagDetection: 1
+  _useLayerDetection: 1
+  _correctPlacementEffect: {fileID: 0}
+  _incorrectPlacementEffect: {fileID: 0}
+  _meshRenderer: {fileID: 0}
+  _placementSound: {fileID: 0}
+  _removalSound: {fileID: 0}
+  _enableDebugLogs: 1
+  _showDetectionGizmos: 1
+  _gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  _NetworkedItemId: 0
+  _IsPlacedInSlot:
+    _value: 0
+  _PlacedSlotIndex: 0
+  _IsCorrectlyPlaced:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _noteName: Mi
+  _noteSound: {fileID: 0}
+  _noteMaterial: {fileID: 0}
+  _noteColorIndex: 2
 --- !u!1001 &558168002
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11226,7 +11435,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1272724688355475315, guid: b9f1391b7a2d097479593b0a97c29c64, type: 3}
       propertyPath: NetworkedBehaviours.Array.size
-      value: 3
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 1272724688355475315, guid: b9f1391b7a2d097479593b0a97c29c64, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[1]'
@@ -11236,9 +11445,17 @@ PrefabInstance:
       propertyPath: 'NetworkedBehaviours.Array.data[2]'
       value: 
       objectReference: {fileID: 1189122416}
+    - target: {fileID: 1272724688355475315, guid: b9f1391b7a2d097479593b0a97c29c64, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[3]'
+      value: 
+      objectReference: {fileID: 1189122417}
+    - target: {fileID: 1272724688355475315, guid: b9f1391b7a2d097479593b0a97c29c64, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[4]'
+      value: 
+      objectReference: {fileID: 1189122418}
     - target: {fileID: 3979852347204307430, guid: b9f1391b7a2d097479593b0a97c29c64, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4183538711661729989, guid: b9f1391b7a2d097479593b0a97c29c64, type: 3}
       propertyPath: m_Drag
@@ -11296,7 +11513,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7089633228314078097, guid: b9f1391b7a2d097479593b0a97c29c64, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -11306,6 +11524,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: b9f1391b7a2d097479593b0a97c29c64, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1189122416}
+    - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: b9f1391b7a2d097479593b0a97c29c64, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1189122417}
+    - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: b9f1391b7a2d097479593b0a97c29c64, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1189122418}
   m_SourcePrefab: {fileID: 100100000, guid: b9f1391b7a2d097479593b0a97c29c64, type: 3}
 --- !u!4 &1189122411 stripped
 Transform:
@@ -11318,7 +11542,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 1189122410}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1189122414}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83df842e125f0cd4cb93003fc376ee44, type: 3}
   m_Name: 
@@ -11381,7 +11605,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   _maintainVelocityOnRelease: 1
   _throwForceMultiplier: 1.5
-  _useSnapSlots: 0
+  _useSnapSlots: 1
   _snapDistance: 0.3
   _slotTag: SnapSlot
   _debugMode: 1
@@ -11393,6 +11617,103 @@ MonoBehaviour:
     _value: 0
   _LastVelocity: {x: 0, y: 0, z: 0}
   _LastAngularVelocity: {x: 0, y: 0, z: 0}
+--- !u!114 &1189122417
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1189122414}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe55e089521161147ac1e2e38dcb7c63, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _itemId: 0
+  _snapDistance: 0.3
+  _slotLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _correctPlacementEffect: {fileID: 0}
+  _incorrectPlacementEffect: {fileID: 0}
+  _meshRenderer: {fileID: 0}
+  _placementSound: {fileID: 0}
+  _removalSound: {fileID: 0}
+  _NetworkedItemId: 0
+  _IsPlacedInSlot:
+    _value: 0
+  _PlacedSlotIndex: 0
+  _IsCorrectlyPlaced:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _noteName: Si
+  _noteSound: {fileID: 0}
+  _noteMaterial: {fileID: 0}
+--- !u!114 &1189122418
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1189122414}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7406994537c4f14a933d769b1a959d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _itemId: 0
+  _snapDistance: 0.5
+  _slotTag: SnapSlot
+  _slotLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  _returnToOriginOnFailedPlacement: 0
+  _returnToOriginDelay: 2
+  _useTagDetection: 1
+  _useLayerDetection: 1
+  _correctPlacementEffect: {fileID: 0}
+  _incorrectPlacementEffect: {fileID: 0}
+  _meshRenderer: {fileID: 0}
+  _placementSound: {fileID: 0}
+  _removalSound: {fileID: 0}
+  _enableDebugLogs: 1
+  _showDetectionGizmos: 1
+  _gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  _NetworkedItemId: 0
+  _IsPlacedInSlot:
+    _value: 0
+  _PlacedSlotIndex: 0
+  _IsCorrectlyPlaced:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _noteName: Si
+  _noteSound: {fileID: 0}
+  _noteMaterial: {fileID: 0}
+  _noteColorIndex: 6
 --- !u!1 &1204565354
 GameObject:
   m_ObjectHideFlags: 0
@@ -13285,7 +13606,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1272724688355475315, guid: 55d4e9bdd7f370b4994c7a7c6fd8147f, type: 3}
       propertyPath: NetworkedBehaviours.Array.size
-      value: 3
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 1272724688355475315, guid: 55d4e9bdd7f370b4994c7a7c6fd8147f, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[1]'
@@ -13295,9 +13616,17 @@ PrefabInstance:
       propertyPath: 'NetworkedBehaviours.Array.data[2]'
       value: 
       objectReference: {fileID: 1350632992}
+    - target: {fileID: 1272724688355475315, guid: 55d4e9bdd7f370b4994c7a7c6fd8147f, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[3]'
+      value: 
+      objectReference: {fileID: 1737078714}
+    - target: {fileID: 1272724688355475315, guid: 55d4e9bdd7f370b4994c7a7c6fd8147f, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[4]'
+      value: 
+      objectReference: {fileID: 1737078715}
     - target: {fileID: 3979852347204307430, guid: 55d4e9bdd7f370b4994c7a7c6fd8147f, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4183538711661729989, guid: 55d4e9bdd7f370b4994c7a7c6fd8147f, type: 3}
       propertyPath: m_Drag
@@ -13355,7 +13684,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7089633228314078097, guid: 55d4e9bdd7f370b4994c7a7c6fd8147f, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -13365,6 +13695,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: 55d4e9bdd7f370b4994c7a7c6fd8147f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1350632992}
+    - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: 55d4e9bdd7f370b4994c7a7c6fd8147f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1737078714}
+    - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: 55d4e9bdd7f370b4994c7a7c6fd8147f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1737078715}
   m_SourcePrefab: {fileID: 100100000, guid: 55d4e9bdd7f370b4994c7a7c6fd8147f, type: 3}
 --- !u!4 &1350632987 stripped
 Transform:
@@ -13377,7 +13713,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 1350632986}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1350632990}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83df842e125f0cd4cb93003fc376ee44, type: 3}
   m_Name: 
@@ -13440,7 +13776,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   _maintainVelocityOnRelease: 1
   _throwForceMultiplier: 1.5
-  _useSnapSlots: 0
+  _useSnapSlots: 1
   _snapDistance: 0.3
   _slotTag: SnapSlot
   _debugMode: 1
@@ -14066,7 +14402,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1272724688355475315, guid: 4da3aed8b983e654fb644925c46969a7, type: 3}
       propertyPath: NetworkedBehaviours.Array.size
-      value: 3
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 1272724688355475315, guid: 4da3aed8b983e654fb644925c46969a7, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[1]'
@@ -14076,9 +14412,17 @@ PrefabInstance:
       propertyPath: 'NetworkedBehaviours.Array.data[2]'
       value: 
       objectReference: {fileID: 1401638367}
+    - target: {fileID: 1272724688355475315, guid: 4da3aed8b983e654fb644925c46969a7, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[3]'
+      value: 
+      objectReference: {fileID: 1577813611}
+    - target: {fileID: 1272724688355475315, guid: 4da3aed8b983e654fb644925c46969a7, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[4]'
+      value: 
+      objectReference: {fileID: 1577813612}
     - target: {fileID: 3979852347204307430, guid: 4da3aed8b983e654fb644925c46969a7, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4183538711661729989, guid: 4da3aed8b983e654fb644925c46969a7, type: 3}
       propertyPath: m_Drag
@@ -14136,7 +14480,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7089633228314078097, guid: 4da3aed8b983e654fb644925c46969a7, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -14146,6 +14491,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: 4da3aed8b983e654fb644925c46969a7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1401638367}
+    - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: 4da3aed8b983e654fb644925c46969a7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1577813611}
+    - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: 4da3aed8b983e654fb644925c46969a7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1577813612}
   m_SourcePrefab: {fileID: 100100000, guid: 4da3aed8b983e654fb644925c46969a7, type: 3}
 --- !u!4 &1401638362 stripped
 Transform:
@@ -14158,7 +14509,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 1401638361}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1401638365}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83df842e125f0cd4cb93003fc376ee44, type: 3}
   m_Name: 
@@ -14221,7 +14572,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   _maintainVelocityOnRelease: 1
   _throwForceMultiplier: 1.5
-  _useSnapSlots: 0
+  _useSnapSlots: 1
   _snapDistance: 0.3
   _slotTag: SnapSlot
   _debugMode: 1
@@ -14896,7 +15247,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1272724688355475315, guid: 43dfcffa501f8ec4193dae7f6c2ce1a7, type: 3}
       propertyPath: NetworkedBehaviours.Array.size
-      value: 3
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 1272724688355475315, guid: 43dfcffa501f8ec4193dae7f6c2ce1a7, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[1]'
@@ -14906,9 +15257,17 @@ PrefabInstance:
       propertyPath: 'NetworkedBehaviours.Array.data[2]'
       value: 
       objectReference: {fileID: 1508731996}
+    - target: {fileID: 1272724688355475315, guid: 43dfcffa501f8ec4193dae7f6c2ce1a7, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[3]'
+      value: 
+      objectReference: {fileID: 1697859061}
+    - target: {fileID: 1272724688355475315, guid: 43dfcffa501f8ec4193dae7f6c2ce1a7, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[4]'
+      value: 
+      objectReference: {fileID: 1697859062}
     - target: {fileID: 3979852347204307430, guid: 43dfcffa501f8ec4193dae7f6c2ce1a7, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4183538711661729989, guid: 43dfcffa501f8ec4193dae7f6c2ce1a7, type: 3}
       propertyPath: m_Drag
@@ -14966,7 +15325,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7089633228314078097, guid: 43dfcffa501f8ec4193dae7f6c2ce1a7, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -14976,6 +15336,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: 43dfcffa501f8ec4193dae7f6c2ce1a7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1508731996}
+    - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: 43dfcffa501f8ec4193dae7f6c2ce1a7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1697859061}
+    - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: 43dfcffa501f8ec4193dae7f6c2ce1a7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1697859062}
   m_SourcePrefab: {fileID: 100100000, guid: 43dfcffa501f8ec4193dae7f6c2ce1a7, type: 3}
 --- !u!4 &1508731991 stripped
 Transform:
@@ -14988,7 +15354,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 1508731990}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1508731994}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83df842e125f0cd4cb93003fc376ee44, type: 3}
   m_Name: 
@@ -15051,7 +15417,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   _maintainVelocityOnRelease: 1
   _throwForceMultiplier: 1.5
-  _useSnapSlots: 0
+  _useSnapSlots: 1
   _snapDistance: 0.3
   _slotTag: SnapSlot
   _debugMode: 1
@@ -15501,6 +15867,103 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1262638364076485565, guid: 92a611703b12b764a89961890e9f02e5, type: 3}
   m_PrefabInstance: {fileID: 1568132538}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1577813611
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1401638365}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe55e089521161147ac1e2e38dcb7c63, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _itemId: 0
+  _snapDistance: 0.3
+  _slotLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _correctPlacementEffect: {fileID: 0}
+  _incorrectPlacementEffect: {fileID: 0}
+  _meshRenderer: {fileID: 0}
+  _placementSound: {fileID: 0}
+  _removalSound: {fileID: 0}
+  _NetworkedItemId: 0
+  _IsPlacedInSlot:
+    _value: 0
+  _PlacedSlotIndex: 0
+  _IsCorrectlyPlaced:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _noteName: Sol
+  _noteSound: {fileID: 0}
+  _noteMaterial: {fileID: 0}
+--- !u!114 &1577813612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1401638365}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7406994537c4f14a933d769b1a959d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _itemId: 0
+  _snapDistance: 0.5
+  _slotTag: SnapSlot
+  _slotLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  _returnToOriginOnFailedPlacement: 0
+  _returnToOriginDelay: 2
+  _useTagDetection: 1
+  _useLayerDetection: 1
+  _correctPlacementEffect: {fileID: 0}
+  _incorrectPlacementEffect: {fileID: 0}
+  _meshRenderer: {fileID: 0}
+  _placementSound: {fileID: 0}
+  _removalSound: {fileID: 0}
+  _enableDebugLogs: 1
+  _showDetectionGizmos: 1
+  _gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  _NetworkedItemId: 0
+  _IsPlacedInSlot:
+    _value: 0
+  _PlacedSlotIndex: 0
+  _IsCorrectlyPlaced:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _noteName: Sol
+  _noteSound: {fileID: 0}
+  _noteMaterial: {fileID: 0}
+  _noteColorIndex: 4
 --- !u!1001 &1588822994
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15589,7 +16052,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1272724688355475315, guid: c4cb2c7c1255d824aa9b0bdfebf18bf2, type: 3}
       propertyPath: NetworkedBehaviours.Array.size
-      value: 3
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 1272724688355475315, guid: c4cb2c7c1255d824aa9b0bdfebf18bf2, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[1]'
@@ -15599,9 +16062,17 @@ PrefabInstance:
       propertyPath: 'NetworkedBehaviours.Array.data[2]'
       value: 
       objectReference: {fileID: 1616000126}
+    - target: {fileID: 1272724688355475315, guid: c4cb2c7c1255d824aa9b0bdfebf18bf2, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[3]'
+      value: 
+      objectReference: {fileID: 1616000127}
+    - target: {fileID: 1272724688355475315, guid: c4cb2c7c1255d824aa9b0bdfebf18bf2, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[4]'
+      value: 
+      objectReference: {fileID: 1616000128}
     - target: {fileID: 3979852347204307430, guid: c4cb2c7c1255d824aa9b0bdfebf18bf2, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4183538711661729989, guid: c4cb2c7c1255d824aa9b0bdfebf18bf2, type: 3}
       propertyPath: m_Drag
@@ -15659,7 +16130,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7089633228314078097, guid: c4cb2c7c1255d824aa9b0bdfebf18bf2, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -15669,6 +16141,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: c4cb2c7c1255d824aa9b0bdfebf18bf2, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1616000126}
+    - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: c4cb2c7c1255d824aa9b0bdfebf18bf2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1616000127}
+    - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: c4cb2c7c1255d824aa9b0bdfebf18bf2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1616000128}
   m_SourcePrefab: {fileID: 100100000, guid: c4cb2c7c1255d824aa9b0bdfebf18bf2, type: 3}
 --- !u!4 &1616000121 stripped
 Transform:
@@ -15681,7 +16159,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 1616000120}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1616000124}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83df842e125f0cd4cb93003fc376ee44, type: 3}
   m_Name: 
@@ -15744,7 +16222,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   _maintainVelocityOnRelease: 1
   _throwForceMultiplier: 1.5
-  _useSnapSlots: 0
+  _useSnapSlots: 1
   _snapDistance: 0.3
   _slotTag: SnapSlot
   _debugMode: 1
@@ -15756,6 +16234,103 @@ MonoBehaviour:
     _value: 0
   _LastVelocity: {x: 0, y: 0, z: 0}
   _LastAngularVelocity: {x: 0, y: 0, z: 0}
+--- !u!114 &1616000127
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1616000124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe55e089521161147ac1e2e38dcb7c63, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _itemId: 0
+  _snapDistance: 0.3
+  _slotLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _correctPlacementEffect: {fileID: 0}
+  _incorrectPlacementEffect: {fileID: 0}
+  _meshRenderer: {fileID: 0}
+  _placementSound: {fileID: 0}
+  _removalSound: {fileID: 0}
+  _NetworkedItemId: 0
+  _IsPlacedInSlot:
+    _value: 0
+  _PlacedSlotIndex: 0
+  _IsCorrectlyPlaced:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _noteName: La
+  _noteSound: {fileID: 0}
+  _noteMaterial: {fileID: 0}
+--- !u!114 &1616000128
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1616000124}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7406994537c4f14a933d769b1a959d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _itemId: 0
+  _snapDistance: 0.5
+  _slotTag: SnapSlot
+  _slotLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  _returnToOriginOnFailedPlacement: 0
+  _returnToOriginDelay: 2
+  _useTagDetection: 1
+  _useLayerDetection: 1
+  _correctPlacementEffect: {fileID: 0}
+  _incorrectPlacementEffect: {fileID: 0}
+  _meshRenderer: {fileID: 0}
+  _placementSound: {fileID: 0}
+  _removalSound: {fileID: 0}
+  _enableDebugLogs: 1
+  _showDetectionGizmos: 1
+  _gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  _NetworkedItemId: 0
+  _IsPlacedInSlot:
+    _value: 0
+  _PlacedSlotIndex: 0
+  _IsCorrectlyPlaced:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _noteName: La
+  _noteSound: {fileID: 0}
+  _noteMaterial: {fileID: 0}
+  _noteColorIndex: 5
 --- !u!1001 &1623191648
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -16402,7 +16977,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1272724688355475315, guid: b89c33b53f261de43b34e4567d41db61, type: 3}
       propertyPath: NetworkedBehaviours.Array.size
-      value: 3
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 1272724688355475315, guid: b89c33b53f261de43b34e4567d41db61, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[1]'
@@ -16412,9 +16987,17 @@ PrefabInstance:
       propertyPath: 'NetworkedBehaviours.Array.data[2]'
       value: 
       objectReference: {fileID: 1671999854}
+    - target: {fileID: 1272724688355475315, guid: b89c33b53f261de43b34e4567d41db61, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[3]'
+      value: 
+      objectReference: {fileID: 1960755790}
+    - target: {fileID: 1272724688355475315, guid: b89c33b53f261de43b34e4567d41db61, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[4]'
+      value: 
+      objectReference: {fileID: 1960755791}
     - target: {fileID: 3979852347204307430, guid: b89c33b53f261de43b34e4567d41db61, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4183538711661729989, guid: b89c33b53f261de43b34e4567d41db61, type: 3}
       propertyPath: m_Drag
@@ -16472,7 +17055,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7089633228314078097, guid: b89c33b53f261de43b34e4567d41db61, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -16482,6 +17066,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: b89c33b53f261de43b34e4567d41db61, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1671999854}
+    - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: b89c33b53f261de43b34e4567d41db61, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1960755790}
+    - targetCorrespondingSourceObject: {fileID: 951382842930164719, guid: b89c33b53f261de43b34e4567d41db61, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1960755791}
   m_SourcePrefab: {fileID: 100100000, guid: b89c33b53f261de43b34e4567d41db61, type: 3}
 --- !u!4 &1671999849 stripped
 Transform:
@@ -16494,7 +17084,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 1671999848}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1671999852}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83df842e125f0cd4cb93003fc376ee44, type: 3}
   m_Name: 
@@ -16557,7 +17147,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   _maintainVelocityOnRelease: 1
   _throwForceMultiplier: 1.5
-  _useSnapSlots: 0
+  _useSnapSlots: 1
   _snapDistance: 0.3
   _slotTag: SnapSlot
   _debugMode: 1
@@ -16705,6 +17295,103 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: f4875d2f80484b54c8baabdcfe69776b, type: 3}
   m_PrefabInstance: {fileID: 1693746707}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1697859061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1508731994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe55e089521161147ac1e2e38dcb7c63, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _itemId: 0
+  _snapDistance: 0.3
+  _slotLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _correctPlacementEffect: {fileID: 0}
+  _incorrectPlacementEffect: {fileID: 0}
+  _meshRenderer: {fileID: 0}
+  _placementSound: {fileID: 0}
+  _removalSound: {fileID: 0}
+  _NetworkedItemId: 0
+  _IsPlacedInSlot:
+    _value: 0
+  _PlacedSlotIndex: 0
+  _IsCorrectlyPlaced:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _noteName: Do
+  _noteSound: {fileID: 0}
+  _noteMaterial: {fileID: 0}
+--- !u!114 &1697859062
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1508731994}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7406994537c4f14a933d769b1a959d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _itemId: 0
+  _snapDistance: 0.5
+  _slotTag: SnapSlot
+  _slotLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  _returnToOriginOnFailedPlacement: 0
+  _returnToOriginDelay: 2
+  _useTagDetection: 1
+  _useLayerDetection: 1
+  _correctPlacementEffect: {fileID: 0}
+  _incorrectPlacementEffect: {fileID: 0}
+  _meshRenderer: {fileID: 0}
+  _placementSound: {fileID: 0}
+  _removalSound: {fileID: 0}
+  _enableDebugLogs: 1
+  _showDetectionGizmos: 1
+  _gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  _NetworkedItemId: 0
+  _IsPlacedInSlot:
+    _value: 0
+  _PlacedSlotIndex: 0
+  _IsCorrectlyPlaced:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _noteName: Do
+  _noteSound: {fileID: 0}
+  _noteMaterial: {fileID: 0}
+  _noteColorIndex: 0
 --- !u!1 &1706830673
 GameObject:
   m_ObjectHideFlags: 0
@@ -16926,6 +17613,103 @@ Camera:
   m_CorrespondingSourceObject: {fileID: 3848378001973728027, guid: 90e106fad5b14a84b99f696448464833, type: 3}
   m_PrefabInstance: {fileID: 2590778363981502706}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1737078714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1350632990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe55e089521161147ac1e2e38dcb7c63, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _itemId: 0
+  _snapDistance: 0.3
+  _slotLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _correctPlacementEffect: {fileID: 0}
+  _incorrectPlacementEffect: {fileID: 0}
+  _meshRenderer: {fileID: 0}
+  _placementSound: {fileID: 0}
+  _removalSound: {fileID: 0}
+  _NetworkedItemId: 0
+  _IsPlacedInSlot:
+    _value: 0
+  _PlacedSlotIndex: 0
+  _IsCorrectlyPlaced:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _noteName: Re
+  _noteSound: {fileID: 0}
+  _noteMaterial: {fileID: 0}
+--- !u!114 &1737078715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1350632990}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7406994537c4f14a933d769b1a959d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _itemId: 0
+  _snapDistance: 0.5
+  _slotTag: SnapSlot
+  _slotLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  _returnToOriginOnFailedPlacement: 0
+  _returnToOriginDelay: 2
+  _useTagDetection: 1
+  _useLayerDetection: 1
+  _correctPlacementEffect: {fileID: 0}
+  _incorrectPlacementEffect: {fileID: 0}
+  _meshRenderer: {fileID: 0}
+  _placementSound: {fileID: 0}
+  _removalSound: {fileID: 0}
+  _enableDebugLogs: 1
+  _showDetectionGizmos: 1
+  _gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  _NetworkedItemId: 0
+  _IsPlacedInSlot:
+    _value: 0
+  _PlacedSlotIndex: 0
+  _IsCorrectlyPlaced:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _noteName: Re
+  _noteSound: {fileID: 0}
+  _noteMaterial: {fileID: 0}
+  _noteColorIndex: 1
 --- !u!1 &1740967381
 GameObject:
   m_ObjectHideFlags: 0
@@ -18830,6 +19614,103 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1954032385}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1960755790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1671999852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe55e089521161147ac1e2e38dcb7c63, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _itemId: 0
+  _snapDistance: 0.3
+  _slotLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _correctPlacementEffect: {fileID: 0}
+  _incorrectPlacementEffect: {fileID: 0}
+  _meshRenderer: {fileID: 0}
+  _placementSound: {fileID: 0}
+  _removalSound: {fileID: 0}
+  _NetworkedItemId: 0
+  _IsPlacedInSlot:
+    _value: 0
+  _PlacedSlotIndex: 0
+  _IsCorrectlyPlaced:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _noteName: Fa
+  _noteSound: {fileID: 0}
+  _noteMaterial: {fileID: 0}
+--- !u!114 &1960755791
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1671999852}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7406994537c4f14a933d769b1a959d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _itemId: 0
+  _snapDistance: 0.5
+  _slotTag: SnapSlot
+  _slotLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  _returnToOriginOnFailedPlacement: 0
+  _returnToOriginDelay: 2
+  _useTagDetection: 1
+  _useLayerDetection: 1
+  _correctPlacementEffect: {fileID: 0}
+  _incorrectPlacementEffect: {fileID: 0}
+  _meshRenderer: {fileID: 0}
+  _placementSound: {fileID: 0}
+  _removalSound: {fileID: 0}
+  _enableDebugLogs: 1
+  _showDetectionGizmos: 1
+  _gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  _NetworkedItemId: 0
+  _IsPlacedInSlot:
+    _value: 0
+  _PlacedSlotIndex: 0
+  _IsCorrectlyPlaced:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _noteName: Fa
+  _noteSound: {fileID: 0}
+  _noteMaterial: {fileID: 0}
+  _noteColorIndex: 3
 --- !u!1 &2000283221
 GameObject:
   m_ObjectHideFlags: 0
@@ -35864,9 +36745,10 @@ GameObject:
   - component: {fileID: 5178570095541635172}
   - component: {fileID: 5178570095541635174}
   - component: {fileID: 5178570095541635173}
-  m_Layer: 0
+  - component: {fileID: 5178570095541635175}
+  m_Layer: 7
   m_Name: BoxPos_5
-  m_TagString: Untagged
+  m_TagString: SnapSlot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -36670,9 +37552,10 @@ GameObject:
   - component: {fileID: 6651279513740841396}
   - component: {fileID: 6651279513740841398}
   - component: {fileID: 6651279513740841397}
-  m_Layer: 0
+  - component: {fileID: 6651279513740841399}
+  m_Layer: 7
   m_Name: BoxPos_3
-  m_TagString: Untagged
+  m_TagString: SnapSlot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -44678,9 +45561,10 @@ GameObject:
   - component: {fileID: 332407205565948933}
   - component: {fileID: 6927572812782343557}
   - component: {fileID: 6927572812782343556}
-  m_Layer: 0
+  - component: {fileID: 6927572812782343558}
+  m_Layer: 7
   m_Name: BoxPos_1
-  m_TagString: Untagged
+  m_TagString: SnapSlot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -53020,9 +53904,10 @@ GameObject:
   - component: {fileID: 3995611810280749879}
   - component: {fileID: 7942795927341094934}
   - component: {fileID: 7942795927341094933}
-  m_Layer: 0
+  - component: {fileID: 7942795927341094935}
+  m_Layer: 7
   m_Name: BoxPos_6
-  m_TagString: Untagged
+  m_TagString: SnapSlot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -58471,9 +59356,10 @@ GameObject:
   - component: {fileID: 8100086656326779408}
   - component: {fileID: 8100086656326779410}
   - component: {fileID: 8100086656326779409}
-  m_Layer: 0
+  - component: {fileID: 8100086656326779411}
+  m_Layer: 7
   m_Name: BoxPos_4
-  m_TagString: Untagged
+  m_TagString: SnapSlot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -61303,10 +62189,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SortKey: 1882587816
   ObjectInterest: 1
-  Flags: 262145
+  Flags: 524289
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 5178570095541635174}
+  - {fileID: 5178570095541635175}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &5178570095541635174
 MonoBehaviour:
@@ -61315,7 +62202,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1932275746888101479}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 04565cdefb4ebe340a38ffbd39104759, type: 3}
   m_Name: 
@@ -61339,6 +62226,54 @@ MonoBehaviour:
   OnIncorrectPlacement:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &5178570095541635175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1932275746888101479}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3ca683cc5a26344b85c85463651f7fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _slotId: 5
+  _expectedItemId: -1
+  _itemAnchor: {fileID: 3139567047991999799}
+  _snapToCenter: 1
+  _lockRotation: 1
+  _slotRenderer: {fileID: 0}
+  _emptyMaterial: {fileID: 0}
+  _correctMaterial: {fileID: 0}
+  _incorrectMaterial: {fileID: 0}
+  _emptyVisual: {fileID: 0}
+  _occupiedVisual: {fileID: 0}
+  _correctSound: {fileID: 0}
+  _incorrectSound: {fileID: 0}
+  _NetworkedSlotId: 0
+  _ExpectedItemId: 0
+  _IsOccupied:
+    _value: 0
+  _PlacedItemId: 0
+  _IsCorrect:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _expectedNoteName: La
+  _noteGlowEffect: {fileID: 0}
+  _correctPlacementParticles: {fileID: 0}
 --- !u!23 &5195280198813298654
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -70818,9 +71753,10 @@ GameObject:
   - component: {fileID: 1706992930469543632}
   - component: {fileID: 6845676863432452872}
   - component: {fileID: 6845676863432452871}
-  m_Layer: 0
+  - component: {fileID: 6845676863432452873}
+  m_Layer: 7
   m_Name: BoxPos_0
-  m_TagString: Untagged
+  m_TagString: SnapSlot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -74376,6 +75312,7 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 6651279513740841398}
+  - {fileID: 6651279513740841399}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &6651279513740841398
 MonoBehaviour:
@@ -74384,7 +75321,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2048941863987362770}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 04565cdefb4ebe340a38ffbd39104759, type: 3}
   m_Name: 
@@ -74408,6 +75345,54 @@ MonoBehaviour:
   OnIncorrectPlacement:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &6651279513740841399
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2048941863987362770}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3ca683cc5a26344b85c85463651f7fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _slotId: 3
+  _expectedItemId: -1
+  _itemAnchor: {fileID: 801475912937153848}
+  _snapToCenter: 1
+  _lockRotation: 1
+  _slotRenderer: {fileID: 0}
+  _emptyMaterial: {fileID: 0}
+  _correctMaterial: {fileID: 0}
+  _incorrectMaterial: {fileID: 0}
+  _emptyVisual: {fileID: 0}
+  _occupiedVisual: {fileID: 0}
+  _correctSound: {fileID: 0}
+  _incorrectSound: {fileID: 0}
+  _NetworkedSlotId: 0
+  _ExpectedItemId: 0
+  _IsOccupied:
+    _value: 0
+  _PlacedItemId: 0
+  _IsCorrect:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _expectedNoteName: Fa
+  _noteGlowEffect: {fileID: 0}
+  _correctPlacementParticles: {fileID: 0}
 --- !u!1001 &6655736829955643735
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -75572,6 +76557,7 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 6845676863432452872}
+  - {fileID: 6845676863432452873}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &6845676863432452872
 MonoBehaviour:
@@ -75580,7 +76566,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6214582278510576476}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 04565cdefb4ebe340a38ffbd39104759, type: 3}
   m_Name: 
@@ -75604,6 +76590,54 @@ MonoBehaviour:
   OnIncorrectPlacement:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &6845676863432452873
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6214582278510576476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3ca683cc5a26344b85c85463651f7fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _slotId: 0
+  _expectedItemId: -1
+  _itemAnchor: {fileID: 3325125645142564656}
+  _snapToCenter: 1
+  _lockRotation: 1
+  _slotRenderer: {fileID: 0}
+  _emptyMaterial: {fileID: 0}
+  _correctMaterial: {fileID: 0}
+  _incorrectMaterial: {fileID: 0}
+  _emptyVisual: {fileID: 0}
+  _occupiedVisual: {fileID: 0}
+  _correctSound: {fileID: 0}
+  _incorrectSound: {fileID: 0}
+  _NetworkedSlotId: 0
+  _ExpectedItemId: 0
+  _IsOccupied:
+    _value: 0
+  _PlacedItemId: 0
+  _IsCorrect:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _expectedNoteName: Do
+  _noteGlowEffect: {fileID: 0}
+  _correctPlacementParticles: {fileID: 0}
 --- !u!1001 &6847955985803555286
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -76535,6 +77569,7 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 6927572812782343557}
+  - {fileID: 6927572812782343558}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &6927572812782343557
 MonoBehaviour:
@@ -76543,7 +77578,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3035809438082289916}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 04565cdefb4ebe340a38ffbd39104759, type: 3}
   m_Name: 
@@ -76567,6 +77602,54 @@ MonoBehaviour:
   OnIncorrectPlacement:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &6927572812782343558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3035809438082289916}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3ca683cc5a26344b85c85463651f7fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _slotId: 1
+  _expectedItemId: -1
+  _itemAnchor: {fileID: 559635026998028187}
+  _snapToCenter: 1
+  _lockRotation: 1
+  _slotRenderer: {fileID: 0}
+  _emptyMaterial: {fileID: 0}
+  _correctMaterial: {fileID: 0}
+  _incorrectMaterial: {fileID: 0}
+  _emptyVisual: {fileID: 0}
+  _occupiedVisual: {fileID: 0}
+  _correctSound: {fileID: 0}
+  _incorrectSound: {fileID: 0}
+  _NetworkedSlotId: 0
+  _ExpectedItemId: 0
+  _IsOccupied:
+    _value: 0
+  _PlacedItemId: 0
+  _IsCorrect:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _expectedNoteName: Re
+  _noteGlowEffect: {fileID: 0}
+  _correctPlacementParticles: {fileID: 0}
 --- !u!1001 &6941195077109549266
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -80586,9 +81669,10 @@ GameObject:
   - component: {fileID: 5913999962429937844}
   - component: {fileID: 7966181231778279631}
   - component: {fileID: 7966181231778279630}
-  m_Layer: 0
+  - component: {fileID: 7966181231778279632}
+  m_Layer: 7
   m_Name: BoxPos_2
-  m_TagString: Untagged
+  m_TagString: SnapSlot
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -83990,6 +85074,7 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 7942795927341094934}
+  - {fileID: 7942795927341094935}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &7942795927341094934
 MonoBehaviour:
@@ -83998,7 +85083,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4111234208780551475}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 04565cdefb4ebe340a38ffbd39104759, type: 3}
   m_Name: 
@@ -84022,6 +85107,54 @@ MonoBehaviour:
   OnIncorrectPlacement:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7942795927341094935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4111234208780551475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3ca683cc5a26344b85c85463651f7fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _slotId: 6
+  _expectedItemId: -1
+  _itemAnchor: {fileID: 7942795927341094932}
+  _snapToCenter: 1
+  _lockRotation: 1
+  _slotRenderer: {fileID: 0}
+  _emptyMaterial: {fileID: 0}
+  _correctMaterial: {fileID: 0}
+  _incorrectMaterial: {fileID: 0}
+  _emptyVisual: {fileID: 0}
+  _occupiedVisual: {fileID: 0}
+  _correctSound: {fileID: 0}
+  _incorrectSound: {fileID: 0}
+  _NetworkedSlotId: 0
+  _ExpectedItemId: 0
+  _IsOccupied:
+    _value: 0
+  _PlacedItemId: 0
+  _IsCorrect:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _expectedNoteName: Si
+  _noteGlowEffect: {fileID: 0}
+  _correctPlacementParticles: {fileID: 0}
 --- !u!1001 &7944446611145428601
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -84353,6 +85486,7 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 7966181231778279631}
+  - {fileID: 7966181231778279632}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &7966181231778279631
 MonoBehaviour:
@@ -84361,7 +85495,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7446807122007397364}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 04565cdefb4ebe340a38ffbd39104759, type: 3}
   m_Name: 
@@ -84385,6 +85519,54 @@ MonoBehaviour:
   OnIncorrectPlacement:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7966181231778279632
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7446807122007397364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3ca683cc5a26344b85c85463651f7fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _slotId: 2
+  _expectedItemId: -1
+  _itemAnchor: {fileID: 5557816573797635288}
+  _snapToCenter: 1
+  _lockRotation: 1
+  _slotRenderer: {fileID: 0}
+  _emptyMaterial: {fileID: 0}
+  _correctMaterial: {fileID: 0}
+  _incorrectMaterial: {fileID: 0}
+  _emptyVisual: {fileID: 0}
+  _occupiedVisual: {fileID: 0}
+  _correctSound: {fileID: 0}
+  _incorrectSound: {fileID: 0}
+  _NetworkedSlotId: 0
+  _ExpectedItemId: 0
+  _IsOccupied:
+    _value: 0
+  _PlacedItemId: 0
+  _IsCorrect:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _expectedNoteName: Mi
+  _noteGlowEffect: {fileID: 0}
+  _correctPlacementParticles: {fileID: 0}
 --- !u!64 &7984366356137526673
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -85753,6 +86935,7 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 8100086656326779410}
+  - {fileID: 8100086656326779411}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &8100086656326779410
 MonoBehaviour:
@@ -85761,7 +86944,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4826445923323389086}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 04565cdefb4ebe340a38ffbd39104759, type: 3}
   m_Name: 
@@ -85785,6 +86968,54 @@ MonoBehaviour:
   OnIncorrectPlacement:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8100086656326779411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4826445923323389086}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3ca683cc5a26344b85c85463651f7fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _slotId: 4
+  _expectedItemId: -1
+  _itemAnchor: {fileID: 276975335298554088}
+  _snapToCenter: 1
+  _lockRotation: 1
+  _slotRenderer: {fileID: 0}
+  _emptyMaterial: {fileID: 0}
+  _correctMaterial: {fileID: 0}
+  _incorrectMaterial: {fileID: 0}
+  _emptyVisual: {fileID: 0}
+  _occupiedVisual: {fileID: 0}
+  _correctSound: {fileID: 0}
+  _incorrectSound: {fileID: 0}
+  _NetworkedSlotId: 0
+  _ExpectedItemId: 0
+  _IsOccupied:
+    _value: 0
+  _PlacedItemId: 0
+  _IsCorrect:
+    _value: 0
+  OnItemPlaced:
+    m_PersistentCalls:
+      m_Calls: []
+  OnItemRemoved:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  OnIncorrectPlacement:
+    m_PersistentCalls:
+      m_Calls: []
+  _puzzleController: {fileID: 0}
+  _expectedNoteName: Sol
+  _noteGlowEffect: {fileID: 0}
+  _correctPlacementParticles: {fileID: 0}
 --- !u!114 &8117058448999221659
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95927,6 +97158,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 961739753}
+  - {fileID: 127117290}
   - {fileID: 4838660418918237014}
   - {fileID: 705168831933205935}
   - {fileID: 453074355140037662}
@@ -95977,6 +97209,5 @@ SceneRoots:
   - {fileID: 1111657492}
   - {fileID: 726477030}
   - {fileID: 1020367550}
-  - {fileID: 127117290}
   - {fileID: 2044285118}
   - {fileID: 239099977}

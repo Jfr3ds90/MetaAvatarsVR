@@ -40,7 +40,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         protected FusionVRGrabbable _grabbable;
         protected Rigidbody _rigidbody;
         protected AudioSource _audioSource;
-        protected NetworkedSlotPuzzleController _puzzleController;
+        [SerializeField] protected NetworkedSlotPuzzleController _puzzleController;
         protected Vector3 _originalPosition;
         protected Quaternion _originalRotation;
         

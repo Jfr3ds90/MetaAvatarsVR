@@ -19,6 +19,8 @@ GameObject:
   - component: {fileID: -2077939417731266205}
   - component: {fileID: 8999395837607430848}
   - component: {fileID: 7055797747418782678}
+  - component: {fileID: 553056003384124143}
+  - component: {fileID: 7089633228314078097}
   m_Layer: 7
   m_Name: Mi_Net
   m_TagString: Untagged
@@ -160,6 +162,8 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 3979852347204307430}
+  - {fileID: 553056003384124143}
+  - {fileID: 7089633228314078097}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &3979852347204307430
 MonoBehaviour:
@@ -180,9 +184,11 @@ MonoBehaviour:
   _glowEffect: {fileID: 0}
   _NoteIndex: 0
   _ColorIndex: 0
-  _IsPlaced:
+  _IsPlacedInSlot:
     _value: 0
   _CurrentSlotIndex: 0
+  _IsLockedInSlot:
+    _value: 0
   OnNotePlaced:
     m_PersistentCalls:
       m_Calls: []
@@ -290,3 +296,57 @@ MonoBehaviour:
   _movementProvider: {fileID: 0}
   _handAligment: 1
   _handGrabPoses: []
+--- !u!114 &553056003384124143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 951382842930164719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a591d221a634417e9827eb58e17de84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 1
+  _interpolationTarget: {fileID: 0}
+  UsePreciseRotation: 0
+  UseRenderSleepThresholds: 1
+  RenderThresholds:
+    UseEnergy: 1
+    Position: 0.01
+    Rotation: 0.01
+    Scale: 0.01
+--- !u!114 &7089633228314078097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 951382842930164719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb03965bedd7fc042a427d604821976f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _allowMultipleGrabbers: 1
+  _grabBreakDistance: 2
+  _grabbedLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _maintainVelocityOnRelease: 1
+  _throwForceMultiplier: 1.5
+  _useSnapSlots: 0
+  _snapDistance: 0.3
+  _slotTag: SnapSlot
+  _debugMode: 1
+  _IsGrabbed:
+    _value: 0
+  _GrabOffset: {x: 0, y: 0, z: 0}
+  _GrabRotationOffset: {x: 0, y: 0, z: 0, w: 0}
+  _IsKinematic:
+    _value: 0
+  _LastVelocity: {x: 0, y: 0, z: 0}
+  _LastAngularVelocity: {x: 0, y: 0, z: 0}

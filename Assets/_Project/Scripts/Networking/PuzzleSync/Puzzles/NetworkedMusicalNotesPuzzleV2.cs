@@ -234,6 +234,16 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         {
             base.ConfigureItems();
             
+            // Asegurar que TODAS las notas tengan el controller configurado
+            foreach (var item in _items)
+            {
+                if (item != null)
+                {
+                    item.SetPuzzleController(this);
+                    Debug.Log($"[NetworkedMusicalNotesPuzzleV2] SetPuzzleController called on {item.name}");
+                }
+            }
+            
             for (int i = 0; i < _items.Length && i < _colorMaterials.Length; i++)
             {
                 if (_items[i] is NetworkedMusicalNoteV2 musicalNote && i < _noteNames.Length)
