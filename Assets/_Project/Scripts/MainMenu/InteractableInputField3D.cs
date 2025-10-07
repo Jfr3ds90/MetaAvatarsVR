@@ -1,13 +1,15 @@
+using DG.Tweening;
+using Oculus.Interaction;
+using Oculus.Interaction.Surfaces;
+using System.Collections;
+using System.Collections.Generic;
+using System.Text;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
-using Oculus.Interaction;
-using TMPro;
-using DG.Tweening;
-using System.Text;
-using System.Collections;
-using Oculus.Interaction.Surfaces;
-using System.Collections.Generic;
+using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace HackMonkeys.UI.Spatial
 {
@@ -461,11 +463,18 @@ namespace HackMonkeys.UI.Spatial
             SurfaceHit hit;
             if (inputText != null)
             {
+                var val = GetComponent<TMP_InputField>();
                 inputText.text = _currentText;
-                Debug.LogWarning("La posición es " +GetComponent<TMP_InputField>().caretPosition+" del texto "+GetComponent<TMP_InputField>().text
-                    +" en la posición "+ GetComponent<ColliderSurface>().Bounds  //revizar RayInteractor como ver que posicion exacta toca al inputfield
+                /*Debug.LogWarning("La posición es " +GetComponent<TMP_InputField>().caretPosition+" del texto "+GetComponent<TMP_InputField>().text
+                    +" en la posición "+ GetComponent<ColliderSurface>().Bounds */ //revizar RayInteractor como ver que posicion exacta toca al inputfield
                     /*GetComponent<ColliderSurface>().Raycast(ray,out hit)*/
-                    /*GetComponent<RayInteractable>().Surface*//*GetComponent<ColliderSurface>().Transform.position*/);
+                    /*GetComponent<RayInteractable>().Surface*//*GetComponent<ColliderSurface>().Transform.position*//*);*/
+                int count=0;
+                foreach(char cha in inputText.text)
+                {
+                    count++;
+                }
+                Debug.LogWarning("tiene una cantidad de texto "+count);
             }
             
             // Validate if needed
