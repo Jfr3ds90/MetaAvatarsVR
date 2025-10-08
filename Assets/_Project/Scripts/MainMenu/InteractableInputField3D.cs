@@ -1,4 +1,5 @@
 using DG.Tweening;
+using ExitGames.Client.Photon;
 using Oculus.Interaction;
 using Oculus.Interaction.Surfaces;
 using System.Collections;
@@ -7,6 +8,7 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
 using static System.Net.Mime.MediaTypeNames;
@@ -78,7 +80,9 @@ namespace HackMonkeys.UI.Spatial
         // Tracking de interactores
         private Dictionary<RayInteractor, bool> _hoveredInteractors = new Dictionary<RayInteractor, bool>();
         private RayInteractor _activeInteractor;
-        
+
+        private VRInputFieldCursorController vrfcc;
+
         private void Awake()
         {
             InitializeComponents();
@@ -93,6 +97,7 @@ namespace HackMonkeys.UI.Spatial
             {
                 Debug.LogError("VirtualKeyboardManager not found! Please ensure there is a VirtualKeyboardManager in the scene with a keyboard prefab assigned.");
             }
+            vrfcc = FindAnyObjectByType<VRInputFieldCursorController>();
         }
         
         private void InitializeComponents()
@@ -214,6 +219,8 @@ namespace HackMonkeys.UI.Spatial
                 {
                     Focus();
                 }
+               PointerEventData pointer = new PointerEventData(EventSystem.current);
+                        vrfcc.OnPointerClick(pointer);
             }
         }
         else if (_hoveredInteractors.ContainsKey(interactor) && _hoveredInteractors[interactor])
@@ -226,6 +233,7 @@ namespace HackMonkeys.UI.Spatial
         }
         
         _hoveredInteractors[interactor] = isCurrentlyHovering;
+                
     }
     
     // Mejorar detección de clics fuera
