@@ -71,6 +71,10 @@ public class VRInputFieldCursorController : MonoBehaviour, IPointerClickHandler
     private int GetCaretIndexWithFallback(Vector2 screenPosition)
     {
         ManualFindCharacterIndex(screenPosition);
+        
+        int o = 0; //hacer que este número cambie correspondiente a la posición
+        TMP_CharacterInfo charInfo = textComponent.textInfo.characterInfo[o];
+        
         // Method 1: Try GetCursorIndexFromPosition (most intelligent)
         if (HasGetCursorIndexMethod())
         {
@@ -161,7 +165,9 @@ public class VRInputFieldCursorController : MonoBehaviour, IPointerClickHandler
             // Skip invisible characters (rich text tags, etc.)
             if (!charInfo.isVisible)
                 continue;
-
+            Debug.LogWarning(" info de char " + charInfo.character + " del objeto " + textComponent.text + " con la pos " +
+                (charInfo.bottomLeft.x - charInfo.bottomRight.x)+ ","+ (charInfo.topLeft.y - charInfo.topRight.y)+","+ (charInfo.topLeft.z - charInfo.topRight.z));
+            //buscar forma de cambiar valores de rect transform a transform
             // Calculate character center in local space
             Vector3 charCenter = new Vector2(
                 (charInfo.bottomLeft.x + charInfo.topRight.x) * 0.5f,
@@ -175,7 +181,7 @@ public class VRInputFieldCursorController : MonoBehaviour, IPointerClickHandler
                 minDistance = distance;
                 closestIndex = i;
             }
-            Debug.LogWarning(" info de char "+charInfo.character+" del objeto "+ textComponent.text+" con la pos "+charCenter);
+           
         }
 
         // Refine: check if we're closer to the character's start or end
