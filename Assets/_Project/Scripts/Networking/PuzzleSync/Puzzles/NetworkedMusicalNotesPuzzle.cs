@@ -3,187 +3,43 @@ using System.Linq;
 using Fusion;
 using UnityEngine;
 using UnityEngine.Events;
+using MetaAvatarsVR.Networking.PuzzleSync.SlotSystem;
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
 {
-    public enum MusicalPuzzlePhase
+    public class NetworkedMusicalNotesPuzzle : NetworkedSlotPuzzleController
     {
-        Initialization = 0,
-        PatternDisplay = 1,
-        NoteCollection = 2,
-        PianoSequence = 3,
-        Completed = 4
-    }
-    
-
-    public class NetworkedMusicalNotesPuzzle : NetworkBehaviour
-    {
-        [Header("Configuration")]
-        [SerializeField] private int _puzzleId = 100;
+        [Header("Musical Puzzle Configuration")]
+        [SerializeField] private bool _keepPatternVisible = false;
         [SerializeField] private float _patternDisplayDuration = 10f;
-        [SerializeField] private NetworkedDoor _puzzleDoor;
+        [SerializeField] private GameObject _patternDisplay;
+        [SerializeField] private MeshRenderer _patternRenderer;
+        [SerializeField] private Material[] _colorMaterials;
         
-        [Header("Pattern Display")]
-        [SerializeField] private GameObject _patternDisplay; 
-        [SerializeField] private MeshRenderer _patternRenderer; 
-        [Header("Color Materials")]
-        [SerializeField] private Material[] _colorMaterials; 
-        
-        [Header("Notes & Slots")]
-        [SerializeField] private NetworkedMusicalNote[] _notes; 
-        [SerializeField] private NetworkedNoteSlot[] _slots; 
-        
-        [Header("Piano")]
+        [Header("Piano Phase")]
         [SerializeField] private NetworkedPiano _piano;
+        [SerializeField] private bool _requirePianoSequence = true;
         
-        [Header("Audio")]
-        [SerializeField] private AudioClip _phaseCompleteSound;
-        [SerializeField] private AudioClip _puzzleCompleteSound;
-        [SerializeField] private AudioClip _errorSound;
+        [Header("Musical Events")]
+        public UnityEvent OnPatternDisplayStarted = new UnityEvent();
+        public UnityEvent OnPatternDisplayEnded = new UnityEvent();
+        public UnityEvent OnPianoPhaseStarted = new UnityEvent();
         
-        [Header("Network State")]
-        [Networked] public MusicalPuzzlePhase CurrentPhase { get; set; }
-        [Networked] public NetworkBool IsSolved { get; set; }
-        [Networked] public int CorrectNotesPlaced { get; set; }
         [Networked] public TickTimer PatternTimer { get; set; }
+        [Networked] public NetworkBool PatternShown { get; set; }
+        [Networked] public NetworkBool PianoPhaseActive { get; set; }
+        [Networked, Capacity(7)] public NetworkArray<int> NetworkedPattern { get; }
         
-        [Networked, Capacity(7)]
-        public NetworkArray<int> PatternOrder { get; } 
-        
-        [Header("Events")]
-        public UnityEvent OnPuzzleStarted = new UnityEvent();
-        public UnityEvent<MusicalPuzzlePhase> OnPhaseChanged = new UnityEvent<MusicalPuzzlePhase>();
-        public UnityEvent OnAllNotesPlaced = new UnityEvent();
-        public UnityEvent OnPuzzleSolved = new UnityEvent();
-        
-        private AudioSource _audioSource;
         private readonly string[] _noteNames = { "Do", "Re", "Mi", "Fa", "Sol", "La", "Si" };
-        private Material[] _originalPatternMaterials; 
+        private Material[] _originalPatternMaterials;
         
-        private void Awake()
+        protected override void Awake()
         {
-            _audioSource = GetComponent<AudioSource>();
-            if (_audioSource == null)
-                _audioSource = gameObject.AddComponent<AudioSource>();
-                
-            if (_patternRenderer == null && _patternDisplay != null)
-            {
-                _patternRenderer = _patternDisplay.GetComponent<MeshRenderer>();
-            }
+            base.Awake();
             
             if (_patternRenderer != null)
             {
                 _originalPatternMaterials = _patternRenderer.sharedMaterials;
-            }
-            
-            ValidateComponents();
-        }
-        
-        private void ValidateComponents()
-        {
-            if (_notes == null || _notes.Length != 7)
-            {
-                Debug.LogError($"[NetworkedMusicalNotesPuzzle] Expected 7 notes, found {_notes?.Length ?? 0}");
-            }
-            
-            if (_slots == null || _slots.Length != 7)
-            {
-                Debug.LogError($"[NetworkedMusicalNotesPuzzle] Expected 7 slots, found {_slots?.Length ?? 0}");
-            }
-            
-            if (_colorMaterials == null || _colorMaterials.Length != 7)
-            {
-                Debug.LogError($"[NetworkedMusicalNotesPuzzle] Expected 7 color materials, found {_colorMaterials?.Length ?? 0}");
-            }
-            
-            if (_patternRenderer != null)
-            {
-                Material[] mats = _patternRenderer.sharedMaterials;
-                if (mats.Length < 8)
-                {
-                    Debug.LogWarning($"[NetworkedMusicalNotesPuzzle] Pattern renderer should have 8 material slots (0=base, 1-7=colors). Found: {mats.Length}");
-                }
-            }
-        }
-        
-        public override void Spawned()
-        {
-            if (HasStateAuthority)
-            {
-                CurrentPhase = MusicalPuzzlePhase.Initialization;
-                IsSolved = false;
-                CorrectNotesPlaced = 0;
-                
-                InitializePuzzle();
-                
-                if (NetworkedPuzzleManager.Instance != null)
-                {
-                    NetworkedPuzzleManager.Instance.RPC_RequestStartPuzzle(_puzzleId);
-                }
-            }
-            
-            SetupComponents();
-        }
-        
-        private void InitializePuzzle()
-        {
-            if (!HasStateAuthority) return;
-            
-            GenerateRandomPatternOrder();
-            
-            ConfigureSlots();
-            
-            TransitionToPhase(MusicalPuzzlePhase.PatternDisplay);
-        }
-        
-        private void GenerateRandomPatternOrder()
-        {
-            List<int> indices = Enumerable.Range(0, 7).ToList();
-            
-            System.Random random = new System.Random(Runner.Tick);
-            
-            for (int i = indices.Count - 1; i > 0; i--)
-            {
-                int j = random.Next(i + 1);
-                int temp = indices[i];
-                indices[i] = indices[j];
-                indices[j] = temp;
-            }
-            
-            for (int i = 0; i < 7; i++)
-            {
-                PatternOrder.Set(i, indices[i]);
-            }
-            
-            Debug.Log($"[NetworkedMusicalNotesPuzzle] Pattern order generated: {string.Join(", ", indices)}");
-        }
-        
-        private void ConfigureSlots()
-        {
-            for (int i = 0; i < _slots.Length && i < 7; i++)
-            {
-                if (_slots[i] != null)
-                {
-                    int expectedColorIndex = PatternOrder.Get(i);
-                    _slots[i].SetExpectedColorIndex(expectedColorIndex);
-                    
-                    Debug.Log($"[NetworkedMusicalNotesPuzzle] Slot {i} expects color index {expectedColorIndex} ({_noteNames[expectedColorIndex]})");
-                }
-            }
-        }
-        
-        private void SetupComponents()
-        {
-            
-            for (int i = 0; i < _notes.Length && i < 7; i++)
-            {
-                if (_notes[i] != null)
-                {
-                    _notes[i].SetPuzzleController(this);
-                    _notes[i].SetNoteIndex(i); 
-                    
-                    Debug.Log($"[NetworkedMusicalNotesPuzzle] Note {_noteNames[i]} configured with index {i}");
-                }
             }
             
             if (_piano != null)
@@ -194,56 +50,127 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             }
         }
         
-        private void TransitionToPhase(MusicalPuzzlePhase newPhase)
+        protected override void InitializePuzzle()
         {
-            if (!HasStateAuthority) return;
+            base.InitializePuzzle();
             
-            CurrentPhase = newPhase;
-            RPC_NotifyPhaseChange(newPhase);
-            
-            switch (newPhase)
+            if (Runner.IsSharedModeMasterClient)
             {
-                case MusicalPuzzlePhase.PatternDisplay:
-                    StartPatternDisplay();
-                    break;
-                    
-                case MusicalPuzzlePhase.NoteCollection:
-                    StartNoteCollection();
-                    break;
-                    
-                case MusicalPuzzlePhase.PianoSequence:
-                    StartPianoSequence();
-                    break;
-                    
-                case MusicalPuzzlePhase.Completed:
-                    CompletePuzzle();
-                    break;
+                PatternShown = false;
+                PianoPhaseActive = false;
+                
+                // Generate pattern first, then display it after a short delay to ensure sync
+                StartCoroutine(DelayedPatternDisplay());
             }
+            else
+            {
+                // Non-master clients also need to configure their items
+                StartCoroutine(ConfigureItemsAfterSync());
+            }
+        }
+        
+        private System.Collections.IEnumerator DelayedPatternDisplay()
+        {
+            // Wait a frame to ensure the pattern is synced across network
+            yield return null;
+            
+            if (_patternDisplay != null)
+            {
+                StartPatternDisplay();
+            }
+        }
+        
+        private System.Collections.IEnumerator ConfigureItemsAfterSync()
+        {
+            // Wait a frame for network state to sync
+            yield return null;
+            
+            // Reconstruct pattern from network
+            _expectedPattern = new List<int>();
+            for (int i = 0; i < NetworkedPattern.Length; i++)
+            {
+                if (NetworkedPattern[i] >= 0)
+                {
+                    _expectedPattern.Add(NetworkedPattern[i]);
+                }
+            }
+            
+            if (_expectedPattern.Count > 0)
+            {
+                Debug.Log($"[NetworkedMusicalNotesPuzzle] Client pattern synced: {string.Join(", ", _expectedPattern.Select(i => _noteNames[i % _noteNames.Length]))}");
+                ConfigureSlots();
+                ConfigureItems();
+            }
+        }
+        
+        protected override void GenerateExpectedPattern()
+        {
+            _expectedPattern = new List<int>();
+            
+            List<int> indices = Enumerable.Range(0, Mathf.Min(7, _items.Length)).ToList();
+            System.Random random = new System.Random(Runner.Tick);
+            
+            for (int i = indices.Count - 1; i > 0; i--)
+            {
+                int j = random.Next(i + 1);
+                int temp = indices[i];
+                indices[i] = indices[j];
+                indices[j] = temp;
+            }
+            
+            _expectedPattern = indices;
+            
+            // Sync the pattern to network array
+            for (int i = 0; i < _expectedPattern.Count && i < NetworkedPattern.Length; i++)
+            {
+                NetworkedPattern.Set(i, _expectedPattern[i]);
+            }
+            
+            Debug.Log($"[NetworkedMusicalNotesPuzzle] Pattern generated: {string.Join(", ", _expectedPattern.Select(i => _noteNames[i % _noteNames.Length]))}");
         }
         
         private void StartPatternDisplay()
         {
-            PatternTimer = TickTimer.CreateFromSeconds(Runner, _patternDisplayDuration);
+            if (!_keepPatternVisible)
+            {
+                PatternTimer = TickTimer.CreateFromSeconds(Runner, _patternDisplayDuration);
+            }
+            PatternShown = true;
             RPC_ShowPattern();
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_ShowPattern()
         {
+            // Reconstruct the pattern from networked array for clients
+            if (_expectedPattern == null || _expectedPattern.Count == 0)
+            {
+                _expectedPattern = new List<int>();
+                for (int i = 0; i < NetworkedPattern.Length; i++)
+                {
+                    if (NetworkedPattern[i] >= 0) // Valid pattern index
+                    {
+                        _expectedPattern.Add(NetworkedPattern[i]);
+                    }
+                }
+                Debug.Log($"[NetworkedMusicalNotesPuzzle] Pattern reconstructed from network: {string.Join(", ", _expectedPattern.Select(i => _noteNames[i % _noteNames.Length]))}");
+            }
+            
             if (_patternDisplay != null)
             {
                 _patternDisplay.SetActive(true);
+                OnPatternDisplayStarted?.Invoke();
                 
-                if (_patternRenderer != null && _colorMaterials != null)
+                if (_patternRenderer != null && _colorMaterials != null && _expectedPattern != null)
                 {
-                    Material[] materials = _patternRenderer.materials; 
-                   
-                    for (int i = 0; i < 7; i++)
+                    Material[] materials = _patternRenderer.materials;
+                    
+                    for (int i = 0; i < _expectedPattern.Count && i < materials.Length - 1; i++)
                     {
-                        int colorIndex = PatternOrder.Get(i);
+                        int colorIndex = _expectedPattern[i];
                         if (colorIndex >= 0 && colorIndex < _colorMaterials.Length)
                         {
-                            materials[i + 1] = _colorMaterials[colorIndex]; 
+                            materials[i + 1] = _colorMaterials[colorIndex];
                         }
                     }
                     
@@ -254,122 +181,36 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             Debug.Log("[NetworkedMusicalNotesPuzzle] Pattern displayed to all players");
         }
         
-        private void StartNoteCollection()
-        {
-            RPC_HidePattern();
-            RPC_ActivateNotes();
-        }
-        
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_HidePattern()
         {
             if (_patternDisplay != null)
             {
+                _patternDisplay.SetActive(false);
+                OnPatternDisplayEnded?.Invoke();
             }
             
-            Debug.Log("[NetworkedMusicalNotesPuzzle] Pattern hidden, note collection phase started");
+            Debug.Log("[NetworkedMusicalNotesPuzzle] Pattern hidden");
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_ActivateNotes()
+        protected override bool ValidateFinalConfiguration()
         {
-            foreach (var note in _notes)
+            bool slotsValid = base.ValidateFinalConfiguration();
+            
+            if (slotsValid && _requirePianoSequence && !PianoPhaseActive)
             {
-                if (note != null)
-                {
-                    note.EnableInteraction(true);
-                }
-            }
-        }
-        
-        public bool TryPlaceNoteInSlot(NetworkedMusicalNote note, int slotIndex)
-        {
-            if (!HasStateAuthority) return false;
-            if (slotIndex < 0 || slotIndex >= _slots.Length) return false;
-            
-            var slot = _slots[slotIndex];
-            if (slot == null || slot.IsOccupied) return false;
-            
-            
-            bool isCorrect = (note.GetNoteIndex() == slot.ExpectedColorIndex);
-            
-            bool placed = slot.TryPlaceNote(note, isCorrect);
-            
-            if (placed)
-            {
-                if (isCorrect)
-                {
-                    CorrectNotesPlaced++;
-                    RPC_NotifyCorrectPlacement(slotIndex, note.GetNoteIndex());
-                }
-                else
-                {
-                    RPC_NotifyIncorrectPlacement(slotIndex, note.GetNoteIndex());
-                }
-                
-                CheckAllNotesPlaced();
+                StartPianoPhase();
+                return false;
             }
             
-            return placed;
+            return slotsValid && (!_requirePianoSequence || PianoPhaseActive);
         }
         
-        public void RemoveNoteFromSlot(int slotIndex)
+        private void StartPianoPhase()
         {
-            if (!HasStateAuthority) return;
+            if (!Runner.IsSharedModeMasterClient) return;
             
-            if (slotIndex >= 0 && slotIndex < _slots.Length)
-            {
-                var slot = _slots[slotIndex];
-                if (slot != null)
-                {
-                    if (slot.IsCorrect)
-                    {
-                        CorrectNotesPlaced--;
-                    }
-                    slot.RemoveNote();
-                }
-            }
-        }
-        
-        private void CheckAllNotesPlaced()
-        {
-            if (CorrectNotesPlaced == 7)
-            {
-                RPC_NotifyAllNotesCorrect();
-                
-                StartCoroutine(DelayedPhaseTransition(2f, MusicalPuzzlePhase.PianoSequence));
-            }
-        }
-        
-        private System.Collections.IEnumerator DelayedPhaseTransition(float delay, MusicalPuzzlePhase nextPhase)
-        {
-            yield return new WaitForSeconds(delay);
-            TransitionToPhase(nextPhase);
-        }
-        
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_NotifyCorrectPlacement(int slotIndex, int noteIndex)
-        {
-            Debug.Log($"[NetworkedMusicalNotesPuzzle] Correct! Note {_noteNames[noteIndex]} placed in slot {slotIndex}");
-            PlaySound(_phaseCompleteSound);
-        }
-        
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_NotifyIncorrectPlacement(int slotIndex, int noteIndex)
-        {
-            Debug.Log($"[NetworkedMusicalNotesPuzzle] Incorrect. Note {_noteNames[noteIndex]} in slot {slotIndex}");
-            PlaySound(_errorSound);
-        }
-        
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_NotifyAllNotesCorrect()
-        {
-            OnAllNotesPlaced?.Invoke();
-            Debug.Log("[NetworkedMusicalNotesPuzzle] All notes placed correctly!");
-        }
-        
-        private void StartPianoSequence()
-        {
+            PianoPhaseActive = true;
             BuildExpectedPianoSequence();
             RPC_ActivatePiano();
         }
@@ -378,14 +219,14 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         {
             string sequence = "";
             
-            for (int i = 0; i < 7; i++)
+            foreach (var slot in _slots)
             {
-                if (_slots[i] != null && _slots[i].IsOccupied)
+                if (slot != null && slot.IsOccupied)
                 {
-                    int noteIndex = _slots[i].PlacedNoteIndex;
-                    if (noteIndex >= 0 && noteIndex < 7)
+                    var item = GetItem(slot.PlacedItemId);
+                    if (item is NetworkedMusicalNote musicalNote)
                     {
-                        sequence += _noteNames[noteIndex];
+                        sequence += musicalNote.NoteName;
                     }
                 }
             }
@@ -397,23 +238,24 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             }
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_ActivatePiano()
         {
             if (_piano != null)
             {
                 _piano.gameObject.SetActive(true);
                 _piano.ActivatePiano();
+                OnPianoPhaseStarted?.Invoke();
             }
             
-            Debug.Log("[NetworkedMusicalNotesPuzzle] Piano activated");
+            Debug.Log("[NetworkedMusicalNotesPuzzle] Piano phase activated");
         }
         
         private void OnPianoComplete()
         {
-            if (HasStateAuthority)
+            if (Runner.IsSharedModeMasterClient && PianoPhaseActive)
             {
-                TransitionToPhase(MusicalPuzzlePhase.Completed);
+                TransitionToState(SlotPuzzleState.Completed);
             }
         }
         
@@ -422,125 +264,113 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             Debug.Log("[NetworkedMusicalNotesPuzzle] Piano sequence failed, try again");
         }
         
-        private void CompletePuzzle()
+        protected override void OnFixedUpdateCustom()
         {
-            IsSolved = true;
+            base.OnFixedUpdateCustom();
             
-            if (NetworkedPuzzleManager.Instance != null)
+            // Solo ocultar el patrón si no está configurado para permanecer visible
+            if (!_keepPatternVisible && PatternShown && PatternTimer.Expired(Runner))
             {
-                NetworkedPuzzleManager.Instance.RPC_CompletePuzzle(_puzzleId);
-            }
-            
-            if (_puzzleDoor != null)
-            {
-                _puzzleDoor.RPC_UnlockDoor();
-                _puzzleDoor.RPC_RequestOpen();
-            }
-            
-            RPC_NotifyPuzzleSolved();
-        }
-        
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_NotifyPuzzleSolved()
-        {
-            OnPuzzleSolved?.Invoke();
-            PlaySound(_puzzleCompleteSound);
-            
-            Debug.Log("[NetworkedMusicalNotesPuzzle] PUZZLE COMPLETED! 🎉");
-        }
-        
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_NotifyPhaseChange(MusicalPuzzlePhase phase)
-        {
-            OnPhaseChanged?.Invoke(phase);
-            Debug.Log($"[NetworkedMusicalNotesPuzzle] Phase changed to: {phase}");
-        }
-        
-        private void PlaySound(AudioClip clip)
-        {
-            if (clip != null && _audioSource != null)
-            {
-                _audioSource.PlayOneShot(clip);
+                PatternShown = false;
+                RPC_HidePattern();
             }
         }
         
-        public void ResetPuzzle()
+        public override void ResetPuzzle()
         {
-            if (!HasStateAuthority) return;
+            base.ResetPuzzle();
             
-            CurrentPhase = MusicalPuzzlePhase.Initialization;
-            IsSolved = false;
-            CorrectNotesPlaced = 0;
-            
-            foreach (var note in _notes)
+            if (Runner.IsSharedModeMasterClient)
             {
-                if (note != null)
+                PianoPhaseActive = false;
+                
+                // Solo ocultar el patrón si no está configurado para permanecer visible
+                if (!_keepPatternVisible)
                 {
-                    note.ResetNote();
+                    PatternShown = false;
+                    RPC_HidePattern();
+                }
+                
+                if (_piano != null)
+                {
+                    _piano.ResetSequence();
+                    _piano.gameObject.SetActive(false);
+                }
+            }
+        }
+        
+        protected override void ConfigureItems()
+        {
+            base.ConfigureItems();
+            
+            // Asegurar que TODAS las notas tengan el controller configurado
+            foreach (var item in _items)
+            {
+                if (item != null)
+                {
+                    item.SetPuzzleController(this);
+                    Debug.Log($"[NetworkedMusicalNotesPuzzle] SetPuzzleController called on {item.name}");
                 }
             }
             
-            foreach (var slot in _slots)
+            // Configure colors based on the expected pattern if available
+            if (_expectedPattern != null && _expectedPattern.Count > 0)
             {
-                if (slot != null)
+                for (int i = 0; i < _expectedPattern.Count && i < _items.Length; i++)
                 {
-                    slot.ResetSlot();
-                }
-            }
-            
-            if (_piano != null)
-            {
-                _piano.ResetSequence();
-                _piano.gameObject.SetActive(false);
-            }
-            
-            InitializePuzzle();
-        }
-        
-        public override void FixedUpdateNetwork()
-        {
-            if (HasStateAuthority)
-            {
-                if (CurrentPhase == MusicalPuzzlePhase.PatternDisplay)
-                {
-                    if (PatternTimer.Expired(Runner))
+                    int colorIndex = _expectedPattern[i];
+                    if (colorIndex >= 0 && colorIndex < _items.Length && _items[colorIndex] is NetworkedMusicalNote musicalNote)
                     {
-                        TransitionToPhase(MusicalPuzzlePhase.NoteCollection);
+                        if (colorIndex < _colorMaterials.Length && _colorMaterials[colorIndex] != null)
+                        {
+                            var meshRenderer = musicalNote.GetComponent<MeshRenderer>();
+                            if (meshRenderer != null)
+                            {
+                                meshRenderer.material = _colorMaterials[colorIndex];
+                                Debug.Log($"[NetworkedMusicalNotesPuzzle] Note {musicalNote.name} assigned color {colorIndex}");
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Fallback: assign colors sequentially if no pattern yet
+                for (int i = 0; i < _items.Length && i < _colorMaterials.Length; i++)
+                {
+                    if (_items[i] is NetworkedMusicalNote musicalNote && i < _noteNames.Length)
+                    {
+                        if (_colorMaterials[i] != null)
+                        {
+                            var meshRenderer = musicalNote.GetComponent<MeshRenderer>();
+                            if (meshRenderer != null)
+                            {
+                                meshRenderer.material = _colorMaterials[i];
+                            }
+                        }
                     }
                 }
             }
         }
         
         #if UNITY_EDITOR
-        [Header("Debug")]
-        [SerializeField] private bool _debugMode = false;
-        
-        private void OnGUI()
+        protected override void OnGUI()
         {
+            base.OnGUI();
+            
             if (!_debugMode || !Application.isPlaying) return;
             
-            GUILayout.BeginArea(new Rect(10, 10, 300, 200));
-            GUILayout.Label($"Musical Puzzle Debug");
-            GUILayout.Label($"Phase: {CurrentPhase}");
-            GUILayout.Label($"Correct Notes: {CorrectNotesPlaced}/7");
-            GUILayout.Label($"Pattern: {string.Join(",", Enumerable.Range(0, 7).Select(i => PatternOrder.Get(i)))}");
+            GUILayout.BeginArea(new Rect(10, 260, 300, 120));
+            GUILayout.Label("Musical Puzzle Specific:");
+            GUILayout.Label($"Pattern Shown: {PatternShown}");
+            GUILayout.Label($"Keep Pattern Visible: {_keepPatternVisible}");
+            GUILayout.Label($"Piano Phase: {PianoPhaseActive}");
             
-            if (HasStateAuthority)
+            if (Runner.IsSharedModeMasterClient)
             {
                 if (GUILayout.Button("Skip to Piano"))
                 {
-                    CorrectNotesPlaced = 7;
-                    TransitionToPhase(MusicalPuzzlePhase.PianoSequence);
-                }
-                
-                if (GUILayout.Button("Complete Puzzle"))
-                {
-                    TransitionToPhase(MusicalPuzzlePhase.Completed);
-                }
-                
-                if (GUILayout.Button("Reset Puzzle"))
-                {
-                    ResetPuzzle();
+                    StartPianoPhase();
                 }
             }
             GUILayout.EndArea();

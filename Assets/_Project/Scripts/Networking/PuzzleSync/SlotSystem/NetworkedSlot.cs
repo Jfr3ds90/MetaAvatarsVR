@@ -63,7 +63,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         
         public override void Spawned()
         {
-            if (HasStateAuthority)
+            // In Shared Mode, Master Client initializes slot state
+            if (Runner.IsSharedModeMasterClient)
             {
                 NetworkedSlotId = _slotId;
                 ExpectedItemId = _expectedItemId;
@@ -83,7 +84,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         
         public virtual bool TryPlaceItem(ISlottable item, bool isCorrect, PlayerRef player = default)
         {
-            if (!HasStateAuthority) return false;
+            // Only Master Client can modify slot state in Shared Mode
+            if (!Runner.IsSharedModeMasterClient) return false;
             if (IsOccupied) return false;
             if (item == null) return false;
             
@@ -95,7 +97,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
             
             if (_snapToCenter)
             {
-                SnapItemToSlot(item);
+                RPC_SnapItemToSlot(item.ItemId);
             }
             
             RPC_NotifyItemPlaced(item.ItemId, isCorrect);
@@ -105,41 +107,69 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         
         public virtual void RemoveItem()
         {
-            if (!HasStateAuthority) return;
-            if (!IsOccupied) return;
+            // Only Master Client can modify slot state in Shared Mode
+            if (!Runner.IsSharedModeMasterClient) return;
+            
+            Debug.Log($"[NetworkedSlot] RemoveItem called on slot {_slotId}. IsOccupied: {IsOccupied}, PlacedItemId: {PlacedItemId}");
+            
+            if (!IsOccupied)
+            {
+                Debug.LogWarning($"[NetworkedSlot] Slot {_slotId} is not occupied, nothing to remove");
+                return;
+            }
             
             int removedItemId = PlacedItemId;
             
+            // Limpiar estado del slot
             _currentItem = null;
             IsOccupied = false;
             PlacedItemId = -1;
             IsCorrect = false;
+            LastInteractedPlayer = PlayerRef.None;
+            
+            Debug.Log($"[NetworkedSlot] Slot {_slotId} cleared. Removed item: {removedItemId}");
             
             RPC_NotifyItemRemoved(removedItemId);
         }
         
-        protected virtual void SnapItemToSlot(ISlottable item)
+        [Rpc(RpcSources.All, RpcTargets.All)]
+        protected virtual void RPC_SnapItemToSlot(int itemId)
         {
-            if (item?.Transform == null) return;
-            
-            item.Transform.position = _itemAnchor.position;
-            
-            if (_lockRotation)
+            // Find the item and snap it to position on all clients
+            var items = FindObjectsOfType<NetworkedSlottableItem>();
+            foreach (var item in items)
             {
-                item.Transform.rotation = _itemAnchor.rotation;
-            }
-            
-            var rb = item.Transform.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
+                if (item.ItemId == itemId)
+                {
+                    item.Transform.position = _itemAnchor.position;
+                    
+                    if (_lockRotation)
+                    {
+                        item.Transform.rotation = _itemAnchor.rotation;
+                    }
+                    
+                    var rb = item.Transform.GetComponent<Rigidbody>();
+                    if (rb != null)
+                    {
+                        rb.isKinematic = true; // Mantener kinematic cuando está en slot
+                        rb.linearVelocity = Vector3.zero;
+                        rb.angularVelocity = Vector3.zero;
+                        Debug.Log($"[NetworkedSlot] Item {itemId} rigidbody set to kinematic for slot snap");
+                    }
+                    break;
+                }
             }
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         protected virtual void RPC_NotifyItemPlaced(int itemId, NetworkBool isCorrect)
         {
+            // Only Master Client should broadcast this in Shared Mode
+            if (!Runner.IsSharedModeMasterClient && Runner.LocalPlayer != PlayerRef.None)
+            {
+                return;
+            }
+            
             OnItemPlaced?.Invoke(itemId);
             
             if (isCorrect)
@@ -157,9 +187,19 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
             OnItemPlacedCustom(itemId, isCorrect);
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         protected virtual void RPC_NotifyItemRemoved(int itemId)
         {
+            Debug.Log($"[NetworkedSlot] RPC_NotifyItemRemoved called for slot {_slotId}, itemId: {itemId}");
+            
+            // Only Master Client should broadcast this in Shared Mode
+            if (!Runner.IsSharedModeMasterClient && Runner.LocalPlayer != PlayerRef.None)
+            {
+                Debug.Log($"[NetworkedSlot] Not master client, skipping notification broadcast");
+                return;
+            }
+            
+            Debug.Log($"[NetworkedSlot] Broadcasting item removal notification for slot {_slotId}");
             OnItemRemoved?.Invoke(itemId);
             UpdateVisualState();
             OnItemRemovedCustom(itemId);
@@ -168,15 +208,26 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         public virtual void SetExpectedItem(int itemId)
         {
             _expectedItemId = itemId;
-            if (HasStateAuthority)
+            if (Runner.IsSharedModeMasterClient)
             {
                 ExpectedItemId = itemId;
             }
         }
         
+        public void SetSlotId(int id)
+        {
+            _slotId = id;
+            if (Runner != null && Runner.IsSharedModeMasterClient)
+            {
+                NetworkedSlotId = id;
+            }
+            Debug.Log($"[NetworkedSlot] Slot {name} ID set to {id}");
+        }
+        
         public void SetPuzzleController(NetworkedSlotPuzzleController controller)
         {
             _puzzleController = controller;
+            Debug.Log($"[NetworkedSlot] Slot {_slotId} controller set to {controller?.name ?? "null"}");
         }
         
         protected virtual void UpdateVisualState()
@@ -214,7 +265,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         
         public virtual void ResetSlot()
         {
-            if (HasStateAuthority)
+            if (Runner.IsSharedModeMasterClient)
             {
                 RemoveItem();
                 IsOccupied = false;

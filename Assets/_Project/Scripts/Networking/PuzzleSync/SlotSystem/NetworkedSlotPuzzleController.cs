@@ -81,7 +81,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         
         public override void Spawned()
         {
-            if (HasStateAuthority)
+            // In Shared Mode, the Master Client manages puzzle state
+            if (Runner.IsSharedModeMasterClient)
             {
                 CurrentState = SlotPuzzleState.NotStarted;
                 IsSolved = false;
@@ -92,22 +93,31 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
                 
                 InitializePuzzle();
             }
+            else
+            {
+                // Non-master clients also initialize but don't set network state
+                InitializePuzzle();
+            }
             
             RegisterComponents();
         }
         
         protected virtual void InitializePuzzle()
         {
-            GenerateExpectedPattern();
+            // Master Client generates the pattern for everyone
+            if (Runner.IsSharedModeMasterClient)
+            {
+                GenerateExpectedPattern();
+                TransitionToState(SlotPuzzleState.WaitingForItems);
+                
+                if (NetworkedPuzzleManager.Instance != null)
+                {
+                    NetworkedPuzzleManager.Instance.RPC_RequestStartPuzzle(_config.puzzleId);
+                }
+            }
+            
             ConfigureSlots();
             ConfigureItems();
-            
-            TransitionToState(SlotPuzzleState.WaitingForItems);
-            
-            if (NetworkedPuzzleManager.Instance != null)
-            {
-                NetworkedPuzzleManager.Instance.RPC_RequestStartPuzzle(_config.puzzleId);
-            }
         }
         
         protected abstract void GenerateExpectedPattern();
@@ -118,6 +128,14 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
             {
                 if (_slots[i] != null)
                 {
+                    // IMPORTANTE: Asegurar que cada slot tenga su ID configurado
+                    if (_slots[i].SlotId != i)
+                    {
+                        Debug.LogWarning($"[{GetType().Name}] Slot {i} has mismatched ID: {_slots[i].SlotId}. Setting to {i}");
+                        // En Shared Mode, necesitamos asegurar que los IDs estén sincronizados
+                        _slots[i].SetSlotId(i);
+                    }
+                    
                     _slots[i].SetPuzzleController(this);
                     
                     if (_expectedPattern != null && i < _expectedPattern.Count)
@@ -125,7 +143,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
                         _slots[i].SetExpectedItem(_expectedPattern[i]);
                     }
                     
-                    Debug.Log($"[{GetType().Name}] Configured slot {i}: {_slots[i].name} with controller");
+                    Debug.Log($"[{GetType().Name}] Configured slot {i}: {_slots[i].name} with ID {_slots[i].SlotId} and controller");
                 }
             }
         }
@@ -155,15 +173,35 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
             }
         }
         
-        public virtual bool TryPlaceItemInSlot(ISlottable item, int slotId)
+        public virtual bool TryPlaceItemInSlot(ISlottable item, int slotId, PlayerRef requestingPlayer)
         {
-            if (!HasStateAuthority) return false;
+            Debug.Log($"[{GetType().Name}] TryPlaceItemInSlot - Item: {item?.ItemId}, SlotId: {slotId}, Requester: {requestingPlayer}");
+            
+            // Only Master Client processes placement in Shared Mode
+            if (!Runner.IsSharedModeMasterClient)
+            {
+                Debug.LogWarning($"[{GetType().Name}] Not master client, cannot process placement");
+                return false;
+            }
             
             var slot = GetSlot(slotId);
-            if (slot == null || !slot.CanAcceptItem) return false;
+            if (slot == null)
+            {
+                Debug.LogWarning($"[{GetType().Name}] Slot {slotId} not found! Available slots: {string.Join(", ", _slots.Select(s => s?.SlotId ?? -1))}");
+                return false;
+            }
+            
+            if (!slot.CanAcceptItem)
+            {
+                Debug.LogWarning($"[{GetType().Name}] Slot {slotId} cannot accept item (occupied: {slot.IsOccupied})");
+                return false;
+            }
             
             bool isCorrect = ValidatePlacement(item, slot);
-            bool placed = slot.TryPlaceItem(item, isCorrect, Runner.LocalPlayer);
+            Debug.Log($"[{GetType().Name}] Validation result: {isCorrect}");
+            
+            bool placed = slot.TryPlaceItem(item, isCorrect, requestingPlayer);
+            Debug.Log($"[{GetType().Name}] Slot.TryPlaceItem returned: {placed}");
             
             if (placed)
             {
@@ -177,6 +215,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
                 
                 UpdateProgress();
                 CheckCompletionCondition();
+                
+                Debug.Log($"[{GetType().Name}] Item placed successfully! Total: {TotalItemsPlaced}, Correct: {CorrectItemsPlaced}");
             }
             
             return placed;
@@ -184,19 +224,36 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         
         public virtual void RemoveItemFromSlot(int slotId)
         {
-            if (!HasStateAuthority) return;
+            // Only Master Client processes removal in Shared Mode
+            if (!Runner.IsSharedModeMasterClient) return;
+            
+            Debug.Log($"[{GetType().Name}] RemoveItemFromSlot called for slotId: {slotId}");
             
             var slot = GetSlot(slotId);
-            if (slot == null || !slot.IsOccupied) return;
+            if (slot == null)
+            {
+                Debug.LogWarning($"[{GetType().Name}] Slot {slotId} not found for removal");
+                return;
+            }
             
+            if (!slot.IsOccupied)
+            {
+                Debug.LogWarning($"[{GetType().Name}] Slot {slotId} is not occupied, cannot remove item");
+                return;
+            }
+            
+            // Actualizar contadores antes de remover
             if (slot.IsCorrect)
             {
-                CorrectItemsPlaced--;
+                CorrectItemsPlaced = Mathf.Max(0, CorrectItemsPlaced - 1);
+                Debug.Log($"[{GetType().Name}] Decremented correct items count. New: {CorrectItemsPlaced}");
             }
-            TotalItemsPlaced--;
+            TotalItemsPlaced = Mathf.Max(0, TotalItemsPlaced - 1);
             
             _slotItemMapping.Remove(slotId);
             slot.RemoveItem();
+            
+            Debug.Log($"[{GetType().Name}] Item removed from slot {slotId}. Total items: {TotalItemsPlaced}, Correct: {CorrectItemsPlaced}");
             
             UpdateProgress();
         }
@@ -248,7 +305,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         
         protected virtual void TransitionToState(SlotPuzzleState newState)
         {
-            if (!HasStateAuthority) return;
+            // Only Master Client manages state transitions in Shared Mode
+            if (!Runner.IsSharedModeMasterClient) return;
             
             var previousState = CurrentState;
             CurrentState = newState;
@@ -323,7 +381,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         
         public virtual void ResetPuzzle()
         {
-            if (!HasStateAuthority) return;
+            // Only Master Client resets puzzle in Shared Mode
+            if (!Runner.IsSharedModeMasterClient) return;
             
             CurrentState = SlotPuzzleState.NotStarted;
             IsSolved = false;
@@ -354,7 +413,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         
         public override void FixedUpdateNetwork()
         {
-            if (HasStateAuthority)
+            // Only Master Client processes game logic in Shared Mode
+            if (Runner.IsSharedModeMasterClient)
             {
                 if (CurrentState == SlotPuzzleState.ValidationPhase)
                 {
@@ -531,7 +591,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
             GUILayout.Label($"Attempts: {CurrentAttempts}");
             GUILayout.Label($"Is Solved: {IsSolved}");
             
-            if (HasStateAuthority)
+            if (Runner.IsSharedModeMasterClient)
             {
                 if (GUILayout.Button("Complete Puzzle"))
                 {
