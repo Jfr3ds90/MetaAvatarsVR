@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -11,7 +12,7 @@ public class VRInputFieldCursorController : MonoBehaviour, IPointerClickHandler
 
     private TMP_Text textComponent;
     private RectTransform textViewport;
-
+    public Dictionary<TMP_CharacterInfo, Vector3> CharP = new Dictionary<TMP_CharacterInfo, Vector3>();
     void Start()
     {
         if (inputField == null)
@@ -158,6 +159,8 @@ public class VRInputFieldCursorController : MonoBehaviour, IPointerClickHandler
         float minDistance = float.MaxValue;
         int closestIndex = 0;
 
+        CharP.Clear();
+
         for (int i = 0; i < textInfo.characterCount; i++)
         {
             TMP_CharacterInfo charInfo = textInfo.characterInfo[i];
@@ -165,8 +168,12 @@ public class VRInputFieldCursorController : MonoBehaviour, IPointerClickHandler
             // Skip invisible characters (rich text tags, etc.)
             if (!charInfo.isVisible)
                 continue;
+
+            Vector3 cPos = new Vector3((charInfo.bottomLeft.x + charInfo.bottomRight.x)*0.001f ,
+                 inputField.transform.position.y, 
+                inputField.transform.position.z);
             Debug.LogWarning(" info de char " + charInfo.character + " del objeto " + textComponent.text + " con la pos " +
-                (charInfo.bottomLeft.x - charInfo.bottomRight.x)+ ","+ (charInfo.topLeft.y - charInfo.topRight.y)+","+ (charInfo.topLeft.z - charInfo.topRight.z));
+                cPos);
             //buscar forma de cambiar valores de rect transform a transform
             // Calculate character center in local space
             Vector3 charCenter = new Vector2(
@@ -181,9 +188,9 @@ public class VRInputFieldCursorController : MonoBehaviour, IPointerClickHandler
                 minDistance = distance;
                 closestIndex = i;
             }
-           
+            CharP.Add(charInfo,cPos);
         }
-
+        Debug.Log(CharP.Count);
         // Refine: check if we're closer to the character's start or end
         TMP_CharacterInfo closestChar = textInfo.characterInfo[closestIndex];
         float charMidpoint = (closestChar.bottomLeft.x + closestChar.topRight.x) * 0.5f;
