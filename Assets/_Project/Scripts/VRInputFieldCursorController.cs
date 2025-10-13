@@ -13,6 +13,8 @@ public class VRInputFieldCursorController : MonoBehaviour, IPointerClickHandler
     private TMP_Text textComponent;
     private RectTransform textViewport;
     public Dictionary<TMP_CharacterInfo, Vector3> CharP = new Dictionary<TMP_CharacterInfo, Vector3>();
+
+    public bool activation = false;
     void Start()
     {
         if (inputField == null)

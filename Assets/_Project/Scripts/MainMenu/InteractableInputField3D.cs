@@ -221,6 +221,7 @@ namespace HackMonkeys.UI.Spatial
                 }
                PointerEventData pointer = new PointerEventData(EventSystem.current);
                         vrfcc.OnPointerClick(pointer);
+                        vrfcc.activation=true;
             }
         }
         else if (_hoveredInteractors.ContainsKey(interactor) && _hoveredInteractors[interactor])
@@ -467,16 +468,12 @@ namespace HackMonkeys.UI.Spatial
         }
         
         private void UpdateText()
-        {Ray ray = new Ray();
-            SurfaceHit hit;
+        {
             if (inputText != null)
             {
                 var val = GetComponent<TMP_InputField>();
                 inputText.text = _currentText;
-                /*Debug.LogWarning("La posición es " +GetComponent<TMP_InputField>().caretPosition+" del texto "+GetComponent<TMP_InputField>().text
-                    +" en la posición "+ GetComponent<ColliderSurface>().Bounds */ //revizar RayInteractor como ver que posicion exacta toca al inputfield
-                    /*GetComponent<ColliderSurface>().Raycast(ray,out hit)*/
-                    /*GetComponent<RayInteractable>().Surface*//*GetComponent<ColliderSurface>().Transform.position*//*);*/
+
                 int count=0;
                 foreach(char cha in inputText.text)
                 {
