@@ -55,24 +55,33 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             if (_pokeInteractable == null)
             {
                 _pokeInteractable = gameObject.AddComponent<PokeInteractable>();
-                
+        
                 // Configurar superficie de poke para piano
                 var pokeSurface = GetComponent<PlaneSurface>();
                 if (pokeSurface == null)
                 {
                     pokeSurface = gameObject.AddComponent<PlaneSurface>();
-                    //pokeSurface.NormalLocal = Vector3.up;
+                    // Usar Facing en lugar de NormalLocal
+                    pokeSurface.Facing = PlaneSurface.NormalFacing.Forward; // Normal apunta hacia +Z
+                    pokeSurface.DoubleSided = true; // Permitir interacción desde ambos lados
                 }
-                
-                //_pokeInteractable.Surface = pokeSurface;
+        
+                // Crear un SurfacePatch que envuelva la superficie
+                var surfacePatch = GetComponent<BoundsClipper>();
+                if (surfacePatch == null)
+                {
+                    surfacePatch = gameObject.AddComponent<BoundsClipper>();
+                    // El BoundsClipper actúa como ISurfacePatch
+                }
+        
+                // Usar InjectSurfacePatch en lugar de asignar Surface directamente
+                //_pokeInteractable.InjectSurfacePatch(surfacePatch);
             }
-            
-            // Configurar visual de poke
-            var pokeVisual = GetComponent<PokeInteractableVisual>();
-            if (pokeVisual == null)
-            {
-                pokeVisual = gameObject.AddComponent<PokeInteractableVisual>();
-            }
+    
+            // Configurar parámetros de interacción
+            _pokeInteractable.EnterHoverNormal = 0.05f;  // 5cm para empezar hover
+            _pokeInteractable.ExitHoverNormal = 0.08f;   // 8cm para salir de hover
+            _pokeInteractable.CancelSelectNormal = 0.02f; // 2cm de profundidad máxima
         }
         
         private void SetupAudio()

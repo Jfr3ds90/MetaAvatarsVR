@@ -217,7 +217,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         
         private void BuildExpectedPianoSequence()
         {
-            string sequence = "";
+            List<string> notes = new List<string>();
             
             foreach (var slot in _slots)
             {
@@ -226,13 +226,14 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                     var item = GetItem(slot.PlacedItemId);
                     if (item is NetworkedMusicalNote musicalNote)
                     {
-                        sequence += musicalNote.NoteName;
+                        notes.Add(musicalNote.NoteName);
                     }
                 }
             }
             
-            if (_piano != null)
+            if (_piano != null && notes.Count > 0)
             {
+                string sequence = string.Join(",", notes);
                 _piano.SetExpectedSequence(sequence);
                 Debug.Log($"[NetworkedMusicalNotesPuzzle] Piano sequence set: {sequence}");
             }

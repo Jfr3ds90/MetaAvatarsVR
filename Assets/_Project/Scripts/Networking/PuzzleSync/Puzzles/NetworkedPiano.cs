@@ -82,6 +82,9 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 CurrentAttempt = 0;
                 SequenceProgress = 0;
                 CurrentSequence = "";
+                // Establecer secuencia esperada por defecto
+                ExpectedSequence = "Do,Re,Mi,Fa,Sol"; // Cambiar esto según tu puzzle
+                Debug.Log($"[NetworkedPiano] Initialized with expected sequence: {ExpectedSequence}");
             }
         }
         
@@ -95,6 +98,16 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             }
         }
         
+        // Método helper para configurar la secuencia desde el Inspector o scripts externos
+        public void SetExpectedNotes(string[] notes)
+        {
+            if (Runner && Runner.IsSharedModeMasterClient)
+            {
+                ExpectedSequence = string.Join(",", notes);
+                Debug.Log($"[NetworkedPiano] Expected sequence set from array: {ExpectedSequence}");
+            }
+        }
+        
         public void ActivatePiano()
         {
             if (Runner.IsSharedModeMasterClient)
@@ -104,6 +117,17 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 SequenceProgress = 0;
                 CurrentSequence = "";
                 _currentNotes.Clear();
+                
+                // Asegurarse de que la secuencia esperada esté establecida
+                if (string.IsNullOrEmpty(ExpectedSequence.ToString()))
+                {
+                    ExpectedSequence = "Do,Re,Mi,Fa,Sol"; // Secuencia por defecto
+                    Debug.LogWarning($"[NetworkedPiano] No expected sequence set! Using default: {ExpectedSequence}");
+                }
+                else
+                {
+                    Debug.Log($"[NetworkedPiano] Piano activated with sequence: {ExpectedSequence}");
+                }
                 
                 RPC_UpdatePianoState(true, 0, 0);
             }
@@ -117,9 +141,11 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             RPC_ProcessKeyPress(noteName, keyIndex, Runner.LocalPlayer);
         }
         
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_ProcessKeyPress(string noteName, int keyIndex, PlayerRef player, RpcInfo info = default)
         {
+            // Solo el Master Client procesa la lógica del puzzle
+            if (!Runner.IsSharedModeMasterClient) return;
             if (!IsActive) return;
             
             // Validar si es input duplicado
@@ -131,21 +157,25 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             
             LastPlayerInput = player;
             _currentNotes.Add(noteName);
-            CurrentSequence = string.Join("", _currentNotes);
+            CurrentSequence = string.Join(",", _currentNotes); // Usar coma como separador
             SequenceProgress = _currentNotes.Count;
             
-            string expected = ExpectedSequence.ToString();
+            Debug.Log($"[NetworkedPiano] Key pressed: {noteName}, Current sequence: {CurrentSequence}, Expected: {ExpectedSequence}");
+            
+            // Parsear la secuencia esperada (formato: "Do,Re,Mi,Fa,Sol")
+            string[] expectedNotes = ExpectedSequence.ToString().Split(',');
             int currentIndex = _currentNotes.Count - 1;
             
             // Validar nota por nota
-            if (currentIndex < expected.Length && 
-                noteName == expected.Substring(currentIndex * 2, 2)) // Asumiendo formato "DoReMiFa"
+            if (currentIndex < expectedNotes.Length && 
+                noteName == expectedNotes[currentIndex])
             {
                 // Nota correcta
                 RPC_NotifyCorrectNote(keyIndex, SequenceProgress);
+                Debug.Log($"[NetworkedPiano] Correct note! Progress: {SequenceProgress}/{expectedNotes.Length}");
                 
                 // Verificar si completó la secuencia
-                if (_currentNotes.Count * 2 >= expected.Length)
+                if (_currentNotes.Count >= expectedNotes.Length)
                 {
                     IsActive = false;
                     RPC_SequenceComplete();
@@ -155,6 +185,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             {
                 // Nota incorrecta
                 CurrentAttempt++;
+                Debug.Log($"[NetworkedPiano] Wrong note! Expected: {(currentIndex < expectedNotes.Length ? expectedNotes[currentIndex] : "N/A")}, Got: {noteName}, Attempt: {CurrentAttempt}/{_maxAttempts}");
                 RPC_NotifyWrongNote(keyIndex);
                 
                 if (CurrentAttempt >= _maxAttempts)
@@ -171,7 +202,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             }
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_UpdatePianoState(NetworkBool active, int progress, int attempts)
         {
             IsActive = active;
@@ -180,7 +211,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             UpdateProgressIndicators(progress);
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_NotifyCorrectNote(int keyIndex, int progress)
         {
             if (keyIndex < _pianoKeys.Length)
@@ -188,9 +219,12 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 
             UpdateProgressIndicators(progress);
             OnProgressUpdate?.Invoke(progress);
+            
+            if (_correctSound != null)
+                PlaySound(_correctSound);
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_NotifyWrongNote(int keyIndex)
         {
             if (keyIndex < _pianoKeys.Length)
@@ -200,7 +234,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             ShowErrorFeedback();
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_SequenceComplete()
         {
             OnSequenceCompleted?.Invoke();
@@ -209,7 +243,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             Debug.Log("[NetworkedPiano] Sequence completed successfully!");
         }
         
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+        [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_SequenceFailed()
         {
             OnSequenceFailed?.Invoke();
@@ -231,6 +265,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             CurrentSequence = "";
             SequenceProgress = 0;
             UpdateProgressIndicators(0);
+            Debug.Log($"[NetworkedPiano] Sequence reset. Waiting for new attempt...");
         }
         
         private void InitializeProgressIndicators()
