@@ -10,6 +10,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
     {
         [Header("Configuration")]
         [SerializeField] private NetworkedPianoKey[] _pianoKeys;
+        [SerializeField] private bool _limitAttempts = false;
         [SerializeField] private int _maxAttempts = 3;
         [SerializeField] private float _resetDelay = 1.5f;
         [SerializeField] private bool _allowMultiplePlayers = true;
@@ -90,11 +91,12 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         
         public void SetExpectedSequence(string sequence)
         {
-            // Solo el Master Client puede establecer la secuencia esperada
-            if (Runner.IsSharedModeMasterClient)
+            // En Shared Mode, tanto el MasterClient como los demás clientes necesitan poder establecer la secuencia localmente
+            // cuando se activa el piano a través del RPC
+            if (Runner != null && (Runner.IsSharedModeMasterClient || !string.IsNullOrEmpty(sequence)))
             {
                 ExpectedSequence = sequence;
-                Debug.Log($"[NetworkedPiano] Expected sequence set: {sequence}");
+                Debug.Log($"[NetworkedPiano] Expected sequence set: {sequence} (IsMaster: {Runner.IsSharedModeMasterClient})");
             }
         }
         
@@ -129,6 +131,16 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                     Debug.Log($"[NetworkedPiano] Piano activated with sequence: {ExpectedSequence}");
                 }
                 
+                // Informar sobre el modo de intentos
+                if (_limitAttempts)
+                {
+                    Debug.Log($"[NetworkedPiano] Limited attempts mode: {_maxAttempts} attempts allowed");
+                }
+                else
+                {
+                    Debug.Log($"[NetworkedPiano] Unlimited attempts mode enabled");
+                }
+                
                 RPC_UpdatePianoState(true, 0, 0);
             }
         }
@@ -137,14 +149,31 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         {
             if (!IsActive) return;
             
-            // En Shared Mode, cualquier jugador puede interactuar
-            RPC_ProcessKeyPress(noteName, keyIndex, Runner.LocalPlayer);
+            // En Shared Mode, enviar el input solo al Master Client para procesamiento
+            if (Runner.IsSharedModeMasterClient)
+            {
+                // El Master Client procesa directamente
+                ProcessKeyInput(noteName, keyIndex, Runner.LocalPlayer);
+            }
+            else
+            {
+                // Los demás clientes envían al Master Client
+                RPC_RequestProcessKeyPress(noteName, keyIndex);
+            }
         }
         
         [Rpc(RpcSources.All, RpcTargets.All)]
-        private void RPC_ProcessKeyPress(string noteName, int keyIndex, PlayerRef player, RpcInfo info = default)
+        private void RPC_RequestProcessKeyPress(string noteName, int keyIndex, RpcInfo info = default)
         {
-            // Solo el Master Client procesa la lógica del puzzle
+            // Solo el Master Client procesa las solicitudes
+            if (!Runner.IsSharedModeMasterClient) return;
+            if (!IsActive) return;
+            
+            ProcessKeyInput(noteName, keyIndex, info.Source);
+        }
+        
+        private void ProcessKeyInput(string noteName, int keyIndex, PlayerRef player)
+        {
             if (!Runner.IsSharedModeMasterClient) return;
             if (!IsActive) return;
             
@@ -157,10 +186,16 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             
             LastPlayerInput = player;
             _currentNotes.Add(noteName);
-            CurrentSequence = string.Join(",", _currentNotes); // Usar coma como separador
+            
+            // Actualizar CurrentSequence como propiedad Networked (se sincroniza automáticamente)
+            string newSequence = string.Join(",", _currentNotes);
+            CurrentSequence = newSequence;
             SequenceProgress = _currentNotes.Count;
             
-            Debug.Log($"[NetworkedPiano] Key pressed: {noteName}, Current sequence: {CurrentSequence}, Expected: {ExpectedSequence}");
+            Debug.Log($"[NetworkedPiano] Player {player} pressed: {noteName}, Current sequence: {CurrentSequence}, Expected: {ExpectedSequence}");
+            
+            // Notificar a todos los clientes para actualizar sus indicadores visuales
+            RPC_UpdateProgressIndicators(SequenceProgress);
             
             // Parsear la secuencia esperada (formato: "Do,Re,Mi,Fa,Sol")
             string[] expectedNotes = ExpectedSequence.ToString().Split(',');
@@ -185,10 +220,20 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             {
                 // Nota incorrecta
                 CurrentAttempt++;
-                Debug.Log($"[NetworkedPiano] Wrong note! Expected: {(currentIndex < expectedNotes.Length ? expectedNotes[currentIndex] : "N/A")}, Got: {noteName}, Attempt: {CurrentAttempt}/{_maxAttempts}");
+                
+                if (_limitAttempts)
+                {
+                    Debug.Log($"[NetworkedPiano] Wrong note! Expected: {(currentIndex < expectedNotes.Length ? expectedNotes[currentIndex] : "N/A")}, Got: {noteName}, Attempt: {CurrentAttempt}/{_maxAttempts}");
+                }
+                else
+                {
+                    Debug.Log($"[NetworkedPiano] Wrong note! Expected: {(currentIndex < expectedNotes.Length ? expectedNotes[currentIndex] : "N/A")}, Got: {noteName}. Unlimited attempts mode.");
+                }
+                
                 RPC_NotifyWrongNote(keyIndex);
                 
-                if (CurrentAttempt >= _maxAttempts)
+                // Solo verificar el límite de intentos si está habilitado
+                if (_limitAttempts && CurrentAttempt >= _maxAttempts)
                 {
                     RPC_SequenceFailed();
                 }
@@ -200,6 +245,14 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                     _resetCoroutine = StartCoroutine(DelayedReset());
                 }
             }
+        }
+        
+        [Rpc(RpcSources.All, RpcTargets.All)]
+        private void RPC_UpdateProgressIndicators(int progress)
+        {
+            // Todos los clientes actualizan sus indicadores visuales
+            UpdateProgressIndicators(progress);
+            Debug.Log($"[NetworkedPiano] Progress indicators updated: {progress}");
         }
         
         [Rpc(RpcSources.All, RpcTargets.All)]
@@ -249,7 +302,14 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             OnSequenceFailed?.Invoke();
             PlaySound(_wrongSound);
             ResetSequence();
-            Debug.Log("[NetworkedPiano] Sequence failed after max attempts");
+            Debug.Log($"[NetworkedPiano] Sequence failed after {_maxAttempts} attempts");
+            
+            // Si los intentos son limitados, desactivar el piano
+            if (_limitAttempts)
+            {
+                IsActive = false;
+                Debug.Log("[NetworkedPiano] Piano deactivated - Max attempts reached");
+            }
         }
         
         private IEnumerator DelayedReset()
@@ -262,10 +322,28 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         public void ResetSequence()
         {
             _currentNotes.Clear();
-            CurrentSequence = "";
-            SequenceProgress = 0;
-            UpdateProgressIndicators(0);
+            
+            // Solo el MasterClient puede modificar propiedades Networked
+            if (Runner.IsSharedModeMasterClient)
+            {
+                CurrentSequence = "";
+                SequenceProgress = 0;
+                RPC_UpdateProgressIndicators(0);
+            }
+            
             Debug.Log($"[NetworkedPiano] Sequence reset. Waiting for new attempt...");
+        }
+        
+        // Método público para configurar el modo de intentos
+        public void SetAttemptsMode(bool limitAttempts, int maxAttempts = 3)
+        {
+            _limitAttempts = limitAttempts;
+            if (limitAttempts && maxAttempts > 0)
+            {
+                _maxAttempts = maxAttempts;
+            }
+            
+            Debug.Log($"[NetworkedPiano] Attempts mode changed - Limited: {_limitAttempts}, Max: {_maxAttempts}");
         }
         
         private void InitializeProgressIndicators()

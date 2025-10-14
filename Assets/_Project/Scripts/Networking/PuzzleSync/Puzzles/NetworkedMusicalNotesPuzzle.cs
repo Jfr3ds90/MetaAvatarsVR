@@ -59,11 +59,15 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 PatternShown = false;
                 PianoPhaseActive = false;
                 
+                Debug.Log($"[NetworkedMusicalNotesPuzzle] Master Client initializing puzzle");
+                
                 // Generate pattern first, then display it after a short delay to ensure sync
                 StartCoroutine(DelayedPatternDisplay());
             }
             else
             {
+                Debug.Log($"[NetworkedMusicalNotesPuzzle] Non-Master Client waiting for pattern sync");
+                
                 // Non-master clients also need to configure their items
                 StartCoroutine(ConfigureItemsAfterSync());
             }
@@ -107,6 +111,12 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         {
             _expectedPattern = new List<int>();
             
+            // Inicializar el NetworkedPattern con valores negativos
+            for (int i = 0; i < NetworkedPattern.Length; i++)
+            {
+                NetworkedPattern.Set(i, -1);
+            }
+            
             List<int> indices = Enumerable.Range(0, Mathf.Min(7, _items.Length)).ToList();
             System.Random random = new System.Random(Runner.Tick);
             
@@ -142,6 +152,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_ShowPattern()
         {
+            Debug.Log($"[NetworkedMusicalNotesPuzzle] RPC_ShowPattern called on client (IsMaster: {Runner.IsSharedModeMasterClient})");
+            
             // Reconstruct the pattern from networked array for clients
             if (_expectedPattern == null || _expectedPattern.Count == 0)
             {
@@ -219,15 +231,14 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         {
             List<string> notes = new List<string>();
             
-            foreach (var slot in _slots)
+            // Usar el patrón original que se mostró, no las notas colocadas
+            // El patrón original está en NetworkedPattern
+            for (int i = 0; i < NetworkedPattern.Length; i++)
             {
-                if (slot != null && slot.IsOccupied)
+                int noteIndex = NetworkedPattern[i];
+                if (noteIndex >= 0 && noteIndex < _noteNames.Length)
                 {
-                    var item = GetItem(slot.PlacedItemId);
-                    if (item is NetworkedMusicalNote musicalNote)
-                    {
-                        notes.Add(musicalNote.NoteName);
-                    }
+                    notes.Add(_noteNames[noteIndex]);
                 }
             }
             
@@ -235,21 +246,45 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             {
                 string sequence = string.Join(",", notes);
                 _piano.SetExpectedSequence(sequence);
-                Debug.Log($"[NetworkedMusicalNotesPuzzle] Piano sequence set: {sequence}");
+                Debug.Log($"[NetworkedMusicalNotesPuzzle] Piano sequence set from original pattern: {sequence}");
+            }
+            else
+            {
+                Debug.LogWarning($"[NetworkedMusicalNotesPuzzle] Could not build piano sequence. Notes count: {notes.Count}");
             }
         }
         
         [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_ActivatePiano()
         {
+            // Reconstruir la secuencia esperada desde NetworkedPattern para asegurar sincronización
+            List<string> expectedNotes = new List<string>();
+            for (int i = 0; i < NetworkedPattern.Length; i++)
+            {
+                int noteIndex = NetworkedPattern[i];
+                if (noteIndex >= 0 && noteIndex < _noteNames.Length)
+                {
+                    expectedNotes.Add(_noteNames[noteIndex]);
+                }
+            }
+            
             if (_piano != null)
             {
                 _piano.gameObject.SetActive(true);
+                
+                // Establecer la secuencia esperada en todos los clientes
+                if (expectedNotes.Count > 0)
+                {
+                    string sequence = string.Join(",", expectedNotes);
+                    _piano.SetExpectedSequence(sequence);
+                    Debug.Log($"[NetworkedMusicalNotesPuzzle] Piano activated with sequence: {sequence}");
+                }
+                
                 _piano.ActivatePiano();
                 OnPianoPhaseStarted?.Invoke();
             }
             
-            Debug.Log("[NetworkedMusicalNotesPuzzle] Piano phase activated");
+            Debug.Log("[NetworkedMusicalNotesPuzzle] Piano phase activated for all clients");
         }
         
         private void OnPianoComplete()
@@ -314,7 +349,11 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 }
             }
             
-            // Configure colors based on the expected pattern if available
+            // NOTA: Las notas musicales ya tienen sus propios materiales configurados
+            // No sobrescribir los materiales de las notas musicales ya que tienen geometría compleja
+            // con letras que indican la nota musical correspondiente
+            
+            // Solo logging para debug sin cambiar materiales
             if (_expectedPattern != null && _expectedPattern.Count > 0)
             {
                 for (int i = 0; i < _expectedPattern.Count && i < _items.Length; i++)
@@ -322,33 +361,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                     int colorIndex = _expectedPattern[i];
                     if (colorIndex >= 0 && colorIndex < _items.Length && _items[colorIndex] is NetworkedMusicalNote musicalNote)
                     {
-                        if (colorIndex < _colorMaterials.Length && _colorMaterials[colorIndex] != null)
-                        {
-                            var meshRenderer = musicalNote.GetComponent<MeshRenderer>();
-                            if (meshRenderer != null)
-                            {
-                                meshRenderer.material = _colorMaterials[colorIndex];
-                                Debug.Log($"[NetworkedMusicalNotesPuzzle] Note {musicalNote.name} assigned color {colorIndex}");
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                // Fallback: assign colors sequentially if no pattern yet
-                for (int i = 0; i < _items.Length && i < _colorMaterials.Length; i++)
-                {
-                    if (_items[i] is NetworkedMusicalNote musicalNote && i < _noteNames.Length)
-                    {
-                        if (_colorMaterials[i] != null)
-                        {
-                            var meshRenderer = musicalNote.GetComponent<MeshRenderer>();
-                            if (meshRenderer != null)
-                            {
-                                meshRenderer.material = _colorMaterials[i];
-                            }
-                        }
+                        Debug.Log($"[NetworkedMusicalNotesPuzzle] Note {musicalNote.name} has pattern index {colorIndex}");
                     }
                 }
             }

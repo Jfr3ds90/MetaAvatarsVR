@@ -161,15 +161,24 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 PressedTimer = TickTimer.CreateFromSeconds(Runner, 0.5f);
             }
             
-            // Efectos locales para todos los clientes
+            // Efectos visuales y sonoros para todos los clientes
             PlayKeyAnimation(true);
             PlaySound();
             TriggerHaptics(player);
             
-            // Notificar al piano
-            OnKeyPressed?.Invoke(_noteName);
-            
-            Debug.Log($"[PianoKey] {_noteName} pressed by Player {player}");
+            // IMPORTANTE: Solo el cliente que presionó la tecla debe notificar al piano
+            // Esto evita que se procese múltiples veces
+            if (player == Runner.LocalPlayer)
+            {
+                // Notificar al piano solo desde el cliente que presionó la tecla
+                OnKeyPressed?.Invoke(_noteName);
+                Debug.Log($"[PianoKey] {_noteName} pressed by Player {player} (local)");
+            }
+            else
+            {
+                // Los demás clientes solo muestran el log
+                Debug.Log($"[PianoKey] {_noteName} pressed by Player {player} (remote)");
+            }
         }
         
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
