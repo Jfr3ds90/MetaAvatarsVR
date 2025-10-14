@@ -82,6 +82,8 @@ namespace HackMonkeys.UI.Spatial
         private RayInteractor _activeInteractor;
 
         private VRInputFieldCursorController vrfcc;
+        PointerEventData pointer;
+        bool clickAsigned = false;
 
         private void Awake()
         {
@@ -189,13 +191,13 @@ namespace HackMonkeys.UI.Spatial
     
     foreach (var interactor in rayInteractors)
     {
-        bool isCurrentlyHovering = false;
+                bool isCurrentlyHovering = false;
         
         if (interactor.HasCandidate && 
             interactor.CandidateProperties is RayInteractor.RayCandidateProperties props &&
             props.ClosestInteractable == fieldInteractable)
         {
-            isCurrentlyHovering = true;
+                    isCurrentlyHovering = true;
             
             bool wasHovering = _hoveredInteractors.ContainsKey(interactor) && _hoveredInteractors[interactor];
             
@@ -206,24 +208,32 @@ namespace HackMonkeys.UI.Spatial
                     _activeInteractor = interactor;
                     OnHoverEnter();
                 }
+                
             }
-            
+
             // Detectar clic para focus
             if (!_isFocused && interactor.State == InteractorState.Select)
-            {
-                // Verificar que es un nuevo clic
-                InteractorState previousState = _hoveredInteractors.ContainsKey(interactor) ? 
-                    InteractorState.Normal : InteractorState.Normal;
-                    
-                if (wasHovering) // Solo si ya estaba hovering
-                {
-                    Focus();
+                    {
+                        // Verificar que es un nuevo clic
+                        InteractorState previousState = _hoveredInteractors.ContainsKey(interactor) ?
+                            InteractorState.Normal : InteractorState.Normal;
+
+                        if (wasHovering) // Solo si ya estaba hovering
+                        {
+                            Focus();
+                        }
+                        if (clickAsigned == false)
+                        {
+                            pointer = new PointerEventData(EventSystem.current); 
+                            clickAsigned = true; 
+                        }
+                        if (clickAsigned == true)
+                        {
+                            vrfcc.OnPointerClick(pointer);
+                            vrfcc.activation = true;
+                        }
+                    }
                 }
-               PointerEventData pointer = new PointerEventData(EventSystem.current);
-                        vrfcc.OnPointerClick(pointer);
-                        vrfcc.activation=true;
-            }
-        }
         else if (_hoveredInteractors.ContainsKey(interactor) && _hoveredInteractors[interactor])
         {
             if (_activeInteractor == interactor)
@@ -232,10 +242,15 @@ namespace HackMonkeys.UI.Spatial
                 _activeInteractor = null;
             }
         }
-        
-        _hoveredInteractors[interactor] = isCurrentlyHovering;
+                _hoveredInteractors[interactor] = isCurrentlyHovering;   
                 
-    }
+        if(interactor.State == InteractorState.Select)
+                    if (clickAsigned == true)
+                    {
+                        vrfcc.OnPointerClick(pointer);
+                        vrfcc.activation = true;
+                    }
+            }
     
     // Mejorar detección de clics fuera
     if (_isFocused && _keyboardManager != null)
@@ -319,6 +334,7 @@ namespace HackMonkeys.UI.Spatial
                 focusOutline.transform.DOScale(Vector3.one, animationDuration)
                     .From(Vector3.one * 0.9f)
                     .SetEase(Ease.OutBack);
+
             }
             
             // Show input text and hide placeholder
@@ -326,6 +342,7 @@ namespace HackMonkeys.UI.Spatial
             {
                 if (placeholderText != null) placeholderText.gameObject.SetActive(false);
                 if (inputText != null) inputText.gameObject.SetActive(true);
+                
             }
             
             // Start caret blinking
