@@ -32,12 +32,17 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         [Networked] public NetworkBool IsPressed { get; set; }
         [Networked] public TickTimer PressedTimer { get; set; }
         
+        [Header("Particle Effects")]
+        [SerializeField] private float _particleDuration = 2f;
+        [SerializeField] private bool _useParticleEffects = true;
+        
         [Header("Events")]
         public UnityEvent<string> OnKeyPressed = new UnityEvent<string>();
         
         // Components
         private PokeInteractable _pokeInteractable;
         private AudioSource _audioSource;
+        private ParticleSystem _noteParticleSystem;
         private Vector3 _originalPosition;
         private Quaternion _originalRotation;
         private Coroutine _animationCoroutine;
@@ -46,6 +51,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         {
             SetupPokeInteraction();
             SetupAudio();
+            SetupParticleSystem();
             CacheTransformData();
         }
         
@@ -93,6 +99,33 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 _audioSource.spatialBlend = 1f; // 3D sound
                 _audioSource.rolloffMode = AudioRolloffMode.Linear;
                 _audioSource.maxDistance = 10f;
+            }
+        }
+        
+        private void SetupParticleSystem()
+        {
+            if (!_useParticleEffects) return;
+            
+            // Buscar el sistema de partículas en los hijos (PS_NotaMusical)
+            _noteParticleSystem = GetComponentInChildren<ParticleSystem>();
+            
+            if (_noteParticleSystem == null)
+            {
+                Debug.LogWarning($"[NetworkedPianoKey] No ParticleSystem found in children of {gameObject.name}. Particle effects will be disabled.");
+                _useParticleEffects = false;
+            }
+            else
+            {
+                // Configurar el sistema de partículas
+                var main = _noteParticleSystem.main;
+                main.playOnAwake = false;
+                main.loop = false;
+                main.duration = _particleDuration;
+                
+                // Asegurarse de que esté detenido al inicio
+                _noteParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                
+                Debug.Log($"[NetworkedPianoKey] ParticleSystem found and configured for {_noteName}");
             }
         }
         
@@ -164,6 +197,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             // Efectos visuales y sonoros para todos los clientes
             PlayKeyAnimation(true);
             PlaySound();
+            PlayParticleEffect();
             TriggerHaptics(player);
             
             // IMPORTANTE: Solo el cliente que presionó la tecla debe notificar al piano
@@ -199,6 +233,9 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             if (_animationCoroutine != null)
                 StopCoroutine(_animationCoroutine);
             _animationCoroutine = StartCoroutine(FlashMaterial(_correctMaterial, 0.5f));
+            
+            // También reproducir partículas para feedback correcto
+            PlayParticleEffect();
         }
         
         public void ShowErrorFeedback()
@@ -206,6 +243,31 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             if (_animationCoroutine != null)
                 StopCoroutine(_animationCoroutine);
             _animationCoroutine = StartCoroutine(FlashMaterial(_errorMaterial, 0.3f));
+            
+            // Opcionalmente, reproducir partículas con color diferente para error
+            if (_useParticleEffects && _noteParticleSystem != null)
+            {
+                // Temporalmente cambiar el color de las partículas a rojo
+                var main = _noteParticleSystem.main;
+                var originalColor = main.startColor;
+                main.startColor = new Color(1f, 0.2f, 0.2f, 1f);
+                
+                PlayParticleEffect();
+                
+                // Restaurar color original después
+                StartCoroutine(RestoreParticleColor(originalColor, 0.5f));
+            }
+        }
+        
+        private IEnumerator RestoreParticleColor(ParticleSystem.MinMaxGradient originalColor, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            
+            if (_noteParticleSystem != null)
+            {
+                var main = _noteParticleSystem.main;
+                main.startColor = originalColor;
+            }
         }
         
         private void PlayKeyAnimation(bool pressed)
@@ -261,6 +323,32 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             if (_noteSound != null && _audioSource != null)
             {
                 _audioSource.PlayOneShot(_noteSound);
+            }
+        }
+        
+        private void PlayParticleEffect()
+        {
+            if (!_useParticleEffects || _noteParticleSystem == null) return;
+            
+            // Detener cualquier emisión anterior y limpiar partículas
+            _noteParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            
+            // Reproducir el sistema de partículas
+            _noteParticleSystem.Play();
+            
+            Debug.Log($"[NetworkedPianoKey] Playing particle effect for {_noteName}");
+            
+            // Opcional: Detener automáticamente después de la duración
+            StartCoroutine(StopParticlesAfterDuration());
+        }
+        
+        private IEnumerator StopParticlesAfterDuration()
+        {
+            yield return new WaitForSeconds(_particleDuration);
+            
+            if (_noteParticleSystem != null && _noteParticleSystem.isPlaying)
+            {
+                _noteParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             }
         }
         
