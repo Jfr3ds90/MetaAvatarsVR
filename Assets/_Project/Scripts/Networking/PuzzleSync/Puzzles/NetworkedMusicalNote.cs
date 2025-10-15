@@ -1,250 +1,159 @@
-using System;
-using Fusion;
 using UnityEngine;
-using UnityEngine.Events;
-using Oculus.Interaction;
+using MetaAvatarsVR.Networking.PuzzleSync.SlotSystem;
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
 {
-    
-    [RequireComponent(typeof(Rigidbody))]
-    public class NetworkedMusicalNote : NetworkBehaviour
+    public class NetworkedMusicalNote : NetworkedSlottableItem
     {
-        [Header("Note Configuration")]
-        [SerializeField] private int _noteIndex = 0; 
+        [Header("Musical Note Configuration")]
         [SerializeField] private string _noteName = "Do";
         [SerializeField] private AudioClip _noteSound;
+        [SerializeField] private Material _noteMaterial;
+        [SerializeField] private int _noteColorIndex = 0;
         
-        [Header("Visual")]
-        [SerializeField] private MeshRenderer _meshRenderer;
-        [SerializeField] private GameObject _glowEffect;
+        public string NoteName => _noteName;
+        public int ColorIndex => _noteColorIndex;
         
-        [Header("Network State")]
-        [Networked] public int NoteIndex { get; set; }
-        [Networked] public int ColorIndex { get; set; }
-        [Networked] public NetworkBool IsPlaced { get; set; }
-        [Networked] public int CurrentSlotIndex { get; set; }
-        
-        [Header("Events")]
-        public UnityEvent<int> OnNotePlaced = new UnityEvent<int>();
-        public UnityEvent OnNoteRemoved = new UnityEvent();
-        
-        private Grabbable _grabbable;
-        private Rigidbody _rigidbody;
-        private AudioSource _audioSource;
-        private NetworkedMusicalNotesPuzzle _puzzleController;
-        private Vector3 _originalPosition;
-        private Quaternion _originalRotation;
-        
-        private void Awake()
+        protected override void Awake()
         {
-            _grabbable = GetComponent<Grabbable>();
-            if (_grabbable == null)
+            base.Awake();
+            
+            // Configurar valores predeterminados específicos para notas musicales
+            // Reducir la distancia de snap para mayor precisión
+            if (_snapDistance == 0.5f || _snapDistance > 0.3f)
+                _snapDistance = 0.25f;  // Distancia más pequeña para evitar detectar slots adyacentes
+            
+            if (string.IsNullOrEmpty(_slotTag))
+                _slotTag = "NoteSlot";
+            
+            DebugLog($"[MusicalNote {_noteName}] Awake completed with snapDistance: {_snapDistance}, tag: {_slotTag}");
+        }
+        
+        protected override void OnSpawnedCustom()
+        {
+            base.OnSpawnedCustom();
+            
+            if (_noteMaterial != null && _meshRenderer != null)
             {
-                _grabbable = gameObject.AddComponent<Grabbable>();
+                _meshRenderer.material = _noteMaterial;
+                DebugLog($"[MusicalNote {_noteName}] Material set");
             }
             
-            _rigidbody = GetComponent<Rigidbody>();
-            _rigidbody.useGravity = true;
-            _rigidbody.isKinematic = false;
-            
-            _audioSource = GetComponent<AudioSource>();
-            if (_audioSource == null)
+            // Establecer el ID basado en el índice de color para el sistema de validación
+            if (_itemId == 0)
             {
-                _audioSource = gameObject.AddComponent<AudioSource>();
+                _itemId = _noteColorIndex;
+                SetItemId(_noteColorIndex);
             }
             
-            if (_meshRenderer == null)
-                _meshRenderer = GetComponent<MeshRenderer>();
-                
-            _originalPosition = transform.position;
-            _originalRotation = transform.rotation;
+            DebugLog($"[MusicalNote {_noteName}] Spawned with ColorIndex: {_noteColorIndex}, ItemId: {_itemId}");
         }
         
-        private void Start()
+        protected override void OnGrabbed()
         {
-            if (_grabbable != null)
-            {
-                _grabbable.WhenPointerEventRaised += OnGrabbableEvent;
-            }
-        }
-        
-        public override void Spawned()
-        {
-            if (HasStateAuthority)
-            {
-                NoteIndex = _noteIndex;
-                CurrentSlotIndex = -1;
-                IsPlaced = false;
-            }
-        }
-        
-        private void OnGrabbableEvent(PointerEvent evt)
-        {
-            if (evt.Type == PointerEventType.Select)
-            {
-                OnGrabbed();
-            }
-            else if (evt.Type == PointerEventType.Unselect)
-            {
-                OnReleased();
-            }
-        }
-        
-        private void OnGrabbed()
-        {
-            if (IsPlaced)
-            {
-                RPC_RemoveFromSlot();
-            }
-        }
-        
-        private void OnReleased()
-        {
-            CheckNearbySlot();
-        }
-        
-        private void CheckNearbySlot()
-        {
-            Collider[] colliders = Physics.OverlapSphere(transform.position, 0.3f);
+            DebugLog($"[MusicalNote {_noteName}] OnGrabbed called");
+            base.OnGrabbed();
             
-            foreach (var collider in colliders)
+            // Reproducir sonido de la nota al agarrarla
+            if (_noteSound != null)
             {
-                var slot = collider.GetComponent<NetworkedNoteSlot>();
-                if (slot != null && !slot.IsOccupied)
+                PlaySound(_noteSound);
+            }
+        }
+        
+        protected override void CheckNearbySlot()
+        {
+            DebugLog($"[MusicalNote {_noteName}] CheckNearbySlot - Starting slot detection for musical note");
+            base.CheckNearbySlot();
+        }
+        
+        protected override void OnPlacedCustom(int slotIndex, bool isCorrect)
+        {
+            base.OnPlacedCustom(slotIndex, isCorrect);
+            
+            DebugLog($"[MusicalNote {_noteName}] Placed in slot {slotIndex}. Correct: {isCorrect}");
+            
+            if (_noteSound != null)
+            {
+                // Reproducir sonido con pitch diferente si es correcto
+                if (isCorrect)
                 {
-                    RPC_RequestPlacement(slot.SlotIndex);
-                    return;
-                }
-            }
-            
-            StartCoroutine(ReturnToOriginAfterDelay());
-        }
-        
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-        private void RPC_RequestPlacement(int slotIndex, RpcInfo info = default)
-        {
-            if (_puzzleController != null)
-            {
-                bool success = _puzzleController.TryPlaceNoteInSlot(this, slotIndex);
-                
-                if (success)
-                {
-                    IsPlaced = true;
-                    CurrentSlotIndex = slotIndex;
-                    RPC_PlacementSuccess(slotIndex);
+                    _audioSource.pitch = 1.2f;
                 }
                 else
                 {
-                    RPC_PlacementFailed();
+                    _audioSource.pitch = 0.8f;
                 }
+                
+                PlaySound(_noteSound);
+                _audioSource.pitch = 1.0f; // Restaurar pitch
             }
-        }
-        
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_PlacementSuccess(int slotIndex)
-        {
-            OnNotePlaced?.Invoke(slotIndex);
-            PlaySound();
             
-            if (_glowEffect != null)
-                _glowEffect.SetActive(true);
-        }
-        
-        [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-        private void RPC_PlacementFailed()
-        {
-            ReturnToOrigin();
-        }
-        
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-        private void RPC_RemoveFromSlot(RpcInfo info = default)
-        {
-            if (_puzzleController != null && CurrentSlotIndex >= 0)
+            // Añadir efecto visual adicional
+            if (isCorrect)
             {
-                _puzzleController.RemoveNoteFromSlot(CurrentSlotIndex);
-                IsPlaced = false;
-                CurrentSlotIndex = -1;
+                StartCoroutine(CorrectPlacementAnimation());
             }
         }
         
-        public void SetPuzzleController(NetworkedMusicalNotesPuzzle controller)
+        protected override void OnRemovedCustom(int slotIndex)
         {
-            _puzzleController = controller;
-        }
-        
-        public void SetColor(Material colorMaterial)
-        {
-            if (_meshRenderer != null)
-            {
-                _meshRenderer.material = colorMaterial;
-            }
-        }
-        
-        public void SetNoteIndex(int index)
-        {
-            _noteIndex = index;
-            if (HasStateAuthority)
-            {
-                NoteIndex = index;
-            }
-        }
-        
-        public int GetNoteIndex()
-        {
-            return _noteIndex;
-        }
-        
-        public void EnableInteraction(bool enabled)
-        {
-            var grabbable = GetComponent<Grabbable>();
-            if (grabbable != null)
-            {
-                // Aquí puedes habilitar/deshabilitar la interacción si es necesario
-            }
-        }
-        
-        public void ReturnToOrigin()
-        {
-            transform.position = _originalPosition;
-            transform.rotation = _originalRotation;
-            _rigidbody.linearVelocity = Vector3.zero;
-            _rigidbody.angularVelocity = Vector3.zero;
-        }
-        
-        private System.Collections.IEnumerator ReturnToOriginAfterDelay()
-        {
-            yield return new WaitForSeconds(2f);
-            if (!IsPlaced)
-            {
-                ReturnToOrigin();
-            }
-        }
-        
-        private void PlaySound()
-        {
-            if (_noteSound != null && _audioSource != null)
-            {
-                _audioSource.PlayOneShot(_noteSound);
-            }
-        }
-        
-        public void ResetNote()
-        {
-            IsPlaced = false;
-            CurrentSlotIndex = -1;
-            ReturnToOrigin();
+            base.OnRemovedCustom(slotIndex);
+            DebugLog($"[MusicalNote {_noteName}] OnRemovedCustom - Removed from slot {slotIndex}");
             
-            if (_glowEffect != null)
-                _glowEffect.SetActive(false);
-        }
-        
-        private void OnDestroy()
-        {
-            if (_grabbable != null)
+            // Reproducir un sonido suave al remover
+            if (_audioSource != null)
             {
-                _grabbable.WhenPointerEventRaised -= OnGrabbableEvent;
+                _audioSource.pitch = 0.9f;
+                PlaySound(_removalSound);
+                _audioSource.pitch = 1.0f;
             }
         }
+        
+        private System.Collections.IEnumerator CorrectPlacementAnimation()
+        {
+            Vector3 originalScale = transform.localScale;
+            float duration = 0.3f;
+            float elapsed = 0f;
+            
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / duration;
+                float scale = 1f + Mathf.Sin(t * Mathf.PI) * 0.2f;
+                transform.localScale = originalScale * scale;
+                yield return null;
+            }
+            
+            transform.localScale = originalScale;
+        }
+        
+        public void SetNoteData(string noteName, int colorIndex)
+        {
+            _noteName = noteName;
+            _noteColorIndex = colorIndex;
+            _itemId = colorIndex;
+            
+            DebugLog($"[MusicalNote] Note data set - Name: {noteName}, ColorIndex: {colorIndex}");
+        }
+        
+        public override void ResetToOrigin()
+        {
+            DebugLog($"[MusicalNote {_noteName}] Reset requested");
+            base.ResetToOrigin();
+        }
+        
+        #if UNITY_EDITOR
+        protected override void OnDrawGizmosSelected()
+        {
+            base.OnDrawGizmosSelected();
+            
+            // Dibujar el nombre de la nota
+            if (Application.isPlaying)
+            {
+                UnityEditor.Handles.Label(transform.position + Vector3.up * 0.3f, $"Note: {_noteName}\nColor: {_noteColorIndex}");
+            }
+        }
+        #endif
     }
 }
