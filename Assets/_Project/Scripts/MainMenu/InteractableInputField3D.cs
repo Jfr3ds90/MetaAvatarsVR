@@ -69,21 +69,21 @@ namespace HackMonkeys.UI.Spatial
         
         // Private state
         private string _currentText = "";
-        private bool _isFocused = false;
-        private bool _isHovered = false;
-        private VirtualKeyboardManager _keyboardManager;
+        /*private*/public bool _isFocused = false;
+        /*private*/public bool _isHovered = false;
+        /*private*/public VirtualKeyboardManager _keyboardManager;
         private Renderer _backgroundRenderer;
         private Coroutine _caretBlinkCoroutine;
         private int _caretPosition = 0;
         private bool _isValid = true;
         
         // Tracking de interactores
-        private Dictionary<RayInteractor, bool> _hoveredInteractors = new Dictionary<RayInteractor, bool>();
-        private RayInteractor _activeInteractor;
+        /*private*/public Dictionary<RayInteractor, bool> _hoveredInteractors = new Dictionary<RayInteractor, bool>();
+        /*private*/public RayInteractor _activeInteractor;
 
-        private VRInputFieldCursorController vrfcc;
-        PointerEventData pointer;
-        bool clickAsigned = false;
+        [HideInInspector] public VRInputFieldCursorController vrfcc;
+        [HideInInspector] public PointerEventData pointer;
+        [HideInInspector] public bool clickAsigned = false;
 
         private void Awake()
         {
@@ -253,7 +253,7 @@ namespace HackMonkeys.UI.Spatial
             }
     
     // Mejorar detección de clics fuera
-    if (_isFocused && _keyboardManager != null)
+    if (_isFocused && _keyboardManager != null)//agregar aca la excepción del otro inputfield (el que esta en copyinputtext)
     {
         bool shouldUnfocus = false;
         
@@ -295,7 +295,7 @@ namespace HackMonkeys.UI.Spatial
     }
 }
         
-        private void OnHoverEnter()
+        /*private*/public void OnHoverEnter()
         {
             if (_isFocused) return;
             
@@ -307,7 +307,7 @@ namespace HackMonkeys.UI.Spatial
                 .SetEase(Ease.OutQuad);
         }
         
-        private void OnHoverExit()
+        /*private*/public void OnHoverExit()
         {
             if (_isFocused) return;
             

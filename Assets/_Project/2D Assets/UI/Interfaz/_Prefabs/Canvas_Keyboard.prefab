@@ -2012,6 +2012,7 @@ GameObject:
   - component: {fileID: 3144767450198217941}
   - component: {fileID: 3310756545838689198}
   - component: {fileID: 1589296856042258652}
+  - component: {fileID: 5160179203459362944}
   m_Layer: 5
   m_Name: InputFieldEsctito
   m_TagString: Untagged
@@ -2028,7 +2029,7 @@ RectTransform:
   m_GameObject: {fileID: 1231558259008728454}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.023, y: 0.04, z: 0.5}
+  m_LocalScale: {x: 0.015, y: 0.04, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8752495524626592249}
@@ -2036,8 +2037,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 350, y: 60}
+  m_AnchoredPosition: {x: -0.0333, y: 0}
+  m_SizeDelta: {x: 530.9205, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1792893727988819962
 CanvasRenderer:
@@ -2185,7 +2186,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1231558259008728454}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 674b12d61af65a245bd12febc960a3ac, type: 3}
   m_Name: 
@@ -2228,6 +2229,12 @@ MonoBehaviour:
   OnDeselect:
     m_PersistentCalls:
       m_Calls: []
+  _isFocused: 0
+  _isHovered: 0
+  _keyboardManager: {fileID: 0}
+  _activeInteractor: {fileID: 0}
+  vrfcc: {fileID: 0}
+  clickAsigned: 0
 --- !u!114 &3144767450198217941
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2281,8 +2288,22 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 350, y: 60, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 530.93915, y: 60, z: 0.47838736}
+  m_Center: {x: 0.0012204761, y: 0, z: 0.26080632}
+--- !u!114 &5160179203459362944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1231558259008728454}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d3cdb4070b6a20428dee5415c123eef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OText: {fileID: 0}
+  TText: {fileID: 0}
 --- !u!1 &1255700635861124114
 GameObject:
   m_ObjectHideFlags: 0
@@ -7009,8 +7030,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -7035,7 +7056,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -7805,6 +7826,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2670930393897497731}
+  - component: {fileID: 2315156391714443676}
   - component: {fileID: 6285959217228875452}
   m_Layer: 0
   m_Name: TextoEscrito
@@ -7813,22 +7835,34 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2670930393897497731
-Transform:
+--- !u!224 &2670930393897497731
+RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4063787144361395090}
-  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 8.200002, z: 0.05}
+  m_LocalPosition: {x: 0, y: 0, z: 0.05}
   m_LocalScale: {x: 3.5, y: 1, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5551566848525044355}
   m_Father: {fileID: 1736460506327085054}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 8.200002}
+  m_SizeDelta: {x: 8.003437, y: 2.16}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &2315156391714443676
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4063787144361395090}
+  m_CullTransparentMesh: 1
 --- !u!212 &6285959217228875452
 SpriteRenderer:
   m_ObjectHideFlags: 0
