@@ -2013,6 +2013,7 @@ GameObject:
   - component: {fileID: 3310756545838689198}
   - component: {fileID: 1589296856042258652}
   - component: {fileID: 5160179203459362944}
+  - component: {fileID: 3875725452407517671}
   m_Layer: 5
   m_Name: InputFieldEsctito
   m_TagString: Untagged
@@ -2186,7 +2187,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1231558259008728454}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 674b12d61af65a245bd12febc960a3ac, type: 3}
   m_Name: 
@@ -2304,6 +2305,54 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   OText: {fileID: 0}
   TText: {fileID: 0}
+--- !u!114 &3875725452407517671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1231558259008728454}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d4b5af7c6d8ca342a66c1ef3b93bfaf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonTransform: {fileID: 5551566848525044355}
+  buttonRenderer: {fileID: 0}
+  buttonText: {fileID: 3689488692709631299}
+  hoverEffect: {fileID: 0}
+  pressEffect: {fileID: 0}
+  normalMaterial: {fileID: 0}
+  hoverMaterial: {fileID: 0}
+  pressedMaterial: {fileID: 0}
+  disabledMaterial: {fileID: 0}
+  hoverScale: 1.1
+  pressScale: 0.95
+  animationDuration: 0.15
+  scaleEase: 27
+  baseScale: {x: 1, y: 1, z: 1}
+  buttonLabel: 
+  isInteractable: 1
+  playSound: 1
+  allowRepeatOnHold: 0
+  repeatDelay: 0.5
+  repeatInterval: 0.1
+  requireFullRelease: 1
+  buttonSurface: {fileID: 3310756545838689198}
+  surfaceRadius: 0.1
+  OnButtonPressed:
+    m_PersistentCalls:
+      m_Calls: []
+  OnButtonHovered:
+    m_PersistentCalls:
+      m_Calls: []
+  OnButtonUnhovered:
+    m_PersistentCalls:
+      m_Calls: []
+  OnButtonHeld:
+    m_PersistentCalls:
+      m_Calls: []
+  CanDebug: 0
 --- !u!1 &1255700635861124114
 GameObject:
   m_ObjectHideFlags: 0

@@ -6,8 +6,8 @@ using UnityEngine.EventSystems;
 
 public class CopyInputText : MonoBehaviour
 {
-    [HideInInspector] public GameObject OText,TText;//falta asignarlo al prefab del canvas
-    private RayInteractable fieldInteractable;
+    /*[HideInInspector] */public GameObject OText,TText;//falta asignarlo al prefab del canvas
+    public TMP_Text tex;
 
     /*[HideInInspector] public VRInputFieldCursorController vrfcc;
     [HideInInspector] public PointerEventData pointer;
@@ -16,18 +16,20 @@ public class CopyInputText : MonoBehaviour
     {
       OText = FindAnyObjectByType<VRInputFieldCursorController>().gameObject;
       TText = GetComponent<TMP_InputField>().gameObject;
-        fieldInteractable = GetComponent<RayInteractable>();
+        tex = GetComponentInChildren<TMP_Text>();
+       // fieldInteractable = GetComponent<RayInteractable>();
        // vrfcc = FindAnyObjectByType<VRInputFieldCursorController>();
     }
     private void Update()
     {
-        TText.GetComponent<TMP_InputField>().text = OText.GetComponent<TMP_InputField>().text;
-
-        Check();
+        TText.GetComponent<InteractableButton3D>().SetButtonLabel(OText.GetComponentInChildren<TMP_Text>().text) ;
+        tex.text = OText.GetComponent<TMP_InputField>().text;
+       // TText.GetComponent<InteractableButton3D>().
+       // Check();
     }
-    void Check()
+    /*void Check()
     {
-        var val = OText.GetComponent<InteractableInputField3D>();
+        var val = OText.GetComponent<InteractableButton3D>();
         
         if (fieldInteractable == null) return;
         
@@ -94,7 +96,7 @@ public class CopyInputText : MonoBehaviour
         // Mejorar detección de clics fuera
         if (val._isFocused && val._keyboardManager != null)
         {
-            /*bool shouldUnfocus = false;*/
+            /*bool shouldUnfocus = false;
 
             foreach (var interactor in rayInteractors)
             {
@@ -115,7 +117,7 @@ public class CopyInputText : MonoBehaviour
                                 // No es el teclado, deberíamos desfocar
                                 shouldUnfocus = true;
                                 break;
-                            }*/
+                            }
                         }
                     }
                    /* else
@@ -123,15 +125,15 @@ public class CopyInputText : MonoBehaviour
                         // Clic en el vacío
                         shouldUnfocus = true;
                         break;
-                    }*/
+                    }
                 }
             }
 
             /*if (shouldUnfocus)
             {
                 val.Unfocus();
-            }*/
+            }
         }
         val.IsFocused();
-    }
+    }*/
 }
