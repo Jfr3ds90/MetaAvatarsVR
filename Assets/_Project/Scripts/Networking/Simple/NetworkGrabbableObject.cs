@@ -4,6 +4,9 @@ using Oculus.Interaction;
 using Cysharp.Threading.Tasks;
 using System.Threading;
 using Fusion.Addons.Physics;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace MetaAvatarsVR.Networking
 {
@@ -70,7 +73,7 @@ namespace MetaAvatarsVR.Networking
             if (_networkRigidbody != null && _networkRigidbody.InterpolationTarget != null)
             {
                 _visualTransform = _networkRigidbody.InterpolationTarget;
-                Debug.Log($"[NetworkGrabbable] Using NetworkRigidbody3D InterpolationTarget: {_visualTransform.name}");
+                AdvancedDebugSystem.Log($"[NetworkGrabbable] Using NetworkRigidbody3D InterpolationTarget: {_visualTransform.name}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             // NetworkTransform NO tiene InterpolationTarget en Fusion 2
             else if (_networkTransform != null)
@@ -98,13 +101,13 @@ namespace MetaAvatarsVR.Networking
                 }
                 
                 _visualTransform = visualChild;
-                Debug.Log($"[NetworkGrabbable] Using visual child for NetworkTransform: {_visualTransform.name}");
+                AdvancedDebugSystem.Log($"[NetworkGrabbable] Using visual child for NetworkTransform: {_visualTransform.name}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             else
             {
                 // Fallback: usar el transform principal
                 _visualTransform = transform;
-                Debug.LogWarning("[NetworkGrabbable] No network component found, using main transform");
+                AdvancedDebugSystem.LogWarning("[NetworkGrabbable] No network component found, using main transform", LogCategory.Networking | LogCategory.Photon);
             }
         }
         
@@ -156,7 +159,7 @@ namespace MetaAvatarsVR.Networking
             IInteractorView interactor = evt.Data as IInteractorView;
             if (interactor == null)
             {
-                Debug.LogWarning("[NetworkGrabbable] Could not cast evt.Data to IInteractorView");
+                AdvancedDebugSystem.LogWarning("[NetworkGrabbable] Could not cast evt.Data to IInteractorView", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
             
@@ -167,7 +170,7 @@ namespace MetaAvatarsVR.Networking
             }
             else
             {
-                Debug.LogWarning("[NetworkGrabbable] Could not get transform from interactor");
+                AdvancedDebugSystem.LogWarning("[NetworkGrabbable] Could not get transform from interactor", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
             
@@ -177,7 +180,7 @@ namespace MetaAvatarsVR.Networking
             Vector3 offset = _localGrabberTransform.InverseTransformPoint(transform.position);
             Quaternion rotOffset = Quaternion.Inverse(_localGrabberTransform.rotation) * transform.rotation;
             
-            Debug.Log($"[NetworkGrabbable] Local grab started - Requesting authority");
+            AdvancedDebugSystem.Log($"[NetworkGrabbable] Local grab started - Requesting authority", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             // Request input authority in Shared mode
             if (!HasInputAuthority)
@@ -195,7 +198,7 @@ namespace MetaAvatarsVR.Networking
                 if (!authorityAcquired && _isBeingGrabbedLocally)
                 {
                     // Failed to acquire input authority
-                    Debug.LogWarning($"[NetworkGrabbable] Failed to acquire input authority - releasing grab");
+                    AdvancedDebugSystem.LogWarning($"[NetworkGrabbable] Failed to acquire input authority - releasing grab", LogCategory.Networking | LogCategory.Photon);
                     _isBeingGrabbedLocally = false;
                     _localGrabberTransform = null;
                 }
@@ -221,7 +224,7 @@ namespace MetaAvatarsVR.Networking
                     // Check if we're still waiting
                     if (!_waitingForAuthority || !_isBeingGrabbedLocally)
                     {
-                        Debug.Log("[NetworkGrabbable] Authority wait cancelled - grab released");
+                        AdvancedDebugSystem.Log("[NetworkGrabbable] Authority wait cancelled - grab released", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                         return false;
                     }
                 }
@@ -230,19 +233,19 @@ namespace MetaAvatarsVR.Networking
                 
                 if (HasInputAuthority)
                 {
-                    Debug.Log($"[NetworkGrabbable] Input authority acquired in {(Time.time - startTime) * 1000f:F0}ms");
+                    AdvancedDebugSystem.Log($"[NetworkGrabbable] Input authority acquired in {(Time.time - startTime) * 1000f:F0}ms", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                     SetGrabbedState(offset, rotOffset);
                     return true;
                 }
                 else
                 {
-                    Debug.LogWarning($"[NetworkGrabbable] Input authority timeout after {_authorityTimeout}ms");
+                    AdvancedDebugSystem.LogWarning($"[NetworkGrabbable] Input authority timeout after {_authorityTimeout}ms", LogCategory.Networking | LogCategory.Photon);
                     return false;
                 }
             }
             catch (System.OperationCanceledException)
             {
-                Debug.Log("[NetworkGrabbable] Authority wait cancelled");
+                AdvancedDebugSystem.Log("[NetworkGrabbable] Authority wait cancelled", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 _waitingForAuthority = false;
                 return false;
             }
@@ -260,14 +263,14 @@ namespace MetaAvatarsVR.Networking
                 _rigidbody.isKinematic = true;
             }
             
-            Debug.Log($"[NetworkGrabbable] Grab state set for player {Runner.LocalPlayer}");
+            AdvancedDebugSystem.Log($"[NetworkGrabbable] Grab state set for player {Runner.LocalPlayer}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         private void OnLocalRelease()
         {
             if (!_isBeingGrabbedLocally) return;
             
-            Debug.Log($"[NetworkGrabbable] Local release");
+            AdvancedDebugSystem.Log($"[NetworkGrabbable] Local release", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             // Cancelar cualquier task de autoridad pendiente
             _authorityCts?.Cancel();
@@ -389,7 +392,7 @@ namespace MetaAvatarsVR.Networking
             if (Object.HasStateAuthority)
             {
                 Object.AssignInputAuthority(info.Source);
-                Debug.Log($"[NetworkGrabbable] Input authority transferred to player {info.Source}");
+                AdvancedDebugSystem.Log($"[NetworkGrabbable] Input authority transferred to player {info.Source}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
         }
         

@@ -1,6 +1,9 @@
 using UnityEngine;
 using Fusion;
 using MetaAvatarsVR.Networking.PuzzleSync.Puzzles;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace MetaAvatarsVR.Networking.PuzzleSync
 {
@@ -135,22 +138,22 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             
             if (_puzzleManager == null)
             {
-                Debug.LogError("[PuzzleSyncSetup] NetworkedPuzzleManager is missing!");
+                AdvancedDebugSystem.LogError("[PuzzleSyncSetup] NetworkedPuzzleManager is missing!", LogCategory.Networking | LogCategory.Photon);
                 isValid = false;
             }
             else if (_puzzleManager.GetComponent<NetworkObject>() == null)
             {
-                Debug.LogError("[PuzzleSyncSetup] NetworkedPuzzleManager is missing NetworkObject component!");
+                AdvancedDebugSystem.LogError("[PuzzleSyncSetup] NetworkedPuzzleManager is missing NetworkObject component!", LogCategory.Networking | LogCategory.Photon);
                 isValid = false;
             }
             
             if (_puzzleValidator == null)
             {
-                Debug.LogWarning("[PuzzleSyncSetup] NetworkedPuzzleValidator is missing (optional)");
+                AdvancedDebugSystem.LogWarning("[PuzzleSyncSetup] NetworkedPuzzleValidator is missing (optional)", LogCategory.Networking | LogCategory.Photon);
             }
             else if (_puzzleValidator.GetComponent<NetworkObject>() == null)
             {
-                Debug.LogError("[PuzzleSyncSetup] NetworkedPuzzleValidator is missing NetworkObject component!");
+                AdvancedDebugSystem.LogError("[PuzzleSyncSetup] NetworkedPuzzleValidator is missing NetworkObject component!", LogCategory.Networking | LogCategory.Photon);
                 isValid = false;
             }
             
@@ -158,7 +161,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             {
                 if (randomizer != null && randomizer.GetComponent<NetworkObject>() == null)
                 {
-                    Debug.LogError($"[PuzzleSyncSetup] NetworkedRandomizer '{randomizer.name}' is missing NetworkObject component!");
+                    AdvancedDebugSystem.LogError($"[PuzzleSyncSetup] NetworkedRandomizer '{randomizer.name}' is missing NetworkObject component!", LogCategory.Networking | LogCategory.Photon);
                     isValid = false;
                 }
             }
@@ -166,7 +169,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             var networkRunner = FindObjectOfType<NetworkRunner>();
             if (networkRunner == null)
             {
-                Debug.LogError("[PuzzleSyncSetup] No NetworkRunner found in scene!");
+                AdvancedDebugSystem.LogError("[PuzzleSyncSetup] No NetworkRunner found in scene!", LogCategory.Networking | LogCategory.Photon);
                 isValid = false;
             }
             
@@ -176,7 +179,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             }
             else
             {
-                Debug.LogError("[PuzzleSyncSetup] Setup validation failed! Please fix the errors above.");
+                AdvancedDebugSystem.LogError("[PuzzleSyncSetup] Setup validation failed! Please fix the errors above.", LogCategory.Networking | LogCategory.Photon);
             }
         }
         
@@ -277,7 +280,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         {
             if (_enableDebugLogs)
             {
-                Debug.Log($"[PuzzleSyncSetup] {message}");
+                AdvancedDebugSystem.Log($"[PuzzleSyncSetup] {message}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
         }
         

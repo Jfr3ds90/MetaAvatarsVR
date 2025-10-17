@@ -10,6 +10,9 @@ using HackMonkeys.UI.Spatial;
 using HackMonkeys.UI.Theme;
 using System.Linq;
 using System.Collections;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace HackMonkeys.UI.Panels
 {
@@ -270,19 +273,19 @@ namespace HackMonkeys.UI.Panels
             // Validaciones de rate limiting
             if (!forceRefresh && Time.time - _browserState.LastRefreshTime < minRefreshInterval)
             {
-                Debug.Log("[LobbyBrowser] Skipping refresh - too soon");
+                AdvancedDebugSystem.Log("[LobbyBrowser] Skipping refresh - too soon", LogCategory.Avatar, LogLevel.Debug);
                 return;
             }
             
             if (_browserState.IsRefreshing)
             {
-                Debug.Log("[LobbyBrowser] Already refreshing...");
+                AdvancedDebugSystem.Log("[LobbyBrowser] Already refreshing...", LogCategory.Avatar, LogLevel.Debug);
                 return;
             }
             
             if (_browserState.IsJoiningRoom)
             {
-                Debug.Log("[LobbyBrowser] Cannot refresh while joining room");
+                AdvancedDebugSystem.Log("[LobbyBrowser] Cannot refresh while joining room", LogCategory.Avatar, LogLevel.Debug);
                 return;
             }
     
@@ -304,7 +307,7 @@ namespace HackMonkeys.UI.Panels
     
             try
             {
-                Debug.Log("[LobbyBrowser] 🔍 Requesting session list...");
+                AdvancedDebugSystem.Log("[LobbyBrowser] 🔍 Requesting session list...", LogCategory.Avatar, LogLevel.Debug);
                 
                 var sessions = await _networkBootstrapper.GetAvailableSessions();
                 
@@ -315,7 +318,7 @@ namespace HackMonkeys.UI.Panels
                     UpdateSessionCache(sessions);
                     OnSessionListUpdated(sessions);
                     
-                    Debug.Log($"[LobbyBrowser] 📋 Received {sessions.Count} sessions");
+                    AdvancedDebugSystem.Log($"[LobbyBrowser] 📋 Received {sessions.Count} sessions", LogCategory.Avatar, LogLevel.Debug);
                 }
                 else if (!_browserState.HasInitialLoad)
                 {
@@ -330,7 +333,7 @@ namespace HackMonkeys.UI.Panels
             }
             catch (Exception e)
             {
-                Debug.LogError($"[LobbyBrowser] ❌ Error getting sessions: {e.Message}");
+                AdvancedDebugSystem.LogError($"[LobbyBrowser] ❌ Error getting sessions: {e.Message}", LogCategory.Avatar);
                 HandleRefreshError();
             }
             finally
@@ -401,7 +404,7 @@ namespace HackMonkeys.UI.Panels
             else if (_browserState.ConsecutiveRefreshFailures >= maxConsecutiveFailures)
             {
                 UpdateStatusText("Connection issues detected", MessageType.Error);
-                Debug.LogWarning($"[LobbyBrowser] Max consecutive failures reached ({maxConsecutiveFailures})");
+                AdvancedDebugSystem.LogWarning($"[LobbyBrowser] Max consecutive failures reached ({maxConsecutiveFailures})", LogCategory.Avatar);
             }
         }
         
@@ -412,7 +415,7 @@ namespace HackMonkeys.UI.Panels
         {
             if (!_browserState.IsRefreshing && sessions != null)
             {
-                Debug.Log($"[LobbyBrowser] External session update received: {sessions.Count} sessions");
+                AdvancedDebugSystem.Log($"[LobbyBrowser] External session update received: {sessions.Count} sessions", LogCategory.Avatar, LogLevel.Debug);
                 UpdateSessionCache(sessions);
                 OnSessionListUpdated(sessions);
             }
@@ -571,7 +574,7 @@ namespace HackMonkeys.UI.Panels
         /// </summary>
         private void HandleSelectedRoomDisappeared()
         {
-            Debug.Log($"[LobbyBrowser] Selected room '{_browserState.SelectedSessionName}' no longer available");
+            AdvancedDebugSystem.Log($"[LobbyBrowser] Selected room '{_browserState.SelectedSessionName}' no longer available", LogCategory.Avatar, LogLevel.Debug);
             
             // Animar desaparición del panel de info
             if (selectedRoomInfo != null && selectedRoomInfo.activeSelf)
@@ -659,11 +662,11 @@ namespace HackMonkeys.UI.Panels
             
             if (_browserState.IsJoiningRoom)
             {
-                Debug.LogWarning("[LobbyBrowser] Already joining a room");
+                AdvancedDebugSystem.LogWarning("[LobbyBrowser] Already joining a room", LogCategory.Avatar);
                 return;
             }
     
-            Debug.Log($"[LobbyBrowser] 🎮 Attempting to join room: {_browserState.SelectedSession.Name}");
+            AdvancedDebugSystem.Log($"[LobbyBrowser] 🎮 Attempting to join room: {_browserState.SelectedSession.Name}", LogCategory.Avatar, LogLevel.Debug);
     
             _browserState.IsJoiningRoom = true;
             
@@ -676,7 +679,7 @@ namespace HackMonkeys.UI.Panels
             {
                 bool success = await _networkBootstrapper.JoinRoom(_browserState.SelectedSession);
         
-                Debug.Log($"[LobbyBrowser] Join result: {success}");
+                AdvancedDebugSystem.Log($"[LobbyBrowser] Join result: {success}", LogCategory.Avatar, LogLevel.Debug);
         
                 if (success)
                 {
@@ -684,16 +687,16 @@ namespace HackMonkeys.UI.Panels
                     
                     UpdateStatusText("Connected! Loading lobby...", MessageType.Success);
             
-                    Debug.Log("[LobbyBrowser] ⏳ Waiting for player spawn...");
+                    AdvancedDebugSystem.Log("[LobbyBrowser] ⏳ Waiting for player spawn...", LogCategory.Avatar, LogLevel.Debug);
                     await System.Threading.Tasks.Task.Delay(1000);
             
-                    Debug.Log("[LobbyBrowser] 🚀 Transitioning to LobbyRoom panel");
+                    AdvancedDebugSystem.Log("[LobbyBrowser] 🚀 Transitioning to LobbyRoom panel", LogCategory.Avatar, LogLevel.Debug);
                     _uiManager.ShowPanel(PanelID.LobbyRoom);
                 }
                 else
                 {
                     UpdateStatusText("Failed to join room", MessageType.Error);
-                    Debug.LogError("[LobbyBrowser] ❌ Failed to join room");
+                    AdvancedDebugSystem.LogError("[LobbyBrowser] ❌ Failed to join room", LogCategory.Avatar);
             
                     await System.Threading.Tasks.Task.Delay(2000);
                     
@@ -705,7 +708,7 @@ namespace HackMonkeys.UI.Panels
             }
             catch (Exception e)
             {
-                Debug.LogError($"[LobbyBrowser] ❌ Exception joining room: {e.Message}");
+                AdvancedDebugSystem.LogError($"[LobbyBrowser] ❌ Exception joining room: {e.Message}", LogCategory.Avatar);
                 UpdateStatusText("Error joining room", MessageType.Error);
         
                 if (joinButton != null)
@@ -853,15 +856,15 @@ namespace HackMonkeys.UI.Panels
         [ContextMenu("Debug: Print Browser State")]
         private void DebugPrintState()
         {
-            Debug.Log("=== LobbyBrowser State ===");
-            Debug.Log($"Has Initial Load: {_browserState.HasInitialLoad}");
-            Debug.Log($"Is Refreshing: {_browserState.IsRefreshing}");
-            Debug.Log($"Is Joining: {_browserState.IsJoiningRoom}");
-            Debug.Log($"Selected Room: {_browserState.SelectedSessionName ?? "None"}");
-            Debug.Log($"Cached Sessions: {_browserState.CachedSessions.Count}");
-            Debug.Log($"Consecutive Failures: {_browserState.ConsecutiveRefreshFailures}");
-            Debug.Log($"Last Refresh: {Time.time - _browserState.LastRefreshTime}s ago");
-            Debug.Log("==========================");
+            AdvancedDebugSystem.Log("=== LobbyBrowser State ===", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Has Initial Load: {_browserState.HasInitialLoad}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Is Refreshing: {_browserState.IsRefreshing}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Is Joining: {_browserState.IsJoiningRoom}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Selected Room: {_browserState.SelectedSessionName ?? "None"}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Cached Sessions: {_browserState.CachedSessions.Count}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Consecutive Failures: {_browserState.ConsecutiveRefreshFailures}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Last Refresh: {Time.time - _browserState.LastRefreshTime}s ago", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log("==========================", LogCategory.Avatar, LogLevel.Debug);
         }
         
         [ContextMenu("Debug: Force Refresh")]

@@ -3,6 +3,7 @@ using Oculus.Avatar2;
 using UnityEngine;
 using Oculus.Platform;
 using System.Collections;
+using HackMonkeys.Debugging;
 
 public class OculusStuff : MonoBehaviour
 {
@@ -44,13 +45,13 @@ public class OculusStuff : MonoBehaviour
             // Implements a default behavior for an entitlement check failure -- log the failure and exit the app.
             // Going into a limited demo mode, or displaying an error, is also valid.
             var err = msg.GetError();
-            Debug.LogError("Error de verificación de derechos: " + msg.GetError().Message + " | Código: " + msg.GetError().Code);
+            AdvancedDebugSystem.LogError("Error de verificación de derechos: " + msg.GetError().Message + " | Código: " + msg.GetError().Code, LogCategory.Avatar);
             Debug.LogErrorFormat($"Entitlement check failed: %s. {err}", err.Message);
             UnityEngine.Application.Quit();
         }
         else
         {
-            Debug.Log("You are entitled to use this app.");
+            AdvancedDebugSystem.Log("You are entitled to use this app.", LogCategory.Avatar, LogLevel.Debug);
             StartCoroutine(StartOvrPlatform());
         }
     }

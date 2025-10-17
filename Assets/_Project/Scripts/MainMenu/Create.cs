@@ -3,6 +3,7 @@ using UnityEngine;
 using HackMonkeys.Core;
 using HackMonkeys.UI.Spatial;
 using TMPro;
+using HackMonkeys.Debugging;
 
 public class Create : MenuPanel
 {
@@ -31,7 +32,7 @@ public class Create : MenuPanel
     {
         if (string.IsNullOrEmpty(roomNameField.text))
         {
-            Debug.LogWarning("Room name cannot be empty!");
+            AdvancedDebugSystem.LogWarning("Room name cannot be empty!", LogCategory.Avatar);
             return;
         }
         
@@ -49,7 +50,7 @@ public class Create : MenuPanel
         }
         else
         {
-            Debug.LogError("Failed to create room!");
+            AdvancedDebugSystem.LogError("Failed to create room!", LogCategory.Avatar);
             
             if (createRoomButton != null) createRoomButton.SetInteractable(true);
         }

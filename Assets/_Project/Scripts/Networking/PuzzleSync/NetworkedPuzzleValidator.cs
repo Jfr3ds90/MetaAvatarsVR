@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace MetaAvatarsVR.Networking.PuzzleSync
 {
@@ -200,7 +203,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             stats.IsSuspected = true;
             PlayerStatsDict.Set(player, stats);
             
-            Debug.LogWarning($"[NetworkedPuzzleValidator] Player {player} marked as suspected");
+            AdvancedDebugSystem.LogWarning($"[NetworkedPuzzleValidator] Player {player} marked as suspected", LogCategory.Networking | LogCategory.Photon);
         }
         
         public void RegisterFailure(PlayerRef player, string failureType)
@@ -221,7 +224,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 stats.TimeoutUntil = Runner.SimulationTime + _failureTimeout;
                 RPC_NotifyPlayerTimeout(player, _failureTimeout);
                 
-                Debug.LogWarning($"[NetworkedPuzzleValidator] Player {player} timed out for {_failureTimeout}s");
+                AdvancedDebugSystem.LogWarning($"[NetworkedPuzzleValidator] Player {player} timed out for {_failureTimeout}s", LogCategory.Networking | LogCategory.Photon);
             }
             
             PlayerStatsDict.Set(player, stats);
@@ -230,13 +233,13 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
         private void RPC_NotifyPlayerTimeout(PlayerRef player, float duration)
         {
-            Debug.Log($"[NetworkedPuzzleValidator] Player {player} has been timed out for {duration} seconds");
+            AdvancedDebugSystem.Log($"[NetworkedPuzzleValidator] Player {player} has been timed out for {duration} seconds", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         private void LogViolation(PlayerRef player, string violationType, string details)
         {
             TotalViolations++;
-            Debug.LogWarning($"[NetworkedPuzzleValidator] VIOLATION: Player {player} - {violationType}: {details}");
+            AdvancedDebugSystem.LogWarning($"[NetworkedPuzzleValidator] VIOLATION: Player {player} - {violationType}: {details}", LogCategory.Networking | LogCategory.Photon);
             
             // Could send to analytics or ban system here
         }
@@ -283,7 +286,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         public void EnableValidation(bool enable)
         {
             _enableValidation = enable;
-            Debug.Log($"[NetworkedPuzzleValidator] Validation {(enable ? "enabled" : "disabled")}");
+            AdvancedDebugSystem.Log($"[NetworkedPuzzleValidator] Validation {(enable ? "enabled" : "disabled")}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         public override void FixedUpdateNetwork()

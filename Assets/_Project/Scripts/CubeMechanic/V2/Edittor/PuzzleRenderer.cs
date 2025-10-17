@@ -2,6 +2,9 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace PuzzleCubes.Core
 {
@@ -493,7 +496,7 @@ namespace PuzzleCubes.Core
             catch (System.Exception e)
             {
                 EditorUtility.DisplayDialog("Error", $"Failed to render: {e.Message}", "OK");
-                Debug.LogError(e);
+                AdvancedDebugSystem.LogError(e.ToString(), LogCategory.Avatar);
             }
             finally
             {

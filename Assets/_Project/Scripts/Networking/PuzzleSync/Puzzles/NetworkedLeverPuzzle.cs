@@ -3,6 +3,9 @@ using System.Linq;
 using Fusion;
 using UnityEngine;
 using UnityEngine.Events;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
 {
@@ -66,7 +69,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             if (_levers == null || _levers.Length == 0)
             {
                 _levers = GetComponentsInChildren<NetworkedLever>();
-                Debug.Log($"[NetworkedLeverPuzzle] Found {_levers.Length} levers");
+                AdvancedDebugSystem.Log($"[NetworkedLeverPuzzle] Found {_levers.Length} levers", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
     
             for (int i = 0; i < _levers.Length; i++)
@@ -79,7 +82,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                     
                     _leverIndexToLetter[i] = letter;
                     
-                    Debug.Log($"[NetworkedLeverPuzzle] Lever {i} mapped to letter '{letter}'");
+                    AdvancedDebugSystem.Log($"[NetworkedLeverPuzzle] Lever {i} mapped to letter '{letter}'", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 }
             }
         }
@@ -111,7 +114,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             if (index >= 0 && index < _levers.Length)
             {
                 _levers[index] = lever;
-                Debug.Log($"[NetworkedLeverPuzzle] Lever {index} registered");
+                AdvancedDebugSystem.Log($"[NetworkedLeverPuzzle] Lever {index} registered", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
         }
 
@@ -120,17 +123,17 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         {
             if (!HasStateAuthority)
             {
-                Debug.LogWarning($"[NetworkedLeverPuzzle] OnLeverStateChanged called without authority");
+                AdvancedDebugSystem.LogWarning($"[NetworkedLeverPuzzle] OnLeverStateChanged called without authority", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
             
             if (IsSolved)
             {
-                Debug.Log($"[NetworkedLeverPuzzle] Puzzle already solved, ignoring lever change");
+                AdvancedDebugSystem.Log($"[NetworkedLeverPuzzle] Puzzle already solved, ignoring lever change", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 return;
             }
             
-            Debug.Log($"[NetworkedLeverPuzzle] Lever {leverIndex} state changed to {activated}");
+            AdvancedDebugSystem.Log($"[NetworkedLeverPuzzle] Lever {leverIndex} state changed to {activated}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             if (activated)
             {
@@ -147,20 +150,20 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         {
             if (!_leverIndexToLetter.ContainsKey(leverIndex))
             {
-                Debug.LogError($"[NetworkedLeverPuzzle] No letter mapping for lever index {leverIndex}!");
+                AdvancedDebugSystem.LogError($"[NetworkedLeverPuzzle] No letter mapping for lever index {leverIndex}!", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
             
             if (_activatedLevers.Contains(leverIndex))
             {
-                Debug.LogWarning($"[NetworkedLeverPuzzle] Lever {leverIndex} already in activated list");
+                AdvancedDebugSystem.LogWarning($"[NetworkedLeverPuzzle] Lever {leverIndex} already in activated list", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
             
             _activatedLevers.Add(leverIndex);
             string letter = _leverIndexToLetter[leverIndex];
             
-            Debug.Log($"[NetworkedLeverPuzzle] Added lever {leverIndex} (letter '{letter}') to sequence");
+            AdvancedDebugSystem.Log($"[NetworkedLeverPuzzle] Added lever {leverIndex} (letter '{letter}') to sequence", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             UpdateCurrentSequence();
             
@@ -172,14 +175,14 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         {
             if (!_activatedLevers.Contains(leverIndex))
             {
-                Debug.LogWarning($"[NetworkedLeverPuzzle] Lever {leverIndex} not in activated list");
+                AdvancedDebugSystem.LogWarning($"[NetworkedLeverPuzzle] Lever {leverIndex} not in activated list", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
             
             _activatedLevers.Remove(leverIndex);
             
             string letter = _leverIndexToLetter.ContainsKey(leverIndex) ? _leverIndexToLetter[leverIndex] : "?";
-            Debug.Log($"[NetworkedLeverPuzzle] Removed lever {leverIndex} (letter '{letter}') from sequence");
+            AdvancedDebugSystem.Log($"[NetworkedLeverPuzzle] Removed lever {leverIndex} (letter '{letter}') from sequence", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             UpdateCurrentSequence();
             
@@ -201,7 +204,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             
             CurrentSequence = sequence;
             
-            Debug.Log($"[NetworkedLeverPuzzle] Current sequence updated: '{sequence}'");
+            AdvancedDebugSystem.Log($"[NetworkedLeverPuzzle] Current sequence updated: '{sequence}'", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             RPC_NotifySequenceUpdated(sequence);
         }
@@ -217,7 +220,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 return;
             }
             
-            Debug.Log($"[NetworkedLeverPuzzle] Validating sequence: '{currentSeq}' vs correct: '{_correctSequence}'");
+            AdvancedDebugSystem.Log($"[NetworkedLeverPuzzle] Validating sequence: '{currentSeq}' vs correct: '{_correctSequence}'", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             bool isValid = true;
             int correctCount = 0;
@@ -239,17 +242,17 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             
             if (!isValid)
             {
-                Debug.Log($"[NetworkedLeverPuzzle] Incorrect sequence at position {correctCount}");
+                AdvancedDebugSystem.Log($"[NetworkedLeverPuzzle] Incorrect sequence at position {correctCount}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 FailPuzzle();
             }
             else if (currentSeq.Length == _correctSequence.Length && correctCount == _correctSequence.Length)
             {
-                Debug.Log($"[NetworkedLeverPuzzle] PUZZLE SOLVED! Sequence complete and correct");
+                AdvancedDebugSystem.Log($"[NetworkedLeverPuzzle] PUZZLE SOLVED! Sequence complete and correct", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 SolvePuzzle();
             }
             else
             {
-                Debug.Log($"[NetworkedLeverPuzzle] Partial sequence correct: {correctCount}/{_correctSequence.Length}");
+                AdvancedDebugSystem.Log($"[NetworkedLeverPuzzle] Partial sequence correct: {correctCount}/{_correctSequence.Length}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 
                 if (correctCount > 0)
                 {
@@ -277,7 +280,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             }
             
             CorrectCount = correct;
-            Debug.Log($"[NetworkedLeverPuzzle] Recalculated correct count: {correct}");
+            AdvancedDebugSystem.Log($"[NetworkedLeverPuzzle] Recalculated correct count: {correct}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         private void SolvePuzzle()
@@ -321,7 +324,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             OnSequenceUpdated?.Invoke(sequence);
             PlaySound(_progressSound);
             
-            Debug.Log($"[NetworkedLeverPuzzle] Broadcasting sequence update: '{sequence}'");
+            AdvancedDebugSystem.Log($"[NetworkedLeverPuzzle] Broadcasting sequence update: '{sequence}'", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -344,7 +347,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             if (_successIndicator != null)
                 _successIndicator.SetActive(true);
                 
-            Debug.Log("[NetworkedLeverPuzzle] PUZZLE SOLVED! Broadcasting to all clients");
+            AdvancedDebugSystem.Log("[NetworkedLeverPuzzle] PUZZLE SOLVED! Broadcasting to all clients", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -359,7 +362,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 StartCoroutine(HideIndicatorAfterDelay(_failureIndicator, 2f));
             }
             
-            Debug.Log("[NetworkedLeverPuzzle] Puzzle failed! Resetting in 2 seconds...");
+            AdvancedDebugSystem.Log("[NetworkedLeverPuzzle] Puzzle failed! Resetting in 2 seconds...", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         private void ResetPuzzle()
@@ -367,7 +370,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             if (!HasStateAuthority)
                 return;
                 
-            Debug.Log("[NetworkedLeverPuzzle] Resetting puzzle...");
+            AdvancedDebugSystem.Log("[NetworkedLeverPuzzle] Resetting puzzle...", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             _activatedLevers.Clear();
             CurrentSequence = "";
@@ -392,7 +395,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             if (_failureIndicator != null)
                 _failureIndicator.SetActive(false);
                 
-            Debug.Log("[NetworkedLeverPuzzle] Puzzle reset complete");
+            AdvancedDebugSystem.Log("[NetworkedLeverPuzzle] Puzzle reset complete", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         private void ShowFeedback(Vector3 position, bool success)
@@ -418,7 +421,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         public void SetCorrectSequence(string sequence)
         {
             _correctSequence = sequence;
-            Debug.Log($"[NetworkedLeverPuzzle] Correct sequence set to: '{sequence}'");
+            AdvancedDebugSystem.Log($"[NetworkedLeverPuzzle] Correct sequence set to: '{sequence}'", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         public string GetCurrentSequence()
@@ -451,14 +454,14 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         
         public int RegisterLeverActivation(int leverIndex)
         {
-            Debug.LogWarning($"[NetworkedLeverPuzzle] RegisterLeverActivation is deprecated. Use OnLeverStateChanged instead");
+            AdvancedDebugSystem.LogWarning($"[NetworkedLeverPuzzle] RegisterLeverActivation is deprecated. Use OnLeverStateChanged instead", LogCategory.Networking | LogCategory.Photon);
             OnLeverStateChanged(leverIndex, true);
             return _activatedLevers.IndexOf(leverIndex);
         }
         
         public void RegisterLeverDeactivation(int leverIndex)
         {
-            Debug.LogWarning($"[NetworkedLeverPuzzle] RegisterLeverDeactivation is deprecated. Use OnLeverStateChanged instead");
+            AdvancedDebugSystem.LogWarning($"[NetworkedLeverPuzzle] RegisterLeverDeactivation is deprecated. Use OnLeverStateChanged instead", LogCategory.Networking | LogCategory.Photon);
             OnLeverStateChanged(leverIndex, false);
         }
     }

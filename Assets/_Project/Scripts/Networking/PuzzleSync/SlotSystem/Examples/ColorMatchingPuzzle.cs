@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem.Examples
 {
@@ -24,7 +25,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem.Examples
                 StartCoroutine(ShowColorHints());
             }
             
-            Debug.Log($"[ColorMatchingPuzzle] Color pattern generated");
+            AdvancedDebugSystem.Log($"[ColorMatchingPuzzle] Color pattern generated", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         private System.Collections.IEnumerator ShowColorHints()

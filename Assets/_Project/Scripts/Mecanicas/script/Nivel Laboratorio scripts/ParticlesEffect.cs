@@ -1,13 +1,14 @@
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 public class ParticlesEffect : MonoBehaviour
 {
     private void OnParticleCollision(GameObject other)
     {
-            Debug.Log(other.name + " es lo que choco");
+            AdvancedDebugSystem.Log(other.name + " es lo que choco", LogCategory.Avatar, LogLevel.Debug);
     }
     private void OnParticleTrigger()
     {
-        Debug.Log(name + " es quien detecto");
+        AdvancedDebugSystem.Log(name + " es quien detecto", LogCategory.Avatar, LogLevel.Debug);
     }
 }

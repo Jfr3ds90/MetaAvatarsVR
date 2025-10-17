@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using Fusion;
 using Oculus.Avatar2;
 using UnityEngine;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
 
 public class AvatarEntityState : OvrAvatarEntity
 {
@@ -38,7 +40,7 @@ public class AvatarEntityState : OvrAvatarEntity
             ? CAPI.ovrAvatar2EntityViewFlags.FirstPerson
             : CAPI.ovrAvatar2EntityViewFlags.ThirdPerson);
             
-        Debug.Log($"[AvatarEntityState] View set to: {(isLocalAvatar ? "FirstPerson" : "ThirdPerson")}");
+        AdvancedDebugSystem.Log($"[AvatarEntityState] View set to: {(isLocalAvatar ? "FirstPerson" : "ThirdPerson")}", LogCategory.Avatar, LogLevel.Debug);
         StartCoroutine(LoadAvatarID());
     }
 
@@ -60,18 +62,18 @@ public class AvatarEntityState : OvrAvatarEntity
             }
             else
             {
-                Debug.LogWarning("[AvatarEntityState] SampleInputManager not found for local avatar");
+                AdvancedDebugSystem.LogWarning("[AvatarEntityState] SampleInputManager not found for local avatar", LogCategory.Avatar);
             }
             
             gameObject.name = $"Local Avatar ({_networkObject.InputAuthority})";
-            Debug.Log($"[AvatarEntityState] ✅ Configured as LOCAL avatar");
+            AdvancedDebugSystem.Log($"[AvatarEntityState] ✅ Configured as LOCAL avatar", LogCategory.Avatar, LogLevel.Debug);
         }
         else
         {
             SetIsLocal(false);
             _creationInfo.features = CAPI.ovrAvatar2EntityFeatures.Preset_Remote;
             gameObject.name = $"Remote Avatar ({_networkObject.InputAuthority})";
-            Debug.Log($"[AvatarEntityState] 👥 Configured as REMOTE avatar");
+            AdvancedDebugSystem.Log($"[AvatarEntityState] 👥 Configured as REMOTE avatar", LogCategory.Avatar, LogLevel.Debug);
         }
     }
 

@@ -1,4 +1,5 @@
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 public class PortalObjects : MonoBehaviour
 {
@@ -11,7 +12,7 @@ public class PortalObjects : MonoBehaviour
         if (activation == true && other.tag == "cubePuzzle")
         {
             other.gameObject.transform.position = Destination.position;           
-            Debug.Log(other.gameObject.name);
+            AdvancedDebugSystem.Log(other.gameObject.name, LogCategory.Avatar, LogLevel.Debug);
             if (door != null)
                 door.OpenDoorAct();
         }

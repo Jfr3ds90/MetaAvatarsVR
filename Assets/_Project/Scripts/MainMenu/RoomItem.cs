@@ -5,6 +5,9 @@ using HackMonkeys.UI.Theme;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace HackMonkeys.UI.Panels
 {
@@ -114,7 +117,7 @@ namespace HackMonkeys.UI.Panels
         {
             if (session == null)
             {
-                Debug.LogWarning("[RoomItem] SetRoomData called with null session");
+                AdvancedDebugSystem.LogWarning("[RoomItem] SetRoomData called with null session", LogCategory.Avatar);
                 return;
             }
             
@@ -276,7 +279,7 @@ namespace HackMonkeys.UI.Panels
                 string displayName = !string.IsNullOrEmpty(name) ? name : "Unnamed Room";
                 roomNameText.text = displayName;
         
-                Debug.Log($"[RoomItem] Setting room name: {displayName}");
+                AdvancedDebugSystem.Log($"[RoomItem] Setting room name: {displayName}", LogCategory.Avatar, LogLevel.Debug);
             }
         }
 
@@ -557,14 +560,14 @@ namespace HackMonkeys.UI.Panels
         [ContextMenu("Debug: Print State")]
         private void DebugPrintState()
         {
-            Debug.Log($"=== RoomItem State ===");
-            Debug.Log($"Room: {_sessionInfo?.Name ?? "None"}");
-            Debug.Log($"Players: {_lastPlayerCount}");
-            Debug.Log($"Is Open: {_lastOpenState}");
-            Debug.Log($"Is Full: {_lastFullState}");
-            Debug.Log($"Is Selected: {_isSelected}");
-            Debug.Log($"Is Hovered: {_isHovered}");
-            Debug.Log($"======================");
+            AdvancedDebugSystem.Log($"=== RoomItem State ===", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Room: {_sessionInfo?.Name ?? "None"}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Players: {_lastPlayerCount}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Is Open: {_lastOpenState}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Is Full: {_lastFullState}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Is Selected: {_isSelected}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Is Hovered: {_isHovered}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"======================", LogCategory.Avatar, LogLevel.Debug);
         }
 
         #endregion

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.Collections.LowLevel.Unsafe;
+using HackMonkeys.Debugging;
 
 /// \cond
 /// <summary>
@@ -181,9 +182,9 @@ public struct OVRSResult<TStatus> : IEquatable<OVRSResult<TStatus>>
     /// <code><![CDATA[
     /// var result = DoOperation();
     /// if (result) {
-    ///   Debug.Log("Operation succeeded.");
+    ///   AdvancedDebugSystem.Log("Operation succeeded.", LogCategory.Avatar, LogLevel.Debug);
     /// } else {
-    ///   Debug.LogError($"Operation failed with error {result.Status}.");
+    ///   AdvancedDebugSystem.LogError($"Operation failed with error {result.Status}.", LogCategory.Avatar);
     /// }
     /// ]]></code>
     /// </example>
@@ -460,9 +461,9 @@ public struct OVRSResult<TValue, TStatus> : IEquatable<OVRSResult<TValue, TStatu
     /// <code><![CDATA[
     /// var result = DoOperation();
     /// if (result) {
-    ///   Debug.Log("Operation succeeded.");
+    ///   AdvancedDebugSystem.Log("Operation succeeded.", LogCategory.Avatar, LogLevel.Debug);
     /// } else {
-    ///   Debug.LogError($"Operation failed with error {result.Status}.");
+    ///   AdvancedDebugSystem.LogError($"Operation failed with error {result.Status}.", LogCategory.Avatar);
     /// }
     /// ]]></code>
     /// </example>

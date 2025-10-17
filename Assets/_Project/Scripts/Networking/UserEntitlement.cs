@@ -3,6 +3,7 @@ using Oculus.Avatar2;
 using Oculus.Platform;
 using Oculus.Platform.Models;
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 public class UserEntitlement : MonoBehaviour
 {
@@ -21,8 +22,8 @@ public class UserEntitlement : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError("Platform failed to initialize");
-            Debug.LogError(e);
+            AdvancedDebugSystem.LogError("Platform failed to initialize", LogCategory.Networking | LogCategory.Photon);
+            AdvancedDebugSystem.LogError(e.ToString(), LogCategory.Networking | LogCategory.Photon);
             throw;
         }
     }
@@ -31,11 +32,11 @@ public class UserEntitlement : MonoBehaviour
     {
         if (msg.IsError)
         {
-            Debug.LogError($"Error: {msg.GetError()}");
+            AdvancedDebugSystem.LogError($"Error: {msg.GetError()}", LogCategory.Networking | LogCategory.Photon);
             return;
         }
         
-        Debug.Log($"You are entitled to application");
+        AdvancedDebugSystem.Log($"You are entitled to application", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         Users.GetAccessToken().OnComplete(GetAccessTokenCompleted);
     }
 
@@ -43,8 +44,8 @@ public class UserEntitlement : MonoBehaviour
     {
         if (msg.IsError)
         {
-            Debug.LogError($"Error geting the token");
-            Debug.LogError(msg.GetError());
+            AdvancedDebugSystem.LogError($"Error geting the token", LogCategory.Networking | LogCategory.Photon);
+            AdvancedDebugSystem.LogError(msg.GetError().ToString(), LogCategory.Networking | LogCategory.Photon);
             return;
         }
         
@@ -56,8 +57,8 @@ public class UserEntitlement : MonoBehaviour
     {
         if (msg.IsError)
         {
-            Debug.LogError($"Error on logged user");
-            Debug.LogError(msg.GetError());
+            AdvancedDebugSystem.LogError($"Error on logged user", LogCategory.Networking | LogCategory.Photon);
+            AdvancedDebugSystem.LogError(msg.GetError().ToString(), LogCategory.Networking | LogCategory.Photon);
             return;
         }
 

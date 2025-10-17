@@ -2,6 +2,7 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Video;
+using HackMonkeys.Debugging;
 
 public class OfficeStaff : MonoBehaviour
 {
@@ -50,10 +51,10 @@ public class OfficeStaff : MonoBehaviour
         MRpc.GetComponent<VideoPlayer>().Play(); 
         ButtonsCanvas.SetActive(false);
         creditsEnd.SetActive(true);
-        Debug.Log("opcion correcta");
+        AdvancedDebugSystem.Log("opcion correcta", LogCategory.Avatar, LogLevel.Debug);
     }
     public void IncorrectOption()
     {
-        Debug.Log("opcion incorrecta");
+        AdvancedDebugSystem.Log("opcion incorrecta", LogCategory.Avatar, LogLevel.Debug);
     }
 }

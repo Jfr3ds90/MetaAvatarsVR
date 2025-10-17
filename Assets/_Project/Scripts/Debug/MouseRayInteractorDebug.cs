@@ -4,6 +4,7 @@ using Oculus.Interaction.Surfaces;
 using System.Collections.Generic;
 using System.Reflection;
 using DG.Tweening;
+using HackMonkeys.Debugging;
 
 namespace HackMonkeys.UI.Spatial.DebugRay
 {
@@ -110,7 +111,7 @@ namespace HackMonkeys.UI.Spatial.DebugRay
         
         private void OnEnable()
         {
-            Debug.Log($"[MouseRayDebug] Activado - Presiona {toggleKey} para toggle");
+            AdvancedDebugSystem.Log($"[MouseRayDebug] Activado - Presiona {toggleKey} para toggle", LogCategory.Avatar, LogLevel.Debug);
             
             if (lockCursor)
             {
@@ -137,7 +138,7 @@ namespace HackMonkeys.UI.Spatial.DebugRay
             if (Input.GetKeyDown(toggleKey))
             {
                 enableMouseControl = !enableMouseControl;
-                Debug.Log($"[MouseRayDebug] Mouse control: {(enableMouseControl ? "ACTIVADO" : "DESACTIVADO")}");
+                AdvancedDebugSystem.Log($"[MouseRayDebug] Mouse control: {(enableMouseControl ? "ACTIVADO" : "DESACTIVADO")}", LogCategory.Avatar, LogLevel.Debug);
                 
                 if (!enableMouseControl)
                 {
@@ -242,20 +243,20 @@ namespace HackMonkeys.UI.Spatial.DebugRay
                     
                     if (simulateHaptics)
                     {
-                        Debug.Log("[MouseRayDebug] 🎮 Hover haptic (0.1f)");
+                        AdvancedDebugSystem.Log("[MouseRayDebug] 🎮 Hover haptic (0.1f)", LogCategory.Avatar, LogLevel.Debug);
                     }
                 }
                 
                 // Inicializar estado
                 _interactableStates[_currentHoveredInteractable] = InteractorState.Normal;
                 
-                Debug.Log($"[MouseRayDebug] Hovering: {_currentHoveredInteractable.name}");
+                AdvancedDebugSystem.Log($"[MouseRayDebug] Hovering: {_currentHoveredInteractable.name}", LogCategory.Avatar, LogLevel.Debug);
             }
         }
         
         private void HandleSelectStart()
         {
-            Debug.Log($"[MouseRayDebug] Select start on: {_currentHoveredInteractable.name}");
+            AdvancedDebugSystem.Log($"[MouseRayDebug] Select start on: {_currentHoveredInteractable.name}", LogCategory.Avatar, LogLevel.Debug);
             
             // Manejar input field
             if (_currentHoveredInputField != null)
@@ -299,14 +300,14 @@ namespace HackMonkeys.UI.Spatial.DebugRay
                 
                 if (simulateHaptics)
                 {
-                    Debug.Log("[MouseRayDebug] 🎮 Click haptic (0.3f)");
+                    AdvancedDebugSystem.Log("[MouseRayDebug] 🎮 Click haptic (0.3f)", LogCategory.Avatar, LogLevel.Debug);
                 }
             }
         }
         
         private void HandleSelectEnd()
         {
-            Debug.Log($"[MouseRayDebug] Select end on: {_currentHoveredInteractable.name}");
+            AdvancedDebugSystem.Log($"[MouseRayDebug] Select end on: {_currentHoveredInteractable.name}", LogCategory.Avatar, LogLevel.Debug);
             
             // Importante: Llamar OnSelectEnd en el botón presionado
             if (_pressedButton != null)
@@ -317,11 +318,11 @@ namespace HackMonkeys.UI.Spatial.DebugRay
                 if (onSelectEndMethod != null)
                 {
                     onSelectEndMethod.Invoke(_pressedButton, null);
-                    Debug.Log($"[MouseRayDebug] Called OnSelectEnd on button: {_pressedButton.name}");
+                    AdvancedDebugSystem.Log($"[MouseRayDebug] Called OnSelectEnd on button: {_pressedButton.name}", LogCategory.Avatar, LogLevel.Debug);
                 }
                 else
                 {
-                    Debug.LogWarning("[MouseRayDebug] Could not find OnSelectEnd method!");
+                    AdvancedDebugSystem.LogWarning("[MouseRayDebug] Could not find OnSelectEnd method!", LogCategory.Avatar);
                 }
                 
                 _pressedButton = null;
@@ -330,14 +331,14 @@ namespace HackMonkeys.UI.Spatial.DebugRay
         
         private void HandleClickOutside()
         {
-            Debug.Log("[MouseRayDebug] Click outside any interactable");
+            AdvancedDebugSystem.Log("[MouseRayDebug] Click outside any interactable", LogCategory.Avatar, LogLevel.Debug);
             
             // Buscar si hay un input field activo
             var activeInputField = FindActiveInputField();
             
             if (activeInputField != null)
             {
-                Debug.Log($"[MouseRayDebug] Unfocusing active input field: {activeInputField.name}");
+                AdvancedDebugSystem.Log($"[MouseRayDebug] Unfocusing active input field: {activeInputField.name}", LogCategory.Avatar, LogLevel.Debug);
                 activeInputField.Unfocus();
             }
         }

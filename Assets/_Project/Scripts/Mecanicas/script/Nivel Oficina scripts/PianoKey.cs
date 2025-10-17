@@ -1,4 +1,5 @@
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 public class PianoKey : MonoBehaviour
 {
@@ -10,7 +11,7 @@ public class PianoKey : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log(other.transform.name);
+        AdvancedDebugSystem.Log(other.transform.name, LogCategory.Avatar, LogLevel.Debug);
         piano.partiture(KeyNote);
        // GetComponentInParent<Transform>().rotation = Quaternion.Euler(GetComponentInParent<Transform>().rotation.x +3, 0f, 0f);
     }

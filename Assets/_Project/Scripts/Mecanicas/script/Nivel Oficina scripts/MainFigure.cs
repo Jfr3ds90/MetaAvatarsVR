@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 public class MainFigure : MonoBehaviour
 {
@@ -32,7 +33,7 @@ public class MainFigure : MonoBehaviour
             safe.GetComponent<Switch>().OpenDoorAct();
             FindAnyObjectByType<AudioManager>().moreAction = 2;
             FindAnyObjectByType<AudioManager>().calls();
-            Debug.Log("Cantidad igual"); 
+            AdvancedDebugSystem.Log("Cantidad igual", LogCategory.Avatar, LogLevel.Debug); 
         }
 
     }

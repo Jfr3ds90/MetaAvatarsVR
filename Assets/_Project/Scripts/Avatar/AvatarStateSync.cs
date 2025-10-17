@@ -2,6 +2,8 @@ using System;
 using Fusion;
 using Oculus.Avatar2;
 using UnityEngine;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
 
 public class AvatarStateSync : NetworkBehaviour
 {
@@ -21,7 +23,7 @@ public class AvatarStateSync : NetworkBehaviour
 
     public override void Spawned()
     {
-        Debug.Log($"[AvatarStateSync] Spawned - InputAuthority: {Object.InputAuthority}, LocalPlayer: {Runner.LocalPlayer}");
+        AdvancedDebugSystem.Log($"[AvatarStateSync] Spawned - InputAuthority: {Object.InputAuthority}, LocalPlayer: {Runner.LocalPlayer}", LogCategory.Avatar, LogLevel.Debug);
         
         _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
 
@@ -29,11 +31,11 @@ public class AvatarStateSync : NetworkBehaviour
         if (Object.InputAuthority == Runner.LocalPlayer)
         {
             OculusID = UserEntitlement.OculusID;
-            Debug.Log($"[AvatarStateSync] ✅ Local avatar - Setting OculusID: {OculusID}");
+            AdvancedDebugSystem.Log($"[AvatarStateSync] ✅ Local avatar - Setting OculusID: {OculusID}", LogCategory.Avatar, LogLevel.Debug);
         }
         else
         {
-            Debug.Log($"[AvatarStateSync] 👥 Remote avatar - Will wait for OculusID from network");
+            AdvancedDebugSystem.Log($"[AvatarStateSync] 👥 Remote avatar - Will wait for OculusID from network", LogCategory.Avatar, LogLevel.Debug);
             ApplyAvatarData();
         }
     }

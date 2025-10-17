@@ -4,6 +4,9 @@ using Fusion;
 using UnityEngine;
 using UnityEngine.Events;
 using Oculus.Interaction;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
 {
@@ -792,18 +795,18 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         protected void DebugLog(string message)
         {
             if (_enableDebugLogs)
-                Debug.Log($"[SlottableItem] {message}");
+                AdvancedDebugSystem.Log($"[SlottableItem] {message}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         protected void DebugLogWarning(string message)
         {
             if (_enableDebugLogs)
-                Debug.LogWarning($"[SlottableItem] {message}");
+                AdvancedDebugSystem.LogWarning($"[SlottableItem] {message}", LogCategory.Networking | LogCategory.Photon);
         }
         
         protected void DebugLogError(string message)
         {
-            Debug.LogError($"[SlottableItem] {message}");
+            AdvancedDebugSystem.LogError($"[SlottableItem] {message}", LogCategory.Networking | LogCategory.Photon);
         }
         
         #if UNITY_EDITOR

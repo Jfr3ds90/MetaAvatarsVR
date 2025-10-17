@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 public class AudioManager : MonoBehaviour
 {
@@ -29,7 +30,7 @@ public class AudioManager : MonoBehaviour
     {       
         timer = 0;
         source.clip = Narrator[objetos - 1];
-        source.Play(); //1 al 9 fase 1|10 al 14 fase 2|15 al 23 fase 3|24 al 29 fase 4|30 al 35 fase 5  //fase 4 |24 al ser agarrado una llave| 25 (ya esta) entrar a la salas separadas | 26 tiempo afk| 27 colocarse frente a la pantalla | 28 figura hecha | 29 inmediatamente tras el 28       //fase 5 |30 al abrirse la caja fuerte| 31 agarrar el pendrive| 32 iniciar ventana de selección (aun no implementado mecanica)| 33 tras hacer el primer envio (aun no implementado mecanica)| 34 tras lograrlo a la primer (aun no implementado mecanica)| 35 tras lograrlo habiendo fallado al menos una vez (aun no implementado mecanica)
+        source.Play(); //1 al 9 fase 1|10 al 14 fase 2|15 al 23 fase 3|24 al 29 fase 4|30 al 35 fase 5  //fase 4 |24 al ser agarrado una llave| 25 (ya esta) entrar a la salas separadas | 26 tiempo afk| 27 colocarse frente a la pantalla | 28 figura hecha | 29 inmediatamente tras el 28       //fase 5 |30 al abrirse la caja fuerte| 31 agarrar el pendrive| 32 iniciar ventana de selecciÃ³n (aun no implementado mecanica)| 33 tras hacer el primer envio (aun no implementado mecanica)| 34 tras lograrlo a la primer (aun no implementado mecanica)| 35 tras lograrlo habiendo fallado al menos una vez (aun no implementado mecanica)
         yield return new WaitForSeconds(tiempo);
     }
     public void NarratorLinesActivation()
@@ -60,7 +61,7 @@ public class AudioManager : MonoBehaviour
     private void FixedUpdate()
     {
         if (ActualPhase<3)
-            switch (ActualPhase)//cada vez que pase mucho tiempo sin interacción...
+            switch (ActualPhase)//cada vez que pase mucho tiempo sin interacciÃ³n...
             {
                 case 0:
                       
@@ -168,12 +169,12 @@ public class AudioManager : MonoBehaviour
                     {
                         case 0:
                             StartCoroutine(NarratorLines(6, 17)); //accionar la palanca
-                            Debug.Log("Termino dialogo 17");
+                            AdvancedDebugSystem.Log("Termino dialogo 17", LogCategory.Avatar, LogLevel.Debug);
 
                             StartCoroutine(NarratorLines(6, 20)); //una vez terminado el dialogo 17
                             ActualPhase = 3;
                             moreAction = 0;
-                            Debug.Log("fase actual " + ActualPhase +" extra "+ moreAction);
+                            AdvancedDebugSystem.Log("fase actual " + ActualPhase +" extra "+ moreAction, LogCategory.Avatar, LogLevel.Debug);
                             break;
                     }                      
                 else//con colision              
@@ -186,7 +187,7 @@ public class AudioManager : MonoBehaviour
                             StartCoroutine(NarratorLines(4, 16)); //colocarse en frente de la palanca
                             break;
                         case 3:
-                            StartCoroutine(NarratorLines(4, 21)); //acercarse a los baños
+                            StartCoroutine(NarratorLines(4, 21)); //acercarse a los baÃ±os
                             break;
                     }    
                 

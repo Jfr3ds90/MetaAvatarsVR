@@ -1,6 +1,7 @@
 using HackMonkeys.Core;
 using HackMonkeys.UI.Spatial;
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 public class NameTag : MenuPanel
 {
@@ -113,11 +114,11 @@ public class NameTag : MenuPanel
                 if (nameToSave != _currentPlayerName)
                 {
                     PlayerDataManager.Instance.SetPlayerName(nameToSave);
-                    Debug.Log($"[NameTag] Name changed from '{_currentPlayerName}' to '{nameToSave}'");
+                    AdvancedDebugSystem.Log($"[NameTag] Name changed from '{_currentPlayerName}' to '{nameToSave}'", LogCategory.Avatar, LogLevel.Debug);
                 }
                 else
                 {
-                    Debug.Log($"[NameTag] Keeping current name: {nameToSave}");
+                    AdvancedDebugSystem.Log($"[NameTag] Keeping current name: {nameToSave}", LogCategory.Avatar, LogLevel.Debug);
                 }
                 
                 // Ir al menú principal

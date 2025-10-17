@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace MetaAvatarsVR.Networking.PuzzleSync
 {
@@ -225,7 +228,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             UpdateVisualState(InteractableState.Activated);
             PlaySound(_interactSound);
             
-            Debug.Log($"[NetworkedInteractable] {gameObject.name} activated by player {player}");
+            AdvancedDebugSystem.Log($"[NetworkedInteractable] {gameObject.name} activated by player {player}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         [Rpc(RpcSources.All, RpcTargets.All)]
@@ -235,7 +238,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             UpdateVisualState(InteractableState.Idle);
             PlaySound(_releaseSound);
             
-            Debug.Log($"[NetworkedInteractable] {gameObject.name} deactivated by player {player}");
+            AdvancedDebugSystem.Log($"[NetworkedInteractable] {gameObject.name} deactivated by player {player}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         protected virtual void PerformActivation(PlayerRef player)
@@ -332,7 +335,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             
             UpdateVisualState(locked ? InteractableState.Disabled : InteractableState.Idle);
             
-            Debug.Log($"[NetworkedInteractable] {gameObject.name} locked state: {locked}");
+            AdvancedDebugSystem.Log($"[NetworkedInteractable] {gameObject.name} locked state: {locked}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         public void ResetInteractable()

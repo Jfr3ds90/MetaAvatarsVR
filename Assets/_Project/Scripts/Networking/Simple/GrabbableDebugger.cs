@@ -2,6 +2,9 @@ using UnityEngine;
 using Fusion;
 using MetaAvatarsVR.Networking.Pragmatic;
 using Oculus.Interaction;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace MetaAvatarsVR.Networking
 {
@@ -45,20 +48,20 @@ namespace MetaAvatarsVR.Networking
         {
             if (evt.Type == PointerEventType.Select)
             {
-                Debug.Log("===== GRAB DIAGNOSTIC START =====");
-                Debug.Log($"[GrabbableDebugger] Meta Grabbable SELECT event fired");
+                AdvancedDebugSystem.Log("===== GRAB DIAGNOSTIC START =====", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+                AdvancedDebugSystem.Log($"[GrabbableDebugger] Meta Grabbable SELECT event fired", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 
                 var interactor = evt.Data as IInteractorView;
                 if (interactor != null)
                 {
-                    Debug.Log($"[GrabbableDebugger] Interactor type: {interactor.GetType()}");
+                    AdvancedDebugSystem.Log($"[GrabbableDebugger] Interactor type: {interactor.GetType()}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                     
                     if (interactor is MonoBehaviour mb)
                     {
                         _lastTransform = mb.transform;
-                        Debug.Log($"[GrabbableDebugger] Grabber transform acquired: {mb.transform.name}");
-                        Debug.Log($"[GrabbableDebugger] Grabber position: {mb.transform.position}");
-                        Debug.Log($"[GrabbableDebugger] Object position: {transform.position}");
+                        AdvancedDebugSystem.Log($"[GrabbableDebugger] Grabber transform acquired: {mb.transform.name}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+                        AdvancedDebugSystem.Log($"[GrabbableDebugger] Grabber position: {mb.transform.position}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+                        AdvancedDebugSystem.Log($"[GrabbableDebugger] Object position: {transform.position}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                         
                         // Verificar jerarquía
                         Transform parent = mb.transform.parent;
@@ -68,11 +71,11 @@ namespace MetaAvatarsVR.Networking
                             hierarchy = parent.name + "/" + hierarchy;
                             parent = parent.parent;
                         }
-                        Debug.Log($"[GrabbableDebugger] Grabber hierarchy: {hierarchy}");
+                        AdvancedDebugSystem.Log($"[GrabbableDebugger] Grabber hierarchy: {hierarchy}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                     }
                     else
                     {
-                        Debug.LogWarning($"[GrabbableDebugger] Could not cast interactor to MonoBehaviour");
+                        AdvancedDebugSystem.LogWarning($"[GrabbableDebugger] Could not cast interactor to MonoBehaviour", LogCategory.Networking | LogCategory.Photon);
                         
                         // Intentar obtener Transform de otra manera
                         var transformProp = interactor.GetType().GetProperty("Transform");
@@ -82,23 +85,23 @@ namespace MetaAvatarsVR.Networking
                             if (t != null)
                             {
                                 _lastTransform = t;
-                                Debug.Log($"[GrabbableDebugger] Got transform via reflection: {t.name}");
+                                AdvancedDebugSystem.Log($"[GrabbableDebugger] Got transform via reflection: {t.name}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                             }
                         }
                     }
                 }
                 else
                 {
-                    Debug.LogError($"[GrabbableDebugger] Interactor is NULL!");
+                    AdvancedDebugSystem.LogError($"[GrabbableDebugger] Interactor is NULL!", LogCategory.Networking | LogCategory.Photon);
                 }
                 
                 _isMonitoring = true;
                 _lastPosition = transform.position;
-                Debug.Log("===== GRAB DIAGNOSTIC END =====");
+                AdvancedDebugSystem.Log("===== GRAB DIAGNOSTIC END =====", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             else if (evt.Type == PointerEventType.Unselect)
             {
-                Debug.Log($"[GrabbableDebugger] Meta Grabbable UNSELECT event fired");
+                AdvancedDebugSystem.Log($"[GrabbableDebugger] Meta Grabbable UNSELECT event fired", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 _isMonitoring = false;
                 _lastTransform = null;
             }
@@ -140,13 +143,13 @@ namespace MetaAvatarsVR.Networking
                     
                     if (_lastTransform != null && !_isMoving)
                     {
-                        Debug.LogWarning($"[GrabbableDebugger] NOT MOVING! Grabber at {_lastTransform.position}, Object at {transform.position}");
+                        AdvancedDebugSystem.LogWarning($"[GrabbableDebugger] NOT MOVING! Grabber at {_lastTransform.position}, Object at {transform.position}", LogCategory.Networking | LogCategory.Photon);
                         
                         // Verificar componentes
                         var rb = GetComponent<Rigidbody>();
                         if (rb != null)
                         {
-                            Debug.Log($"[GrabbableDebugger] Rigidbody: isKinematic={rb.isKinematic}, constraints={rb.constraints}");
+                            AdvancedDebugSystem.Log($"[GrabbableDebugger] Rigidbody: isKinematic={rb.isKinematic}, constraints={rb.constraints}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                         }
                         
                         // Verificar si algo más está moviendo el objeto
@@ -155,7 +158,7 @@ namespace MetaAvatarsVR.Networking
                         {
                             if (comp is MonoBehaviour mb && mb.enabled && mb != this && mb != _grabbable)
                             {
-                                Debug.Log($"[GrabbableDebugger] Active component: {comp.GetType().Name}");
+                                AdvancedDebugSystem.Log($"[GrabbableDebugger] Active component: {comp.GetType().Name}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                             }
                         }
                     }
@@ -180,11 +183,11 @@ namespace MetaAvatarsVR.Networking
             if (_lastTransform != null)
             {
                 transform.position = _lastTransform.position;
-                Debug.Log($"[GrabbableDebugger] FORCED move to {_lastTransform.position}");
+                AdvancedDebugSystem.Log($"[GrabbableDebugger] FORCED move to {_lastTransform.position}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             else
             {
-                Debug.LogError($"[GrabbableDebugger] Cannot force move - no grabber transform!");
+                AdvancedDebugSystem.LogError($"[GrabbableDebugger] Cannot force move - no grabber transform!", LogCategory.Networking | LogCategory.Photon);
             }
         }
     }

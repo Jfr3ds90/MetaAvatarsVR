@@ -3,6 +3,7 @@ using Meta.XR.MRUtilityKit;
 using Oculus.Interaction;
 using Oculus.Interaction.HandGrab;
 using System.Collections;
+using HackMonkeys.Debugging;
 
 namespace PuzzleCubes.Core
 {
@@ -79,7 +80,7 @@ namespace PuzzleCubes.Core
             cubeGrid = FindAnyObjectByType<CubeGrid>();
             if (!cubeGrid)
             {
-                Debug.LogError("CubeGrid not found in scene!");
+                AdvancedDebugSystem.LogError("CubeGrid not found in scene!", LogCategory.Avatar);
             }
         }
         

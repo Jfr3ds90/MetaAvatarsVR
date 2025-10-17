@@ -3,6 +3,9 @@ using Fusion;
 using Oculus.Interaction;
 using Oculus.Interaction.HandGrab;
 using UnityEngine.Events;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
 {
@@ -120,7 +123,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 RPC_SetGrabbed(true);
             }
             
-            Debug.Log($"[Lever] Grab started at angle {_grabStartAngle:F1}°");
+            AdvancedDebugSystem.Log($"[Lever] Grab started at angle {_grabStartAngle:F1}°", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         private void UpdateGrab(PointerEvent evt)
@@ -153,7 +156,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 RPC_UpdateAngle(finalAngle);
             }
             
-            Debug.Log($"[Lever] Grab ended at angle {finalAngle:F1}°");
+            AdvancedDebugSystem.Log($"[Lever] Grab ended at angle {finalAngle:F1}°", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         private void ApplyRotation(float angle)

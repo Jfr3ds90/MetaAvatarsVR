@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 using System.Threading.Tasks;
+using HackMonkeys.Debugging;
 
 namespace HackMonkeys.Core
 {
@@ -34,13 +35,13 @@ namespace HackMonkeys.Core
         {
             if (Instance != null)
             {
-                Debug.LogWarning("[LobbyController] Multiple instances detected. Destroying duplicate.");
+                AdvancedDebugSystem.LogWarning("Multiple instances detected. Destroying duplicate.", LogCategory.Lobby | LogCategory.StateManagement);
                 Destroy(gameObject);
                 return;
             }
-            
+
             Instance = this;
-            Debug.Log("[LobbyController] ✅ Initialized successfully");
+            AdvancedDebugSystem.LogInfo("✅ Initialized successfully", LogCategory.Lobby | LogCategory.StateManagement);
         }
         
         private void Start()
@@ -58,19 +59,19 @@ namespace HackMonkeys.Core
                 _networkBootstrapper = NetworkBootstrapper.Instance;
                 
                 if (_lobbyState == null)
-                    Debug.LogWarning("[LobbyController] ⏳ Waiting for LobbyState.Instance...");
-                    
+                    AdvancedDebugSystem.LogWarning("⏳ Waiting for LobbyState.Instance...", LogCategory.Lobby | LogCategory.StateManagement);
+
                 if (_networkBootstrapper == null)
-                    Debug.LogWarning("[LobbyController] ⏳ Waiting for NetworkBootstrapper.Instance...");
+                    AdvancedDebugSystem.LogWarning("⏳ Waiting for NetworkBootstrapper.Instance...", LogCategory.Lobby | LogCategory.Networking);
                 
                 yield return new WaitForSeconds(0.1f);
             }
             
-            Debug.Log("[LobbyController] ✅ All references initialized successfully");
+            AdvancedDebugSystem.Log("[LobbyController] ✅ All references initialized successfully", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             // 🧪 DEBUG LOG
-            Debug.Log($"🧪 [LOBBYCONTROLLER] LobbyState: {_lobbyState != null}");
-            Debug.Log($"🧪 [LOBBYCONTROLLER] NetworkBootstrapper: {_networkBootstrapper != null}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYCONTROLLER] LobbyState: {_lobbyState != null}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"🧪 [LOBBYCONTROLLER] NetworkBootstrapper: {_networkBootstrapper != null}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         // ========================================
@@ -82,24 +83,24 @@ namespace HackMonkeys.Core
         /// </summary>
         public async void StartGame()
         {
-            Debug.Log("[LobbyController] 🚀 === STARTING GAME SEQUENCE ===");
+            AdvancedDebugSystem.Log("[LobbyController] 🚀 === STARTING GAME SEQUENCE ===", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             // Debug de estado actual
-            Debug.Log($"[LobbyController] IsRoomCreator: {IsRoomCreator}, IsInRoom: {IsInLobby}");
-            Debug.Log($"[LobbyController] AllPlayersReady: {_lobbyState?.AllPlayersReady}");
-            Debug.Log($"[LobbyController] PlayerCount: {_lobbyState?.PlayerCount}");
+            AdvancedDebugSystem.Log($"[LobbyController] IsRoomCreator: {IsRoomCreator}, IsInRoom: {IsInLobby}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"[LobbyController] AllPlayersReady: {_lobbyState?.AllPlayersReady}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"[LobbyController] PlayerCount: {_lobbyState?.PlayerCount}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             PlayerDataManager.Instance.UpdateSessionPlayers(_lobbyState);
                 
             string selectedMap = _lobbyState.GetSelectedMap();
             PlayerDataManager.Instance.SetSelectedMap(selectedMap);
-            Debug.Log($"[LobbyController] Selected map: {selectedMap}");
+            AdvancedDebugSystem.Log($"[LobbyController] Selected map: {selectedMap}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             // VALIDACIÓN Fail Fast
             if (!ValidateCanStartGame())
             {
                 string reason = GetStartGameValidationError();
-                Debug.LogError($"[LobbyController] ❌ Cannot start game: {reason}");
+                AdvancedDebugSystem.LogError($"[LobbyController] ❌ Cannot start game: {reason}", LogCategory.Networking | LogCategory.Photon);
                 OnActionFailed?.Invoke($"Cannot start game: {reason}");
                 OnGameStartFailed?.Invoke();
                 return;
@@ -107,44 +108,44 @@ namespace HackMonkeys.Core
             
             try
             {
-                Debug.Log("[LobbyController] ✅ Validation passed, starting game...");
+                AdvancedDebugSystem.Log("[LobbyController] ✅ Validation passed, starting game...", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 OnGameStarting?.Invoke();
 
                 string mapName = PlayerDataManager.Instance.SelectedMap;
                 int playerCount = _lobbyState.PlayerCount;
                 
-                Debug.Log($"[LobbyController] Starting match with map: {mapName}, players: {playerCount}");
+                AdvancedDebugSystem.Log($"[LobbyController] Starting match with map: {mapName}, players: {playerCount}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
 
                 bool coreReady = await _gameCore.StartMatch(mapName, playerCount);
-                Debug.Log($"[LobbyController] GameCore.StartMatch result: {coreReady}");
+                AdvancedDebugSystem.Log($"[LobbyController] GameCore.StartMatch result: {coreReady}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
 
                 if (coreReady)
                 {
-                    Debug.Log($"[LobbyController] Calling NetworkBootstrapper.StartGame...");
+                    AdvancedDebugSystem.Log($"[LobbyController] Calling NetworkBootstrapper.StartGame...", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                     bool success = await _networkBootstrapper.StartGame();
                     
                     if (success)
                     {
-                        Debug.Log("[LobbyController] ✅ Game started successfully!");
+                        AdvancedDebugSystem.Log("[LobbyController] ✅ Game started successfully!", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                     }
                     else
                     {
-                        Debug.LogError("[LobbyController] ❌ Failed to start game - NetworkBootstrapper error");
+                        AdvancedDebugSystem.LogError("[LobbyController] ❌ Failed to start game - NetworkBootstrapper error", LogCategory.Networking | LogCategory.Photon);
                         OnActionFailed?.Invoke("Failed to start game - network error");
                         OnGameStartFailed?.Invoke();
                     }
                 }
                 else
                 {
-                    Debug.LogError("[LobbyController] ❌ GameCore.StartMatch failed");
+                    AdvancedDebugSystem.LogError("[LobbyController] ❌ GameCore.StartMatch failed", LogCategory.Networking | LogCategory.Photon);
                     OnActionFailed?.Invoke("Failed to initialize game core");
                     OnGameStartFailed?.Invoke();
                 }
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[LobbyController] ❌ Exception starting game: {e.Message}");
-                Debug.LogError($"[LobbyController] Stack trace: {e.StackTrace}");
+                AdvancedDebugSystem.LogError($"[LobbyController] ❌ Exception starting game: {e.Message}", LogCategory.Networking | LogCategory.Photon);
+                AdvancedDebugSystem.LogError($"[LobbyController] Stack trace: {e.StackTrace}", LogCategory.Networking | LogCategory.Photon);
                 OnActionFailed?.Invoke($"Error starting game: {e.Message}");
                 OnGameStartFailed?.Invoke();
             }
@@ -155,11 +156,11 @@ namespace HackMonkeys.Core
         /// </summary>
         public async void LeaveLobby()
         {
-            Debug.Log("[LobbyController] 👋 Attempting to leave lobby...");
+            AdvancedDebugSystem.Log("[LobbyController] 👋 Attempting to leave lobby...", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
     
             if (!CanLeaveLobby)
             {
-                Debug.LogWarning("[LobbyController] ❌ Not in a lobby to leave");
+                AdvancedDebugSystem.LogWarning("[LobbyController] ❌ Not in a lobby to leave", LogCategory.Networking | LogCategory.Photon);
                 OnActionFailed?.Invoke("Not in a lobby");
                 return;
             }
@@ -171,7 +172,7 @@ namespace HackMonkeys.Core
                 // IMPORTANTE: Limpiar LobbyState ANTES de desconectar
                 if (_lobbyState != null)
                 {
-                    Debug.Log("[LobbyController] Clearing LobbyState before disconnect");
+                    AdvancedDebugSystem.Log("[LobbyController] Clearing LobbyState before disconnect", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
                     // Obtener referencia al jugador local antes de limpiar
                     var localPlayer = _lobbyState.LocalPlayer;
@@ -182,7 +183,7 @@ namespace HackMonkeys.Core
                     // Si tenemos un jugador local, asegurar que se destruya
                     if (localPlayer != null)
                     {
-                        Debug.Log("[LobbyController] Forcing cleanup of local player");
+                        AdvancedDebugSystem.Log("[LobbyController] Forcing cleanup of local player", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                         localPlayer.ForceCleanup();
                     }
                 }
@@ -193,27 +194,27 @@ namespace HackMonkeys.Core
                 // Ahora sí, desconectar de la red
                 await _networkBootstrapper.LeaveRoom();
         
-                Debug.Log("[LobbyController] ✅ Left lobby successfully");
+                AdvancedDebugSystem.Log("[LobbyController] ✅ Left lobby successfully", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         
                 // Limpiar referencias locales
                 CleanupLocalReferences();
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[LobbyController] ❌ Exception leaving lobby: {e.Message}");
+                AdvancedDebugSystem.LogError($"[LobbyController] ❌ Exception leaving lobby: {e.Message}", LogCategory.Networking | LogCategory.Photon);
                 OnActionFailed?.Invoke($"Error leaving lobby: {e.Message}");
             }
         }
         
         private void CleanupLocalReferences()
         {
-            Debug.Log("[LobbyController] Cleaning up local references");
+            AdvancedDebugSystem.Log("[LobbyController] Cleaning up local references", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
     
             // Verificar si hay LobbyPlayers huérfanos
             var orphanedPlayers = FindObjectsOfType<LobbyPlayer>();
             if (orphanedPlayers.Length > 0)
             {
-                Debug.LogWarning($"[LobbyController] Found {orphanedPlayers.Length} orphaned LobbyPlayers, destroying them");
+                AdvancedDebugSystem.LogWarning($"[LobbyController] Found {orphanedPlayers.Length} orphaned LobbyPlayers, destroying them", LogCategory.Networking | LogCategory.Photon);
                 foreach (var player in orphanedPlayers)
                 {
                     if (player != null && player.gameObject != null)
@@ -226,7 +227,7 @@ namespace HackMonkeys.Core
         
         public void OnUnexpectedDisconnection()
         {
-            Debug.Log("[LobbyController] Handling unexpected disconnection");
+            AdvancedDebugSystem.Log("[LobbyController] Handling unexpected disconnection", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
     
             // Limpiar estado local
             if (_lobbyState != null)
@@ -248,7 +249,7 @@ namespace HackMonkeys.Core
         {
             if (_lobbyState == null)
             {
-                Debug.LogError("[LobbyController] ❌ LobbyState not available");
+                AdvancedDebugSystem.LogError("[LobbyController] ❌ LobbyState not available", LogCategory.Networking | LogCategory.Photon);
                 OnActionFailed?.Invoke("Lobby state not available");
                 return;
             }
@@ -256,12 +257,12 @@ namespace HackMonkeys.Core
             var localPlayer = _lobbyState.LocalPlayer;
             if (localPlayer == null)
             {
-                Debug.LogWarning("[LobbyController] ❌ No local player found");
+                AdvancedDebugSystem.LogWarning("[LobbyController] ❌ No local player found", LogCategory.Networking | LogCategory.Photon);
                 OnActionFailed?.Invoke("Local player not found");
                 return;
             }
             
-            Debug.Log($"[LobbyController] 🔄 Toggling ready state for: {localPlayer.GetDisplayName()}");
+            AdvancedDebugSystem.Log($"[LobbyController] 🔄 Toggling ready state for: {localPlayer.GetDisplayName()}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             _lobbyState.ToggleLocalPlayerReady();
         }
@@ -273,30 +274,30 @@ namespace HackMonkeys.Core
         {
             if (!IsRoomCreator)
             {
-                Debug.LogError("[LobbyController] ❌ Only room creator can kick players");
+                AdvancedDebugSystem.LogError("[LobbyController] ❌ Only room creator can kick players", LogCategory.Networking | LogCategory.Photon);
                 OnActionFailed?.Invoke("Only room creator can kick players");
                 return;
             }
             
             if (playerToKick == null)
             {
-                Debug.LogWarning("[LobbyController] ❌ Cannot kick null player");
+                AdvancedDebugSystem.LogWarning("[LobbyController] ❌ Cannot kick null player", LogCategory.Networking | LogCategory.Photon);
                 OnActionFailed?.Invoke("Invalid player to kick");
                 return;
             }
             
             if (playerToKick.IsLocalPlayer)
             {
-                Debug.LogWarning("[LobbyController] ❌ Cannot kick local player");
+                AdvancedDebugSystem.LogWarning("[LobbyController] ❌ Cannot kick local player", LogCategory.Networking | LogCategory.Photon);
                 OnActionFailed?.Invoke("Cannot kick yourself");
                 return;
             }
             
-            Debug.Log($"[LobbyController] 🥾 Kicking player: {playerToKick.GetDisplayName()}");
+            AdvancedDebugSystem.Log($"[LobbyController] 🥾 Kicking player: {playerToKick.GetDisplayName()}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             // TODO: Implementar kick functionality en NetworkBootstrapper/Fusion
             // Por ahora, solo log
-            Debug.LogWarning("[LobbyController] ⚠️ Kick functionality not implemented yet");
+            AdvancedDebugSystem.LogWarning("[LobbyController] ⚠️ Kick functionality not implemented yet", LogCategory.Networking | LogCategory.Photon);
             OnActionFailed?.Invoke("Kick functionality not implemented");
         }
         
@@ -393,41 +394,41 @@ namespace HackMonkeys.Core
         [ContextMenu("Debug: Controller Status")]
         private void DebugControllerStatus()
         {
-            Debug.Log("=== LobbyController Status ===");
-            Debug.Log($"Instance: {Instance != null}");
-            Debug.Log($"LobbyState: {_lobbyState != null}");
-            Debug.Log($"NetworkBootstrapper: {_networkBootstrapper != null}");
-            Debug.Log($"Is Room Creator: {IsRoomCreator}");
-            Debug.Log($"Is In Lobby: {IsInLobby}");
-            Debug.Log($"Can Start Game: {CanStartGame}");
-            Debug.Log($"Can Leave Lobby: {CanLeaveLobby}");
+            AdvancedDebugSystem.Log("=== LobbyController Status ===", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Instance: {Instance != null}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"LobbyState: {_lobbyState != null}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"NetworkBootstrapper: {_networkBootstrapper != null}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Is Room Creator: {IsRoomCreator}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Is In Lobby: {IsInLobby}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Can Start Game: {CanStartGame}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Can Leave Lobby: {CanLeaveLobby}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             if (!CanStartGame)
             {
-                Debug.Log($"Start Game Error: {GetStartGameValidationError()}");
+                AdvancedDebugSystem.Log($"Start Game Error: {GetStartGameValidationError()}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             
             var info = GetLobbyInfo();
             if (info != null)
             {
-                Debug.Log($"Room: {info.RoomName} ({info.CurrentPlayers}/{info.MaxPlayers})");
-                Debug.Log($"Ready: {info.ReadyPlayers}/{info.CurrentPlayers} ({info.ReadyPercentage:P})");
+                AdvancedDebugSystem.Log($"Room: {info.RoomName} ({info.CurrentPlayers}/{info.MaxPlayers})", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+                AdvancedDebugSystem.Log($"Ready: {info.ReadyPlayers}/{info.CurrentPlayers} ({info.ReadyPercentage:P})", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             
-            Debug.Log("================================");
+            AdvancedDebugSystem.Log("================================", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         [ContextMenu("Debug: Test Start Game")]
         private void DebugTestStartGame()
         {
-            Debug.Log("🧪 [DEBUG] Testing start game...");
+            AdvancedDebugSystem.Log("🧪 [DEBUG] Testing start game...", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             StartGame();
         }
         
         [ContextMenu("Debug: Test Toggle Ready")]
         private void DebugTestToggleReady()
         {
-            Debug.Log("🧪 [DEBUG] Testing toggle ready...");
+            AdvancedDebugSystem.Log("🧪 [DEBUG] Testing toggle ready...", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             ToggleReady();
         }
         
@@ -436,7 +437,7 @@ namespace HackMonkeys.Core
         {
             if (Instance == this)
             {
-                Debug.Log("[LobbyController] 🧹 Instance destroyed, clearing singleton reference");
+                AdvancedDebugSystem.Log("[LobbyController] 🧹 Instance destroyed, clearing singleton reference", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 Instance = null;
             }
         }

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
 using UnityEngine.Events;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace MetaAvatarsVR.Networking.PuzzleSync
 {
@@ -110,7 +113,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         private void GenerateRandomizationSeed()
         {
             RandomizationSeed = UnityEngine.Random.Range(1000, 99999);
-            Debug.Log($"[NetworkedPuzzleManager] Generated randomization seed: {RandomizationSeed}");
+            AdvancedDebugSystem.Log($"[NetworkedPuzzleManager] Generated randomization seed: {RandomizationSeed}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         private int GetPuzzleSteps(int puzzleId)
@@ -131,7 +134,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         {
             if (!ValidatePuzzleAccess(puzzleId))
             {
-                Debug.LogWarning($"[NetworkedPuzzleManager] Player cannot start puzzle {puzzleId} yet");
+                AdvancedDebugSystem.LogWarning($"[NetworkedPuzzleManager] Player cannot start puzzle {puzzleId} yet", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
             
@@ -143,7 +146,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 CurrentPuzzleIndex = puzzleId;
                 
                 RPC_NotifyPuzzleStarted(puzzleId);
-                Debug.Log($"[NetworkedPuzzleManager] Puzzle {puzzleId} started by player {info.Source}");
+                AdvancedDebugSystem.Log($"[NetworkedPuzzleManager] Puzzle {puzzleId} started by player {info.Source}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
         }
         
@@ -173,7 +176,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 CompletePuzzle(puzzleId);
             }
             
-            Debug.Log($"[NetworkedPuzzleManager] Puzzle {puzzleId} progress: {progress.CurrentStep}/{progress.TotalSteps}");
+            AdvancedDebugSystem.Log($"[NetworkedPuzzleManager] Puzzle {puzzleId} progress: {progress.CurrentStep}/{progress.TotalSteps}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -206,7 +209,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             
             CheckAllPuzzlesCompleted();
             
-            Debug.Log($"[NetworkedPuzzleManager] Puzzle {puzzleId} completed!");
+            AdvancedDebugSystem.Log($"[NetworkedPuzzleManager] Puzzle {puzzleId} completed!", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -237,7 +240,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             
             RPC_NotifyPuzzleFailed(puzzleId);
             
-            Debug.Log($"[NetworkedPuzzleManager] Puzzle {puzzleId} failed!");
+            AdvancedDebugSystem.Log($"[NetworkedPuzzleManager] Puzzle {puzzleId} failed!", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -257,7 +260,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             progress.CurrentStep = 0;
             PuzzleProgresses.Set(puzzleId, progress);
             
-            Debug.Log($"[NetworkedPuzzleManager] Puzzle {puzzleId} reset");
+            AdvancedDebugSystem.Log($"[NetworkedPuzzleManager] Puzzle {puzzleId} reset", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -265,7 +268,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         {
             CurrentRoomName = roomName;
             OnRoomTransition?.Invoke(roomName);
-            Debug.Log($"[NetworkedPuzzleManager] Transitioning to room: {roomName}");
+            AdvancedDebugSystem.Log($"[NetworkedPuzzleManager] Transitioning to room: {roomName}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         private void CheckAllPuzzlesCompleted()
@@ -291,7 +294,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         private void RPC_NotifyAllPuzzlesCompleted()
         {
             OnAllPuzzlesCompleted?.Invoke();
-            Debug.Log("[NetworkedPuzzleManager] All puzzles completed! Game finished!");
+            AdvancedDebugSystem.Log("[NetworkedPuzzleManager] All puzzles completed! Game finished!", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         private bool ValidatePuzzleAccess(int puzzleId)
@@ -348,7 +351,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         private void RegisterNetworkCallbacks()
         {
-            Debug.Log($"[NetworkedPuzzleManager] Initialized with {_totalPuzzles} puzzles");
+            AdvancedDebugSystem.Log($"[NetworkedPuzzleManager] Initialized with {_totalPuzzles} puzzles", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         private void OnDestroy()

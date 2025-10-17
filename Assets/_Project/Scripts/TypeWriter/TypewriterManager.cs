@@ -2,6 +2,7 @@ using UnityEngine;
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using HackMonkeys.Debugging;
 
 /// <summary>
 /// Manager para controlar múltiples TypewriterEffect y secuencias complejas
@@ -136,7 +137,7 @@ public class TypewriterManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"TypewriterManager: No typewriter found with name '{typewriterName}'");
+            AdvancedDebugSystem.LogWarning($"TypewriterManager: No typewriter found with name '{typewriterName}'", LogCategory.Avatar);
         }
     }
     

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using HackMonkeys.Debugging;
 
 public class Puzzle02 : MonoBehaviour
 {
@@ -130,13 +131,13 @@ public class Puzzle02 : MonoBehaviour
     }
     public void GButton()
     {
-       //Debug.LogWarning("El sprite utilizado es "+Coord.ElementAt(posObj).Key.GetComponent<Image>().sprite);
+       //AdvancedDebugSystem.LogWarning("El sprite utilizado es "+Coord.ElementAt(posObj).Key.GetComponent<Image>().sprite, LogCategory.Avatar);
         string sprite = Coord.ElementAt(posObj).Key.GetComponent<Image>().sprite.name;
         GameObject piece = Coord.ElementAt(posObj).Key;
         switch (sprite)
         {
             case "Puzzle02_Vacio_Cuadruple":
-               // Debug.LogWarning("opcion 1");
+               // AdvancedDebugSystem.LogWarning("opcion 1", LogCategory.Avatar);
                 break;
             case "Puzzle02_Vacio_Triple":
                 Rotable.TryGetValue(piece,out int valT);
@@ -147,17 +148,17 @@ public class Puzzle02 : MonoBehaviour
                 simpleRotate(valT, T);
                 Rotable[piece] = valT;
                 originFill(Coord.ElementAt(posObj).Key.GetComponent<Image>(), originDirection(posObj), 3, valT);
-             //   Debug.LogWarning("opcion 2 con rotacion tipo: "+valT);
+             //   AdvancedDebugSystem.LogWarning("opcion 2 con rotacion tipo: "+valT, LogCategory.Avatar);
                 break;
             case "Puzzle02_Vacio_Vertical":
                 //es el 3 pasa al 1
-            //    Debug.LogWarning("opcion 3");
+            //    AdvancedDebugSystem.LogWarning("opcion 3", LogCategory.Avatar);
                 break;
             case "Puzzle02_Vacio_Horizontal":
                 //es el 1 pasa al 3
-            //    Debug.LogWarning("opcion 4");
+            //    AdvancedDebugSystem.LogWarning("opcion 4", LogCategory.Avatar);
                 break;
-            case "Puzzle02_Vacio_DesviaciÛn":
+            case "Puzzle02_Vacio_Desviaci√≥n":
                 Rotable.TryGetValue(piece, out int valD);
                 valD++;
                 if (valD > 3)
@@ -166,7 +167,7 @@ public class Puzzle02 : MonoBehaviour
                 simpleRotate(valD, D);
                 Rotable[piece] = valD;
                 originFill(Coord.ElementAt(posObj).Key.GetComponent<Image>(), originDirection(posObj), 1, valD);
-                //  Debug.LogWarning("opcion con rotacion tipo: " + valD);
+                //  AdvancedDebugSystem.LogWarning("opcion con rotacion tipo: " + valD, LogCategory.Avatar);
                 break;
                
         }
@@ -392,7 +393,7 @@ public class Puzzle02 : MonoBehaviour
                         break;
                 }
                 break;
-            case 4://2 conexiones o m·s
+            case 4://2 conexiones o m√°s
                 im.fillAmount = 1;
                 break;
             case -1://0 conexiones

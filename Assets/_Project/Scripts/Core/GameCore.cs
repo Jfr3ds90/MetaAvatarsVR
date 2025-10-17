@@ -8,6 +8,8 @@ using HackMonkeys.Core;
 using HackMonkeys.UI.Spatial;
 using Fusion;
 using DG.Tweening;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
 
 namespace HackMonkeys.Core
 {
@@ -115,7 +117,7 @@ namespace HackMonkeys.Core
             _instance = this;
             DontDestroyOnLoad(gameObject);
             
-            Debug.Log("[GameCore] 🎮 GameCore initialized");
+            AdvancedDebugSystem.Log("[GameCore] 🎮 GameCore initialized", LogCategory.Avatar, LogLevel.Debug);
         }
 
         private void Start()
@@ -135,7 +137,7 @@ namespace HackMonkeys.Core
         #region Initialization
         private IEnumerator InitializeGame()
         {
-            Debug.Log("[GameCore] 🚀 Starting game initialization...");
+            AdvancedDebugSystem.Log("[GameCore] 🚀 Starting game initialization...", LogCategory.Avatar, LogLevel.Debug);
             
             // Obtener referencias a sistemas existentes
             yield return new WaitUntil(() => NetworkBootstrapper.Instance != null);
@@ -153,7 +155,7 @@ namespace HackMonkeys.Core
             // Transicionar a menú principal
             yield return TransitionToStateCoroutine(GameState.NameTag);
             
-            Debug.Log("[GameCore] ✅ Game initialization complete");
+            AdvancedDebugSystem.Log("[GameCore] ✅ Game initialization complete", LogCategory.Avatar, LogLevel.Debug);
         }
 
         private void CreateVRFadeCanvas()
@@ -185,7 +187,7 @@ namespace HackMonkeys.Core
         {
             if (_currentState == newState)
             {
-                Debug.LogWarning($"[GameCore] Already in state {newState}");
+                AdvancedDebugSystem.LogWarning($"[GameCore] Already in state {newState}", LogCategory.Avatar);
                 return;
             }
 
@@ -194,7 +196,7 @@ namespace HackMonkeys.Core
 
         private IEnumerator TransitionToStateCoroutine(GameState newState)
         {
-            Debug.Log($"[GameCore] 🔄 Transitioning from {_currentState} to {newState}");
+            AdvancedDebugSystem.Log($"[GameCore] 🔄 Transitioning from {_currentState} to {newState}", LogCategory.Avatar, LogLevel.Debug);
             
             _previousState = _currentState;
             
@@ -210,7 +212,7 @@ namespace HackMonkeys.Core
             // Notify listeners
             OnStateChanged?.Invoke(_previousState, _currentState);
             
-            Debug.Log($"[GameCore] ✅ Transitioned to {newState}");
+            AdvancedDebugSystem.Log($"[GameCore] ✅ Transitioned to {newState}", LogCategory.Avatar, LogLevel.Debug);
         }
 
         private IEnumerator ExitState(GameState state)
@@ -303,7 +305,7 @@ namespace HackMonkeys.Core
 
         private IEnumerator EnterLoadingMatch()
         {
-            Debug.Log($"[GameCore] Entering LoadingMatch state - IsHost: {NetworkBootstrapper.Instance?.IsHost}");
+            AdvancedDebugSystem.Log($"[GameCore] Entering LoadingMatch state - IsHost: {NetworkBootstrapper.Instance?.IsHost}", LogCategory.Avatar, LogLevel.Debug);
     
             // Fade out
             yield return FadeOut();
@@ -317,11 +319,11 @@ namespace HackMonkeys.Core
             // Los clientes solo esperan, el host inicia el cambio de escena
             if (NetworkBootstrapper.Instance?.IsHost == true)
             {
-                Debug.Log("[GameCore] HOST: Will trigger scene change");
+                AdvancedDebugSystem.Log("[GameCore] HOST: Will trigger scene change", LogCategory.Avatar, LogLevel.Debug);
             }
             else
             {
-                Debug.Log("[GameCore] CLIENT: Waiting for scene sync from host");
+                AdvancedDebugSystem.Log("[GameCore] CLIENT: Waiting for scene sync from host", LogCategory.Avatar, LogLevel.Debug);
             }
         }
 
@@ -337,7 +339,7 @@ namespace HackMonkeys.Core
             // Fade in al juego
             yield return FadeIn();
             
-            Debug.Log("[GameCore] 🎮 Match started!");
+            AdvancedDebugSystem.Log("[GameCore] 🎮 Match started!", LogCategory.Avatar, LogLevel.Debug);
         }
 
         private IEnumerator EnterResults()
@@ -374,7 +376,7 @@ namespace HackMonkeys.Core
         /// </summary>
         public void OnJoinedLobby(string roomName, bool isHost)
         {
-            Debug.Log($"[GameCore] Joined lobby: {roomName} (Host: {isHost})");
+            AdvancedDebugSystem.Log($"[GameCore] Joined lobby: {roomName} (Host: {isHost})", LogCategory.Avatar, LogLevel.Debug);
             TransitionToState(GameState.InLobby);
         }
 
@@ -385,14 +387,14 @@ namespace HackMonkeys.Core
         {
             if (_currentState != GameState.InLobby)
             {
-                Debug.LogError("[GameCore] Can only start match from lobby");
+                AdvancedDebugSystem.LogError("[GameCore] Can only start match from lobby", LogCategory.Avatar);
                 return false;
             }
     
             // SOLO el host ejecuta esta lógica
             if (NetworkBootstrapper.Instance?.IsHost != true)
             {
-                Debug.LogWarning("[GameCore] Only host can start match - clients wait for scene sync");
+                AdvancedDebugSystem.LogWarning("[GameCore] Only host can start match - clients wait for scene sync", LogCategory.Avatar);
                 return false;
             }
     
@@ -434,7 +436,7 @@ namespace HackMonkeys.Core
         {
             if (_currentState != GameState.InMatch)
             {
-                Debug.LogWarning("[GameCore] Not in match, cannot end");
+                AdvancedDebugSystem.LogWarning("[GameCore] Not in match, cannot end", LogCategory.Avatar);
                 return;
             }
             
@@ -468,7 +470,7 @@ namespace HackMonkeys.Core
         /// </summary>
         public void OnNetworkDisconnected()
         {
-            Debug.LogWarning("[GameCore] Network disconnected!");
+            AdvancedDebugSystem.LogWarning("[GameCore] Network disconnected!", LogCategory.Avatar);
             
             if (_currentState == GameState.InMatch || _currentState == GameState.InLobby)
             {
@@ -482,7 +484,7 @@ namespace HackMonkeys.Core
         {
             if (vrLoadingEnvironmentPrefab == null)
             {
-                Debug.LogWarning("[GameCore] No VR loading environment prefab assigned");
+                AdvancedDebugSystem.LogWarning("[GameCore] No VR loading environment prefab assigned", LogCategory.Avatar);
                 yield break;
             }
             
@@ -564,14 +566,14 @@ namespace HackMonkeys.Core
         private void ShowVRNotification(string message, float duration = 2f)
         {
             // TODO: Implementar notificaciones 3D en VR
-            Debug.Log($"[VR Notification] {message}");
+            AdvancedDebugSystem.Log($"[VR Notification] {message}", LogCategory.Avatar, LogLevel.Debug);
         }
         #endregion
 
         #region Scene Management
         private IEnumerator LoadSceneAsync(string sceneName)
         {
-            Debug.Log($"[GameCore] Loading scene: {sceneName}");
+            AdvancedDebugSystem.Log($"[GameCore] Loading scene: {sceneName}", LogCategory.Avatar, LogLevel.Debug);
             
             AsyncOperation loadOperation = SceneManager.LoadSceneAsync(sceneName);
             
@@ -582,7 +584,7 @@ namespace HackMonkeys.Core
                 yield return null;
             }
             
-            Debug.Log($"[GameCore] Scene loaded: {sceneName}");
+            AdvancedDebugSystem.Log($"[GameCore] Scene loaded: {sceneName}", LogCategory.Avatar, LogLevel.Debug);
         }
         
         /// <summary>
@@ -590,7 +592,7 @@ namespace HackMonkeys.Core
         /// </summary>
         public void OnClientSceneChangeStarted()
         {
-            Debug.Log("[GameCore] 📱 CLIENT: Scene change detected");
+            AdvancedDebugSystem.Log("[GameCore] 📱 CLIENT: Scene change detected", LogCategory.Avatar, LogLevel.Debug);
     
             if (_currentState == GameState.InLobby)
             {
@@ -613,13 +615,13 @@ namespace HackMonkeys.Core
         private void SaveMatchResults(MatchResult result)
         {
             // TODO: Implementar guardado de resultados
-            Debug.Log($"[GameCore] Match results saved");
+            AdvancedDebugSystem.Log($"[GameCore] Match results saved", LogCategory.Avatar, LogLevel.Debug);
         }
 
         private void CleanupGameplaySystems()
         {
             // TODO: Limpiar sistemas de gameplay
-            Debug.Log("[GameCore] Gameplay systems cleaned up");
+            AdvancedDebugSystem.Log("[GameCore] Gameplay systems cleaned up", LogCategory.Avatar, LogLevel.Debug);
         }
         #endregion
 
@@ -627,12 +629,12 @@ namespace HackMonkeys.Core
         [ContextMenu("Debug: Print Current State")]
         private void DebugPrintState()
         {
-            Debug.Log($"=== GameCore State ===");
-            Debug.Log($"Current: {_currentState}");
-            Debug.Log($"Previous: {_previousState}");
-            Debug.Log($"Is In Game: {IsInGame}");
-            Debug.Log($"Is Loading: {IsLoading}");
-            Debug.Log($"====================");
+            AdvancedDebugSystem.Log($"=== GameCore State ===", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Current: {_currentState}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Previous: {_previousState}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Is In Game: {IsInGame}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Is Loading: {IsLoading}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"====================", LogCategory.Avatar, LogLevel.Debug);
         }
 
         [ContextMenu("Test: Start Match")]

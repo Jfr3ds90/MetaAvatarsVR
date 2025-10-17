@@ -1,4 +1,5 @@
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 namespace HackMonkeys.UI.Theme
 {
@@ -31,7 +32,7 @@ namespace HackMonkeys.UI.Theme
                     _instance = Resources.Load<UIColorTheme>("UIColorTheme");
                     if (_instance == null)
                     {
-                        Debug.LogWarning("UIColorTheme not found in Resources folder. Using default colors.");
+                        AdvancedDebugSystem.LogWarning("UIColorTheme not found in Resources folder. Using default colors.", LogCategory.Avatar);
                         _instance = CreateInstance<UIColorTheme>();
                     }
                 }

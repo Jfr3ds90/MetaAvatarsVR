@@ -2,6 +2,9 @@ using UnityEngine;
 using Fusion;
 using Cysharp.Threading.Tasks;
 using System.Threading;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace HackMonkeys.Core
 {
@@ -38,7 +41,7 @@ namespace HackMonkeys.Core
         #region Network Lifecycle
         public override void Spawned()
         {
-            Debug.Log($"[LOBBYPLAYER] 🎮 Spawned - PlayerRef: {Object.InputAuthority}, IsLocal: {HasInputAuthority}");
+            AdvancedDebugSystem.Log($"[LOBBYPLAYER] 🎮 Spawned - PlayerRef: {Object.InputAuthority}, IsLocal: {HasInputAuthority}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
 
             _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
             _cancellationTokenSource = new CancellationTokenSource();
@@ -57,7 +60,7 @@ namespace HackMonkeys.Core
 
         public override void Despawned(NetworkRunner runner, bool hasState)
         {
-            Debug.Log($"[LOBBYPLAYER] 👋 Despawning - Name: {_cachedPlayerName}, PlayerRef: {Object.InputAuthority}");
+            AdvancedDebugSystem.Log($"[LOBBYPLAYER] 👋 Despawning - Name: {_cachedPlayerName}, PlayerRef: {Object.InputAuthority}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
@@ -101,14 +104,14 @@ namespace HackMonkeys.Core
         {
             try
             {
-                Debug.Log("[LOBBYPLAYER] 🔄 Starting local player initialization...");
+                AdvancedDebugSystem.Log("[LOBBYPLAYER] 🔄 Starting local player initialization...", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 
                 // Obtener PlayerDataManager
                 _dataManager = PlayerDataManager.Instance;
                 
                 if (_dataManager == null)
                 {
-                    Debug.LogError("[LOBBYPLAYER] ❌ PlayerDataManager not found!");
+                    AdvancedDebugSystem.LogError("[LOBBYPLAYER] ❌ PlayerDataManager not found!", LogCategory.Networking | LogCategory.Photon);
                     return;
                 }
                 
@@ -117,7 +120,7 @@ namespace HackMonkeys.Core
                 
                 if (!dataReady)
                 {
-                    Debug.LogError("[LOBBYPLAYER] ❌ Player data not ready after timeout!");
+                    AdvancedDebugSystem.LogError("[LOBBYPLAYER] ❌ Player data not ready after timeout!", LogCategory.Networking | LogCategory.Photon);
                     return;
                 }
                 
@@ -131,12 +134,12 @@ namespace HackMonkeys.Core
                 if (string.IsNullOrEmpty(playerName))
                 {
                     playerName = $"Player_{Object.InputAuthority.PlayerId}";
-                    Debug.LogWarning($"[LOBBYPLAYER] Name was empty, using fallback: {playerName}");
+                    AdvancedDebugSystem.LogWarning($"[LOBBYPLAYER] Name was empty, using fallback: {playerName}", LogCategory.Networking | LogCategory.Photon);
                 }
                 
                 _cachedPlayerName = playerName;
                 
-                Debug.Log($"[LOBBYPLAYER] 📤 Sending player data - Name: {playerName}, IsRoomCreator: {isRoomCreator}");
+                AdvancedDebugSystem.Log($"[LOBBYPLAYER] 📤 Sending player data - Name: {playerName}, IsRoomCreator: {isRoomCreator}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 
                 // Enviar datos via RPC
                 RPC_SetPlayerData(playerName, playerColor, isRoomCreator);
@@ -153,15 +156,15 @@ namespace HackMonkeys.Core
                     await SyncWithCreatorMapAsync(cancellationToken);
                 }
                 
-                Debug.Log($"[LOBBYPLAYER] ✅ Local player initialization complete: {playerName}");
+                AdvancedDebugSystem.Log($"[LOBBYPLAYER] ✅ Local player initialization complete: {playerName}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             catch (System.OperationCanceledException)
             {
-                Debug.Log("[LOBBYPLAYER] Initialization cancelled");
+                AdvancedDebugSystem.Log("[LOBBYPLAYER] Initialization cancelled", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[LOBBYPLAYER] ❌ Initialization error: {e.Message}");
+                AdvancedDebugSystem.LogError($"[LOBBYPLAYER] ❌ Initialization error: {e.Message}", LogCategory.Networking | LogCategory.Photon);
             }
         }
 
@@ -173,7 +176,7 @@ namespace HackMonkeys.Core
             float timeout = 3f;
             float elapsed = 0f;
             
-            Debug.Log("[LOBBYPLAYER] ⏳ Waiting for data sync...");
+            AdvancedDebugSystem.Log("[LOBBYPLAYER] ⏳ Waiting for data sync...", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             while (!DataInitialized && elapsed < timeout)
             {
@@ -183,14 +186,14 @@ namespace HackMonkeys.Core
                 // Verificar si los datos están disponibles
                 if (!string.IsNullOrEmpty(PlayerName.ToString()))
                 {
-                    Debug.Log($"[LOBBYPLAYER] ✅ Data synced: {PlayerName}");
+                    AdvancedDebugSystem.Log($"[LOBBYPLAYER] ✅ Data synced: {PlayerName}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                     break;
                 }
             }
             
             if (elapsed >= timeout)
             {
-                Debug.LogWarning("[LOBBYPLAYER] ⚠️ Data sync timeout!");
+                AdvancedDebugSystem.LogWarning("[LOBBYPLAYER] ⚠️ Data sync timeout!", LogCategory.Networking | LogCategory.Photon);
             }
         }
 
@@ -201,7 +204,7 @@ namespace HackMonkeys.Core
         {
             try
             {
-                Debug.Log($"[LOBBYPLAYER] ⏳ Waiting for remote player data - PlayerRef: {Object.InputAuthority}");
+                AdvancedDebugSystem.Log($"[LOBBYPLAYER] ⏳ Waiting for remote player data - PlayerRef: {Object.InputAuthority}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 
                 float timeout = 5f;
                 float elapsed = 0f;
@@ -213,7 +216,7 @@ namespace HackMonkeys.Core
                     if (DataInitialized || !string.IsNullOrEmpty(PlayerName.ToString()))
                     {
                         _cachedPlayerName = PlayerName.ToString();
-                        Debug.Log($"[LOBBYPLAYER] ✅ Remote player data received: {_cachedPlayerName}");
+                        AdvancedDebugSystem.Log($"[LOBBYPLAYER] ✅ Remote player data received: {_cachedPlayerName}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                         break;
                     }
                     
@@ -223,7 +226,7 @@ namespace HackMonkeys.Core
                 
                 if (elapsed >= timeout)
                 {
-                    Debug.LogWarning($"[LOBBYPLAYER] ⚠️ Timeout waiting for remote player data - PlayerRef: {Object.InputAuthority}");
+                    AdvancedDebugSystem.LogWarning($"[LOBBYPLAYER] ⚠️ Timeout waiting for remote player data - PlayerRef: {Object.InputAuthority}", LogCategory.Networking | LogCategory.Photon);
                     _cachedPlayerName = $"Player_{Object.InputAuthority.PlayerId}";
                 }
                 
@@ -233,11 +236,11 @@ namespace HackMonkeys.Core
             }
             catch (System.OperationCanceledException)
             {
-                Debug.Log("[LOBBYPLAYER] Remote player wait cancelled");
+                AdvancedDebugSystem.Log("[LOBBYPLAYER] Remote player wait cancelled", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[LOBBYPLAYER] ❌ Error waiting for remote data: {e.Message}");
+                AdvancedDebugSystem.LogError($"[LOBBYPLAYER] ❌ Error waiting for remote data: {e.Message}", LogCategory.Networking | LogCategory.Photon);
             }
         }
 
@@ -254,7 +257,7 @@ namespace HackMonkeys.Core
                 var hostPlayer = LobbyState.Instance.RoomCreatorPlayer; // Usar RoomCreatorPlayer en lugar de HostPlayer
                 if (hostPlayer != null && !string.IsNullOrEmpty(hostPlayer.SelectedMap.ToString()))
                 {
-                    Debug.Log($"[LOBBYPLAYER] 🗺️ Player syncing with room creator's map: {hostPlayer.SelectedMap}");
+                    AdvancedDebugSystem.Log($"[LOBBYPLAYER] 🗺️ Player syncing with room creator's map: {hostPlayer.SelectedMap}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                     
                     var networkBootstrapper = NetworkBootstrapper.Instance;
                     if (networkBootstrapper != null)
@@ -278,12 +281,12 @@ namespace HackMonkeys.Core
             
             if (LobbyState.Instance == null)
             {
-                Debug.LogWarning("[LOBBYPLAYER] ⚠️ LobbyState not available for registration");
+                AdvancedDebugSystem.LogWarning("[LOBBYPLAYER] ⚠️ LobbyState not available for registration", LogCategory.Networking | LogCategory.Photon);
                 WaitForLobbyStateAsync(_cancellationTokenSource.Token).Forget();
                 return;
             }
             
-            Debug.Log($"[LOBBYPLAYER] 📝 Registering player - Name: {GetDisplayName()}, PlayerRef: {PlayerRef}");
+            AdvancedDebugSystem.Log($"[LOBBYPLAYER] 📝 Registering player - Name: {GetDisplayName()}, PlayerRef: {PlayerRef}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             LobbyState.Instance.RegisterPlayer(this);
             _isRegistered = true;
@@ -314,12 +317,12 @@ namespace HackMonkeys.Core
                 }
                 else
                 {
-                    Debug.LogError("[LOBBYPLAYER] ❌ LobbyState not found after timeout!");
+                    AdvancedDebugSystem.LogError("[LOBBYPLAYER] ❌ LobbyState not found after timeout!", LogCategory.Networking | LogCategory.Photon);
                 }
             }
             catch (System.OperationCanceledException)
             {
-                Debug.Log("[LOBBYPLAYER] LobbyState wait cancelled");
+                AdvancedDebugSystem.Log("[LOBBYPLAYER] LobbyState wait cancelled", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
         }
 
@@ -344,12 +347,12 @@ namespace HackMonkeys.Core
         [Rpc(RpcSources.InputAuthority, RpcTargets.All)] // En Shared Mode, enviamos a todos
         private void RPC_SetPlayerData(NetworkString<_32> name, Color color, NetworkBool isRoomCreator)
         {
-            Debug.Log($"[LOBBYPLAYER-RPC] 📥 Setting player data - Name: {name}, IsRoomCreator: {isRoomCreator}, PlayerRef: {Object.InputAuthority}");
+            AdvancedDebugSystem.Log($"[LOBBYPLAYER-RPC] 📥 Setting player data - Name: {name}, IsRoomCreator: {isRoomCreator}, PlayerRef: {Object.InputAuthority}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             // En Shared Mode, cada jugador actualiza sus propios datos
             if (!HasInputAuthority)
             {
-                Debug.Log("[LOBBYPLAYER-RPC] Received remote player data");
+                AdvancedDebugSystem.Log("[LOBBYPLAYER-RPC] Received remote player data", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 return;
             }
             
@@ -373,7 +376,7 @@ namespace HackMonkeys.Core
                 {
                     string defaultMap = networkBootstrapper.GetDefaultSceneName();
                     SelectedMap = defaultMap;
-                    Debug.Log($"[LOBBYPLAYER-RPC] Room creator initialized with default map: {defaultMap}");
+                    AdvancedDebugSystem.Log($"[LOBBYPLAYER-RPC] Room creator initialized with default map: {defaultMap}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                     
                     // Notificar a todos del mapa
                     RPC_NotifyMapChange(defaultMap);
@@ -390,7 +393,7 @@ namespace HackMonkeys.Core
         [Rpc(RpcSources.All, RpcTargets.All)] // En Shared Mode, cualquiera puede notificar
         private void RPC_NotifyDataReady(PlayerRef playerRef, NetworkString<_32> playerName)
         {
-            Debug.Log($"[LOBBYPLAYER-RPC] 📢 Data ready notification - Player: {playerName} ({playerRef})");
+            AdvancedDebugSystem.Log($"[LOBBYPLAYER-RPC] 📢 Data ready notification - Player: {playerName} ({playerRef})", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             // Si es nuestro jugador local, confirmar sincronización
             if (HasInputAuthority)
@@ -413,12 +416,12 @@ namespace HackMonkeys.Core
         {
             if (!HasInputAuthority)
             {
-                Debug.LogWarning("[LOBBYPLAYER] Cannot toggle ready - not local player");
+                AdvancedDebugSystem.LogWarning("[LOBBYPLAYER] Cannot toggle ready - not local player", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
 
             bool newReadyState = !IsReady;
-            Debug.Log($"[LOBBYPLAYER] 🔄 Toggling ready to: {newReadyState}");
+            AdvancedDebugSystem.Log($"[LOBBYPLAYER] 🔄 Toggling ready to: {newReadyState}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             RPC_SetReady(newReadyState);
         }
@@ -430,7 +433,7 @@ namespace HackMonkeys.Core
             if (HasInputAuthority)
             {
                 IsReady = ready;
-                Debug.Log($"[LOBBYPLAYER] Ready state set to: {ready}");
+                AdvancedDebugSystem.Log($"[LOBBYPLAYER] Ready state set to: {ready}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 // Notificar a todos del cambio
                 RPC_NotifyReadyStateChanged(Object.InputAuthority, ready);
             }
@@ -462,12 +465,12 @@ namespace HackMonkeys.Core
         [Rpc(RpcSources.InputAuthority, RpcTargets.All)] // En Shared Mode
         public void RPC_ChangeMap(NetworkString<_64> mapName)
         {
-            Debug.Log($"[LOBBYPLAYER-RPC] 📤 RPC_ChangeMap received: {mapName}, IsRoomCreator: {IsRoomCreator}");
+            AdvancedDebugSystem.Log($"[LOBBYPLAYER-RPC] 📤 RPC_ChangeMap received: {mapName}, IsRoomCreator: {IsRoomCreator}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             // Solo el creador de la sala puede cambiar el mapa
             if (!IsRoomCreator)
             {
-                Debug.LogWarning("[LOBBYPLAYER] Non-room-creator tried to change map!");
+                AdvancedDebugSystem.LogWarning("[LOBBYPLAYER] Non-room-creator tried to change map!", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
             
@@ -475,7 +478,7 @@ namespace HackMonkeys.Core
             if (HasInputAuthority && IsRoomCreator)
             {
                 SelectedMap = mapName;
-                Debug.Log($"[LOBBYPLAYER-RPC] ✅ Room creator updated SelectedMap to: {mapName}");
+                AdvancedDebugSystem.Log($"[LOBBYPLAYER-RPC] ✅ Room creator updated SelectedMap to: {mapName}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 
                 // Notificar a todos los jugadores
                 RPC_NotifyMapChange(mapName);
@@ -485,11 +488,11 @@ namespace HackMonkeys.Core
         [Rpc(RpcSources.All, RpcTargets.All)] // En Shared Mode
         private void RPC_NotifyMapChange(NetworkString<_64> mapName)
         {
-            Debug.Log($"[LOBBYPLAYER-RPC] 📥 Map change notification received: {mapName}, IsRoomCreator: {IsRoomCreator}");
+            AdvancedDebugSystem.Log($"[LOBBYPLAYER-RPC] 📥 Map change notification received: {mapName}, IsRoomCreator: {IsRoomCreator}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             // En Shared Mode, todos actualizan la selección del mapa localmente
             SelectedMap = mapName;
-            Debug.Log($"[LOBBYPLAYER-RPC] ✅ Updated SelectedMap to: {mapName}");
+            AdvancedDebugSystem.Log($"[LOBBYPLAYER-RPC] ✅ Updated SelectedMap to: {mapName}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             if (LobbyState.Instance != null)
             {
@@ -499,7 +502,7 @@ namespace HackMonkeys.Core
                 // Todos actualizan su NetworkBootstrapper
                 if (NetworkBootstrapper.Instance != null)
                 {
-                    Debug.Log($"[LOBBYPLAYER-RPC] 🗺️ Updating NetworkBootstrapper map to: {mapName}");
+                    AdvancedDebugSystem.Log($"[LOBBYPLAYER-RPC] 🗺️ Updating NetworkBootstrapper map to: {mapName}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                     NetworkBootstrapper.Instance.SelectedSceneName = mapName.ToString();
                 }
             }
@@ -517,7 +520,7 @@ namespace HackMonkeys.Core
                     switch (change)
                     {
                         case nameof(IsReady):
-                            Debug.Log($"[LOBBYPLAYER] Ready state changed: {IsReady}");
+                            AdvancedDebugSystem.Log($"[LOBBYPLAYER] Ready state changed: {IsReady}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                             if (LobbyState.Instance != null && _isRegistered)
                             {
                                 LobbyState.Instance.UpdatePlayerDisplay(this);
@@ -525,7 +528,7 @@ namespace HackMonkeys.Core
                             break;
                             
                         case nameof(SelectedMap):
-                            Debug.Log($"[LOBBYPLAYER] Map changed: {SelectedMap}");
+                            AdvancedDebugSystem.Log($"[LOBBYPLAYER] Map changed: {SelectedMap}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                             if (IsRoomCreator && LobbyState.Instance != null)
                             {
                                 LobbyState.Instance.UpdateMapSelection(SelectedMap.ToString());
@@ -576,7 +579,7 @@ namespace HackMonkeys.Core
         /// </summary>
         public void ForceCleanup()
         {
-            Debug.Log($"[LOBBYPLAYER] Force cleanup - Name: {_cachedPlayerName}");
+            AdvancedDebugSystem.Log($"[LOBBYPLAYER] Force cleanup - Name: {_cachedPlayerName}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             _cancellationTokenSource?.Cancel();
             
@@ -592,7 +595,7 @@ namespace HackMonkeys.Core
         #region Unity Callbacks
         private void OnDestroy()
         {
-            Debug.Log($"[LOBBYPLAYER] OnDestroy - Name: {_cachedPlayerName}");
+            AdvancedDebugSystem.Log($"[LOBBYPLAYER] OnDestroy - Name: {_cachedPlayerName}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
@@ -612,16 +615,16 @@ namespace HackMonkeys.Core
         [ContextMenu("Debug: Player State")]
         private void DebugPlayerState()
         {
-            Debug.Log($"=== LobbyPlayer Debug ===");
-            Debug.Log($"Name: {GetDisplayName()}");
-            Debug.Log($"Cached Name: {_cachedPlayerName}");
-            Debug.Log($"Ready: {IsReady}");
-            Debug.Log($"Host: {IsHost}");
-            Debug.Log($"IsLocal: {IsLocalPlayer}");
-            Debug.Log($"DataInitialized: {DataInitialized}");
-            Debug.Log($"IsRegistered: {_isRegistered}");
-            Debug.Log($"PlayerRef: {PlayerRef}");
-            Debug.Log($"=========================");
+            AdvancedDebugSystem.Log($"=== LobbyPlayer Debug ===", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Name: {GetDisplayName()}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Cached Name: {_cachedPlayerName}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Ready: {IsReady}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Host: {IsHost}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"IsLocal: {IsLocalPlayer}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"DataInitialized: {DataInitialized}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"IsRegistered: {_isRegistered}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"PlayerRef: {PlayerRef}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"=========================", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         #endregion
     }

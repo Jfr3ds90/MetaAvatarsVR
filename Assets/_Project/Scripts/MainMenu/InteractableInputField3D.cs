@@ -7,6 +7,7 @@ using System.Text;
 using System.Collections;
 using Oculus.Interaction.Surfaces;
 using System.Collections.Generic;
+using HackMonkeys.Debugging;
 
 namespace HackMonkeys.UI.Spatial
 {
@@ -88,7 +89,7 @@ namespace HackMonkeys.UI.Spatial
             _keyboardManager = VirtualKeyboardManager.Instance;
             if (_keyboardManager == null)
             {
-                Debug.LogError("VirtualKeyboardManager not found! Please ensure there is a VirtualKeyboardManager in the scene with a keyboard prefab assigned.");
+                AdvancedDebugSystem.LogError("VirtualKeyboardManager not found! Please ensure there is a VirtualKeyboardManager in the scene with a keyboard prefab assigned.", LogCategory.Avatar);
             }
         }
         
@@ -506,7 +507,7 @@ namespace HackMonkeys.UI.Spatial
             // Could show a tooltip or error message
             if (!string.IsNullOrEmpty(validationErrorMessage))
             {
-                Debug.Log($"Validation Error: {validationErrorMessage}");
+                AdvancedDebugSystem.Log($"Validation Error: {validationErrorMessage}", LogCategory.Avatar, LogLevel.Debug);
                 PlayErrorSound();
             }
         }

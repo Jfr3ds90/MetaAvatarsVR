@@ -3,6 +3,9 @@ using System;
 using System.Collections.Generic;
 using Fusion;
 using Cysharp.Threading.Tasks;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace HackMonkeys.Core
 {
@@ -93,7 +96,7 @@ namespace HackMonkeys.Core
             
             _isInitializing = false;
             
-            Debug.Log($"[PlayerDataManager] ✅ Initialized - Name: {_playerName}, Color: {ColorUtility.ToHtmlStringRGB(_playerColor)}");
+            AdvancedDebugSystem.Log($"[PlayerDataManager] ✅ Initialized - Name: {_playerName}, Color: {ColorUtility.ToHtmlStringRGB(_playerColor)}", LogCategory.Avatar, LogLevel.Debug);
         }
 
         private void LoadOrCreateData()
@@ -102,7 +105,7 @@ namespace HackMonkeys.Core
             if (!string.IsNullOrEmpty(overridePlayerName))
             {
                 _playerName = overridePlayerName;
-                Debug.Log($"[PlayerDataManager] Using override name: {_playerName}");
+                AdvancedDebugSystem.Log($"[PlayerDataManager] Using override name: {_playerName}", LogCategory.Avatar, LogLevel.Debug);
             }
             else if (PlayerPrefs.HasKey(Keys.PLAYER_NAME))
             {
@@ -115,20 +118,20 @@ namespace HackMonkeys.Core
                     SavePlayerName();
                 }
                 
-                Debug.Log($"[PlayerDataManager] Loaded saved name: {_playerName}");
+                AdvancedDebugSystem.Log($"[PlayerDataManager] Loaded saved name: {_playerName}", LogCategory.Avatar, LogLevel.Debug);
             }
             else
             {
                 _playerName = GenerateRandomName();
                 SavePlayerName();
-                Debug.Log($"[PlayerDataManager] Generated new name: {_playerName}");
+                AdvancedDebugSystem.Log($"[PlayerDataManager] Generated new name: {_playerName}", LogCategory.Avatar, LogLevel.Debug);
             }
             
             // Cargar o generar color
             if (overridePlayerColor != Color.clear && overridePlayerColor.a > 0)
             {
                 _playerColor = overridePlayerColor;
-                Debug.Log($"[PlayerDataManager] Using override color");
+                AdvancedDebugSystem.Log($"[PlayerDataManager] Using override color", LogCategory.Avatar, LogLevel.Debug);
             }
             else if (PlayerPrefs.HasKey(Keys.PLAYER_COLOR_R))
             {
@@ -136,13 +139,13 @@ namespace HackMonkeys.Core
                 float g = PlayerPrefs.GetFloat(Keys.PLAYER_COLOR_G);
                 float b = PlayerPrefs.GetFloat(Keys.PLAYER_COLOR_B);
                 _playerColor = new Color(r, g, b);
-                Debug.Log($"[PlayerDataManager] Loaded saved color");
+                AdvancedDebugSystem.Log($"[PlayerDataManager] Loaded saved color", LogCategory.Avatar, LogLevel.Debug);
             }
             else
             {
                 _playerColor = GenerateRandomColor();
                 SavePlayerColor();
-                Debug.Log($"[PlayerDataManager] Generated new color");
+                AdvancedDebugSystem.Log($"[PlayerDataManager] Generated new color", LogCategory.Avatar, LogLevel.Debug);
             }
 
             _hasLoadedData = true;
@@ -187,7 +190,7 @@ namespace HackMonkeys.Core
             {
                 _playerName = GenerateRandomName();
                 SavePlayerName();
-                Debug.LogWarning($"[PlayerDataManager] Name was empty, generated: {_playerName}");
+                AdvancedDebugSystem.LogWarning($"[PlayerDataManager] Name was empty, generated: {_playerName}", LogCategory.Avatar);
             }
             
             return _playerName;
@@ -205,7 +208,7 @@ namespace HackMonkeys.Core
             {
                 _playerColor = GenerateRandomColor();
                 SavePlayerColor();
-                Debug.LogWarning("[PlayerDataManager] Color was invalid, generated new one");
+                AdvancedDebugSystem.LogWarning("[PlayerDataManager] Color was invalid, generated new one", LogCategory.Avatar);
             }
             
             return _playerColor;
@@ -225,7 +228,7 @@ namespace HackMonkeys.Core
             
             if (!_hasLoadedData)
             {
-                Debug.LogError("[PlayerDataManager] Data not ready after timeout!");
+                AdvancedDebugSystem.LogError("[PlayerDataManager] Data not ready after timeout!", LogCategory.Avatar);
                 LoadOrCreateData(); // Forzar carga
             }
             
@@ -240,14 +243,14 @@ namespace HackMonkeys.Core
 
             _playerName = name;
             SavePlayerName();
-            Debug.Log($"[PlayerDataManager] Name updated to: {_playerName}");
+            AdvancedDebugSystem.Log($"[PlayerDataManager] Name updated to: {_playerName}", LogCategory.Avatar, LogLevel.Debug);
         }
 
         public void SetPlayerColor(Color color)
         {
             _playerColor = color;
             SavePlayerColor();
-            Debug.Log($"[PlayerDataManager] Color updated");
+            AdvancedDebugSystem.Log($"[PlayerDataManager] Color updated", LogCategory.Avatar, LogLevel.Debug);
         }
         #endregion
 
@@ -259,7 +262,7 @@ namespace HackMonkeys.Core
             _currentRoomName = roomName;
             _sessionPlayers = new Dictionary<PlayerRef, SessionPlayerData>();
 
-            Debug.Log($"[PlayerDataManager] Session started - Host: {isHost}, Room: {roomName}, PlayerRef: {localRef}");
+            AdvancedDebugSystem.Log($"[PlayerDataManager] Session started - Host: {isHost}, Room: {roomName}, PlayerRef: {localRef}", LogCategory.Avatar, LogLevel.Debug);
         }
 
         public void UpdateSessionPlayers(LobbyState lobbyState)
@@ -281,7 +284,7 @@ namespace HackMonkeys.Core
 
             _selectedMap = lobbyState.GetSelectedMap();
 
-            Debug.Log($"[PlayerDataManager] Updated {_sessionPlayers.Count} players in session");
+            AdvancedDebugSystem.Log($"[PlayerDataManager] Updated {_sessionPlayers.Count} players in session", LogCategory.Avatar, LogLevel.Debug);
         }
 
         public void ClearSessionData()
@@ -292,7 +295,7 @@ namespace HackMonkeys.Core
             _selectedMap = null;
             _sessionPlayers?.Clear();
 
-            Debug.Log("[PlayerDataManager] Session data cleared");
+            AdvancedDebugSystem.Log("[PlayerDataManager] Session data cleared", LogCategory.Avatar, LogLevel.Debug);
         }
 
         public bool IsHost => _isHost;
@@ -313,7 +316,7 @@ namespace HackMonkeys.Core
         public void UpdateLocalPlayerRef(PlayerRef playerRef)
         {
             _localPlayerRef = playerRef;
-            Debug.Log($"[PlayerDataManager] Updated LocalPlayerRef: {playerRef}");
+            AdvancedDebugSystem.Log($"[PlayerDataManager] Updated LocalPlayerRef: {playerRef}", LogCategory.Avatar, LogLevel.Debug);
         }
 
         public void UpdateSessionInfo(string selectedMap, string roomName = null)
@@ -322,13 +325,13 @@ namespace HackMonkeys.Core
             if (!string.IsNullOrEmpty(roomName))
                 _currentRoomName = roomName;
             
-            Debug.Log($"[PlayerDataManager] Updated session info - Map: {selectedMap}");
+            AdvancedDebugSystem.Log($"[PlayerDataManager] Updated session info - Map: {selectedMap}", LogCategory.Avatar, LogLevel.Debug);
         }
 
         public void SetSelectedMap(string mapName)
         {
             _selectedMap = mapName;
-            Debug.Log($"[PlayerDataManager] Selected map: {mapName}");
+            AdvancedDebugSystem.Log($"[PlayerDataManager] Selected map: {mapName}", LogCategory.Avatar, LogLevel.Debug);
         }
 
         public void UpdateSelectedMapFromLobbyPlayer()
@@ -339,7 +342,7 @@ namespace HackMonkeys.Core
                 if (hostPlayer != null)
                 {
                     _selectedMap = hostPlayer.SelectedMap.ToString();
-                    Debug.Log($"[PlayerDataManager] Updated map from host player: {_selectedMap}");
+                    AdvancedDebugSystem.Log($"[PlayerDataManager] Updated map from host player: {_selectedMap}", LogCategory.Avatar, LogLevel.Debug);
                 }
             }
         }
@@ -366,14 +369,14 @@ namespace HackMonkeys.Core
         {
             _playerName = GenerateRandomName();
             SavePlayerName();
-            Debug.Log($"[PlayerDataManager] Forced new random name: {_playerName}");
+            AdvancedDebugSystem.Log($"[PlayerDataManager] Forced new random name: {_playerName}", LogCategory.Avatar, LogLevel.Debug);
         }
 
         public void ForceRandomColor()
         {
             _playerColor = GenerateRandomColor();
             SavePlayerColor();
-            Debug.Log($"[PlayerDataManager] Forced new random color");
+            AdvancedDebugSystem.Log($"[PlayerDataManager] Forced new random color", LogCategory.Avatar, LogLevel.Debug);
         }
 
         public void ClearAllData()
@@ -385,7 +388,7 @@ namespace HackMonkeys.Core
             PlayerPrefs.Save();
 
             LoadOrCreateData();
-            Debug.Log("[PlayerDataManager] All data cleared and regenerated");
+            AdvancedDebugSystem.Log("[PlayerDataManager] All data cleared and regenerated", LogCategory.Avatar, LogLevel.Debug);
         }
         #endregion
 
@@ -393,14 +396,14 @@ namespace HackMonkeys.Core
         [ContextMenu("Debug: Print Current Settings")]
         private void DebugPrintSettings()
         {
-            Debug.Log("=== PlayerDataManager ===");
-            Debug.Log($"Player Name: {_playerName}");
-            Debug.Log($"Player Color: #{ColorUtility.ToHtmlStringRGB(_playerColor)}");
-            Debug.Log($"Has Loaded: {_hasLoadedData}");
-            Debug.Log($"Is Host: {_isHost}");
-            Debug.Log($"Local PlayerRef: {_localPlayerRef}");
-            Debug.Log($"Current Room: {_currentRoomName}");
-            Debug.Log("=========================");
+            AdvancedDebugSystem.Log("=== PlayerDataManager ===", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Player Name: {_playerName}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Player Color: #{ColorUtility.ToHtmlStringRGB(_playerColor)}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Has Loaded: {_hasLoadedData}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Is Host: {_isHost}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Local PlayerRef: {_localPlayerRef}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Current Room: {_currentRoomName}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log("=========================", LogCategory.Avatar, LogLevel.Debug);
         }
         #endregion
     }

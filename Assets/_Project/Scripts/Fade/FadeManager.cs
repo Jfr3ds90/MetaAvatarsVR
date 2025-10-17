@@ -4,6 +4,7 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 using Cysharp.Threading.Tasks;
+using HackMonkeys.Debugging;
 
 namespace FadeSystem
 {
@@ -285,7 +286,7 @@ namespace FadeSystem
         {
             if (fadeable == null || !fadeable.IsValid())
             {
-                Debug.LogWarning("FadeManager: Attempted to fade null or invalid object");
+                AdvancedDebugSystem.LogWarning("FadeManager: Attempted to fade null or invalid object", LogCategory.Avatar);
                 return -1;
             }
 
@@ -376,7 +377,7 @@ namespace FadeSystem
             }
             catch (Exception ex)
             {
-                Debug.LogError($"FadeManager: Error during fade execution: {ex.Message}");
+                AdvancedDebugSystem.LogError($"FadeManager: Error during fade execution: {ex.Message}", LogCategory.Avatar);
             }
             finally
             {

@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 public class CubeFigure : MonoBehaviour
 {
@@ -33,7 +34,7 @@ public class CubeFigure : MonoBehaviour
         {
             mainFigure.AddCoord(xValue,yValue,zValue, scannedTimes);mainFigure.CheckR();
            for (int i = 0; i < mainFigure.sizeExample.Count; i++)
-                Debug.Log("coordenada guardada " + mainFigure.sizeExample[i]);
+                AdvancedDebugSystem.Log("coordenada guardada " + mainFigure.sizeExample[i], LogCategory.Avatar, LogLevel.Debug);
         }
         if (Input.GetKeyUp(KeyCode.R))
             Check();*/
@@ -44,13 +45,13 @@ public class CubeFigure : MonoBehaviour
         if (!mainFigure.sizeExample.Contains(new Vector3(xValue, yValue, zValue)))
             mainFigure.sizeExample.Add(new Vector3(xValue, yValue, zValue));
 
-        //Debug.Log(mainFigure.sizeExample.Count+" es la cantidad");
+        //AdvancedDebugSystem.Log(mainFigure.sizeExample.Count+" es la cantidad", LogCategory.Avatar, LogLevel.Debug);
         for (int i = 0; i < mainFigure.sizeExample.Count; i++) //reviza si la coordenada existe
         {
-                Debug.Log(mainFigure.sizeExample[i].ToString()+" esta en la lista");
-            Debug.Log("esta en: "+i);
+                AdvancedDebugSystem.Log(mainFigure.sizeExample[i].ToString()+" esta en la lista", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log("esta en: "+i, LogCategory.Avatar, LogLevel.Debug);
         }
-        Debug.Log("Al final es "+existed+" tambien el ultimo valor es "+Lastvalue);
+        AdvancedDebugSystem.Log("Al final es "+existed+" tambien el ultimo valor es "+Lastvalue, LogCategory.Avatar, LogLevel.Debug);
     }
     public void Check() //revizar contacto desde el objeto manipulado 
     {
@@ -98,7 +99,7 @@ public class CubeFigure : MonoBehaviour
             
             location += new Vector3(0, hit.collider.GetComponent<CubeFigure>().location.y, 0);
             hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
-            Debug.Log("Deteccion arriba");
+            AdvancedDebugSystem.Log("Deteccion arriba", LogCategory.Avatar, LogLevel.Debug);
         }
         if (Physics.Raycast(transform.position, transform.right, out hit, 0.3f) && hit.collider.GetComponent<CubeFigure>() != null)
         {           
@@ -108,7 +109,7 @@ public class CubeFigure : MonoBehaviour
             
              location+= new Vector3(hit.collider.GetComponent<CubeFigure>().location.x, 0, 0);
             hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
-            Debug.Log("Deteccion derecha");
+            AdvancedDebugSystem.Log("Deteccion derecha", LogCategory.Avatar, LogLevel.Debug);
         }
 
         if (Physics.Raycast(transform.position, transform.forward, out hit, 0.3f) && hit.collider.GetComponent<CubeFigure>() != null)
@@ -119,7 +120,7 @@ public class CubeFigure : MonoBehaviour
             
             location += new Vector3(0, 0, hit.collider.GetComponent<CubeFigure>().location.z);
             hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
-            Debug.Log("Deteccion frente");
+            AdvancedDebugSystem.Log("Deteccion frente", LogCategory.Avatar, LogLevel.Debug);
         }
 
         if (Physics.Raycast(transform.position, -transform.up, out hit, 0.3f) && hit.collider.GetComponent<CubeFigure>() != null)
@@ -131,7 +132,7 @@ public class CubeFigure : MonoBehaviour
             hit.collider.GetComponent<CubeFigure>().location += new Vector3(0, location.y, 0);
             location += new Vector3(0, hit.collider.GetComponent<CubeFigure>().location.y, 0);
             hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
-            Debug.Log("Deteccion abajo");
+            AdvancedDebugSystem.Log("Deteccion abajo", LogCategory.Avatar, LogLevel.Debug);
         }
 
         if (Physics.Raycast(transform.position, -transform.right, out hit, 0.3f) && hit.collider.GetComponent<CubeFigure>() != null)
@@ -143,7 +144,7 @@ public class CubeFigure : MonoBehaviour
             hit.collider.GetComponent<CubeFigure>().location += new Vector3(location.x, 0, 0);
             location += new Vector3(hit.collider.GetComponent<CubeFigure>().location.x,0, 0);
             hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
-            Debug.Log("Deteccion izquierda");
+            AdvancedDebugSystem.Log("Deteccion izquierda", LogCategory.Avatar, LogLevel.Debug);
         }
         if (Physics.Raycast(transform.position, -transform.forward, out hit, 0.3f) && hit.collider.GetComponent<CubeFigure>() != null)
         {
@@ -153,7 +154,7 @@ public class CubeFigure : MonoBehaviour
             hit.collider.GetComponent<CubeFigure>().location += new Vector3(0, 0, location.z);
             location += new Vector3(0, 0, hit.collider.GetComponent<CubeFigure>().location.z);
             hit.collider.GetComponent<CubeFigure>().scannedTimes++;//para saber las veces que fue tocado por el raycast
-            Debug.Log("Deteccion atras");
+            AdvancedDebugSystem.Log("Deteccion atras", LogCategory.Avatar, LogLevel.Debug);
         }
     }
     public void CheckBase() //revizar contacto desde el que estaba (es mejor asi para que la posicion dependa de este y no sea manipulado al rotarse)
@@ -225,6 +226,6 @@ public class CubeFigure : MonoBehaviour
 
         }
         scanned = true;
-        Debug.Log(this+" esta ubicacion en "+location);
+        AdvancedDebugSystem.Log(this+" esta ubicacion en "+location, LogCategory.Avatar, LogLevel.Debug);
     }
 }

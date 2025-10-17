@@ -1,5 +1,6 @@
 using Unity.VisualScripting;
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 public class Chemistry : MonoBehaviour
 {
@@ -26,13 +27,13 @@ public class Chemistry : MonoBehaviour
                          switch (otherElement)
                          {
                              case 0:
-                                 Debug.Log("mismo elemento");
+                                 AdvancedDebugSystem.Log("mismo elemento", LogCategory.Avatar, LogLevel.Debug);
                                  break;
                              case 1:
-                                 Debug.Log("combinado con el elemento 1");
+                                 AdvancedDebugSystem.Log("combinado con el elemento 1", LogCategory.Avatar, LogLevel.Debug);
                                  break;
                              case 2:
-                                 Debug.Log("combinado con el elemento 2");
+                                 AdvancedDebugSystem.Log("combinado con el elemento 2", LogCategory.Avatar, LogLevel.Debug);
                                  break;
                              default:
                                  break;
@@ -42,13 +43,13 @@ public class Chemistry : MonoBehaviour
                          switch (otherElement)
                          {
                              case 0:
-                                 Debug.Log("combinado con el elemento 0");
+                                 AdvancedDebugSystem.Log("combinado con el elemento 0", LogCategory.Avatar, LogLevel.Debug);
                                  break;
                              case 1:
-                                 Debug.Log("mismo elemento");
+                                 AdvancedDebugSystem.Log("mismo elemento", LogCategory.Avatar, LogLevel.Debug);
                                  break;
                              case 2:
-                                 Debug.Log("combinado con el elemento 2");
+                                 AdvancedDebugSystem.Log("combinado con el elemento 2", LogCategory.Avatar, LogLevel.Debug);
                                  break;
                              default:
                                  break;
@@ -58,13 +59,13 @@ public class Chemistry : MonoBehaviour
                          switch (otherElement)
                          {
                              case 0:
-                                 Debug.Log("combinado con el elemento 0");
+                                 AdvancedDebugSystem.Log("combinado con el elemento 0", LogCategory.Avatar, LogLevel.Debug);
                                  break;
                              case 1:
-                                 Debug.Log("combinado con el elemento 1");
+                                 AdvancedDebugSystem.Log("combinado con el elemento 1", LogCategory.Avatar, LogLevel.Debug);
                                  break;
                              case 2:
-                                 Debug.Log("mismo elemento");
+                                 AdvancedDebugSystem.Log("mismo elemento", LogCategory.Avatar, LogLevel.Debug);
                                  break;
                              default:
                                  break;
@@ -75,7 +76,7 @@ public class Chemistry : MonoBehaviour
                  }
          }
          else*/
-        Debug.LogWarning(Chem.material.GetColor("_TopColor")+" es el color y el correcto es "+color+" y el objeto que toco es "+collision.gameObject.name+" con el tag "+collision.tag);
+        AdvancedDebugSystem.LogWarning(Chem.material.GetColor("_TopColor")+" es el color y el correcto es "+color+" y el objeto que toco es "+collision.gameObject.name+" con el tag "+collision.tag, LogCategory.Avatar);
         if (collision.gameObject.tag=="cubePuzzle")
             if( Chem.material.GetColor("_TopColor")==FindAnyObjectByType<ValveManager>().keyColor)
         {
@@ -90,13 +91,13 @@ public class Chemistry : MonoBehaviour
                 audioS.Play();
         }
         if (collision.gameObject.tag == "Player")
-            Debug.LogWarning("Detecto al jugador");
+            AdvancedDebugSystem.LogWarning("Detecto al jugador", LogCategory.Avatar);
     }
     private void OnParticleCollision(GameObject other)
     {
-        Debug.LogWarning("detecto particulas");
+        AdvancedDebugSystem.LogWarning("detecto particulas", LogCategory.Avatar);
         if (other != null)
-            Debug.Log(other.name + " es la particula que choco");
+            AdvancedDebugSystem.Log(other.name + " es la particula que choco", LogCategory.Avatar, LogLevel.Debug);
         //Chem.enabled = true;
         color = FindAnyObjectByType<ValveManager>().colorGas;
         
@@ -122,7 +123,7 @@ public class Chemistry : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         if(collision.gameObject.tag == "Player")
-            Debug.LogWarning("Detecto al jugador");
+            AdvancedDebugSystem.LogWarning("Detecto al jugador", LogCategory.Avatar);
     }
 
 }

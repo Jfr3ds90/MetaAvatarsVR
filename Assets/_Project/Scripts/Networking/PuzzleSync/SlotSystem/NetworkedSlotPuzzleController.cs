@@ -3,6 +3,9 @@ using System.Linq;
 using Fusion;
 using UnityEngine;
 using UnityEngine.Events;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
 {
@@ -131,7 +134,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
                     // IMPORTANTE: Asegurar que cada slot tenga su ID configurado
                     if (_slots[i].SlotId != i)
                     {
-                        Debug.LogWarning($"[{GetType().Name}] Slot {i} has mismatched ID: {_slots[i].SlotId}. Setting to {i}");
+                        AdvancedDebugSystem.LogWarning($"[{GetType().Name}] Slot {i} has mismatched ID: {_slots[i].SlotId}. Setting to {i}", LogCategory.Networking | LogCategory.Photon);
                         // En Shared Mode, necesitamos asegurar que los IDs estén sincronizados
                         _slots[i].SetSlotId(i);
                     }
@@ -143,7 +146,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
                         _slots[i].SetExpectedItem(_expectedPattern[i]);
                     }
                     
-                    Debug.Log($"[{GetType().Name}] Configured slot {i}: {_slots[i].name} with ID {_slots[i].SlotId} and controller");
+                    AdvancedDebugSystem.Log($"[{GetType().Name}] Configured slot {i}: {_slots[i].name} with ID {_slots[i].SlotId} and controller", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 }
             }
         }
@@ -156,7 +159,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
                 {
                     _items[i].SetPuzzleController(this);
                     _items[i].SetItemId(i);
-                    Debug.Log($"[{GetType().Name}] Configured item {i}: {_items[i].name} with controller");
+                    AdvancedDebugSystem.Log($"[{GetType().Name}] Configured item {i}: {_items[i].name} with controller", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 }
             }
         }
@@ -175,33 +178,33 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         
         public virtual bool TryPlaceItemInSlot(ISlottable item, int slotId, PlayerRef requestingPlayer)
         {
-            Debug.Log($"[{GetType().Name}] TryPlaceItemInSlot - Item: {item?.ItemId}, SlotId: {slotId}, Requester: {requestingPlayer}");
+            AdvancedDebugSystem.Log($"[{GetType().Name}] TryPlaceItemInSlot - Item: {item?.ItemId}, SlotId: {slotId}, Requester: {requestingPlayer}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             // Only Master Client processes placement in Shared Mode
             if (!Runner.IsSharedModeMasterClient)
             {
-                Debug.LogWarning($"[{GetType().Name}] Not master client, cannot process placement");
+                AdvancedDebugSystem.LogWarning($"[{GetType().Name}] Not master client, cannot process placement", LogCategory.Networking | LogCategory.Photon);
                 return false;
             }
             
             var slot = GetSlot(slotId);
             if (slot == null)
             {
-                Debug.LogWarning($"[{GetType().Name}] Slot {slotId} not found! Available slots: {string.Join(", ", _slots.Select(s => s?.SlotId ?? -1))}");
+                AdvancedDebugSystem.LogWarning($"[{GetType().Name}] Slot {slotId} not found! Available slots: {string.Join(", ", _slots.Select(s => s?.SlotId ?? -1))}", LogCategory.Networking | LogCategory.Photon);
                 return false;
             }
             
             if (!slot.CanAcceptItem)
             {
-                Debug.LogWarning($"[{GetType().Name}] Slot {slotId} cannot accept item (occupied: {slot.IsOccupied})");
+                AdvancedDebugSystem.LogWarning($"[{GetType().Name}] Slot {slotId} cannot accept item (occupied: {slot.IsOccupied})", LogCategory.Networking | LogCategory.Photon);
                 return false;
             }
             
             bool isCorrect = ValidatePlacement(item, slot);
-            Debug.Log($"[{GetType().Name}] Validation result: {isCorrect}");
+            AdvancedDebugSystem.Log($"[{GetType().Name}] Validation result: {isCorrect}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             bool placed = slot.TryPlaceItem(item, isCorrect, requestingPlayer);
-            Debug.Log($"[{GetType().Name}] Slot.TryPlaceItem returned: {placed}");
+            AdvancedDebugSystem.Log($"[{GetType().Name}] Slot.TryPlaceItem returned: {placed}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             if (placed)
             {
@@ -216,7 +219,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
                 UpdateProgress();
                 CheckCompletionCondition();
                 
-                Debug.Log($"[{GetType().Name}] Item placed successfully! Total: {TotalItemsPlaced}, Correct: {CorrectItemsPlaced}");
+                AdvancedDebugSystem.Log($"[{GetType().Name}] Item placed successfully! Total: {TotalItemsPlaced}, Correct: {CorrectItemsPlaced}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             
             return placed;
@@ -227,18 +230,18 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
             // Only Master Client processes removal in Shared Mode
             if (!Runner.IsSharedModeMasterClient) return;
             
-            Debug.Log($"[{GetType().Name}] RemoveItemFromSlot called for slotId: {slotId}");
+            AdvancedDebugSystem.Log($"[{GetType().Name}] RemoveItemFromSlot called for slotId: {slotId}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             var slot = GetSlot(slotId);
             if (slot == null)
             {
-                Debug.LogWarning($"[{GetType().Name}] Slot {slotId} not found for removal");
+                AdvancedDebugSystem.LogWarning($"[{GetType().Name}] Slot {slotId} not found for removal", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
             
             if (!slot.IsOccupied)
             {
-                Debug.LogWarning($"[{GetType().Name}] Slot {slotId} is not occupied, cannot remove item");
+                AdvancedDebugSystem.LogWarning($"[{GetType().Name}] Slot {slotId} is not occupied, cannot remove item", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
             
@@ -246,14 +249,14 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
             if (slot.IsCorrect)
             {
                 CorrectItemsPlaced = Mathf.Max(0, CorrectItemsPlaced - 1);
-                Debug.Log($"[{GetType().Name}] Decremented correct items count. New: {CorrectItemsPlaced}");
+                AdvancedDebugSystem.Log($"[{GetType().Name}] Decremented correct items count. New: {CorrectItemsPlaced}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             TotalItemsPlaced = Mathf.Max(0, TotalItemsPlaced - 1);
             
             _slotItemMapping.Remove(slotId);
             slot.RemoveItem();
             
-            Debug.Log($"[{GetType().Name}] Item removed from slot {slotId}. Total items: {TotalItemsPlaced}, Correct: {CorrectItemsPlaced}");
+            AdvancedDebugSystem.Log($"[{GetType().Name}] Item removed from slot {slotId}. Total items: {TotalItemsPlaced}, Correct: {CorrectItemsPlaced}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             UpdateProgress();
         }
@@ -474,7 +477,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         protected virtual void RPC_NotifyStateChange(SlotPuzzleState state)
         {
             OnStateChanged?.Invoke(state);
-            Debug.Log($"[{GetType().Name}] State changed to: {state}");
+            AdvancedDebugSystem.Log($"[{GetType().Name}] State changed to: {state}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -500,7 +503,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
                 if (obj != null) obj.SetActive(false);
             }
             
-            Debug.Log($"[{GetType().Name}] PUZZLE COMPLETED!");
+            AdvancedDebugSystem.Log($"[{GetType().Name}] PUZZLE COMPLETED!", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -511,14 +514,14 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
                 OnPuzzleFailed?.Invoke();
             }
             PlaySound(_puzzleFailSound);
-            Debug.Log($"[{GetType().Name}] Puzzle failed. Final: {isFinal}");
+            AdvancedDebugSystem.Log($"[{GetType().Name}] Puzzle failed. Final: {isFinal}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
         protected virtual void RPC_NotifyReset()
         {
             OnPuzzleReset?.Invoke();
-            Debug.Log($"[{GetType().Name}] Puzzle reset");
+            AdvancedDebugSystem.Log($"[{GetType().Name}] Puzzle reset", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         protected void PlaySound(AudioClip clip)
@@ -533,12 +536,12 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         {
             if (_slots == null || _slots.Length == 0)
             {
-                Debug.LogError($"[{GetType().Name}] No slots configured!");
+                AdvancedDebugSystem.LogError($"[{GetType().Name}] No slots configured!", LogCategory.Networking | LogCategory.Photon);
             }
             
             if (_items == null || _items.Length == 0)
             {
-                Debug.LogError($"[{GetType().Name}] No items configured!");
+                AdvancedDebugSystem.LogError($"[{GetType().Name}] No items configured!", LogCategory.Networking | LogCategory.Photon);
             }
         }
         
@@ -547,11 +550,11 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
             if (_slots == null || _slots.Length == 0)
             {
                 _slots = GetComponentsInChildren<NetworkedSlot>();
-                Debug.Log($"[{GetType().Name}] Auto-detected {_slots.Length} slots in children");
+                AdvancedDebugSystem.Log($"[{GetType().Name}] Auto-detected {_slots.Length} slots in children", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             else
             {
-                Debug.Log($"[{GetType().Name}] Using {_slots.Length} manually configured slots");
+                AdvancedDebugSystem.Log($"[{GetType().Name}] Using {_slots.Length} manually configured slots", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             
             if (_items == null || _items.Length == 0)
@@ -559,11 +562,11 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
                 // IMPORTANTE: FindObjectsOfType encontrará TODOS los items en la escena
                 // Es mejor configurar manualmente los items en el inspector
                 _items = FindObjectsOfType<NetworkedSlottableItem>();
-                Debug.LogWarning($"[{GetType().Name}] Auto-detected {_items.Length} items in ENTIRE SCENE - Consider manually assigning items!");
+                AdvancedDebugSystem.LogWarning($"[{GetType().Name}] Auto-detected {_items.Length} items in ENTIRE SCENE - Consider manually assigning items!", LogCategory.Networking | LogCategory.Photon);
             }
             else
             {
-                Debug.Log($"[{GetType().Name}] Using {_items.Length} manually configured items");
+                AdvancedDebugSystem.Log($"[{GetType().Name}] Using {_items.Length} manually configured items", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             
             // Log de los items encontrados/configurados
@@ -571,7 +574,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
             {
                 if (_items[i] != null)
                 {
-                    Debug.Log($"[{GetType().Name}] Item {i}: {_items[i].name}");
+                    AdvancedDebugSystem.Log($"[{GetType().Name}] Item {i}: {_items[i].name}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 }
             }
         }

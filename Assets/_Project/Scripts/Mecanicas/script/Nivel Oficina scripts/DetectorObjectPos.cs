@@ -1,5 +1,6 @@
 using Unity.VisualScripting;
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 public class DetectorObjectPos : MonoBehaviour
 {//lista/array de posiciones clave para resolver
@@ -19,7 +20,7 @@ public class DetectorObjectPos : MonoBehaviour
             
             if (totalCorrect == objectPos.Length && door != null)
             {
-                Debug.Log("Correct placed order");
+                AdvancedDebugSystem.Log("Correct placed order", LogCategory.Avatar, LogLevel.Debug);
                 if (door != null)
                     door.OpenDoorAct();
                 FindAnyObjectByType<AudioManager>().ActualPhase = 2;

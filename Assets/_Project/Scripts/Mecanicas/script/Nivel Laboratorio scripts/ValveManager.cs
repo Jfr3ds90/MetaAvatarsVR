@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 public class ValveManager : MonoBehaviour
 {
@@ -34,7 +35,7 @@ public class ValveManager : MonoBehaviour
         if (n > 2)
         {
             gasFog += Time.deltaTime * 0.01f*n;//hacer corrutina para esto
-            Debug.Log("m·s de 2 valvulas abiertas"); 
+            AdvancedDebugSystem.Log("m√°s de 2 valvulas abiertas", LogCategory.Avatar, LogLevel.Debug); 
         }
 
         else
@@ -46,16 +47,16 @@ public class ValveManager : MonoBehaviour
                     switch (value)
                     {
                         case 0:
-                            Debug.Log("valvula activa " + value);
+                            AdvancedDebugSystem.Log("valvula activa " + value, LogCategory.Avatar, LogLevel.Debug);
                             break;
                         case 1:
-                            Debug.Log("valvula activa " + value);
+                            AdvancedDebugSystem.Log("valvula activa " + value, LogCategory.Avatar, LogLevel.Debug);
                             break;
                         case 2:
-                            Debug.Log("valvula activa " + value);
+                            AdvancedDebugSystem.Log("valvula activa " + value, LogCategory.Avatar, LogLevel.Debug);
                             break;
                         case 3:
-                            Debug.Log("valvula activa " + value);
+                            AdvancedDebugSystem.Log("valvula activa " + value, LogCategory.Avatar, LogLevel.Debug);
                             break;
                         default:
                             gasFog += Time.deltaTime*10f;
@@ -79,16 +80,16 @@ public class ValveManager : MonoBehaviour
                 switch (value)
                 {
                     case 0:
-                        Debug.Log("valvula activa " + value);
+                        AdvancedDebugSystem.Log("valvula activa " + value, LogCategory.Avatar, LogLevel.Debug);
                         break;
                     case 1:
-                        Debug.Log("valvula activa " + value+" y tambien "+lastValveActived);
+                        AdvancedDebugSystem.Log("valvula activa " + value+" y tambien "+lastValveActived, LogCategory.Avatar, LogLevel.Debug);
                         break;
                     case 2:
-                        Debug.Log("valvula activa " + value + " y tambien " + lastValveActived);
+                        AdvancedDebugSystem.Log("valvula activa " + value + " y tambien " + lastValveActived, LogCategory.Avatar, LogLevel.Debug);
                         break;
                     case 3:
-                        Debug.Log("valvula activa " + value + " y tambien " + lastValveActived);
+                        AdvancedDebugSystem.Log("valvula activa " + value + " y tambien " + lastValveActived, LogCategory.Avatar, LogLevel.Debug);
                         break;
                     default:
                         gasFog += Time.deltaTime * 20f;
@@ -130,11 +131,11 @@ public class ValveManager : MonoBehaviour
                 ParticleSystem.ColorOverLifetimeModule COL =PS_Gas[i].colorOverLifetime ;
                 COL.color = new ParticleSystem.MinMaxGradient(colorGas).color;
               //  COL.color = new ParticleSystem.MinMaxGradient(new Vector4(0,0,0,0)).gradientMax;
-           //     Debug.Log(COL+" es el color");
+           //     AdvancedDebugSystem.Log(COL+" es el color", LogCategory.Avatar, LogLevel.Debug);
                 if (!PS_Gas[i].isPlaying)
                     PS_Gas[i].Play();
             }
-          //  Debug.Log(RenderSettings.fogDensity + " es la densidad y el color es "+ RenderSettings.fogColor);
+          //  AdvancedDebugSystem.Log(RenderSettings.fogDensity + " es la densidad y el color es "+ RenderSettings.fogColor, LogCategory.Avatar, LogLevel.Debug);
             yield return null;
         }
     }

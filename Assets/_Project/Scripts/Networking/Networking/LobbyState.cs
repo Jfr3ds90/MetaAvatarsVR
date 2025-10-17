@@ -3,6 +3,9 @@ using Fusion;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Events;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace HackMonkeys.Core
 {
@@ -38,13 +41,13 @@ namespace HackMonkeys.Core
         {
             if (Instance != null)
             {
-                Debug.LogWarning("[LobbyState] Multiple instances detected. Destroying duplicate.");
+                AdvancedDebugSystem.LogWarning("[LobbyState] Multiple instances detected. Destroying duplicate.", LogCategory.Networking | LogCategory.Photon);
                 Destroy(gameObject);
                 return;
             }
             
             Instance = this;
-            Debug.Log("[LobbyState] ✅ Initialized successfully");
+            AdvancedDebugSystem.Log("[LobbyState] ✅ Initialized successfully", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         /// <summary>
@@ -54,7 +57,7 @@ namespace HackMonkeys.Core
         {
             if (player == null)
             {
-                Debug.LogWarning("[LobbyState] ❌ Attempted to register null player");
+                AdvancedDebugSystem.LogWarning("[LobbyState] ❌ Attempted to register null player", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
             
@@ -62,20 +65,20 @@ namespace HackMonkeys.Core
             
             if (_players.ContainsKey(playerRef))
             {
-                Debug.LogWarning($"[LobbyState] Player {playerRef} already registered, updating...");
+                AdvancedDebugSystem.LogWarning($"[LobbyState] Player {playerRef} already registered, updating...", LogCategory.Networking | LogCategory.Photon);
                 _players[playerRef] = player;
                 return;
             }
             
             _players[playerRef] = player;
             
-            Debug.Log($"[LobbyState] ✅ Player registered: {player.GetDisplayName()} (Total: {PlayerCount})");
+            AdvancedDebugSystem.Log($"[LobbyState] ✅ Player registered: {player.GetDisplayName()} (Total: {PlayerCount})", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             OnPlayerJoined?.Invoke(player);
             OnPlayerCountChanged?.Invoke(PlayerCount, GetMaxPlayers());
             CheckAllPlayersReady();
             
-            Debug.Log($"🧪 [LOBBYSTATE] Events fired for player join: {player.GetDisplayName()}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYSTATE] Events fired for player join: {player.GetDisplayName()}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         /// <summary>
@@ -85,7 +88,7 @@ namespace HackMonkeys.Core
         {
             if (player == null)
             {
-                Debug.LogWarning("[LobbyState] ❌ Attempted to unregister null player");
+                AdvancedDebugSystem.LogWarning("[LobbyState] ❌ Attempted to unregister null player", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
     
@@ -93,20 +96,20 @@ namespace HackMonkeys.Core
     
             if (!_players.ContainsKey(playerRef))
             {
-                Debug.LogWarning($"[LobbyState] Player {playerRef} not found in registry");
+                AdvancedDebugSystem.LogWarning($"[LobbyState] Player {playerRef} not found in registry", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
     
             // Verificar que sea el mismo objeto
             if (_players[playerRef] != player)
             {
-                Debug.LogWarning($"[LobbyState] Player reference mismatch for {playerRef}");
+                AdvancedDebugSystem.LogWarning($"[LobbyState] Player reference mismatch for {playerRef}", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
     
             _players.Remove(playerRef);
     
-            Debug.Log($"[LobbyState] 👋 Player unregistered: {player.GetDisplayName()} (Remaining: {PlayerCount})");
+            AdvancedDebugSystem.Log($"[LobbyState] 👋 Player unregistered: {player.GetDisplayName()} (Remaining: {PlayerCount})", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
     
             OnPlayerLeft?.Invoke(player);
             OnPlayerCountChanged?.Invoke(PlayerCount, GetMaxPlayers());
@@ -120,17 +123,17 @@ namespace HackMonkeys.Core
         {
             if (player == null)
             {
-                Debug.LogWarning("[LobbyState] ❌ Attempted to update null player");
+                AdvancedDebugSystem.LogWarning("[LobbyState] ❌ Attempted to update null player", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
             
             if (!_players.ContainsKey(player.PlayerRef))
             {
-                Debug.LogWarning($"[LobbyState] Player {player.PlayerRef} not registered, cannot update");
+                AdvancedDebugSystem.LogWarning($"[LobbyState] Player {player.PlayerRef} not registered, cannot update", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
             
-            Debug.Log($"[LobbyState] 🔄 Player updated: {player.GetDisplayName()} - Ready: {player.IsReady}");
+            AdvancedDebugSystem.Log($"[LobbyState] 🔄 Player updated: {player.GetDisplayName()} - Ready: {player.IsReady}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             OnPlayerUpdated?.Invoke(player);
             CheckAllPlayersReady();
@@ -143,7 +146,7 @@ namespace HackMonkeys.Core
         
         public void UpdateMapSelection(string mapName)
         {
-            Debug.Log($"[LobbyState] 🗺️ Map selection updated: {mapName}");
+            AdvancedDebugSystem.Log($"[LobbyState] 🗺️ Map selection updated: {mapName}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             OnMapChanged?.Invoke(mapName);
         }
         
@@ -172,11 +175,11 @@ namespace HackMonkeys.Core
         {
             if (LocalPlayer == null)
             {
-                Debug.LogWarning("[LobbyState] ❌ No local player found to toggle ready state");
+                AdvancedDebugSystem.LogWarning("[LobbyState] ❌ No local player found to toggle ready state", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
             
-            Debug.Log($"[LobbyState] 🔄 Toggling ready state for local player: {LocalPlayer.GetDisplayName()}");
+            AdvancedDebugSystem.Log($"[LobbyState] 🔄 Toggling ready state for local player: {LocalPlayer.GetDisplayName()}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             LocalPlayer.ToggleReady();
         }
         
@@ -212,7 +215,7 @@ namespace HackMonkeys.Core
         /// </summary>
         public void ClearAllPlayers()
         {
-            Debug.Log("[LobbyState] 🧹 Clearing all players");
+            AdvancedDebugSystem.Log("[LobbyState] 🧹 Clearing all players", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
     
             // Crear copia de la lista para evitar modificación durante iteración
             var playersToRemove = _players.Values.ToList();
@@ -237,7 +240,7 @@ namespace HackMonkeys.Core
         private void CheckAllPlayersReady()
         {
             bool allReady = AllPlayersReady;
-            Debug.Log($"[LobbyState] 🎯 All players ready check: {allReady} ({PlayerCount} players)");
+            AdvancedDebugSystem.Log($"[LobbyState] 🎯 All players ready check: {allReady} ({PlayerCount} players)", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             OnAllPlayersReady?.Invoke(allReady);
         }
         
@@ -250,7 +253,7 @@ namespace HackMonkeys.Core
                 if (!string.IsNullOrEmpty(currentMap) && currentMap != _lastKnownMap)
                 {
                     _lastKnownMap = currentMap;
-                    Debug.Log($"[LobbyState] 🗺️ Detected host map change to: {currentMap}");
+                    AdvancedDebugSystem.Log($"[LobbyState] 🗺️ Detected host map change to: {currentMap}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                     OnMapChanged?.Invoke(currentMap);
                 }
             }
@@ -273,7 +276,7 @@ namespace HackMonkeys.Core
             {
                 if (kvp.Value > 1)
                 {
-                    Debug.LogError($"[LobbyState] ❌ Found {kvp.Value} instances of player {kvp.Key}!");
+                    AdvancedDebugSystem.LogError($"[LobbyState] ❌ Found {kvp.Value} instances of player {kvp.Key}!", LogCategory.Networking | LogCategory.Photon);
                     hasDuplicates = true;
                 }
             }
@@ -289,7 +292,7 @@ namespace HackMonkeys.Core
         [ContextMenu("Clean Duplicate Players")]
         public void CleanDuplicatePlayers()
         {
-            Debug.Log("[LobbyState] Checking for duplicate players...");
+            AdvancedDebugSystem.Log("[LobbyState] Checking for duplicate players...", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
     
             var allLobbyPlayers = FindObjectsOfType<LobbyPlayer>();
             var processedRefs = new HashSet<PlayerRef>();
@@ -298,7 +301,7 @@ namespace HackMonkeys.Core
             {
                 if (processedRefs.Contains(player.PlayerRef))
                 {
-                    Debug.LogWarning($"[LobbyState] Found duplicate player {player.PlayerRef}, destroying...");
+                    AdvancedDebugSystem.LogWarning($"[LobbyState] Found duplicate player {player.PlayerRef}, destroying...", LogCategory.Networking | LogCategory.Photon);
             
                     // Desregistrar si está registrado
                     if (_players.ContainsKey(player.PlayerRef) && _players[player.PlayerRef] == player)
@@ -315,7 +318,7 @@ namespace HackMonkeys.Core
                 }
             }
     
-            Debug.Log("[LobbyState] Duplicate cleanup complete");
+            AdvancedDebugSystem.Log("[LobbyState] Duplicate cleanup complete", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
 
         
@@ -323,11 +326,11 @@ namespace HackMonkeys.Core
         [ContextMenu("Debug: List All Players")]
         private void DebugListPlayers()
         {
-            Debug.Log($"=== LobbyState Players ({PlayerCount}/{GetMaxPlayers()}) ===");
+            AdvancedDebugSystem.Log($"=== LobbyState Players ({PlayerCount}/{GetMaxPlayers()}) ===", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             if (PlayerCount == 0)
             {
-                Debug.Log("No players in lobby");
+                AdvancedDebugSystem.Log("No players in lobby", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 return;
             }
             
@@ -338,28 +341,28 @@ namespace HackMonkeys.Core
                 
                 if (player.IsRoomCreator) status += " | ROOM CREATOR";
                 
-                Debug.Log(status);
+                AdvancedDebugSystem.Log(status, LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             
-            Debug.Log($"All Ready: {AllPlayersReady}");
-            Debug.Log($"Room Creator: {RoomCreatorPlayer?.GetDisplayName() ?? "None"}");
-            Debug.Log($"Local Player: {LocalPlayer?.GetDisplayName() ?? "None"}");
-            Debug.Log("================================");
+            AdvancedDebugSystem.Log($"All Ready: {AllPlayersReady}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Room Creator: {RoomCreatorPlayer?.GetDisplayName() ?? "None"}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Local Player: {LocalPlayer?.GetDisplayName() ?? "None"}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log("================================", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         [ContextMenu("Debug: Validate State")]
         private void DebugValidateState()
         {
-            Debug.Log("=== LobbyState Validation ===");
+            AdvancedDebugSystem.Log("=== LobbyState Validation ===", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
     
             // Verificar duplicados
             if (!ValidateNoDuplicates())
             {
-                Debug.LogError("❌ Duplicate players detected!");
+                AdvancedDebugSystem.LogError("❌ Duplicate players detected!", LogCategory.Networking | LogCategory.Photon);
             }
             else
             {
-                Debug.Log("✅ No duplicate players");
+                AdvancedDebugSystem.Log("✅ No duplicate players", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
     
             // Verificar objetos huérfanos
@@ -370,30 +373,30 @@ namespace HackMonkeys.Core
             {
                 if (!_players.ContainsValue(player))
                 {
-                    Debug.LogWarning($"⚠️ Orphaned player found: {player.GetDisplayName()}");
+                    AdvancedDebugSystem.LogWarning($"⚠️ Orphaned player found: {player.GetDisplayName()}", LogCategory.Networking | LogCategory.Photon);
                     orphanedCount++;
                 }
             }
     
             if (orphanedCount > 0)
             {
-                Debug.LogError($"❌ Found {orphanedCount} orphaned players!");
+                AdvancedDebugSystem.LogError($"❌ Found {orphanedCount} orphaned players!", LogCategory.Networking | LogCategory.Photon);
             }
             else
             {
-                Debug.Log("✅ No orphaned players");
+                AdvancedDebugSystem.Log("✅ No orphaned players", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
     
-            Debug.Log($"Total registered: {_players.Count}");
-            Debug.Log($"Total in scene: {allLobbyPlayers.Length}");
-            Debug.Log("================================");
+            AdvancedDebugSystem.Log($"Total registered: {_players.Count}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"Total in scene: {allLobbyPlayers.Length}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
+            AdvancedDebugSystem.Log("================================", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         private void OnDestroy()
         {
             if (Instance == this)
             {
-                Debug.Log("[LobbyState] 🧹 Instance destroyed, clearing singleton reference");
+                AdvancedDebugSystem.Log("[LobbyState] 🧹 Instance destroyed, clearing singleton reference", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         
                 // Limpiar todos los jugadores antes de destruir
                 ClearAllPlayers();

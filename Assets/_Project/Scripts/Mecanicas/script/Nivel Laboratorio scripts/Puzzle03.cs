@@ -2,6 +2,7 @@ using ExitGames.Client.Photon.StructWrapping;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 public class Puzzle03 : MonoBehaviour
 {
@@ -274,8 +275,8 @@ public class Puzzle03 : MonoBehaviour
         for (int i = 0; i < squarePos.Length; i++)
         
             if (LSprite[i] == squarePos[i].GetComponent<SpriteRenderer>().sprite)
-               { v++; Debug.LogWarning(i + " es el correcto "+ LSprite[i]); }
-            //Debug.LogWarning(v + " es la cantidad en posicion correcta ");
+               { v++; AdvancedDebugSystem.LogWarning(i + " es el correcto "+ LSprite[i], LogCategory.Avatar); }
+            //AdvancedDebugSystem.LogWarning(v + " es la cantidad en posicion correcta ", LogCategory.Avatar);
         
 
         if (v==16) {squarePos[empty].GetComponent<SpriteRenderer>().color= Color.white; return true;}

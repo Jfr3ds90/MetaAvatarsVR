@@ -6,6 +6,7 @@ using System.Threading;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using HackMonkeys.Debugging;
 
 [RequireComponent(typeof(AudioSource))]
 public class TypewriterEffect : MonoBehaviour
@@ -73,7 +74,7 @@ public class TypewriterEffect : MonoBehaviour
         
         if (legacyText == null && tmpText == null)
         {
-            Debug.LogError($"TypewriterEffect: No Text or TextMeshProUGUI component found on {gameObject.name}");
+            AdvancedDebugSystem.LogError($"TypewriterEffect: No Text or TextMeshProUGUI component found on {gameObject.name}", LogCategory.Avatar);
         }
     }
     
@@ -81,7 +82,7 @@ public class TypewriterEffect : MonoBehaviour
     {
         if (settings == null)
         {
-            Debug.LogWarning($"TypewriterEffect: No settings assigned on {gameObject.name}. Using default values.");
+            AdvancedDebugSystem.LogWarning($"TypewriterEffect: No settings assigned on {gameObject.name}. Using default values.", LogCategory.Avatar);
         }
     }
     
@@ -117,7 +118,7 @@ public class TypewriterEffect : MonoBehaviour
     {
         if (texts == null || texts.Length == 0)
         {
-            Debug.LogWarning("TypewriterEffect: Text array is null or empty");
+            AdvancedDebugSystem.LogWarning("TypewriterEffect: Text array is null or empty", LogCategory.Avatar);
             return;
         }
         

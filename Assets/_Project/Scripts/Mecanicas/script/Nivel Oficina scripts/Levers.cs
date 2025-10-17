@@ -1,4 +1,5 @@
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 public class Levers : MonoBehaviour
 {
@@ -18,17 +19,17 @@ public class Levers : MonoBehaviour
         {
             OnOff = true;
             piano.partiture(orderLevel);
-            Debug.Log("palanca activa");
+            AdvancedDebugSystem.Log("palanca activa", LogCategory.Avatar, LogLevel.Debug);
             //FindAnyObjectByType<AudioManager>().FindLevers += 1;
         }
         else if (transformThis.rotation.z! <= -0.55f && OnOff == false) //estaba abajo, suelta abajo
         {
-            Debug.Log("palanca inactiva");
+            AdvancedDebugSystem.Log("palanca inactiva", LogCategory.Avatar, LogLevel.Debug);
         }
         else if (transformThis.rotation.z >= -0.55f && OnOff == true)// estaba arriba y queda arriba
         { // no ocurre nada
             piano.partiture(orderLevel);
-            Debug.Log("palanca activa");
+            AdvancedDebugSystem.Log("palanca activa", LogCategory.Avatar, LogLevel.Debug);
             //FindAnyObjectByType<AudioManager>().FindLevers += 1;
         }
         else if (transformThis.rotation.z! <= -0.55f && OnOff == true)// estaba arriba y queda abajo
@@ -37,7 +38,7 @@ public class Levers : MonoBehaviour
             piano.partiture(-1);
             //FindAnyObjectByType<AudioManager>().FindLevers -= 1;
             FindAnyObjectByType<AudioManager>().FailLevers +=1;
-            Debug.Log("palanca inactiva");
+            AdvancedDebugSystem.Log("palanca inactiva", LogCategory.Avatar, LogLevel.Debug);
         }
         z = transform.rotation.z;
     }

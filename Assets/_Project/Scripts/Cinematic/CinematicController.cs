@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using HackMonkeys.Debugging;
 
 public class CinematicController : MonoBehaviour
 {
@@ -40,7 +41,7 @@ public class CinematicController : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("TypewriterEffect is null!");
+            AdvancedDebugSystem.LogWarning("TypewriterEffect is null!", LogCategory.Avatar);
             return;
         }
     }

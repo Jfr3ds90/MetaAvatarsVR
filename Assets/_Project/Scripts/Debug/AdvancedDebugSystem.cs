@@ -29,10 +29,18 @@ namespace HackMonkeys.Debugging
         StateManagement = 1 << 9,   // 512
         Photon = 1 << 10,           // 1024
         Animation = 1 << 11,        // 2048
-        
+        Avatar = 1 << 12,           // 4096
+        Lobby = 1 << 13,            // 8192
+        Gameplay = 1 << 14,         // 16384
+        Puzzle = 1 << 15,           // 32768
+        SceneManagement = 1 << 16,  // 65536
+        Flashlight = 1 << 17,       // 131072
+
+
         // Combinaciones útiles predefinidas
         VRSystems = VRInput | FusionVrGrabbable | Physics,
         NetworkSystems = Networking | Photon | StateManagement,
+        GameplaySystems = Gameplay | Puzzle | SceneManagement,
         All = ~0
     }
 
@@ -110,9 +118,18 @@ namespace HackMonkeys.Debugging
             {
                 if (_instance == null)
                 {
-                    GameObject go = new GameObject("[AdvancedDebugSystem]");
-                    _instance = go.AddComponent<AdvancedDebugSystem>();
-                    DontDestroyOnLoad(go);
+                    // Primero buscar si existe una instancia en la escena
+                    _instance = FindAnyObjectByType<AdvancedDebugSystem>();
+
+                    // Si no existe, crear una nueva con configuración por defecto
+                    if (_instance == null)
+                    {
+                        Debug.LogWarning("[AdvancedDebugSystem] No instance found in scene. Creating default instance. " +
+                                       "Consider adding AdvancedDebugSystem to your scene for custom configuration.");
+                        GameObject go = new GameObject("[AdvancedDebugSystem]");
+                        _instance = go.AddComponent<AdvancedDebugSystem>();
+                        DontDestroyOnLoad(go);
+                    }
                 }
                 return _instance;
             }
@@ -157,12 +174,15 @@ namespace HackMonkeys.Debugging
         {
             if (_instance != null && _instance != this)
             {
+                Debug.LogWarning($"[AdvancedDebugSystem] Duplicate instance found on '{gameObject.name}'. Destroying duplicate.");
                 Destroy(gameObject);
                 return;
             }
-            
+
             _instance = this;
             DontDestroyOnLoad(gameObject);
+
+            Debug.Log($"[AdvancedDebugSystem] Initialized from scene on '{gameObject.name}' with categories: {_activeCategories}");
             InitializeSystem();
         }
 
@@ -362,6 +382,38 @@ namespace HackMonkeys.Debugging
         public static void SetNetworkRunner(NetworkRunner runner)
         {
             Instance._networkRunner = runner;
+        }
+
+        /// <summary>
+        /// Obtiene las categorías activas actuales
+        /// </summary>
+        public static LogCategory GetActiveCategories()
+        {
+            return Instance._activeCategories;
+        }
+
+        /// <summary>
+        /// Obtiene el nivel mínimo de log actual
+        /// </summary>
+        public static LogLevel GetMinimumLevel()
+        {
+            return Instance._minimumLogLevel;
+        }
+
+        /// <summary>
+        /// Verifica si el logging está habilitado
+        /// </summary>
+        public static bool IsLoggingEnabled()
+        {
+            return Instance._enableLogging;
+        }
+
+        /// <summary>
+        /// Habilita o deshabilita el logging completamente
+        /// </summary>
+        public static void SetLoggingEnabled(bool enabled)
+        {
+            Instance._enableLogging = enabled;
         }
 
         #endregion

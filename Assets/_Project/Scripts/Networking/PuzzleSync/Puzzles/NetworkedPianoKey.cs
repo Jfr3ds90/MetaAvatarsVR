@@ -6,6 +6,9 @@ using Oculus.Interaction;
 using Oculus.Interaction.Surfaces;
 using Cysharp.Threading.Tasks;
 using System.Threading;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
 {
@@ -115,7 +118,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             
             if (_noteParticleSystem == null)
             {
-                Debug.LogWarning($"[NetworkedPianoKey] No ParticleSystem found in children of {gameObject.name}. Particle effects will be disabled.");
+                AdvancedDebugSystem.LogWarning($"[NetworkedPianoKey] No ParticleSystem found in children of {gameObject.name}. Particle effects will be disabled.", LogCategory.Networking | LogCategory.Photon);
                 _useParticleEffects = false;
             }
             else
@@ -129,7 +132,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 // Asegurarse de que esté detenido al inicio
                 _noteParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
                 
-                Debug.Log($"[NetworkedPianoKey] ParticleSystem found and configured for {_noteName}");
+                AdvancedDebugSystem.Log($"[NetworkedPianoKey] ParticleSystem found and configured for {_noteName}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
         }
         
@@ -220,12 +223,12 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             {
                 // Notificar al piano solo desde el cliente que presionó la tecla
                 OnKeyPressed?.Invoke(_noteName);
-                Debug.Log($"[PianoKey] {_noteName} pressed by Player {player} (local)");
+                AdvancedDebugSystem.Log($"[PianoKey] {_noteName} pressed by Player {player} (local)", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             else
             {
                 // Los demás clientes solo muestran el log
-                Debug.Log($"[PianoKey] {_noteName} pressed by Player {player} (remote)");
+                AdvancedDebugSystem.Log($"[PianoKey] {_noteName} pressed by Player {player} (remote)", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
         }
         
@@ -438,7 +441,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             // Reproducir el sistema de partículas
             _noteParticleSystem.Play();
             
-            Debug.Log($"[NetworkedPianoKey] Playing particle effect for {_noteName}");
+            AdvancedDebugSystem.Log($"[NetworkedPianoKey] Playing particle effect for {_noteName}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             // Opcional: Detener automáticamente después de la duración
             StartCoroutine(StopParticlesAfterDuration());

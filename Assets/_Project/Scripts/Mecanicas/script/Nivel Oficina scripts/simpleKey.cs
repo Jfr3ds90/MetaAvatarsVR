@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.Video;
+using HackMonkeys.Debugging;
 
 public class simpleKey : MonoBehaviour
 {
@@ -24,15 +25,15 @@ public class simpleKey : MonoBehaviour
     }
     private void OnCollisionEnter(Collision other)
     {
-        Debug.Log("detecto");
+        AdvancedDebugSystem.Log("detecto", LogCategory.Avatar, LogLevel.Debug);
         if (pendrive == false)        
             if(other.gameObject.name == "Mesh_Door_02 (7)"&& right == other.gameObject.GetComponent<Switch>().orientation 
             || other.gameObject.name == "Mesh_Door_02 (1)" && right == other.gameObject.GetComponent<Switch>().orientation)
             {
             other.gameObject.GetComponent<Switch>().OpenDoorAct();
-            Debug.Log(other.gameObject+" detectado");
+            AdvancedDebugSystem.Log(other.gameObject+" detectado", LogCategory.Avatar, LogLevel.Debug);
                 {
-                Debug.Log("funciona!!");
+                AdvancedDebugSystem.Log("funciona!!", LogCategory.Avatar, LogLevel.Debug);
               actionKey();
                 }
             }
@@ -43,7 +44,7 @@ public class simpleKey : MonoBehaviour
         if (pendrive == true&&other.GetComponent<AreaDetectorAudio>().phase==4 && other.GetComponent<AreaDetectorAudio>().extra== 2)//arreglar        
             if (other.GetComponent<AreaDetectorAudio>().phase==4)
             {
-                Debug.Log(name+" detecto al objeto "+other.name);
+                AdvancedDebugSystem.Log(name+" detecto al objeto "+other.name, LogCategory.Avatar, LogLevel.Debug);
                 if(canvasActivated==false)
                 { FindAnyObjectByType<OfficeStaff>().activationPc(); canvasActivated = true; }
                 gameobjectInteractor.GetComponent<MeshRenderer>().materials[1].mainTexture = matVideo.mainTexture;

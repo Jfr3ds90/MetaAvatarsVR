@@ -3,6 +3,9 @@ using Fusion;
 using System.Collections;
 using HackMonkeys.Core;
 using HackMonkeys.Gameplay;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace HackMonkeys.DebugNet
 {
@@ -107,7 +110,7 @@ namespace HackMonkeys.DebugNet
         {
             if (_networkBootstrapper?.Runner != null && _networkBootstrapper.Runner.IsServer)
             {
-                Debug.Log("[DEBUG] Testing LoadScene directly...");
+                AdvancedDebugSystem.Log("[DEBUG] Testing LoadScene directly...", LogCategory.Avatar, LogLevel.Debug);
                 var sceneRef = SceneRef.FromIndex(1); // Ajusta el índice
                 _networkBootstrapper.Runner.LoadScene(sceneRef);
             }
@@ -117,12 +120,12 @@ namespace HackMonkeys.DebugNet
         {
             // if (_networkBootstrapper?.Runner != null)
             // {
-            //     Debug.Log("[DEBUG] Listing all registered callbacks...");
+            //     AdvancedDebugSystem.Log("[DEBUG] Listing all registered callbacks...", LogCategory.Avatar, LogLevel.Debug);
             //     var callbacks = _networkBootstrapper.Runner.GetCallbacks();
-            //     Debug.Log($"[DEBUG] Total callbacks: {callbacks.Count()}");
+            //     AdvancedDebugSystem.Log($"[DEBUG] Total callbacks: {callbacks.Count()}", LogCategory.Avatar, LogLevel.Debug);
             //     foreach (var callback in callbacks)
             //     {
-            //         Debug.Log($"[DEBUG] - Callback: {callback.GetType().Name}");
+            //         AdvancedDebugSystem.Log($"[DEBUG] - Callback: {callback.GetType().Name}", LogCategory.Avatar, LogLevel.Debug);
             //     }
             // }
         }

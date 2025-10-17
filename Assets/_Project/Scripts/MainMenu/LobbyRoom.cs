@@ -7,6 +7,9 @@ using DG.Tweening;
 using Fusion;
 using HackMonkeys.Core;
 using HackMonkeys.UI.Spatial;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace HackMonkeys.UI.Panels
 {
@@ -82,41 +85,41 @@ namespace HackMonkeys.UI.Panels
         {
             base.SetupPanel();
 
-            Debug.Log("🧪 [LOBBYROOM] Setting up panel...");
+            AdvancedDebugSystem.Log("🧪 [LOBBYROOM] Setting up panel...", LogCategory.Avatar, LogLevel.Debug);
 
             _lobbyState = LobbyState.Instance;
             _lobbyController = LobbyController.Instance;
             _networkBootstrapper = NetworkBootstrapper.Instance;
 
-            Debug.Log($"🧪 [LOBBYROOM] LobbyState: {_lobbyState != null}");
-            Debug.Log($"🧪 [LOBBYROOM] LobbyController: {_lobbyController != null}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] LobbyState: {_lobbyState != null}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] LobbyController: {_lobbyController != null}", LogCategory.Avatar, LogLevel.Debug);
 
             if (_lobbyState == null)
             {
-                Debug.LogError("🧪 [LOBBYROOM] ❌ LobbyState.Instance is NULL!");
+                AdvancedDebugSystem.LogError("🧪 [LOBBYROOM] ❌ LobbyState.Instance is NULL!", LogCategory.Avatar);
             }
 
             if (_lobbyController == null)
             {
-                Debug.LogError("🧪 [LOBBYROOM] ❌ LobbyController.Instance is NULL!");
+                AdvancedDebugSystem.LogError("🧪 [LOBBYROOM] ❌ LobbyController.Instance is NULL!", LogCategory.Avatar);
             }
 
             ConfigureLobbyButtons();
             InitializePlayerItemPool();
             UpdateHostControls();
 
-            Debug.Log("🧪 [LOBBYROOM] ✅ Panel setup completed");
+            AdvancedDebugSystem.Log("🧪 [LOBBYROOM] ✅ Panel setup completed", LogCategory.Avatar, LogLevel.Debug);
         }
 
         private void ConfigureLobbyButtons()
         {
-            Debug.Log("🧪 [LOBBYROOM] Configuring lobby buttons...");
+            AdvancedDebugSystem.Log("🧪 [LOBBYROOM] Configuring lobby buttons...", LogCategory.Avatar, LogLevel.Debug);
 
             if (readyButton != null)
             {
                 readyButton.OnButtonPressed.AddListener(() =>
                 {
-                    Debug.Log("🧪 [LOBBYROOM] Ready button pressed");
+                    AdvancedDebugSystem.Log("🧪 [LOBBYROOM] Ready button pressed", LogCategory.Avatar, LogLevel.Debug);
                     _lobbyController?.ToggleReady();
                 });
             }
@@ -125,7 +128,7 @@ namespace HackMonkeys.UI.Panels
             {
                 startGameButton.OnButtonPressed.AddListener(() =>
                 {
-                    Debug.Log("🧪 [LOBBYROOM] Start game button pressed");
+                    AdvancedDebugSystem.Log("🧪 [LOBBYROOM] Start game button pressed", LogCategory.Avatar, LogLevel.Debug);
                     StartGameWithSelectedMap();
                 });
             }
@@ -133,7 +136,7 @@ namespace HackMonkeys.UI.Panels
             if (changeMapButton != null)
             {
                 changeMapButton.OnButtonPressed.AddListener(ToggleMapSelection);
-                Debug.Log("🧪 [LOBBYROOM] Change map button configured");
+                AdvancedDebugSystem.Log("🧪 [LOBBYROOM] Change map button configured", LogCategory.Avatar, LogLevel.Debug);
             }
 
             if (settingsButton != null)
@@ -161,12 +164,12 @@ namespace HackMonkeys.UI.Panels
                 difficultySlider.OnValueChanged.AddListener(OnDifficultyChanged);
             }
 
-            Debug.Log("🧪 [LOBBYROOM] ✅ Buttons configured");
+            AdvancedDebugSystem.Log("🧪 [LOBBYROOM] ✅ Buttons configured", LogCategory.Avatar, LogLevel.Debug);
         }
 
         private void InitializePlayerItemPool()
         {
-            Debug.Log("🧪 [LOBBYROOM] Initializing player item pool...");
+            AdvancedDebugSystem.Log("🧪 [LOBBYROOM] Initializing player item pool...", LogCategory.Avatar, LogLevel.Debug);
 
             for (int i = 0; i < maxVisiblePlayers; i++)
             {
@@ -181,14 +184,14 @@ namespace HackMonkeys.UI.Panels
                 }
             }
 
-            Debug.Log($"🧪 [LOBBYROOM] ✅ Created {_playerItems.Count} player items");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] ✅ Created {_playerItems.Count} player items", LogCategory.Avatar, LogLevel.Debug);
         }
 
         public override void OnPanelShown()
         {
             base.OnPanelShown();
 
-            Debug.Log("🧪 [LOBBYROOM] Panel shown, setting up events...");
+            AdvancedDebugSystem.Log("🧪 [LOBBYROOM] Panel shown, setting up events...", LogCategory.Avatar, LogLevel.Debug);
 
             if (_lobbyState != null)
             {
@@ -199,11 +202,11 @@ namespace HackMonkeys.UI.Panels
                 _lobbyState.OnAllPlayersReady.AddListener(OnAllPlayersReadyChanged);
                 _lobbyState.OnMapChanged.AddListener(OnMapChangedByHost);
 
-                Debug.Log("🧪 [LOBBYROOM] ✅ Subscribed to LobbyState events");
+                AdvancedDebugSystem.Log("🧪 [LOBBYROOM] ✅ Subscribed to LobbyState events", LogCategory.Avatar, LogLevel.Debug);
             }
             else
             {
-                Debug.LogError("🧪 [LOBBYROOM] ❌ Cannot subscribe to events - LobbyState is null");
+                AdvancedDebugSystem.LogError("🧪 [LOBBYROOM] ❌ Cannot subscribe to events - LobbyState is null", LogCategory.Avatar);
             }
 
             if (_lobbyController != null)
@@ -223,7 +226,7 @@ namespace HackMonkeys.UI.Panels
                     ShowStatusMessage(error, MessageType.Error);
                 });
 
-                Debug.Log("🧪 [LOBBYROOM] ✅ Subscribed to LobbyController events");
+                AdvancedDebugSystem.Log("🧪 [LOBBYROOM] ✅ Subscribed to LobbyController events", LogCategory.Avatar, LogLevel.Debug);
             }
 
             UpdateRoomInfo();
@@ -237,7 +240,7 @@ namespace HackMonkeys.UI.Panels
 
             AnimateRoomEntry();
 
-            Debug.Log("🧪 [LOBBYROOM] ✅ Panel fully initialized");
+            AdvancedDebugSystem.Log("🧪 [LOBBYROOM] ✅ Panel fully initialized", LogCategory.Avatar, LogLevel.Debug);
         }
 
 
@@ -245,7 +248,7 @@ namespace HackMonkeys.UI.Panels
         {
             base.OnPanelHidden();
 
-            Debug.Log("🧪 [LOBBYROOM] Panel hidden, cleaning up events...");
+            AdvancedDebugSystem.Log("🧪 [LOBBYROOM] Panel hidden, cleaning up events...", LogCategory.Avatar, LogLevel.Debug);
 
             if (_lobbyState != null)
             {
@@ -256,7 +259,7 @@ namespace HackMonkeys.UI.Panels
                 _lobbyState.OnAllPlayersReady.RemoveListener(OnAllPlayersReadyChanged);
                 _lobbyState.OnMapChanged.RemoveListener(OnMapChangedByHost);
 
-                Debug.Log("🧪 [LOBBYROOM] ✅ Unsubscribed from LobbyState events");
+                AdvancedDebugSystem.Log("🧪 [LOBBYROOM] ✅ Unsubscribed from LobbyState events", LogCategory.Avatar, LogLevel.Debug);
             }
 
             if (_lobbyController != null)
@@ -265,26 +268,26 @@ namespace HackMonkeys.UI.Panels
                 _lobbyController.OnGameStartFailed.RemoveAllListeners();
                 _lobbyController.OnActionFailed.RemoveAllListeners();
 
-                Debug.Log("🧪 [LOBBYROOM] ✅ Unsubscribed from LobbyController events");
+                AdvancedDebugSystem.Log("🧪 [LOBBYROOM] ✅ Unsubscribed from LobbyController events", LogCategory.Avatar, LogLevel.Debug);
             }
         }
 
         private System.Collections.IEnumerator DelayedRefresh()
         {
-            Debug.Log("🧪 [LOBBYROOM] Waiting before refresh...");
+            AdvancedDebugSystem.Log("🧪 [LOBBYROOM] Waiting before refresh...", LogCategory.Avatar, LogLevel.Debug);
     
             // Esperar 2 frames para asegurar que todo esté inicializado
             yield return null;
             yield return null;
     
             // Ahora sí refrescar
-            Debug.Log("🧪 [LOBBYROOM] Executing delayed refresh...");
+            AdvancedDebugSystem.Log("🧪 [LOBBYROOM] Executing delayed refresh...", LogCategory.Avatar, LogLevel.Debug);
             RefreshPlayersList();
     
             // Si aún no hay jugadores, intentar de nuevo
             if (_lobbyState != null && _lobbyState.PlayerCount == 0)
             {
-                Debug.LogWarning("🧪 [LOBBYROOM] No players found, retrying in 0.5s...");
+                AdvancedDebugSystem.LogWarning("🧪 [LOBBYROOM] No players found, retrying in 0.5s...", LogCategory.Avatar);
                 yield return new WaitForSeconds(0.5f);
                 RefreshPlayersList();
             }
@@ -296,11 +299,11 @@ namespace HackMonkeys.UI.Panels
         {
             if (_lobbyController == null || _networkBootstrapper == null)
             {
-                Debug.LogError("🧪 [LOBBYROOM] Controller or Bootstrapper not available");
+                AdvancedDebugSystem.LogError("🧪 [LOBBYROOM] Controller or Bootstrapper not available", LogCategory.Avatar);
                 return;
             }
     
-            Debug.Log($"🧪 [LOBBYROOM] === STARTING GAME SEQUENCE ===");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] === STARTING GAME SEQUENCE ===", LogCategory.Avatar, LogLevel.Debug);
             
             // Paso 1: Sincronizar el mapa con todos los clientes
             await SyncMapWithAllClients();
@@ -308,13 +311,13 @@ namespace HackMonkeys.UI.Panels
             // Paso 2: Verificar sincronización
             if (!await VerifyMapSynchronization())
             {
-                Debug.LogError("[LOBBYROOM] Map synchronization failed, aborting game start");
+                AdvancedDebugSystem.LogError("[LOBBYROOM] Map synchronization failed, aborting game start", LogCategory.Avatar);
                 ShowStatusMessage("Failed to sync map with all players", MessageType.Error);
                 return;
             }
     
             // Paso 3: Iniciar el juego
-            Debug.Log($"[LOBBYROOM] ✅ All checks passed, starting game...");
+            AdvancedDebugSystem.Log($"[LOBBYROOM] ✅ All checks passed, starting game...", LogCategory.Avatar, LogLevel.Debug);
             _lobbyController.StartGame();
         }
         
@@ -341,7 +344,7 @@ namespace HackMonkeys.UI.Panels
                     : _networkBootstrapper.SelectedSceneName;
             }
     
-            Debug.Log($"[LOBBYROOM] 🗺️ Final map determined: {finalMap}");
+            AdvancedDebugSystem.Log($"[LOBBYROOM] 🗺️ Final map determined: {finalMap}", LogCategory.Avatar, LogLevel.Debug);
             
             // Actualizar NetworkBootstrapper local (host)
             _networkBootstrapper.SelectedSceneName = finalMap;
@@ -353,7 +356,7 @@ namespace HackMonkeys.UI.Panels
                 var hostPlayer = _lobbyState.LocalPlayer;
                 if (hostPlayer != null && hostPlayer.IsHost)
                 {
-                    Debug.Log($"[LOBBYROOM] 📡 Sending map sync RPC to all clients: {finalMap}");
+                    AdvancedDebugSystem.Log($"[LOBBYROOM] 📡 Sending map sync RPC to all clients: {finalMap}", LogCategory.Avatar, LogLevel.Debug);
                     hostPlayer.RPC_ChangeMap(finalMap);
                     
                     // Esperar más tiempo para asegurar propagación completa
@@ -362,14 +365,14 @@ namespace HackMonkeys.UI.Panels
                     // Verificar que nuestro propio NetworkBootstrapper esté actualizado
                     if (_networkBootstrapper.SelectedSceneName != finalMap)
                     {
-                        Debug.LogWarning($"[LOBBYROOM] NetworkBootstrapper not updated, forcing: {finalMap}");
+                        AdvancedDebugSystem.LogWarning($"[LOBBYROOM] NetworkBootstrapper not updated, forcing: {finalMap}", LogCategory.Avatar);
                         _networkBootstrapper.SelectedSceneName = finalMap;
                     }
                 }
             }
             else
             {
-                Debug.Log($"[LOBBYROOM] Not host, skipping RPC send. IsHost: {lobbyInfo?.IsHost}");
+                AdvancedDebugSystem.Log($"[LOBBYROOM] Not host, skipping RPC send. IsHost: {lobbyInfo?.IsHost}", LogCategory.Avatar, LogLevel.Debug);
             }
         }
         
@@ -378,7 +381,7 @@ namespace HackMonkeys.UI.Panels
             if (_lobbyState == null || _networkBootstrapper == null) return false;
             
             string expectedMap = _networkBootstrapper.SelectedSceneName;
-            Debug.Log($"[LOBBYROOM] 🔍 Verifying map synchronization: {expectedMap}");
+            AdvancedDebugSystem.Log($"[LOBBYROOM] 🔍 Verifying map synchronization: {expectedMap}", LogCategory.Avatar, LogLevel.Debug);
             
             // En Photon Fusion, solo el host puede actualizar SelectedMap
             // Verificamos que:
@@ -399,16 +402,16 @@ namespace HackMonkeys.UI.Panels
                     if (player.IsHost)
                     {
                         string hostMap = player.SelectedMap.ToString();
-                        Debug.Log($"[LOBBYROOM] Host player {player.GetDisplayName()} has map: '{hostMap}'");
+                        AdvancedDebugSystem.Log($"[LOBBYROOM] Host player {player.GetDisplayName()} has map: '{hostMap}'", LogCategory.Avatar, LogLevel.Debug);
                         
                         if (!string.IsNullOrEmpty(hostMap) && hostMap == expectedMap)
                         {
                             hostHasCorrectMap = true;
-                            Debug.Log($"[LOBBYROOM] ✅ Host has correct map: {expectedMap}");
+                            AdvancedDebugSystem.Log($"[LOBBYROOM] ✅ Host has correct map: {expectedMap}", LogCategory.Avatar, LogLevel.Debug);
                         }
                         else
                         {
-                            Debug.LogWarning($"[LOBBYROOM] Host has incorrect map: '{hostMap}', expected '{expectedMap}'");
+                            AdvancedDebugSystem.LogWarning($"[LOBBYROOM] Host has incorrect map: '{hostMap}', expected '{expectedMap}'", LogCategory.Avatar);
                         }
                         break;
                     }
@@ -418,15 +421,15 @@ namespace HackMonkeys.UI.Panels
                 // ya que RPC_NotifyMapChange actualiza el NetworkBootstrapper de todos
                 if (hostHasCorrectMap)
                 {
-                    Debug.Log($"[LOBBYROOM] ✅ Map synchronization verified: {expectedMap}");
+                    AdvancedDebugSystem.Log($"[LOBBYROOM] ✅ Map synchronization verified: {expectedMap}", LogCategory.Avatar, LogLevel.Debug);
                     return true;
                 }
                 
-                Debug.Log($"[LOBBYROOM] ⏳ Attempt {attempt + 1}/{maxAttempts} - waiting for host sync...");
+                AdvancedDebugSystem.Log($"[LOBBYROOM] ⏳ Attempt {attempt + 1}/{maxAttempts} - waiting for host sync...", LogCategory.Avatar, LogLevel.Debug);
                 await System.Threading.Tasks.Task.Delay(200);
             }
             
-            Debug.LogError($"[LOBBYROOM] ❌ Failed to sync host with map after {maxAttempts} attempts");
+            AdvancedDebugSystem.LogError($"[LOBBYROOM] ❌ Failed to sync host with map after {maxAttempts} attempts", LogCategory.Avatar);
             
             // Log adicional para debug
             var allPlayers = _lobbyState.GetPlayersList();
@@ -434,7 +437,7 @@ namespace HackMonkeys.UI.Panels
             {
                 if (player != null)
                 {
-                    Debug.LogError($"[LOBBYROOM] Player {player.GetDisplayName()}: IsHost={player.IsHost}, SelectedMap='{player.SelectedMap}'");
+                    AdvancedDebugSystem.LogError($"[LOBBYROOM] Player {player.GetDisplayName()}: IsHost={player.IsHost}, SelectedMap='{player.SelectedMap}'", LogCategory.Avatar);
                 }
             }
             
@@ -454,7 +457,7 @@ namespace HackMonkeys.UI.Panels
 
             var availableScenes = _networkBootstrapper.GetAvailableScenes();
 
-            Debug.Log($"🧪 [LOBBYROOM] Populating {availableScenes.Count} maps");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] Populating {availableScenes.Count} maps", LogCategory.Avatar, LogLevel.Debug);
 
             for (int i = 0; i < availableScenes.Count; i++)
             {
@@ -490,44 +493,44 @@ namespace HackMonkeys.UI.Panels
         
         private void SelectMap(string mapName)
         {
-            Debug.Log($"🧪 [LOBBYROOM] === SELECT MAP START ===");
-            Debug.Log($"🧪 [LOBBYROOM] Map to select: {mapName}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] === SELECT MAP START ===", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] Map to select: {mapName}", LogCategory.Avatar, LogLevel.Debug);
 
             var lobbyInfo = _lobbyController?.GetLobbyInfo();
-            Debug.Log($"🧪 [LOBBYROOM] Is Host: {lobbyInfo?.IsHost}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] Is Host: {lobbyInfo?.IsHost}", LogCategory.Avatar, LogLevel.Debug);
 
             if (lobbyInfo?.IsHost != true)
             {
                 ShowStatusMessage("Only host can change map", MessageType.Warning);
-                Debug.Log($"🧪 [LOBBYROOM] Not host, cannot change map");
+                AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] Not host, cannot change map", LogCategory.Avatar, LogLevel.Debug);
                 return;
             }
 
             if (!_networkBootstrapper.IsValidScene(mapName))
             {
                 ShowStatusMessage("Invalid map selection", MessageType.Error);
-                Debug.LogError($"🧪 [LOBBYROOM] Invalid scene: {mapName}");
+                AdvancedDebugSystem.LogError($"🧪 [LOBBYROOM] Invalid scene: {mapName}", LogCategory.Avatar);
                 return;
             }
 
             _selectedMapName = mapName;
-            Debug.Log($"🧪 [LOBBYROOM] Local map name set to: {_selectedMapName}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] Local map name set to: {_selectedMapName}", LogCategory.Avatar, LogLevel.Debug);
     
             // Actualizar NetworkBootstrapper inmediatamente
             _networkBootstrapper.SelectedSceneName = mapName;
 
             var localPlayer = _lobbyState?.LocalPlayer;
-            Debug.Log($"🧪 [LOBBYROOM] Local player exists: {localPlayer != null}");
-            Debug.Log($"🧪 [LOBBYROOM] Local player is host: {localPlayer?.IsHost}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] Local player exists: {localPlayer != null}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] Local player is host: {localPlayer?.IsHost}", LogCategory.Avatar, LogLevel.Debug);
 
             if (localPlayer != null && localPlayer.IsHost)
             {
-                Debug.Log($"🧪 [LOBBYROOM] 📡 Calling RPC_ChangeMap with: {mapName}");
+                AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] 📡 Calling RPC_ChangeMap with: {mapName}", LogCategory.Avatar, LogLevel.Debug);
                 localPlayer.RPC_ChangeMap(mapName);
             }
             else
             {
-                Debug.LogError($"🧪 [LOBBYROOM] ❌ Cannot call RPC - player not host or null");
+                AdvancedDebugSystem.LogError($"🧪 [LOBBYROOM] ❌ Cannot call RPC - player not host or null", LogCategory.Avatar);
             }
 
             UpdateMapDisplay();
@@ -540,32 +543,32 @@ namespace HackMonkeys.UI.Panels
             }
 
             ShowStatusMessage($"Map changed to: {mapName}", MessageType.Info);
-            Debug.Log($"🧪 [LOBBYROOM] === SELECT MAP END ===");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] === SELECT MAP END ===", LogCategory.Avatar, LogLevel.Debug);
         }
 
         
         private void OnMapChangedByHost(string newMapName)
         {
-            Debug.Log($"[LOBBYROOM] 🗺️ Map changed by host to: {newMapName}");
+            AdvancedDebugSystem.Log($"[LOBBYROOM] 🗺️ Map changed by host to: {newMapName}", LogCategory.Avatar, LogLevel.Debug);
     
             if (string.IsNullOrEmpty(newMapName)) 
             {
-                Debug.LogWarning("[LOBBYROOM] Received empty map name from host");
+                AdvancedDebugSystem.LogWarning("[LOBBYROOM] Received empty map name from host", LogCategory.Avatar);
                 return;
             }
 
             _selectedMapName = newMapName;
-            Debug.Log($"[LOBBYROOM] Local _selectedMapName updated to: {_selectedMapName}");
+            AdvancedDebugSystem.Log($"[LOBBYROOM] Local _selectedMapName updated to: {_selectedMapName}", LogCategory.Avatar, LogLevel.Debug);
     
             // Actualizar NetworkBootstrapper (CRITICO para clientes)
             if (_networkBootstrapper != null)
             {
                 _networkBootstrapper.SelectedSceneName = newMapName;
-                Debug.Log($"[LOBBYROOM] ✅ NetworkBootstrapper.SelectedSceneName updated to: {newMapName}");
+                AdvancedDebugSystem.Log($"[LOBBYROOM] ✅ NetworkBootstrapper.SelectedSceneName updated to: {newMapName}", LogCategory.Avatar, LogLevel.Debug);
             }
             else
             {
-                Debug.LogError("[LOBBYROOM] NetworkBootstrapper is null! Cannot update scene name.");
+                AdvancedDebugSystem.LogError("[LOBBYROOM] NetworkBootstrapper is null! Cannot update scene name.", LogCategory.Avatar);
             }
     
             UpdateMapDisplay();
@@ -574,7 +577,7 @@ namespace HackMonkeys.UI.Panels
             if (lobbyInfo?.IsHost == false)
             {
                 ShowStatusMessage($"Host changed map to: {newMapName}", MessageType.Info);
-                Debug.Log($"[LOBBYROOM] 📢 Showed map change message to client");
+                AdvancedDebugSystem.Log($"[LOBBYROOM] 📢 Showed map change message to client", LogCategory.Avatar, LogLevel.Debug);
             }
         }
 
@@ -585,7 +588,7 @@ namespace HackMonkeys.UI.Panels
 
         private void OnPlayerJoined(LobbyPlayer player)
         {
-            Debug.Log($"🧪 [LOBBYROOM] 🎉 Player joined: {player.GetDisplayName()}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] 🎉 Player joined: {player.GetDisplayName()}", LogCategory.Avatar, LogLevel.Debug);
 
             RefreshPlayersList();
             ShowStatusMessage($"{player.PlayerName} joined the lobby", MessageType.Info);
@@ -595,7 +598,7 @@ namespace HackMonkeys.UI.Panels
 
         private void OnPlayerLeft(LobbyPlayer player)
         {
-            Debug.Log($"🧪 [LOBBYROOM] 👋 Player left: {player.GetDisplayName()}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] 👋 Player left: {player.GetDisplayName()}", LogCategory.Avatar, LogLevel.Debug);
 
             RefreshPlayersList();
             ShowStatusMessage($"{player.PlayerName} left the lobby", MessageType.Warning);
@@ -603,7 +606,7 @@ namespace HackMonkeys.UI.Panels
 
         private void OnPlayerUpdated(LobbyPlayer player)
         {
-            Debug.Log($"🧪 [LOBBYROOM] 🔄 Player updated: {player.GetDisplayName()} - Ready: {player.IsReady}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] 🔄 Player updated: {player.GetDisplayName()} - Ready: {player.IsReady}", LogCategory.Avatar, LogLevel.Debug);
 
             var playerItem = _playerItems.FirstOrDefault(item =>
                 item.gameObject.activeSelf && item.GetPlayerRef() == player.PlayerRef);
@@ -624,7 +627,7 @@ namespace HackMonkeys.UI.Panels
 
         private void OnPlayerCountChanged(int current, int max)
         {
-            Debug.Log($"🧪 [LOBBYROOM] 📊 Player count changed: {current}/{max}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] 📊 Player count changed: {current}/{max}", LogCategory.Avatar, LogLevel.Debug);
 
             UpdatePlayerCount();
             UpdateStartButton();
@@ -632,7 +635,7 @@ namespace HackMonkeys.UI.Panels
 
         private void OnAllPlayersReadyChanged(bool allReady)
         {
-            Debug.Log($"🧪 [LOBBYROOM] 🎯 All players ready changed: {allReady}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] 🎯 All players ready changed: {allReady}", LogCategory.Avatar, LogLevel.Debug);
 
             UpdateStartButton();
 
@@ -653,12 +656,12 @@ namespace HackMonkeys.UI.Panels
 
         private void UpdateRoomInfo()
         {
-            Debug.Log("🧪 [LOBBYROOM] Updating room info...");
+            AdvancedDebugSystem.Log("🧪 [LOBBYROOM] Updating room info...", LogCategory.Avatar, LogLevel.Debug);
 
             var lobbyInfo = _lobbyController?.GetLobbyInfo();
             if (lobbyInfo == null)
             {
-                Debug.LogWarning("🧪 [LOBBYROOM] ⚠️ Cannot update room info - LobbyController returned null");
+                AdvancedDebugSystem.LogWarning("🧪 [LOBBYROOM] ⚠️ Cannot update room info - LobbyController returned null", LogCategory.Avatar);
                 return;
             }
 
@@ -677,18 +680,18 @@ namespace HackMonkeys.UI.Panels
                 roomStatusIndicator.color = lobbyInfo.IsInLobby ? readyColor : notReadyColor;
             }
 
-            Debug.Log($"🧪 [LOBBYROOM] ✅ Room info updated - {lobbyInfo.RoomName}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] ✅ Room info updated - {lobbyInfo.RoomName}", LogCategory.Avatar, LogLevel.Debug);
         }
 
         private void RefreshPlayersList()
         {
             if (_lobbyState == null)
             {
-                Debug.LogWarning("🧪 [LOBBYROOM] ⚠️ Cannot refresh players list - LobbyState is null");
+                AdvancedDebugSystem.LogWarning("🧪 [LOBBYROOM] ⚠️ Cannot refresh players list - LobbyState is null", LogCategory.Avatar);
                 return;
             }
 
-            Debug.Log("🧪 [LOBBYROOM] Refreshing players list...");
+            AdvancedDebugSystem.Log("🧪 [LOBBYROOM] Refreshing players list...", LogCategory.Avatar, LogLevel.Debug);
 
             try
             {
@@ -706,15 +709,15 @@ namespace HackMonkeys.UI.Panels
                 }
                 catch (System.Exception e)
                 {
-                    Debug.LogError($"🧪 [LOBBYROOM] ❌ Error getting players list: {e.Message}");
+                    AdvancedDebugSystem.LogError($"🧪 [LOBBYROOM] ❌ Error getting players list: {e.Message}", LogCategory.Avatar);
                     return;
                 }
 
-                Debug.Log($"🧪 [LOBBYROOM] Found {players?.Count ?? 0} players to display");
+                AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] Found {players?.Count ?? 0} players to display", LogCategory.Avatar, LogLevel.Debug);
 
                 if (players == null || players.Count == 0)
                 {
-                    Debug.LogWarning("🧪 [LOBBYROOM] ⚠️ No players found in LobbyState!");
+                    AdvancedDebugSystem.LogWarning("🧪 [LOBBYROOM] ⚠️ No players found in LobbyState!", LogCategory.Avatar);
                     return;
                 }
 
@@ -725,17 +728,17 @@ namespace HackMonkeys.UI.Panels
 
                     if (player == null)
                     {
-                        Debug.LogError($"🧪 [LOBBYROOM] ❌ Player at index {i} is null!");
+                        AdvancedDebugSystem.LogError($"🧪 [LOBBYROOM] ❌ Player at index {i} is null!", LogCategory.Avatar);
                         continue;
                     }
 
-                    Debug.Log($"🧪 [LOBBYROOM] Displaying player {i}:");
-                    Debug.Log($"  - Name: {player.PlayerName.ToString()}");
-                    Debug.Log($"  - Display Name: {player.GetDisplayName()}");
-                    Debug.Log($"  - Is Host: {player.IsHost}");
-                    Debug.Log($"  - Is Local: {player.IsLocalPlayer}");
-                    Debug.Log($"  - Is Ready: {player.IsReady}");
-                    Debug.Log($"  - Player Ref: {player.PlayerRef}");
+                    AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] Displaying player {i}:", LogCategory.Avatar, LogLevel.Debug);
+                    AdvancedDebugSystem.Log($"  - Name: {player.PlayerName.ToString()}", LogCategory.Avatar, LogLevel.Debug);
+                    AdvancedDebugSystem.Log($"  - Display Name: {player.GetDisplayName()}", LogCategory.Avatar, LogLevel.Debug);
+                    AdvancedDebugSystem.Log($"  - Is Host: {player.IsHost}", LogCategory.Avatar, LogLevel.Debug);
+                    AdvancedDebugSystem.Log($"  - Is Local: {player.IsLocalPlayer}", LogCategory.Avatar, LogLevel.Debug);
+                    AdvancedDebugSystem.Log($"  - Is Ready: {player.IsReady}", LogCategory.Avatar, LogLevel.Debug);
+                    AdvancedDebugSystem.Log($"  - Player Ref: {player.PlayerRef}", LogCategory.Avatar, LogLevel.Debug);
 
                     item.UpdatePlayerData(player);
                     item.gameObject.SetActive(true);
@@ -751,17 +754,17 @@ namespace HackMonkeys.UI.Panels
                     }
                     catch (System.Exception e)
                     {
-                        Debug.LogError($"🧪 [LOBBYROOM] Animation error: {e.Message}");
+                        AdvancedDebugSystem.LogError($"🧪 [LOBBYROOM] Animation error: {e.Message}", LogCategory.Avatar);
                         item.transform.localPosition = new Vector3(0, targetY, 0);
                     }*/
                 }
 
                 UpdatePlayerCount();
-                Debug.Log("🧪 [LOBBYROOM] ✅ Players list refreshed successfully");
+                AdvancedDebugSystem.Log("🧪 [LOBBYROOM] ✅ Players list refreshed successfully", LogCategory.Avatar, LogLevel.Debug);
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"🧪 [LOBBYROOM] ❌ Critical error in RefreshPlayersList: {e.Message}\n{e.StackTrace}");
+                AdvancedDebugSystem.LogError($"🧪 [LOBBYROOM] ❌ Critical error in RefreshPlayersList: {e.Message}\n{e.StackTrace}", LogCategory.Avatar);
 
                 ShowErrorInPlayerList("Error loading players");
             }
@@ -804,7 +807,7 @@ namespace HackMonkeys.UI.Panels
         {
             _isLocalPlayerReady = localPlayer.IsReady;
 
-            Debug.Log($"🧪 [LOBBYROOM] Updating local player controls - Ready: {_isLocalPlayerReady}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] Updating local player controls - Ready: {_isLocalPlayerReady}", LogCategory.Avatar, LogLevel.Debug);
 
             if (readyButton != null && readyButtonText != null)
             {
@@ -843,7 +846,7 @@ namespace HackMonkeys.UI.Panels
                 if (hostPlayer != null && !string.IsNullOrEmpty(hostPlayer.SelectedMap.ToString()))
                 {
                     currentMap = hostPlayer.SelectedMap.ToString();
-                    Debug.Log($"[LOBBYROOM] Using host's selected map: {currentMap}");
+                    AdvancedDebugSystem.Log($"[LOBBYROOM] Using host's selected map: {currentMap}", LogCategory.Avatar, LogLevel.Debug);
                 }
             }
     
@@ -853,7 +856,7 @@ namespace HackMonkeys.UI.Panels
                 currentMap = !string.IsNullOrEmpty(_selectedMapName) 
                     ? _selectedMapName 
                     : _networkBootstrapper.SelectedSceneName;
-                Debug.Log($"[LOBBYROOM] Using local/default map: {currentMap}");
+                AdvancedDebugSystem.Log($"[LOBBYROOM] Using local/default map: {currentMap}", LogCategory.Avatar, LogLevel.Debug);
             }
     
             // Actualizar el mapa local
@@ -877,7 +880,7 @@ namespace HackMonkeys.UI.Panels
                 if (currentMapText != null)
                     currentMapText.text = "Default Map";
             
-                Debug.LogWarning($"[LOBBYROOM] Scene info not found for: {currentMap}");
+                AdvancedDebugSystem.LogWarning($"[LOBBYROOM] Scene info not found for: {currentMap}", LogCategory.Avatar);
             }
         }
 
@@ -887,7 +890,7 @@ namespace HackMonkeys.UI.Panels
             var lobbyInfo = _lobbyController?.GetLobbyInfo();
             bool isHost = lobbyInfo?.IsHost ?? false;
 
-            Debug.Log($"🧪 [LOBBYROOM] Updating host controls - Is Host: {isHost}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] Updating host controls - Is Host: {isHost}", LogCategory.Avatar, LogLevel.Debug);
 
             if (hostControlsPanel != null)
             {
@@ -914,7 +917,7 @@ namespace HackMonkeys.UI.Panels
             bool canStart = _lobbyController.CanStartGame;
             startGameButton.SetInteractable(canStart);
 
-            Debug.Log($"🧪 [LOBBYROOM] Start button - Can start: {canStart}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] Start button - Can start: {canStart}", LogCategory.Avatar, LogLevel.Debug);
 
             if (canStart)
             {
@@ -969,7 +972,7 @@ namespace HackMonkeys.UI.Panels
         {
             _selectedPlayer = player;
 
-            Debug.Log($"🧪 [LOBBYROOM] Player item clicked: {player.GetDisplayName()}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] Player item clicked: {player.GetDisplayName()}", LogCategory.Avatar, LogLevel.Debug);
 
             var lobbyInfo = _lobbyController?.GetLobbyInfo();
             if (lobbyInfo?.IsHost == true && !player.IsLocalPlayer && kickPlayerButton != null)
@@ -990,7 +993,7 @@ namespace HackMonkeys.UI.Panels
 
             int maxPlayers = Mathf.RoundToInt(value);
             // TODO: Implementar RPC para cambiar max players
-            Debug.Log($"🧪 [LOBBYROOM] Max players changed to: {maxPlayers}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] Max players changed to: {maxPlayers}", LogCategory.Avatar, LogLevel.Debug);
         }
 
         private void OnRoomOpenChanged(bool isOpen)
@@ -999,7 +1002,7 @@ namespace HackMonkeys.UI.Panels
             if (lobbyInfo?.IsHost != true) return;
 
             // TODO: Implementar RPC para cambiar visibilidad de sala
-            Debug.Log($"🧪 [LOBBYROOM] Room open changed to: {isOpen}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] Room open changed to: {isOpen}", LogCategory.Avatar, LogLevel.Debug);
         }
 
         private void OnPrivateRoomChanged(bool isPrivate)
@@ -1008,7 +1011,7 @@ namespace HackMonkeys.UI.Panels
             if (lobbyInfo?.IsHost != true) return;
 
             // TODO: Implementar RPC para cambiar privacidad
-            Debug.Log($"🧪 [LOBBYROOM] Private room changed to: {isPrivate}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] Private room changed to: {isPrivate}", LogCategory.Avatar, LogLevel.Debug);
         }
 
         private void OnDifficultyChanged(float value)
@@ -1017,7 +1020,7 @@ namespace HackMonkeys.UI.Panels
             if (lobbyInfo?.IsHost != true) return;
 
             // TODO: Implementar configuración de dificultad
-            Debug.Log($"🧪 [LOBBYROOM] Difficulty changed to: {value}");
+            AdvancedDebugSystem.Log($"🧪 [LOBBYROOM] Difficulty changed to: {value}", LogCategory.Avatar, LogLevel.Debug);
         }
         
         
@@ -1113,18 +1116,18 @@ namespace HackMonkeys.UI.Panels
         [ContextMenu("Debug: Room Status")]
         private void DebugRoomStatus()
         {
-            Debug.Log("=== LobbyRoom Debug Status ===");
-            Debug.Log($"LobbyState: {_lobbyState != null}");
-            Debug.Log($"LobbyController: {_lobbyController != null}");
+            AdvancedDebugSystem.Log("=== LobbyRoom Debug Status ===", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"LobbyState: {_lobbyState != null}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"LobbyController: {_lobbyController != null}", LogCategory.Avatar, LogLevel.Debug);
 
             if (_lobbyState != null)
             {
                 var stats = _lobbyState.GetLobbyStats();
-                Debug.Log($"Players: {stats.TotalPlayers}/{stats.MaxPlayers}");
-                Debug.Log($"Ready: {stats.ReadyPlayers}/{stats.TotalPlayers}");
-                Debug.Log($"All Ready: {stats.AllReady}");
-                Debug.Log($"Host: {stats.HostName}");
-                Debug.Log($"Local: {stats.LocalPlayerName}");
+                AdvancedDebugSystem.Log($"Players: {stats.TotalPlayers}/{stats.MaxPlayers}", LogCategory.Avatar, LogLevel.Debug);
+                AdvancedDebugSystem.Log($"Ready: {stats.ReadyPlayers}/{stats.TotalPlayers}", LogCategory.Avatar, LogLevel.Debug);
+                AdvancedDebugSystem.Log($"All Ready: {stats.AllReady}", LogCategory.Avatar, LogLevel.Debug);
+                AdvancedDebugSystem.Log($"Host: {stats.HostName}", LogCategory.Avatar, LogLevel.Debug);
+                AdvancedDebugSystem.Log($"Local: {stats.LocalPlayerName}", LogCategory.Avatar, LogLevel.Debug);
             }
 
             if (_lobbyController != null)
@@ -1132,20 +1135,20 @@ namespace HackMonkeys.UI.Panels
                 var info = _lobbyController.GetLobbyInfo();
                 if (info != null)
                 {
-                    Debug.Log($"Room: {info.RoomName}");
-                    Debug.Log($"Is Host: {info.IsHost}");
-                    Debug.Log($"Can Start: {info.CanStart}");
-                    Debug.Log($"Status: {info.StatusText}");
+                    AdvancedDebugSystem.Log($"Room: {info.RoomName}", LogCategory.Avatar, LogLevel.Debug);
+                    AdvancedDebugSystem.Log($"Is Host: {info.IsHost}", LogCategory.Avatar, LogLevel.Debug);
+                    AdvancedDebugSystem.Log($"Can Start: {info.CanStart}", LogCategory.Avatar, LogLevel.Debug);
+                    AdvancedDebugSystem.Log($"Status: {info.StatusText}", LogCategory.Avatar, LogLevel.Debug);
                 }
             }
 
-            Debug.Log("================================");
+            AdvancedDebugSystem.Log("================================", LogCategory.Avatar, LogLevel.Debug);
         }
 
         [ContextMenu("Debug: Force Refresh")]
         private void DebugForceRefresh()
         {
-            Debug.Log("🧪 [DEBUG] Forcing refresh...");
+            AdvancedDebugSystem.Log("🧪 [DEBUG] Forcing refresh...", LogCategory.Avatar, LogLevel.Debug);
             RefreshPlayersList();
             UpdateRoomInfo();
             UpdateHostControls();
@@ -1154,120 +1157,120 @@ namespace HackMonkeys.UI.Panels
         [ContextMenu("Debug: Force Refresh Players")]
         private void DebugForceRefreshPlayers()
         {
-            Debug.Log("🧪 [DEBUG] === FORCE REFRESH PLAYERS ===");
+            AdvancedDebugSystem.Log("🧪 [DEBUG] === FORCE REFRESH PLAYERS ===", LogCategory.Avatar, LogLevel.Debug);
     
             if (_lobbyState == null)
             {
-                Debug.LogError("🧪 [DEBUG] LobbyState is null!");
+                AdvancedDebugSystem.LogError("🧪 [DEBUG] LobbyState is null!", LogCategory.Avatar);
                 _lobbyState = LobbyState.Instance;
                 if (_lobbyState == null)
                 {
-                    Debug.LogError("🧪 [DEBUG] LobbyState.Instance is also null!");
+                    AdvancedDebugSystem.LogError("🧪 [DEBUG] LobbyState.Instance is also null!", LogCategory.Avatar);
                     return;
                 }
             }
     
             var players = _lobbyState.GetPlayersList(hostFirst: true);
-            Debug.Log($"🧪 [DEBUG] Players in LobbyState: {players.Count}");
+            AdvancedDebugSystem.Log($"🧪 [DEBUG] Players in LobbyState: {players.Count}", LogCategory.Avatar, LogLevel.Debug);
     
             foreach (var player in players)
             {
                 if (player != null)
                 {
-                    Debug.Log($"🧪 [DEBUG] - {player.GetDisplayName()} (Ref: {player.PlayerRef})");
+                    AdvancedDebugSystem.Log($"🧪 [DEBUG] - {player.GetDisplayName()} (Ref: {player.PlayerRef})", LogCategory.Avatar, LogLevel.Debug);
                 }
                 else
                 {
-                    Debug.LogError("🧪 [DEBUG] - NULL PLAYER!");
+                    AdvancedDebugSystem.LogError("🧪 [DEBUG] - NULL PLAYER!", LogCategory.Avatar);
                 }
             }
     
             RefreshPlayersList();
     
-            Debug.Log("🧪 [DEBUG] === END FORCE REFRESH ===");
+            AdvancedDebugSystem.Log("🧪 [DEBUG] === END FORCE REFRESH ===", LogCategory.Avatar, LogLevel.Debug);
         }
         
         [ContextMenu("Debug: Complete System State")]
         private void DebugCompleteSystemState()
         {
-            Debug.Log("=== COMPLETE SYSTEM DEBUG STATE ===");
+            AdvancedDebugSystem.Log("=== COMPLETE SYSTEM DEBUG STATE ===", LogCategory.Avatar, LogLevel.Debug);
             
             // LobbyRoom state
-            Debug.Log($"[LobbyRoom] Selected Map Name: {_selectedMapName}");
-            Debug.Log($"[LobbyRoom] NetworkBootstrapper exists: {_networkBootstrapper != null}");
-            Debug.Log($"[LobbyRoom] LobbyController exists: {_lobbyController != null}");
-            Debug.Log($"[LobbyRoom] LobbyState exists: {_lobbyState != null}");
+            AdvancedDebugSystem.Log($"[LobbyRoom] Selected Map Name: {_selectedMapName}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"[LobbyRoom] NetworkBootstrapper exists: {_networkBootstrapper != null}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"[LobbyRoom] LobbyController exists: {_lobbyController != null}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"[LobbyRoom] LobbyState exists: {_lobbyState != null}", LogCategory.Avatar, LogLevel.Debug);
             
             // NetworkBootstrapper state
             if (_networkBootstrapper != null)
             {
-                Debug.Log($"[NetworkBootstrapper] Selected Scene: {_networkBootstrapper.SelectedSceneName}");
-                Debug.Log($"[NetworkBootstrapper] Is Host: {_networkBootstrapper.IsHost}");
-                Debug.Log($"[NetworkBootstrapper] Is In Room: {_networkBootstrapper.IsInRoom}");
-                Debug.Log($"[NetworkBootstrapper] Is Connected: {_networkBootstrapper.IsConnected}");
+                AdvancedDebugSystem.Log($"[NetworkBootstrapper] Selected Scene: {_networkBootstrapper.SelectedSceneName}", LogCategory.Avatar, LogLevel.Debug);
+                AdvancedDebugSystem.Log($"[NetworkBootstrapper] Is Host: {_networkBootstrapper.IsHost}", LogCategory.Avatar, LogLevel.Debug);
+                AdvancedDebugSystem.Log($"[NetworkBootstrapper] Is In Room: {_networkBootstrapper.IsInRoom}", LogCategory.Avatar, LogLevel.Debug);
+                AdvancedDebugSystem.Log($"[NetworkBootstrapper] Is Connected: {_networkBootstrapper.IsConnected}", LogCategory.Avatar, LogLevel.Debug);
             }
             
             // LobbyState players and maps
             if (_lobbyState != null)
             {
                 var players = _lobbyState.GetPlayersList();
-                Debug.Log($"[LobbyState] Player count: {players.Count}");
+                AdvancedDebugSystem.Log($"[LobbyState] Player count: {players.Count}", LogCategory.Avatar, LogLevel.Debug);
                 
                 foreach (var player in players)
                 {
                     if (player != null)
                     {
-                        Debug.Log($"[LobbyState] Player: {player.GetDisplayName()}");
-                        Debug.Log($"  - IsHost: {player.IsHost}");
-                        Debug.Log($"  - IsReady: {player.IsReady}");
-                        Debug.Log($"  - SelectedMap: '{player.SelectedMap}'");
-                        Debug.Log($"  - IsLocalPlayer: {player.IsLocalPlayer}");
+                        AdvancedDebugSystem.Log($"[LobbyState] Player: {player.GetDisplayName()}", LogCategory.Avatar, LogLevel.Debug);
+                        AdvancedDebugSystem.Log($"  - IsHost: {player.IsHost}", LogCategory.Avatar, LogLevel.Debug);
+                        AdvancedDebugSystem.Log($"  - IsReady: {player.IsReady}", LogCategory.Avatar, LogLevel.Debug);
+                        AdvancedDebugSystem.Log($"  - SelectedMap: '{player.SelectedMap}'", LogCategory.Avatar, LogLevel.Debug);
+                        AdvancedDebugSystem.Log($"  - IsLocalPlayer: {player.IsLocalPlayer}", LogCategory.Avatar, LogLevel.Debug);
                     }
                 }
                 
-                Debug.Log($"[LobbyState] All Players Ready: {_lobbyState.AllPlayersReady}");
-                Debug.Log($"[LobbyState] Selected Map: {_lobbyState.GetSelectedMap()}");
+                AdvancedDebugSystem.Log($"[LobbyState] All Players Ready: {_lobbyState.AllPlayersReady}", LogCategory.Avatar, LogLevel.Debug);
+                AdvancedDebugSystem.Log($"[LobbyState] Selected Map: {_lobbyState.GetSelectedMap()}", LogCategory.Avatar, LogLevel.Debug);
             }
             
             // LobbyController state
             if (_lobbyController != null)
             {
-                Debug.Log($"[LobbyController] Can Start Game: {_lobbyController.CanStartGame}");
+                AdvancedDebugSystem.Log($"[LobbyController] Can Start Game: {_lobbyController.CanStartGame}", LogCategory.Avatar, LogLevel.Debug);
                 var info = _lobbyController.GetLobbyInfo();
                 if (info != null)
                 {
-                    Debug.Log($"[LobbyController] Is Host: {info.IsHost}");
-                    Debug.Log($"[LobbyController] Current Players: {info.CurrentPlayers}");
-                    Debug.Log($"[LobbyController] Ready Players: {info.ReadyPlayers}");
+                    AdvancedDebugSystem.Log($"[LobbyController] Is Host: {info.IsHost}", LogCategory.Avatar, LogLevel.Debug);
+                    AdvancedDebugSystem.Log($"[LobbyController] Current Players: {info.CurrentPlayers}", LogCategory.Avatar, LogLevel.Debug);
+                    AdvancedDebugSystem.Log($"[LobbyController] Ready Players: {info.ReadyPlayers}", LogCategory.Avatar, LogLevel.Debug);
                 }
             }
             
-            Debug.Log("==================================");
+            AdvancedDebugSystem.Log("==================================", LogCategory.Avatar, LogLevel.Debug);
         }
         
         [ContextMenu("Debug: Test Map Synchronization")]
         private async void DebugTestMapSynchronization()
         {
-            Debug.Log("=== TESTING MAP SYNCHRONIZATION ===");
+            AdvancedDebugSystem.Log("=== TESTING MAP SYNCHRONIZATION ===", LogCategory.Avatar, LogLevel.Debug);
             
             // Estado antes
-            Debug.Log("--- BEFORE SYNC ---");
+            AdvancedDebugSystem.Log("--- BEFORE SYNC ---", LogCategory.Avatar, LogLevel.Debug);
             DebugCompleteSystemState();
             
             // Simular sincronización
-            Debug.Log("--- STARTING SYNC ---");
+            AdvancedDebugSystem.Log("--- STARTING SYNC ---", LogCategory.Avatar, LogLevel.Debug);
             await SyncMapWithAllClients();
             
             // Estado después
-            Debug.Log("--- AFTER SYNC ---");
+            AdvancedDebugSystem.Log("--- AFTER SYNC ---", LogCategory.Avatar, LogLevel.Debug);
             DebugCompleteSystemState();
             
             // Verificar sincronización
-            Debug.Log("--- VERIFYING SYNC ---");
+            AdvancedDebugSystem.Log("--- VERIFYING SYNC ---", LogCategory.Avatar, LogLevel.Debug);
             bool syncResult = await VerifyMapSynchronization();
-            Debug.Log($"Synchronization result: {syncResult}");
+            AdvancedDebugSystem.Log($"Synchronization result: {syncResult}", LogCategory.Avatar, LogLevel.Debug);
             
-            Debug.Log("=== TEST COMPLETED ===");
+            AdvancedDebugSystem.Log("=== TEST COMPLETED ===", LogCategory.Avatar, LogLevel.Debug);
         }
 
         #endregion

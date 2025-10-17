@@ -1,6 +1,7 @@
 using UnityEngine;
 using Oculus.Avatar2;
 using System.Collections;
+using HackMonkeys.Debugging;
 
 [RequireComponent(typeof(OvrAvatarEntity))]
 public class AvatarTrackingInitializer : MonoBehaviour
@@ -27,7 +28,7 @@ public class AvatarTrackingInitializer : MonoBehaviour
     private IEnumerator InitializeBodyTrackingAfterDelay()
     {
         // Esperar a que el avatar termine de inicializarse
-        if (_debugLogs) Debug.Log($"<color=green>[AvatarTrackingInitializer] Esperando inicialización del avatar...</Color>");
+        if (_debugLogs) AdvancedDebugSystem.Log($"<color=green>[AvatarTrackingInitializer] Esperando inicialización del avatar...</Color>", LogCategory.Avatar, LogLevel.Debug);
         
         while (!_avatarEntity.IsCreated || _avatarEntity.IsPendingAvatar)
         {
@@ -35,7 +36,7 @@ public class AvatarTrackingInitializer : MonoBehaviour
         }
         
         // Esperar un poco más para que todo se estabilice
-        if (_debugLogs) Debug.Log($"<color=green>[AvatarTrackingInitializer] Avatar inicializado. Esperando {_initializationDelay} segundos adicionales...</Color>");
+        if (_debugLogs) AdvancedDebugSystem.Log($"<color=green>[AvatarTrackingInitializer] Avatar inicializado. Esperando {_initializationDelay} segundos adicionales...</Color>", LogCategory.Avatar, LogLevel.Debug);
         yield return new WaitForSeconds(_initializationDelay);
         
         // Buscar el SampleInputManager
@@ -43,7 +44,7 @@ public class AvatarTrackingInitializer : MonoBehaviour
         
         if (_inputManager != null)
         {
-            if (_debugLogs) Debug.Log("<Color=green>[AvatarTrackingInitializer] Reiniciando el sistema de body tracking...</Color>");
+            if (_debugLogs) AdvancedDebugSystem.Log("<Color=green>[AvatarTrackingInitializer] Reiniciando el sistema de body tracking...</Color>", LogCategory.Avatar, LogLevel.Debug);
             
             // Guardar el modo actual
             var currentMode = _inputManager.BodyTrackingMode;
@@ -57,15 +58,15 @@ public class AvatarTrackingInitializer : MonoBehaviour
             // Restaurar el modo original
             _inputManager.BodyTrackingMode = currentMode;
             
-            if (_debugLogs) Debug.Log("<Color=green>[AvatarTrackingInitializer] Reinicio completado.</Color>");
+            if (_debugLogs) AdvancedDebugSystem.Log("<Color=green>[AvatarTrackingInitializer] Reinicio completado.</Color>", LogCategory.Avatar, LogLevel.Debug);
             
             // Esperar y verificar el estado del tracking
             yield return new WaitForSeconds(0.5f);
-            if (_debugLogs) Debug.Log($"<Color=green>[AvatarTrackingInitializer] Estado del tracking después del reinicio: {_avatarEntity.TrackingPoseValid}</color>");
+            if (_debugLogs) AdvancedDebugSystem.Log($"<Color=green>[AvatarTrackingInitializer] Estado del tracking después del reinicio: {_avatarEntity.TrackingPoseValid}</color>", LogCategory.Avatar, LogLevel.Debug);
         }
         else
         {
-            Debug.LogWarning("<color=green>[AvatarTrackingInitializer] No se pudo encontrar el SampleInputManager.</color>");
+            AdvancedDebugSystem.LogWarning("<color=green>[AvatarTrackingInitializer] No se pudo encontrar el SampleInputManager.</color>", LogCategory.Avatar);
         }
     }
     

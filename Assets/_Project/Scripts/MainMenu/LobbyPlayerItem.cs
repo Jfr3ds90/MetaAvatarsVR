@@ -5,6 +5,9 @@ using DG.Tweening;
 using Fusion;
 using HackMonkeys.Core;
 using HackMonkeys.UI.Spatial;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace HackMonkeys.UI.Panels
 {
@@ -123,12 +126,12 @@ namespace HackMonkeys.UI.Panels
 
             if (playerData == null)
             {
-                Debug.LogWarning("[LobbyPlayerItem] UpdatePlayerData called with null player");
+                AdvancedDebugSystem.LogWarning("[LobbyPlayerItem] UpdatePlayerData called with null player", LogCategory.Avatar);
                 gameObject.SetActive(false);
                 return;
             }
     
-            Debug.Log($"[LobbyPlayerItem] Updating display for: {playerData.GetDisplayName()}");
+            AdvancedDebugSystem.Log($"[LobbyPlayerItem] Updating display for: {playerData.GetDisplayName()}", LogCategory.Avatar, LogLevel.Debug);
     
             gameObject.SetActive(true);
     
@@ -170,7 +173,7 @@ namespace HackMonkeys.UI.Panels
             }
             else
             {
-                Debug.LogWarning("[LobbyPlayerItem] playerNameText or _playerData is null in UpdatePlayerName");
+                AdvancedDebugSystem.LogWarning("[LobbyPlayerItem] playerNameText or _playerData is null in UpdatePlayerName", LogCategory.Avatar);
             }
         }
 
@@ -656,7 +659,7 @@ namespace HackMonkeys.UI.Panels
             if (_playerData == null || _playerData.IsLocalPlayer) return;
 
             // TODO: Implementar menú contextual
-            Debug.Log($"[LobbyPlayerItem] Showing options for {_playerData.GetDisplayName()}");
+            AdvancedDebugSystem.Log($"[LobbyPlayerItem] Showing options for {_playerData.GetDisplayName()}", LogCategory.Avatar, LogLevel.Debug);
         }
 
         #endregion
@@ -708,18 +711,18 @@ namespace HackMonkeys.UI.Panels
         [ContextMenu("Debug Components")]
         public void VerifyComponents()
         {
-            Debug.Log("[LobbyPlayerItem] === Component Verification ===");
-            Debug.Log($"  - playerNameText: {playerNameText != null}");
-            Debug.Log($"  - playerStatusText: {playerStatusText != null}");
-            Debug.Log($"  - playerAvatar: {playerAvatar != null}");
-            Debug.Log($"  - readyIndicator: {readyIndicator != null}");
-            Debug.Log($"  - backgroundPanel: {backgroundPanel != null}");
-            Debug.Log($"  - selectButton: {selectButton != null}");
+            AdvancedDebugSystem.Log("[LobbyPlayerItem] === Component Verification ===", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"  - playerNameText: {playerNameText != null}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"  - playerStatusText: {playerStatusText != null}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"  - playerAvatar: {playerAvatar != null}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"  - readyIndicator: {readyIndicator != null}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"  - backgroundPanel: {backgroundPanel != null}", LogCategory.Avatar, LogLevel.Debug);
+            AdvancedDebugSystem.Log($"  - selectButton: {selectButton != null}", LogCategory.Avatar, LogLevel.Debug);
     
             if (playerNameText == null)
-                Debug.LogError("[LobbyPlayerItem] ❌ playerNameText is not assigned!");
+                AdvancedDebugSystem.LogError("[LobbyPlayerItem] ❌ playerNameText is not assigned!", LogCategory.Avatar);
             if (playerStatusText == null)
-                Debug.LogError("[LobbyPlayerItem] ❌ playerStatusText is not assigned!");
+                AdvancedDebugSystem.LogError("[LobbyPlayerItem] ❌ playerStatusText is not assigned!", LogCategory.Avatar);
         }
 
         [ContextMenu("Apply Color Palette")]

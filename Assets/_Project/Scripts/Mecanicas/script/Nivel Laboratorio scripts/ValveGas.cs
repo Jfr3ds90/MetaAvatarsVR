@@ -2,6 +2,7 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 public class ValveGas : MonoBehaviour
 {
@@ -28,7 +29,7 @@ public class ValveGas : MonoBehaviour
         {
             manager.activatedValves[gasType] = true;
 
-            Debug.Log("maximo");
+            AdvancedDebugSystem.Log("maximo", LogCategory.Avatar, LogLevel.Debug);
 
         }
         else if (z <= 10)
@@ -44,7 +45,7 @@ public class ValveGas : MonoBehaviour
 
             StopCoroutine(manager.GasActivated());
 
-            Debug.Log("minimo");
+            AdvancedDebugSystem.Log("minimo", LogCategory.Avatar, LogLevel.Debug);
           //  RenderSettings.fogDensity = 0;
         }
        
@@ -60,12 +61,12 @@ public class ValveGas : MonoBehaviour
 
         manager.MixtureGas(gasType);
         manager.GasAction();
-        //Debug.Log(RenderSettings.fogDensity+" es la densidad "+ manager.gasFog / 350);
+        //AdvancedDebugSystem.Log(RenderSettings.fogDensity+" es la densidad "+ manager.gasFog / 350, LogCategory.Avatar, LogLevel.Debug);
 
     }
     private void Update()
     {
-        //Debug.Log(transform.eulerAngles + " es la rotacion");
+        //AdvancedDebugSystem.Log(transform.eulerAngles + " es la rotacion", LogCategory.Avatar, LogLevel.Debug);
         if (action==true)
        { if(Input.GetKey(KeyCode.RightArrow))
         {

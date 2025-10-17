@@ -3,6 +3,7 @@ using System;
 
 #if UNITY_EDITOR
 using UnityEditor;
+using HackMonkeys.Debugging;
 #endif
 
 /// <summary>
@@ -159,7 +160,7 @@ public class OVRSRuntimeSettings : OVRSRuntimeAssetsBase
 #if !UNITY_EDITOR
         if (settings == null)
         {
-            Debug.LogWarning("Failed to load runtime settings. Using default runtime settings instead.");
+            AdvancedDebugSystem.LogWarning("Failed to load runtime settings. Using default runtime settings instead.", LogCategory.Avatar);
             settings = ScriptableObject.CreateInstance<OVRSRuntimeSettings>();
             HandleSettingsCreated(settings);
         }

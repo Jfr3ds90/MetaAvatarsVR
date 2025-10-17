@@ -3,6 +3,9 @@ using UnityEngine;
 using UnityEngine.Events;
 using Oculus.Interaction;
 using Oculus.Interaction.HandGrab;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace MetaAvatarsVR.Networking.PuzzleSync
 {
@@ -53,7 +56,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
             
             if (_grabbable == null)
             {
-                Debug.LogError($"[NetworkedMetaGrabbable] Grabbable is required on {gameObject.name}");
+                AdvancedDebugSystem.LogError($"[NetworkedMetaGrabbable] Grabbable is required on {gameObject.name}", LogCategory.Networking | LogCategory.Photon);
             }
             
             var rb = GetComponent<Rigidbody>();
@@ -99,7 +102,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 if (_rotateTransformer != null)
                 {
                     _rotateTransformer.enabled = true;
-                    Debug.Log($"[NetworkedMetaGrabbable] Enabled OneGrabRotateTransformer for local player for {gameObject.name}");
+                    AdvancedDebugSystem.Log($"[NetworkedMetaGrabbable] Enabled OneGrabRotateTransformer for local player for {gameObject.name}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 }
                 
                 if (_handGrabInteractable != null)
@@ -112,7 +115,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 if (_rotateTransformer != null)
                 {
                     _rotateTransformer.enabled = false;
-                    Debug.Log($"[NetworkedMetaGrabbable] Disabled OneGrabRotateTransformer for remote player for {gameObject.name}");
+                    AdvancedDebugSystem.Log($"[NetworkedMetaGrabbable] Disabled OneGrabRotateTransformer for remote player for {gameObject.name}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 }
                 
                 if (_handGrabInteractable != null)
@@ -170,12 +173,12 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         private void SetupMetaEvents()
         {
-            Debug.Log($"[NetworkedMetaGrabbable] Setting up events for {gameObject.name}");
+            AdvancedDebugSystem.Log($"[NetworkedMetaGrabbable] Setting up events for {gameObject.name}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             if (_grabbable != null)
             {
                 _grabbable.WhenPointerEventRaised += OnPointerEvent;
-                Debug.Log("[NetworkedMetaGrabbable] Connected to Grabbable events");
+                AdvancedDebugSystem.Log("[NetworkedMetaGrabbable] Connected to Grabbable events", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             
             if (_pointable != null)
@@ -184,7 +187,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 _pointable.WhenUnselect.AddListener(OnUnselect);
                 _pointable.WhenHover.AddListener(OnHover);
                 _pointable.WhenUnhover.AddListener(OnUnhover);
-                Debug.Log("[NetworkedMetaGrabbable] Connected to PointableUnityEventWrapper events");
+                AdvancedDebugSystem.Log("[NetworkedMetaGrabbable] Connected to PointableUnityEventWrapper events", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
         }
         
@@ -206,7 +209,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         private void OnPointerEvent(PointerEvent evt)
         {
-            Debug.Log($"[NetworkedMetaGrabbable] {gameObject.name} - Event: {evt.Type}");
+            AdvancedDebugSystem.Log($"[NetworkedMetaGrabbable] {gameObject.name} - Event: {evt.Type}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             switch (evt.Type)
             {
@@ -219,12 +222,12 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                     break;
                     
                 case PointerEventType.Select:
-                    Debug.Log($"[NetworkedMetaGrabbable] Select event - starting grab");
+                    AdvancedDebugSystem.Log($"[NetworkedMetaGrabbable] Select event - starting grab", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                     ProcessGrab(true);
                     break;
                     
                 case PointerEventType.Unselect:
-                    Debug.Log($"[NetworkedMetaGrabbable] Unselect event - releasing");
+                    AdvancedDebugSystem.Log($"[NetworkedMetaGrabbable] Unselect event - releasing", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                     ProcessGrab(false);
                     break;
                     
@@ -239,25 +242,25 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         private void OnSelect(PointerEvent pointerEvent)
         {
-            Debug.Log($"[NetworkedMetaGrabbable] OnSelect from PointableUnityEventWrapper - Type: {pointerEvent.Type}");
+            AdvancedDebugSystem.Log($"[NetworkedMetaGrabbable] OnSelect from PointableUnityEventWrapper - Type: {pointerEvent.Type}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             ProcessGrab(true);
         }
 
         private void OnUnselect(PointerEvent pointerEvent)
         {
-            Debug.Log($"[NetworkedMetaGrabbable] OnUnselect from PointableUnityEventWrapper - Type: {pointerEvent.Type}");
+            AdvancedDebugSystem.Log($"[NetworkedMetaGrabbable] OnUnselect from PointableUnityEventWrapper - Type: {pointerEvent.Type}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             ProcessGrab(false);
         }
 
         private void OnHover(PointerEvent pointerEvent)
         {
-            Debug.Log($"[NetworkedMetaGrabbable] OnHover from PointableUnityEventWrapper");
+            AdvancedDebugSystem.Log($"[NetworkedMetaGrabbable] OnHover from PointableUnityEventWrapper", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             ProcessHover(true);
         }
 
         private void OnUnhover(PointerEvent pointerEvent)
         {
-            Debug.Log($"[NetworkedMetaGrabbable] OnUnhover from PointableUnityEventWrapper");
+            AdvancedDebugSystem.Log($"[NetworkedMetaGrabbable] OnUnhover from PointableUnityEventWrapper", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             ProcessHover(false);
         }
         
@@ -267,11 +270,11 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         
         private void ProcessGrab(bool grabbing)
         {
-            Debug.Log($"[NetworkedMetaGrabbable] ProcessGrab: {grabbing} on {gameObject.name}");
+            AdvancedDebugSystem.Log($"[NetworkedMetaGrabbable] ProcessGrab: {grabbing} on {gameObject.name}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             if (Runner == null || !Runner.IsRunning)
             {
-                Debug.LogWarning("[NetworkedMetaGrabbable] Runner not ready");
+                AdvancedDebugSystem.LogWarning("[NetworkedMetaGrabbable] Runner not ready", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
             
@@ -285,23 +288,23 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
                 if (grabbing)
                 {
                     _lastValidRotation = transform.rotation;
-                    Debug.Log($"[NetworkedMetaGrabbable] Starting local grab control for {gameObject.name}");
+                    AdvancedDebugSystem.Log($"[NetworkedMetaGrabbable] Starting local grab control for {gameObject.name}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 }
                 else
                 {
-                    Debug.Log($"[NetworkedMetaGrabbable] Ending local grab control for {gameObject.name}");
+                    AdvancedDebugSystem.Log($"[NetworkedMetaGrabbable] Ending local grab control for {gameObject.name}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 }
             }
             
             if (grabbing)
             {
-                Debug.Log($"[NetworkedMetaGrabbable] Sending RPC_OnGrabbed for player {localPlayer}");
+                AdvancedDebugSystem.Log($"[NetworkedMetaGrabbable] Sending RPC_OnGrabbed for player {localPlayer}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 RPC_OnGrabbed(localPlayer);
                 OnMetaGrabbed?.Invoke(localPlayer);
             }
             else
             {
-                Debug.Log($"[NetworkedMetaGrabbable] Sending RPC_OnReleased for player {localPlayer}");
+                AdvancedDebugSystem.Log($"[NetworkedMetaGrabbable] Sending RPC_OnReleased for player {localPlayer}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 RPC_OnReleased(localPlayer);
                 OnMetaReleased?.Invoke(localPlayer);
             }
@@ -342,11 +345,11 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
         private void RPC_OnGrabbed(PlayerRef player, RpcInfo info = default)
         {
-            Debug.Log($"[NetworkedMetaGrabbable RPC] {gameObject.name} grabbed by player {player}");
+            AdvancedDebugSystem.Log($"[NetworkedMetaGrabbable RPC] {gameObject.name} grabbed by player {player}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             if (IsGrabbed && GrabbingPlayer != player)
             {
-                Debug.LogWarning($"Already grabbed by {GrabbingPlayer}");
+                AdvancedDebugSystem.LogWarning($"Already grabbed by {GrabbingPlayer}", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
             
@@ -365,7 +368,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync
         [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
         private void RPC_OnReleased(PlayerRef player, RpcInfo info = default)
         {
-            Debug.Log($"[NetworkedMetaGrabbable RPC] {gameObject.name} released by player {player}");
+            AdvancedDebugSystem.Log($"[NetworkedMetaGrabbable RPC] {gameObject.name} released by player {player}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             if (!IsGrabbed || GrabbingPlayer != player) return;
             

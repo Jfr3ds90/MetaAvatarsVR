@@ -8,6 +8,7 @@ using TMPro;
 using DG.Tweening;
 using Oculus.Interaction.Surfaces;
 using System.Threading;
+using HackMonkeys.Debugging;
 
 namespace HackMonkeys.UI.Spatial
 {
@@ -79,7 +80,7 @@ namespace HackMonkeys.UI.Spatial
         {
             if (CanDebug)
             {
-                Debug.Log($"[{name}] Awake - Base scale: {baseScale}");
+                AdvancedDebugSystem.Log($"[{name}] Awake - Base scale: {baseScale}", LogCategory.Avatar, LogLevel.Debug);
             }
 
             _rayInteractable = GetComponent<RayInteractable>();
@@ -121,7 +122,7 @@ namespace HackMonkeys.UI.Spatial
         {
             if (CanDebug)
             {
-                Debug.Log($"[{name}] OnEnable");
+                AdvancedDebugSystem.Log($"[{name}] OnEnable", LogCategory.Avatar, LogLevel.Debug);
             }
             
             if (_rayInteractable != null)
@@ -150,7 +151,7 @@ namespace HackMonkeys.UI.Spatial
         {
             if (CanDebug)
             {
-                Debug.Log($"[{name}] OnDisable");
+                AdvancedDebugSystem.Log($"[{name}] OnDisable", LogCategory.Avatar, LogLevel.Debug);
             }
 
             // Cancelar todas las tareas async
@@ -306,7 +307,7 @@ namespace HackMonkeys.UI.Spatial
 
             if (CanDebug)
             {
-                Debug.Log($"[{name}] OnHoverEnter");
+                AdvancedDebugSystem.Log($"[{name}] OnHoverEnter", LogCategory.Avatar, LogLevel.Debug);
             }
 
             _isHovered = true;
@@ -329,7 +330,7 @@ namespace HackMonkeys.UI.Spatial
 
             if (CanDebug)
             {
-                Debug.Log($"[{name}] OnHoverExit");
+                AdvancedDebugSystem.Log($"[{name}] OnHoverExit", LogCategory.Avatar, LogLevel.Debug);
             }
 
             _isHovered = false;
@@ -355,7 +356,7 @@ namespace HackMonkeys.UI.Spatial
 
             if (CanDebug)
             {
-                Debug.Log($"[{name}] OnSelectStart");
+                AdvancedDebugSystem.Log($"[{name}] OnSelectStart", LogCategory.Avatar, LogLevel.Debug);
             }
             
             // Verificar si este botón NO es parte del teclado virtual
@@ -370,7 +371,7 @@ namespace HackMonkeys.UI.Spatial
                 {
                     if (CanDebug)
                     {
-                        Debug.Log($"[{name}] Button pressed outside virtual keyboard, closing keyboard");
+                        AdvancedDebugSystem.Log($"[{name}] Button pressed outside virtual keyboard, closing keyboard", LogCategory.Avatar, LogLevel.Debug);
                     }
                     keyboardManager.HideKeyboard();
                 }
@@ -404,7 +405,7 @@ namespace HackMonkeys.UI.Spatial
 
             if (CanDebug)
             {
-                Debug.Log($"[{name}] OnSelectEnd");
+                AdvancedDebugSystem.Log($"[{name}] OnSelectEnd", LogCategory.Avatar, LogLevel.Debug);
             }
 
             _isPressed = false;
@@ -565,7 +566,7 @@ namespace HackMonkeys.UI.Spatial
         {
             Transform targetTransform = buttonTransform != null ? buttonTransform : transform;
             baseScale = targetTransform.localScale;
-            Debug.Log($"Base scale set to: {baseScale}");
+            AdvancedDebugSystem.Log($"Base scale set to: {baseScale}", LogCategory.Avatar, LogLevel.Debug);
         }
         
         [ContextMenu("Apply Base Scale")]

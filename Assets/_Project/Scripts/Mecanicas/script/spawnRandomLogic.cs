@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 public class spawnRandomLogic : MonoBehaviour
 {
@@ -36,7 +37,7 @@ public class spawnRandomLogic : MonoBehaviour
         for (int i = 0; i < pos.Length; i++) //posicion aleatoria
         {
             int randomvalue = Random.Range(0,2);
-            //Debug.Log("spawneara "+randomvalue);
+            //AdvancedDebugSystem.Log("spawneara "+randomvalue, LogCategory.Avatar, LogLevel.Debug);
             switch(randomvalue)
             {
                 case 0:
@@ -46,16 +47,16 @@ public class spawnRandomLogic : MonoBehaviour
                     {
                         //for (int j = 0; j < objects.Length; j++)                   
                             randomObjects(pos, objects, i);//objeto aleatorio
-                        //PosUsed.Add(i);//Debug.Log("Fue agregado " + i);
+                        //PosUsed.Add(i);//AdvancedDebugSystem.Log("Fue agregado " + i, LogCategory.Avatar, LogLevel.Debug);
                         break;
                     }
                     else if (PosUsed.Contains(i))
                         { i++;
-                        //Debug.Log("Ya estaba " + i);
+                        //AdvancedDebugSystem.Log("Ya estaba " + i, LogCategory.Avatar, LogLevel.Debug);
                         break;};                        
                     break;
             }
-            //Debug.Log(i+" esta en la lista? "+PosUsed.Contains(i));
+            //AdvancedDebugSystem.Log(i+" esta en la lista? "+PosUsed.Contains(i), LogCategory.Avatar, LogLevel.Debug);
         }
         /*if (objects.Length+1 != PosUsed.Count)
             randomInPlaces(pos, objects);*/
@@ -71,13 +72,13 @@ public class spawnRandomLogic : MonoBehaviour
         int value = Random.Range(0, objects.Length);
 
         // una vez salga el numero revisar que este no haya salido antes
-        //Debug.Log("aparecio " + objects[j] + " es " + objects[j].name + "(Clone)");
+        //AdvancedDebugSystem.Log("aparecio " + objects[j] + " es " + objects[j].name + "(Clone)", LogCategory.Avatar, LogLevel.Debug);
         if (!objectsUsed.Contains(value))// si no contiene el valor la lista, entonces se agrega
         {
             objectsUsed.Add(value);
             PosUsed.Add(i);
             Instantiate(objects[value], pos[i].transform);
-            Debug.Log("el objeto es "+ objects[value]+" y la posicion es "+ pos[i].transform+" tambien esto esta en: "+this.gameObject.name);
+            AdvancedDebugSystem.Log("el objeto es "+ objects[value]+" y la posicion es "+ pos[i].transform+" tambien esto esta en: "+this.gameObject.name, LogCategory.Avatar, LogLevel.Debug);
         }
         else if (objectsUsed.Contains(value))// si ya lo contiene, se hace de nuevo
         {
@@ -111,7 +112,7 @@ public class spawnRandomLogic : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Deben existir mas pocisiones que elementos");
+            AdvancedDebugSystem.LogError("Deben existir mas pocisiones que elementos", LogCategory.Avatar);
         }
     }
 }

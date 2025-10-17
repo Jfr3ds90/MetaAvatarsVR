@@ -1247,7 +1247,7 @@ public readonly struct OVRSTask<TResult> : IEquatable<OVRSTask<TResult>>, IDispo
     ///
     /// void MethodB() {
     ///   DoSomethingAsync().ContinueWith(anchor => {
-    ///     Debug.Log($"Anchor {anchor} created!");
+    ///     AdvancedDebugSystem.Log($"Anchor {anchor} created!", LogCategory.Avatar, LogLevel.Debug);
     ///   });
     /// }
     /// ]]></code>

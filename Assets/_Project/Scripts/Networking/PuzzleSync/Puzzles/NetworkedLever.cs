@@ -3,6 +3,9 @@ using Fusion;
 using Oculus.Interaction;
 using Oculus.Interaction.HandGrab;
 using UnityEngine.Events;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
 {
@@ -45,7 +48,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             _parentReference = transform.parent;
             if (_parentReference == null)
             {
-                Debug.LogError($"[Lever {_leverLetter}] Must be child of a parent transform!");
+                AdvancedDebugSystem.LogError($"[Lever {_leverLetter}] Must be child of a parent transform!", LogCategory.Networking | LogCategory.Photon);
                 GameObject parent = new GameObject($"LeverParent_{_leverLetter}");
                 parent.transform.position = transform.position;
                 parent.transform.rotation = transform.rotation;
@@ -110,7 +113,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 RPC_SetGrabbed(true);
             }
             
-            Debug.Log($"[Lever {_leverLetter}] Grab started at local angle {_grabStartAngle:F1}°");
+            AdvancedDebugSystem.Log($"[Lever {_leverLetter}] Grab started at local angle {_grabStartAngle:F1}°", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         public void UpdateTransform()
@@ -159,7 +162,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 RPC_UpdateAngle(finalAngle);
             }
             
-            Debug.Log($"[Lever {_leverLetter}] Grab ended at local angle {transform.localEulerAngles.z:F1}°");
+            AdvancedDebugSystem.Log($"[Lever {_leverLetter}] Grab ended at local angle {transform.localEulerAngles.z:F1}°", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         #endregion

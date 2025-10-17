@@ -1,4 +1,5 @@
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 namespace HackMonkeys.UI.Spatial
 {
@@ -38,7 +39,7 @@ namespace HackMonkeys.UI.Spatial
                 }
                 else
                 {
-                    Debug.LogError("VirtualKeyboardManagerBootstrapper: No keyboard prefab assigned! Please assign a VirtualKeyboard3D prefab.");
+                    AdvancedDebugSystem.LogError("VirtualKeyboardManagerBootstrapper: No keyboard prefab assigned! Please assign a VirtualKeyboard3D prefab.", LogCategory.Avatar);
                 }
                 
                 // Hacer el objeto persistente

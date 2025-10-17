@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine.Events;
+using HackMonkeys.Debugging;
 
 namespace PuzzleCubes.Core
 {
@@ -319,7 +320,7 @@ namespace PuzzleCubes.Core
             OVRInput.SetControllerVibration(1f, 1f, OVRInput.Controller.LTouch);
             OVRInput.SetControllerVibration(1f, 1f, OVRInput.Controller.RTouch);
             
-            Debug.Log($"Puzzle '{currentPuzzle.PuzzleData.PuzzleName}' completed!");
+            AdvancedDebugSystem.Log($"Puzzle '{currentPuzzle.PuzzleData.PuzzleName}' completed!", LogCategory.Avatar, LogLevel.Debug);
             OnFinishPuzzle?.Invoke();
         }
         
@@ -340,7 +341,7 @@ namespace PuzzleCubes.Core
         public void LoadNextPuzzle()
         {
             // Implementar lógica para cargar siguiente puzzle
-            Debug.Log("LoadNextPuzzle not implemented yet");
+            AdvancedDebugSystem.Log("LoadNextPuzzle not implemented yet", LogCategory.Avatar, LogLevel.Debug);
         }
         
         #region Debug Methods

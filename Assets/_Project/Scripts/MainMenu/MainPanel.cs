@@ -5,6 +5,7 @@ using DG.Tweening;
 using HackMonkeys.Core;
 using HackMonkeys.UI.Spatial;
 using Meta.XR;
+using HackMonkeys.Debugging;
 
 namespace HackMonkeys.UI.Panels
 {
@@ -259,7 +260,7 @@ namespace HackMonkeys.UI.Panels
           
         private void ShowNotification(string message, NotificationType type)
         {
-            Debug.Log($"[Notification] {type}: {message}");
+            AdvancedDebugSystem.Log($"[Notification] {type}: {message}", LogCategory.Avatar, LogLevel.Debug);
         }
         
         private enum NotificationType

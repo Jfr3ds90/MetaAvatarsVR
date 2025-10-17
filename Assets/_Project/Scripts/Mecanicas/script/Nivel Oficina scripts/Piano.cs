@@ -1,4 +1,5 @@
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 public class Piano : MonoBehaviour
 {
@@ -25,13 +26,13 @@ public class Piano : MonoBehaviour
     {
         for (int i = noteAction; i < notes.Length;) 
         {
-       //     Debug.Log("Esta en la nota que suena "+ pressed +" Esta es la nota correcta "+ notes[i]);
+       //     AdvancedDebugSystem.Log("Esta en la nota que suena "+ pressed +" Esta es la nota correcta "+ notes[i], LogCategory.Avatar, LogLevel.Debug);
             if (notes[i] == pressed)
             {
                 noteAction += 1;
                 if (i == notes.Length - 1) 
                 {
-                    Debug.Log("completo");
+                    AdvancedDebugSystem.Log("completo", LogCategory.Avatar, LogLevel.Debug);
                     if (action !=null)
                     {
                         door.OpenDoorAct();

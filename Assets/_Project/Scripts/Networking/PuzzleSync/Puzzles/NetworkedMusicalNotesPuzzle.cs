@@ -4,6 +4,9 @@ using Fusion;
 using UnityEngine;
 using UnityEngine.Events;
 using MetaAvatarsVR.Networking.PuzzleSync.SlotSystem;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
 {
@@ -59,14 +62,14 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 PatternShown = false;
                 PianoPhaseActive = false;
                 
-                Debug.Log($"[NetworkedMusicalNotesPuzzle] Master Client initializing puzzle");
+                AdvancedDebugSystem.Log($"[NetworkedMusicalNotesPuzzle] Master Client initializing puzzle", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 
                 // Generate pattern first, then display it after a short delay to ensure sync
                 StartCoroutine(DelayedPatternDisplay());
             }
             else
             {
-                Debug.Log($"[NetworkedMusicalNotesPuzzle] Non-Master Client waiting for pattern sync");
+                AdvancedDebugSystem.Log($"[NetworkedMusicalNotesPuzzle] Non-Master Client waiting for pattern sync", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 
                 // Non-master clients also need to configure their items
                 StartCoroutine(ConfigureItemsAfterSync());
@@ -101,7 +104,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             
             if (_expectedPattern.Count > 0)
             {
-                Debug.Log($"[NetworkedMusicalNotesPuzzle] Client pattern synced: {string.Join(", ", _expectedPattern.Select(i => _noteNames[i % _noteNames.Length]))}");
+                AdvancedDebugSystem.Log($"[NetworkedMusicalNotesPuzzle] Client pattern synced: {string.Join(", ", _expectedPattern.Select(i => _noteNames[i % _noteNames.Length]))}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 ConfigureSlots();
                 ConfigureItems();
             }
@@ -136,7 +139,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 NetworkedPattern.Set(i, _expectedPattern[i]);
             }
             
-            Debug.Log($"[NetworkedMusicalNotesPuzzle] Pattern generated: {string.Join(", ", _expectedPattern.Select(i => _noteNames[i % _noteNames.Length]))}");
+            AdvancedDebugSystem.Log($"[NetworkedMusicalNotesPuzzle] Pattern generated: {string.Join(", ", _expectedPattern.Select(i => _noteNames[i % _noteNames.Length]))}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         private void StartPatternDisplay()
@@ -152,7 +155,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_ShowPattern()
         {
-            Debug.Log($"[NetworkedMusicalNotesPuzzle] RPC_ShowPattern called on client (IsMaster: {Runner.IsSharedModeMasterClient})");
+            AdvancedDebugSystem.Log($"[NetworkedMusicalNotesPuzzle] RPC_ShowPattern called on client (IsMaster: {Runner.IsSharedModeMasterClient})", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             // Reconstruct the pattern from networked array for clients
             if (_expectedPattern == null || _expectedPattern.Count == 0)
@@ -165,7 +168,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                         _expectedPattern.Add(NetworkedPattern[i]);
                     }
                 }
-                Debug.Log($"[NetworkedMusicalNotesPuzzle] Pattern reconstructed from network: {string.Join(", ", _expectedPattern.Select(i => _noteNames[i % _noteNames.Length]))}");
+                AdvancedDebugSystem.Log($"[NetworkedMusicalNotesPuzzle] Pattern reconstructed from network: {string.Join(", ", _expectedPattern.Select(i => _noteNames[i % _noteNames.Length]))}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             
             if (_patternDisplay != null)
@@ -190,7 +193,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 }
             }
             
-            Debug.Log("[NetworkedMusicalNotesPuzzle] Pattern displayed to all players");
+            AdvancedDebugSystem.Log("[NetworkedMusicalNotesPuzzle] Pattern displayed to all players", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         [Rpc(RpcSources.All, RpcTargets.All)]
@@ -202,7 +205,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 OnPatternDisplayEnded?.Invoke();
             }
             
-            Debug.Log("[NetworkedMusicalNotesPuzzle] Pattern hidden");
+            AdvancedDebugSystem.Log("[NetworkedMusicalNotesPuzzle] Pattern hidden", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         protected override bool ValidateFinalConfiguration()
@@ -246,11 +249,11 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             {
                 string sequence = string.Join(",", notes);
                 _piano.SetExpectedSequence(sequence);
-                Debug.Log($"[NetworkedMusicalNotesPuzzle] Piano sequence set from original pattern: {sequence}");
+                AdvancedDebugSystem.Log($"[NetworkedMusicalNotesPuzzle] Piano sequence set from original pattern: {sequence}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
             else
             {
-                Debug.LogWarning($"[NetworkedMusicalNotesPuzzle] Could not build piano sequence. Notes count: {notes.Count}");
+                AdvancedDebugSystem.LogWarning($"[NetworkedMusicalNotesPuzzle] Could not build piano sequence. Notes count: {notes.Count}", LogCategory.Networking | LogCategory.Photon);
             }
         }
         
@@ -277,14 +280,14 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 {
                     string sequence = string.Join(",", expectedNotes);
                     _piano.SetExpectedSequence(sequence);
-                    Debug.Log($"[NetworkedMusicalNotesPuzzle] Piano activated with sequence: {sequence}");
+                    AdvancedDebugSystem.Log($"[NetworkedMusicalNotesPuzzle] Piano activated with sequence: {sequence}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 }
                 
                 _piano.ActivatePiano();
                 OnPianoPhaseStarted?.Invoke();
             }
             
-            Debug.Log("[NetworkedMusicalNotesPuzzle] Piano phase activated for all clients");
+            AdvancedDebugSystem.Log("[NetworkedMusicalNotesPuzzle] Piano phase activated for all clients", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         private void OnPianoComplete()
@@ -297,7 +300,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         
         private void OnPianoFailed()
         {
-            Debug.Log("[NetworkedMusicalNotesPuzzle] Piano sequence failed, try again");
+            AdvancedDebugSystem.Log("[NetworkedMusicalNotesPuzzle] Piano sequence failed, try again", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         protected override void OnFixedUpdateCustom()
@@ -345,7 +348,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 if (item != null)
                 {
                     item.SetPuzzleController(this);
-                    Debug.Log($"[NetworkedMusicalNotesPuzzle] SetPuzzleController called on {item.name}");
+                    AdvancedDebugSystem.Log($"[NetworkedMusicalNotesPuzzle] SetPuzzleController called on {item.name}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 }
             }
             
@@ -361,7 +364,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                     int colorIndex = _expectedPattern[i];
                     if (colorIndex >= 0 && colorIndex < _items.Length && _items[colorIndex] is NetworkedMusicalNote musicalNote)
                     {
-                        Debug.Log($"[NetworkedMusicalNotesPuzzle] Note {musicalNote.name} has pattern index {colorIndex}");
+                        AdvancedDebugSystem.Log($"[NetworkedMusicalNotesPuzzle] Note {musicalNote.name} has pattern index {colorIndex}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                     }
                 }
             }

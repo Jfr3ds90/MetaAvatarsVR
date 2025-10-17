@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using HackMonkeys.Debugging;
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem.Examples
 {
@@ -37,7 +38,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem.Examples
                 }
             }
             
-            Debug.Log($"[SimpleSequencePuzzle] Generated pattern: {string.Join(", ", _expectedPattern)}");
+            AdvancedDebugSystem.Log($"[SimpleSequencePuzzle] Generated pattern: {string.Join(", ", _expectedPattern)}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
     }
 }

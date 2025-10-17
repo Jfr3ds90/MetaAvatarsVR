@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using DG.Tweening;
+using HackMonkeys.Debugging;
 
 namespace HackMonkeys.UI.Spatial
 {
@@ -77,14 +78,14 @@ namespace HackMonkeys.UI.Spatial
             if (KeyboardSize.magnitude < 0.01f)
             {
                 KeyboardSize = Vector3.one;
-                Debug.LogWarning("VirtualKeyboardManager: KeyboardSize was zero or too small, setting to Vector3.one");
+                AdvancedDebugSystem.LogWarning("VirtualKeyboardManager: KeyboardSize was zero or too small, setting to Vector3.one", LogCategory.Avatar);
             }
             
             // Si keyboardOffset no tiene valores razonables, usar offset por defecto
             if (keyboardOffset.magnitude < 0.01f && keyboardOffset == Vector3.zero)
             {
                 keyboardOffset = new Vector3(0f, -0.2f, 0f);
-                Debug.Log("VirtualKeyboardManager: keyboardOffset was zero, setting default offset");
+                AdvancedDebugSystem.Log("VirtualKeyboardManager: keyboardOffset was zero, setting default offset", LogCategory.Avatar, LogLevel.Debug);
             }
         }
         
@@ -100,7 +101,7 @@ namespace HackMonkeys.UI.Spatial
             // Validar los nuevos valores
             ValidateKeyboardSettings();
             
-            Debug.Log($"VirtualKeyboardManager: Settings configured - Offset: {keyboardOffset}, Size: {KeyboardSize}, Distance: {optimalDistance}");
+            AdvancedDebugSystem.Log($"VirtualKeyboardManager: Settings configured - Offset: {keyboardOffset}, Size: {KeyboardSize}, Distance: {optimalDistance}", LogCategory.Avatar, LogLevel.Debug);
         }
         
         /// <summary>
@@ -115,7 +116,7 @@ namespace HackMonkeys.UI.Spatial
             angleTilt = Mathf.Clamp(tilt, -45f, 45f);
             smoothMovement = smooth;
             
-            Debug.Log($"VirtualKeyboardManager: Advanced positioning configured - Optimal: {optimalDistance}, Height: {heightOffset}, Tilt: {angleTilt}°");
+            AdvancedDebugSystem.Log($"VirtualKeyboardManager: Advanced positioning configured - Optimal: {optimalDistance}, Height: {heightOffset}, Tilt: {angleTilt}°", LogCategory.Avatar, LogLevel.Debug);
         }
         
         private void Awake()
@@ -192,7 +193,7 @@ namespace HackMonkeys.UI.Spatial
                             }
                             
                             // Es un objeto diferente (botón, etc.), ocultar el teclado
-                            Debug.Log($"VirtualKeyboardManager: External interaction detected with {interactable.name}, hiding keyboard");
+                            AdvancedDebugSystem.Log($"VirtualKeyboardManager: External interaction detected with {interactable.name}, hiding keyboard", LogCategory.Avatar, LogLevel.Debug);
                             HideKeyboard();
                             return;
                         }
@@ -200,7 +201,7 @@ namespace HackMonkeys.UI.Spatial
                     else
                     {
                         // Clic en el vacío, ocultar el teclado
-                        Debug.Log("VirtualKeyboardManager: Click on empty space detected, hiding keyboard");
+                        AdvancedDebugSystem.Log("VirtualKeyboardManager: Click on empty space detected, hiding keyboard", LogCategory.Avatar, LogLevel.Debug);
                         HideKeyboard();
                         return;
                     }
@@ -212,7 +213,7 @@ namespace HackMonkeys.UI.Spatial
         {
             if (keyboardPrefab == null)
             {
-                Debug.LogError("VirtualKeyboardManager: No keyboard prefab assigned! Please assign a VirtualKeyboard3D prefab in the inspector.");
+                AdvancedDebugSystem.LogError("VirtualKeyboardManager: No keyboard prefab assigned! Please assign a VirtualKeyboard3D prefab in the inspector.", LogCategory.Avatar);
                 return;
             }
             
@@ -240,7 +241,7 @@ namespace HackMonkeys.UI.Spatial
             // Si ya estamos en transición, cancelar
             if (_isTransitioning)
             {
-                Debug.Log("VirtualKeyboardManager: Transition already in progress, queueing request.");
+                AdvancedDebugSystem.Log("VirtualKeyboardManager: Transition already in progress, queueing request.", LogCategory.Avatar, LogLevel.Debug);
                 _pendingField = inputField;
                 return;
             }
@@ -251,7 +252,7 @@ namespace HackMonkeys.UI.Spatial
                 CreateKeyboardInstance();
                 if (_keyboardInstance == null)
                 {
-                    Debug.LogError("VirtualKeyboardManager: Cannot show keyboard - no instance available and unable to create one.");
+                    AdvancedDebugSystem.LogError("VirtualKeyboardManager: Cannot show keyboard - no instance available and unable to create one.", LogCategory.Avatar);
                     return;
                 }
             }
@@ -590,7 +591,7 @@ namespace HackMonkeys.UI.Spatial
             if (targetScale.magnitude < 0.01f)
             {
                 targetScale = Vector3.one;
-                Debug.LogWarning("VirtualKeyboardManager: KeyboardSize is zero, using Vector3.one for scale animation");
+                AdvancedDebugSystem.LogWarning("VirtualKeyboardManager: KeyboardSize is zero, using Vector3.one for scale animation", LogCategory.Avatar);
             }
             
             _keyboardInstance.gameObject.SetActive(true);

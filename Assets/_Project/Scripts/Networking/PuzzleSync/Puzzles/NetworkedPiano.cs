@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
 using UnityEngine.Events;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
 {
@@ -85,7 +88,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 CurrentSequence = "";
                 // Establecer secuencia esperada por defecto
                 ExpectedSequence = "Do,Re,Mi,Fa,Sol"; // Cambiar esto según tu puzzle
-                Debug.Log($"[NetworkedPiano] Initialized with expected sequence: {ExpectedSequence}");
+                AdvancedDebugSystem.Log($"[NetworkedPiano] Initialized with expected sequence: {ExpectedSequence}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
         }
         
@@ -96,7 +99,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             if (Runner != null && (Runner.IsSharedModeMasterClient || !string.IsNullOrEmpty(sequence)))
             {
                 ExpectedSequence = sequence;
-                Debug.Log($"[NetworkedPiano] Expected sequence set: {sequence} (IsMaster: {Runner.IsSharedModeMasterClient})");
+                AdvancedDebugSystem.Log($"[NetworkedPiano] Expected sequence set: {sequence} (IsMaster: {Runner.IsSharedModeMasterClient})", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
         }
         
@@ -106,7 +109,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             if (Runner && Runner.IsSharedModeMasterClient)
             {
                 ExpectedSequence = string.Join(",", notes);
-                Debug.Log($"[NetworkedPiano] Expected sequence set from array: {ExpectedSequence}");
+                AdvancedDebugSystem.Log($"[NetworkedPiano] Expected sequence set from array: {ExpectedSequence}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
         }
         
@@ -124,21 +127,21 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 if (string.IsNullOrEmpty(ExpectedSequence.ToString()))
                 {
                     ExpectedSequence = "Do,Re,Mi,Fa,Sol"; // Secuencia por defecto
-                    Debug.LogWarning($"[NetworkedPiano] No expected sequence set! Using default: {ExpectedSequence}");
+                    AdvancedDebugSystem.LogWarning($"[NetworkedPiano] No expected sequence set! Using default: {ExpectedSequence}", LogCategory.Networking | LogCategory.Photon);
                 }
                 else
                 {
-                    Debug.Log($"[NetworkedPiano] Piano activated with sequence: {ExpectedSequence}");
+                    AdvancedDebugSystem.Log($"[NetworkedPiano] Piano activated with sequence: {ExpectedSequence}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 }
                 
                 // Informar sobre el modo de intentos
                 if (_limitAttempts)
                 {
-                    Debug.Log($"[NetworkedPiano] Limited attempts mode: {_maxAttempts} attempts allowed");
+                    AdvancedDebugSystem.Log($"[NetworkedPiano] Limited attempts mode: {_maxAttempts} attempts allowed", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 }
                 else
                 {
-                    Debug.Log($"[NetworkedPiano] Unlimited attempts mode enabled");
+                    AdvancedDebugSystem.Log($"[NetworkedPiano] Unlimited attempts mode enabled", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 }
                 
                 RPC_UpdatePianoState(true, 0, 0);
@@ -180,7 +183,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             // Validar si es input duplicado
             if (!_allowMultiplePlayers && LastPlayerInput != player && _currentNotes.Count > 0)
             {
-                Debug.Log($"[NetworkedPiano] Different player attempted input. Last: {LastPlayerInput}, Current: {player}");
+                AdvancedDebugSystem.Log($"[NetworkedPiano] Different player attempted input. Last: {LastPlayerInput}, Current: {player}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 return;
             }
             
@@ -192,7 +195,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             CurrentSequence = newSequence;
             SequenceProgress = _currentNotes.Count;
             
-            Debug.Log($"[NetworkedPiano] Player {player} pressed: {noteName}, Current sequence: {CurrentSequence}, Expected: {ExpectedSequence}");
+            AdvancedDebugSystem.Log($"[NetworkedPiano] Player {player} pressed: {noteName}, Current sequence: {CurrentSequence}, Expected: {ExpectedSequence}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             // Notificar a todos los clientes para actualizar sus indicadores visuales
             RPC_UpdateProgressIndicators(SequenceProgress);
@@ -207,7 +210,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             {
                 // Nota correcta
                 RPC_NotifyCorrectNote(keyIndex, SequenceProgress);
-                Debug.Log($"[NetworkedPiano] Correct note! Progress: {SequenceProgress}/{expectedNotes.Length}");
+                AdvancedDebugSystem.Log($"[NetworkedPiano] Correct note! Progress: {SequenceProgress}/{expectedNotes.Length}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 
                 // Verificar si completó la secuencia
                 if (_currentNotes.Count >= expectedNotes.Length)
@@ -223,11 +226,11 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 
                 if (_limitAttempts)
                 {
-                    Debug.Log($"[NetworkedPiano] Wrong note! Expected: {(currentIndex < expectedNotes.Length ? expectedNotes[currentIndex] : "N/A")}, Got: {noteName}, Attempt: {CurrentAttempt}/{_maxAttempts}");
+                    AdvancedDebugSystem.Log($"[NetworkedPiano] Wrong note! Expected: {(currentIndex < expectedNotes.Length ? expectedNotes[currentIndex] : "N/A")}, Got: {noteName}, Attempt: {CurrentAttempt}/{_maxAttempts}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 }
                 else
                 {
-                    Debug.Log($"[NetworkedPiano] Wrong note! Expected: {(currentIndex < expectedNotes.Length ? expectedNotes[currentIndex] : "N/A")}, Got: {noteName}. Unlimited attempts mode.");
+                    AdvancedDebugSystem.Log($"[NetworkedPiano] Wrong note! Expected: {(currentIndex < expectedNotes.Length ? expectedNotes[currentIndex] : "N/A")}, Got: {noteName}. Unlimited attempts mode.", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 }
                 
                 RPC_NotifyWrongNote(keyIndex);
@@ -252,7 +255,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         {
             // Todos los clientes actualizan sus indicadores visuales
             UpdateProgressIndicators(progress);
-            Debug.Log($"[NetworkedPiano] Progress indicators updated: {progress}");
+            AdvancedDebugSystem.Log($"[NetworkedPiano] Progress indicators updated: {progress}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         [Rpc(RpcSources.All, RpcTargets.All)]
@@ -293,7 +296,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             OnSequenceCompleted?.Invoke();
             PlaySound(_successMelody ?? _correctSound);
             ShowSuccessFeedback();
-            Debug.Log("[NetworkedPiano] Sequence completed successfully!");
+            AdvancedDebugSystem.Log("[NetworkedPiano] Sequence completed successfully!", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         [Rpc(RpcSources.All, RpcTargets.All)]
@@ -302,13 +305,13 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             OnSequenceFailed?.Invoke();
             PlaySound(_wrongSound);
             ResetSequence();
-            Debug.Log($"[NetworkedPiano] Sequence failed after {_maxAttempts} attempts");
+            AdvancedDebugSystem.Log($"[NetworkedPiano] Sequence failed after {_maxAttempts} attempts", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             // Si los intentos son limitados, desactivar el piano
             if (_limitAttempts)
             {
                 IsActive = false;
-                Debug.Log("[NetworkedPiano] Piano deactivated - Max attempts reached");
+                AdvancedDebugSystem.Log("[NetworkedPiano] Piano deactivated - Max attempts reached", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
         }
         
@@ -331,7 +334,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 RPC_UpdateProgressIndicators(0);
             }
             
-            Debug.Log($"[NetworkedPiano] Sequence reset. Waiting for new attempt...");
+            AdvancedDebugSystem.Log($"[NetworkedPiano] Sequence reset. Waiting for new attempt...", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         // Método público para configurar el modo de intentos
@@ -343,7 +346,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
                 _maxAttempts = maxAttempts;
             }
             
-            Debug.Log($"[NetworkedPiano] Attempts mode changed - Limited: {_limitAttempts}, Max: {_maxAttempts}");
+            AdvancedDebugSystem.Log($"[NetworkedPiano] Attempts mode changed - Limited: {_limitAttempts}, Max: {_maxAttempts}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         private void InitializeProgressIndicators()

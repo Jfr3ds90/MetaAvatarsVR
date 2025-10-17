@@ -2,6 +2,7 @@ using Meta.XR.ImmersiveDebugger.UserInterface;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Animations;
+using HackMonkeys.Debugging;
 
 public class Switch : MonoBehaviour
 {
@@ -35,7 +36,7 @@ public class Switch : MonoBehaviour
     public void OpenDoorAct()
     {
         changeColor();
-        OpenDoor();Debug.Log(orientation+" orientacion");
+        OpenDoor();AdvancedDebugSystem.Log(orientation+" orientacion", LogCategory.Avatar, LogLevel.Debug);
         onOff = true;
         if (GetComponent<AudioSource>() != null)
             GetComponent<AudioSource>().Play(0);
@@ -44,7 +45,7 @@ public class Switch : MonoBehaviour
         if(activationExtra==false)
         timer += Time.deltaTime;
 
-        //Debug.Log("EL TIMER VA EN "+timer);
+        //AdvancedDebugSystem.Log("EL TIMER VA EN "+timer, LogCategory.Avatar, LogLevel.Debug);
         if (timer >= 4)
         {
             if(activationAudio==true&&activated==false)

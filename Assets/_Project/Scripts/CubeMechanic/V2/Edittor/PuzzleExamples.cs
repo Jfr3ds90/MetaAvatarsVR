@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using HackMonkeys.Debugging;
 
 namespace PuzzleCubes.Core
 {
@@ -296,7 +297,7 @@ namespace PuzzleCubes.Core
             AssetDatabase.CreateAsset(puzzleDefinition, assetPath);
             AssetDatabase.SaveAssets();
             
-            Debug.Log($"Created puzzle asset: {assetPath}");
+            AdvancedDebugSystem.Log($"Created puzzle asset: {assetPath}", LogCategory.Avatar, LogLevel.Debug);
             
             // Cleanup
             DestroyImmediate(previewTexture);

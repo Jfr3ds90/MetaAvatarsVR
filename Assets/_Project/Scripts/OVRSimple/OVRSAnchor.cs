@@ -458,7 +458,7 @@ public readonly partial struct OVRSAnchor : IEquatable<OVRSAnchor>, IDisposable
     /// async void CreateAnchor(Pose pose) {
     ///   var anchor = await OVRSAnchor.CreateSpatialAnchorAsync(pose);
     ///   if (anchor == OVRSAnchor.Null) {
-    ///     Debug.LogError("Anchor creation failed!");
+    ///     AdvancedDebugSystem.LogError("Anchor creation failed!", LogCategory.Avatar);
     ///   } else {
     ///     // anchor is valid
     ///   }
@@ -1076,6 +1076,7 @@ public readonly partial struct OVRSAnchor : IEquatable<OVRSAnchor>, IDisposable
 
         var anchorIter = anchors.ToNonAlloc();
         using var anchorNativeList = new OVRSNativeList<ulong>(anchorIter.Count, Allocator.Temp);
+
         foreach (var a in anchorIter)
         {
             anchorNativeList.Add(a.Handle);

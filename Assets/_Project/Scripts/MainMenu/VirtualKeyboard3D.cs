@@ -5,6 +5,7 @@ using DG.Tweening;
 using TMPro;
 using Oculus.Interaction;
 using UnityEngine.UI;
+using HackMonkeys.Debugging;
 
 namespace HackMonkeys.UI.Spatial
 {
@@ -301,7 +302,7 @@ namespace HackMonkeys.UI.Spatial
                     iconSprite = manualKeys[i]._iconSprite,
                 });
 
-                Debug.LogWarning("Existe el valor " + keys.Count);
+                AdvancedDebugSystem.LogWarning("Existe el valor " + keys.Count, LogCategory.Avatar);
             }
             //CreateOutLayout();
             return keys;
@@ -397,7 +398,7 @@ namespace HackMonkeys.UI.Spatial
                     height = 1f,
                 });
 
-                Debug.LogWarning("Existe el valor "+keys.Count);
+                AdvancedDebugSystem.LogWarning("Existe el valor "+keys.Count, LogCategory.Avatar);
             }
 
             return keys;
@@ -733,7 +734,7 @@ namespace HackMonkeys.UI.Spatial
             {
                 // Fallback si no tiene RectTransform
                 keyObj.transform.localPosition = centerPosition;
-                Debug.LogWarning($"Key prefab doesn't have RectTransform! Using transform position.");
+                AdvancedDebugSystem.LogWarning($"Key prefab doesn't have RectTransform! Using transform position.", LogCategory.Avatar);
             }
             
             // Actualizar BoxCollider para que coincida con el tamaño de la tecla
@@ -750,11 +751,11 @@ namespace HackMonkeys.UI.Spatial
                 // Asegurar que el centro del collider esté correcto
                 boxCollider.center = Vector3.zero;
                 
-                Debug.Log($"Key '{keyData.character}' - Collider size: {boxCollider.size}");
+                AdvancedDebugSystem.Log($"Key '{keyData.character}' - Collider size: {boxCollider.size}", LogCategory.Avatar, LogLevel.Debug);
             }
             else
             {
-                Debug.LogWarning($"Key '{keyData.character}' doesn't have BoxCollider!");
+                AdvancedDebugSystem.LogWarning($"Key '{keyData.character}' doesn't have BoxCollider!", LogCategory.Avatar);
             }
             
             // Get button component
@@ -907,7 +908,7 @@ namespace HackMonkeys.UI.Spatial
                 // Debug para verificar tamaños
                 if (Application.isEditor)
                 {
-                    Debug.Log($"Key '{keyData.character}' - Button: {buttonSize}, Icon: {iconRect.sizeDelta}, Margin: {marginPercentage * 100}%");
+                    AdvancedDebugSystem.Log($"Key '{keyData.character}' - Button: {buttonSize}, Icon: {iconRect.sizeDelta}, Margin: {marginPercentage * 100}%", LogCategory.Avatar, LogLevel.Debug);
                 }
             }
             else
@@ -919,7 +920,7 @@ namespace HackMonkeys.UI.Spatial
         
         private void OnKeyButtonPressed(KeyboardKey keyData)
         {
-            Debug.Log($"[VirtualKeyboard3D] Key pressed: {keyData.character}");
+            AdvancedDebugSystem.Log($"[VirtualKeyboard3D] Key pressed: {keyData.character}", LogCategory.Avatar, LogLevel.Debug);
             
             // Play sound
             PlayKeySound(keyData.keyType == KeyType.Character);

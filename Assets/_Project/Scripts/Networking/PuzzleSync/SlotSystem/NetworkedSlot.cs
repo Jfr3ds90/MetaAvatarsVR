@@ -1,6 +1,9 @@
 using Fusion;
 using UnityEngine;
 using UnityEngine.Events;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
 {
@@ -110,11 +113,11 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
             // Only Master Client can modify slot state in Shared Mode
             if (!Runner.IsSharedModeMasterClient) return;
             
-            Debug.Log($"[NetworkedSlot] RemoveItem called on slot {_slotId}. IsOccupied: {IsOccupied}, PlacedItemId: {PlacedItemId}");
+            AdvancedDebugSystem.Log($"[NetworkedSlot] RemoveItem called on slot {_slotId}. IsOccupied: {IsOccupied}, PlacedItemId: {PlacedItemId}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             if (!IsOccupied)
             {
-                Debug.LogWarning($"[NetworkedSlot] Slot {_slotId} is not occupied, nothing to remove");
+                AdvancedDebugSystem.LogWarning($"[NetworkedSlot] Slot {_slotId} is not occupied, nothing to remove", LogCategory.Networking | LogCategory.Photon);
                 return;
             }
             
@@ -127,7 +130,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
             IsCorrect = false;
             LastInteractedPlayer = PlayerRef.None;
             
-            Debug.Log($"[NetworkedSlot] Slot {_slotId} cleared. Removed item: {removedItemId}");
+            AdvancedDebugSystem.Log($"[NetworkedSlot] Slot {_slotId} cleared. Removed item: {removedItemId}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             RPC_NotifyItemRemoved(removedItemId);
         }
@@ -154,7 +157,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
                         rb.isKinematic = true; // Mantener kinematic cuando está en slot
                         rb.linearVelocity = Vector3.zero;
                         rb.angularVelocity = Vector3.zero;
-                        Debug.Log($"[NetworkedSlot] Item {itemId} rigidbody set to kinematic for slot snap");
+                        AdvancedDebugSystem.Log($"[NetworkedSlot] Item {itemId} rigidbody set to kinematic for slot snap", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                     }
                     break;
                 }
@@ -190,16 +193,16 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         [Rpc(RpcSources.All, RpcTargets.All)]
         protected virtual void RPC_NotifyItemRemoved(int itemId)
         {
-            Debug.Log($"[NetworkedSlot] RPC_NotifyItemRemoved called for slot {_slotId}, itemId: {itemId}");
+            AdvancedDebugSystem.Log($"[NetworkedSlot] RPC_NotifyItemRemoved called for slot {_slotId}, itemId: {itemId}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             // Only Master Client should broadcast this in Shared Mode
             if (!Runner.IsSharedModeMasterClient && Runner.LocalPlayer != PlayerRef.None)
             {
-                Debug.Log($"[NetworkedSlot] Not master client, skipping notification broadcast");
+                AdvancedDebugSystem.Log($"[NetworkedSlot] Not master client, skipping notification broadcast", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 return;
             }
             
-            Debug.Log($"[NetworkedSlot] Broadcasting item removal notification for slot {_slotId}");
+            AdvancedDebugSystem.Log($"[NetworkedSlot] Broadcasting item removal notification for slot {_slotId}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             OnItemRemoved?.Invoke(itemId);
             UpdateVisualState();
             OnItemRemovedCustom(itemId);
@@ -221,13 +224,13 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
             {
                 NetworkedSlotId = id;
             }
-            Debug.Log($"[NetworkedSlot] Slot {name} ID set to {id}");
+            AdvancedDebugSystem.Log($"[NetworkedSlot] Slot {name} ID set to {id}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         public void SetPuzzleController(NetworkedSlotPuzzleController controller)
         {
             _puzzleController = controller;
-            Debug.Log($"[NetworkedSlot] Slot {_slotId} controller set to {controller?.name ?? "null"}");
+            AdvancedDebugSystem.Log($"[NetworkedSlot] Slot {_slotId} controller set to {controller?.name ?? "null"}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         protected virtual void UpdateVisualState()
@@ -288,7 +291,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.SlotSystem
         {
             if (_itemAnchor == null)
             {
-                Debug.LogWarning($"[NetworkedSlot] Item anchor not set on {name}, using transform");
+                AdvancedDebugSystem.LogWarning($"[NetworkedSlot] Item anchor not set on {name}, using transform", LogCategory.Networking | LogCategory.Photon);
             }
         }
         

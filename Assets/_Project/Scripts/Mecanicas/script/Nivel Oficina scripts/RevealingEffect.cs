@@ -2,6 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 public class RevealingEffect : MonoBehaviour
 {
@@ -51,7 +54,7 @@ public class RevealingEffect : MonoBehaviour
                 || Physics.Raycast(transform.position, currentPointPositionLeft + currentPointPositionDown, out hit, light.range))
                 {
                 MeshRenderer meshRenderer = hit.collider.GetComponent<MeshRenderer>();
-                //Debug.Log("el material es "+ hit.collider.GetComponent<MeshRenderer>().material.name);
+                //AdvancedDebugSystem.Log("el material es "+ hit.collider.GetComponent<MeshRenderer>().material.name, LogCategory.Avatar, LogLevel.Debug);
                 if (hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV" ||
                         hit.collider.GetComponent<MeshRenderer>().material.name == "M_PistaUV (Instance)"||
                         hit.collider.GetComponent<MeshRenderer>().material.name == "M_Letra_D" ||
@@ -67,11 +70,11 @@ public class RevealingEffect : MonoBehaviour
                         )
                 {
                         //hit.collider.GetComponent<MeshRenderer>().enabled = true;
-                        Debug.Log("El Mesh renderer es "+ hit.collider.GetComponent<MeshRenderer>().name);
+                        AdvancedDebugSystem.Log("El Mesh renderer es "+ hit.collider.GetComponent<MeshRenderer>().name, LogCategory.Avatar, LogLevel.Debug);
                         meshRenderer.material.SetFloat("_Aparicion",-light.intensity/*hit.distance*/);
                         meshRenderer.material.SetVector("_PosicionLuz", hit.point - hit.transform.position);// obtiene la posicion del rayo - posicion del objeto
                         detectado = true;
-                        Debug.Log(hit.distance);// distancia de entre quien apunta y donde llega
+                        AdvancedDebugSystem.Log(hit.distance.ToString(), LogCategory.Avatar, LogLevel.Debug);// distancia de entre quien apunta y donde llega
                      if (meshRenderer.material.GetFloat("_Aparicion") >= 1)
                         meshRenderer.material.SetFloat("_Aparicion", 1);
 
@@ -81,11 +84,11 @@ public class RevealingEffect : MonoBehaviour
                             AnimalsKnown.Add(LastMaterialName, 1);
                             audioManager.FindAnimals = AnimalsKnown.Count;
                             audioManager.NarratorLinesActivation();
-                            Debug.Log("paso");
+                            AdvancedDebugSystem.Log("paso", LogCategory.Avatar, LogLevel.Debug);
                         }
                         else
                         {
-                            Debug.Log("no paso");
+                            AdvancedDebugSystem.Log("no paso", LogCategory.Avatar, LogLevel.Debug);
                         }
                             LastMeshRenderer = meshRenderer;
                 }
@@ -98,7 +101,7 @@ public class RevealingEffect : MonoBehaviour
                             LastMeshRenderer.material.SetFloat("_Aparicion", -light.intensity);
                             if (LastMeshRenderer.material.GetFloat("_Aparicion") >= 1)
                                 LastMeshRenderer.material.SetFloat("_Aparicion", 1);
-                            Debug.Log(LastMeshRenderer + " Existe");
+                            AdvancedDebugSystem.Log(LastMeshRenderer + " Existe", LogCategory.Avatar, LogLevel.Debug);
                         }
                     }
             }
@@ -110,10 +113,10 @@ public class RevealingEffect : MonoBehaviour
     {
         MeshRenderer meshRenderer;
             meshRenderer = GetComponentInParent<MeshRenderer>();
-        Debug.Log(meshRenderer);
+        AdvancedDebugSystem.Log(meshRenderer.name, LogCategory.Avatar, LogLevel.Debug);
         if (OnOff == true)
         {  
-            Debug.Log(meshRenderer.materials[1].color + " es el color");
+            AdvancedDebugSystem.Log(meshRenderer.materials[1].color + " es el color", LogCategory.Avatar, LogLevel.Debug);
             if (meshRenderer.materials[1].color == Color.magenta || meshRenderer.materials[1].color == Color.black)
             {
                 ; meshRenderer.materials[1].color = Color.white;

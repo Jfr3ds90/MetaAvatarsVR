@@ -1,6 +1,9 @@
 using UnityEngine;
 using Fusion;
 using Oculus.Interaction;
+using HackMonkeys.Debugging;
+using LogLevel = HackMonkeys.Debugging.LogLevel;
+
 
 namespace MetaAvatarsVR.Networking.Simple
 {
@@ -80,7 +83,7 @@ namespace MetaAvatarsVR.Networking.Simple
             var oneGrabTransformer = GetComponent<OneGrabFreeTransformer>();
             if (oneGrabTransformer == null)
             {
-                Debug.Log($"[SimpleNetworkedGrabbableFinal] Adding OneGrabFreeTransformer to {gameObject.name}");
+                AdvancedDebugSystem.Log($"[SimpleNetworkedGrabbableFinal] Adding OneGrabFreeTransformer to {gameObject.name}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 oneGrabTransformer = gameObject.AddComponent<OneGrabFreeTransformer>();
             }
         }
@@ -156,7 +159,7 @@ namespace MetaAvatarsVR.Networking.Simple
                 
                 if (_localGrabberTransform == null)
                 {
-                    Debug.LogWarning($"[SimpleNetworkedGrabbableFinal] Could not get transform from interactor");
+                    AdvancedDebugSystem.LogWarning($"[SimpleNetworkedGrabbableFinal] Could not get transform from interactor", LogCategory.Networking | LogCategory.Photon);
                     return;
                 }
                 
@@ -166,7 +169,7 @@ namespace MetaAvatarsVR.Networking.Simple
                 Vector3 localOffset = _localGrabberTransform.InverseTransformPoint(transform.position);
                 Quaternion localRotation = Quaternion.Inverse(_localGrabberTransform.rotation) * transform.rotation;
                 
-                Debug.Log($"[SimpleNetworkedGrabbableFinal] Local grab started on {gameObject.name} by {_localGrabberTransform.name}");
+                AdvancedDebugSystem.Log($"[SimpleNetworkedGrabbableFinal] Local grab started on {gameObject.name} by {_localGrabberTransform.name}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 
                 // In Shared mode, request input authority transfer
                 if (!HasInputAuthority)
@@ -208,7 +211,7 @@ namespace MetaAvatarsVR.Networking.Simple
         
         private async void RequestInputAuthority(Vector3 localOffset, Quaternion localRotation)
         {
-            Debug.Log($"[SimpleNetworkedGrabbableFinal] Requesting input authority for {gameObject.name}");
+            AdvancedDebugSystem.Log($"[SimpleNetworkedGrabbableFinal] Requesting input authority for {gameObject.name}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             
             // In Shared mode, send RPC to request authority transfer
             RPC_RequestAuthorityTransfer(Runner.LocalPlayer, localOffset, localRotation);
@@ -223,12 +226,12 @@ namespace MetaAvatarsVR.Networking.Simple
             
             if (HasInputAuthority)
             {
-                Debug.Log($"[SimpleNetworkedGrabbableFinal] Input authority acquired for {gameObject.name}");
+                AdvancedDebugSystem.Log($"[SimpleNetworkedGrabbableFinal] Input authority acquired for {gameObject.name}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
                 SetGrabbedState(Runner.LocalPlayer, localOffset, localRotation);
             }
             else
             {
-                Debug.LogWarning($"[SimpleNetworkedGrabbableFinal] Failed to acquire input authority for {gameObject.name}");
+                AdvancedDebugSystem.LogWarning($"[SimpleNetworkedGrabbableFinal] Failed to acquire input authority for {gameObject.name}", LogCategory.Networking | LogCategory.Photon);
                 _isLocallyGrabbed = false;
                 _localGrabberTransform = null;
             }
@@ -246,7 +249,7 @@ namespace MetaAvatarsVR.Networking.Simple
                 _rigidbody.isKinematic = true;
             }
             
-            Debug.Log($"[SimpleNetworkedGrabbableFinal] {gameObject.name} grabbed by Player {player}");
+            AdvancedDebugSystem.Log($"[SimpleNetworkedGrabbableFinal] {gameObject.name} grabbed by Player {player}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         private void EndGrab()
@@ -274,7 +277,7 @@ namespace MetaAvatarsVR.Networking.Simple
             if (Object.HasStateAuthority)
             {
                 Object.AssignInputAuthority(info.Source);
-                Debug.Log($"[SimpleNetworkedGrabbableFinal] Authority transferred to player {info.Source}");
+                AdvancedDebugSystem.Log($"[SimpleNetworkedGrabbableFinal] Authority transferred to player {info.Source}", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
             }
         }
         
@@ -289,7 +292,7 @@ namespace MetaAvatarsVR.Networking.Simple
                 _rigidbody.isKinematic = false;
             }
             
-            Debug.Log($"[SimpleNetworkedGrabbableFinal] {gameObject.name} released");
+            AdvancedDebugSystem.Log($"[SimpleNetworkedGrabbableFinal] {gameObject.name} released", LogCategory.Networking | LogCategory.Photon, LogLevel.Debug);
         }
         
         #endregion

@@ -84,12 +84,12 @@ public struct OVRSSpaceUser : System.IDisposable
     /// <code><![CDATA[
     /// void Test(ulong platformUserId) {
     ///   if (OVRspaceUser.TryCreate(platformUserId, out var spaceUser)) {
-    ///     Debug.Log(spaceUser.Valid); // True
+    ///     AdvancedDebugSystem.Log(spaceUser.Valid, LogCategory.Avatar, LogLevel.Debug); // True
     ///
     ///     spaceUser.Dispose();
-    ///     Debug.Log(spaceUser.Valid); // False; spaceUser disposed
+    ///     AdvancedDebugSystem.Log(spaceUser.Valid, LogCategory.Avatar, LogLevel.Debug); // False; spaceUser disposed
     ///   } else {
-    ///     Debug.Log(spaceUser.Valid); // False; creation failed
+    ///     AdvancedDebugSystem.Log(spaceUser.Valid, LogCategory.Avatar, LogLevel.Debug); // False; creation failed
     ///   }
     /// }
     /// ]]></code></example>
