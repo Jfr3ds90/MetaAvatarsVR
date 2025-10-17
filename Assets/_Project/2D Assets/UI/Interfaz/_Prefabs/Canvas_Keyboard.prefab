@@ -2005,8 +2005,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5551566848525044355}
-  - component: {fileID: 1792893727988819962}
-  - component: {fileID: 3917489382925046761}
   - component: {fileID: 1150989003829045489}
   - component: {fileID: 5814050037633890934}
   - component: {fileID: 3144767450198217941}
@@ -2041,44 +2039,6 @@ RectTransform:
   m_AnchoredPosition: {x: -0.0333, y: 0}
   m_SizeDelta: {x: 530.9205, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &1792893727988819962
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1231558259008728454}
-  m_CullTransparentMesh: 1
---- !u!114 &3917489382925046761
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1231558259008728454}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0.99607843, g: 0.75686276, b: 0.06666667, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: -153644155, guid: 247d55877b236944682db81ec4924f7a, type: 3}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 15
 --- !u!114 &1150989003829045489
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2086,7 +2046,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1231558259008728454}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2da0c512f12947e489f739169773d7ca, type: 3}
   m_Name: 
@@ -2119,7 +2079,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 3917489382925046761}
+  m_TargetGraphic: {fileID: 0}
   m_TextViewport: {fileID: 8752495524626592249}
   m_TextComponent: {fileID: 3689488692709631299}
   m_Placeholder: {fileID: 0}
@@ -2305,6 +2265,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   OText: {fileID: 0}
   TText: {fileID: 0}
+  user: 
 --- !u!114 &3875725452407517671
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7030,7 +6991,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3572134923472159571}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
