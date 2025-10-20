@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 
 public class CopyInputText : MonoBehaviour
 {
-    /*[HideInInspector]*/public GameObject OText;//falta asignarlo al prefab del canvas
+    /*[HideInInspector]*/public GameObject OText;
     public TMP_Text TText;
     public string user;
 

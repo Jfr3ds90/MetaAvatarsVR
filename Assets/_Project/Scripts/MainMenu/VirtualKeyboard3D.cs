@@ -917,7 +917,7 @@ namespace HackMonkeys.UI.Spatial
             }
         }
         
-        private void OnKeyButtonPressed(KeyboardKey keyData)
+        /*private*/public void OnKeyButtonPressed(KeyboardKey keyData)
         {
             Debug.Log($"[VirtualKeyboard3D] Key pressed: {keyData.character}");
             
@@ -935,7 +935,7 @@ namespace HackMonkeys.UI.Spatial
                     
                     if (_isCapsLockActive && char.IsLetter(charToSend))
                     {
-                        charToSend = char.ToUpper(charToSend);
+                        charToSend = char.ToUpper(charToSend);//acá se agrega la letra seleccionada
                     }
                     
                     OnKeyPressed?.Invoke(charToSend);
@@ -1137,7 +1137,10 @@ namespace HackMonkeys.UI.Spatial
             UpdateCapsLockIndicator();
             SetShiftState(_isShiftActive); // Refresh keys
         }
-        
+        public void OnSelectText()
+        {
+            OnKeyPressed?.Invoke('|');
+        }
         #endregion
     }
 }
