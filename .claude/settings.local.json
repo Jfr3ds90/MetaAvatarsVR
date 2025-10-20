@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "WebSearch",
-      "WebSearch"
+      "WebSearch",
+      "Bash(python convert_debug_logs.py:*)",
+      "Bash(Select-Object -Last 10)"
     ],
     "deny": [],
     "ask": []
