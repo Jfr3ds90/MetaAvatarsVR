@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.Events;
 using Oculus.Interaction;
 using Oculus.Interaction.Surfaces;
+using Cysharp.Threading.Tasks;
+using System.Threading;
 
 namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
 {
@@ -20,6 +22,7 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         [SerializeField] private MeshRenderer _keyRenderer;
         [SerializeField] private Material _defaultMaterial;
         [SerializeField] private Material _pressedMaterial;
+        [SerializeField] private Material _luminousMaterial; // Nuevo material luminoso
         [SerializeField] private Material _correctMaterial;
         [SerializeField] private Material _errorMaterial;
         
@@ -32,20 +35,27 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         [Networked] public NetworkBool IsPressed { get; set; }
         [Networked] public TickTimer PressedTimer { get; set; }
         
+        [Header("Particle Effects")]
+        [SerializeField] private float _particleDuration = 2f;
+        [SerializeField] private bool _useParticleEffects = true;
+        
         [Header("Events")]
         public UnityEvent<string> OnKeyPressed = new UnityEvent<string>();
         
         // Components
         private PokeInteractable _pokeInteractable;
         private AudioSource _audioSource;
+        private ParticleSystem _noteParticleSystem;
         private Vector3 _originalPosition;
         private Quaternion _originalRotation;
         private Coroutine _animationCoroutine;
+        private CancellationTokenSource _materialChangeCts;
         
         private void Awake()
         {
             SetupPokeInteraction();
             SetupAudio();
+            SetupParticleSystem();
             CacheTransformData();
         }
         
@@ -96,6 +106,33 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             }
         }
         
+        private void SetupParticleSystem()
+        {
+            if (!_useParticleEffects) return;
+            
+            // Buscar el sistema de partículas en los hijos (PS_NotaMusical)
+            _noteParticleSystem = GetComponentInChildren<ParticleSystem>();
+            
+            if (_noteParticleSystem == null)
+            {
+                Debug.LogWarning($"[NetworkedPianoKey] No ParticleSystem found in children of {gameObject.name}. Particle effects will be disabled.");
+                _useParticleEffects = false;
+            }
+            else
+            {
+                // Configurar el sistema de partículas
+                var main = _noteParticleSystem.main;
+                main.playOnAwake = false;
+                main.loop = false;
+                main.duration = _particleDuration;
+                
+                // Asegurarse de que esté detenido al inicio
+                _noteParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                
+                Debug.Log($"[NetworkedPianoKey] ParticleSystem found and configured for {_noteName}");
+            }
+        }
+        
         private void CacheTransformData()
         {
             if (_keyTransform == null)
@@ -127,11 +164,13 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         
         public override void FixedUpdateNetwork()
         {
-            // Resetear tecla automáticamente después del timer
+            // Resetear tecla automáticamente después del timer (failsafe)
             if (IsPressed && PressedTimer.Expired(Runner))
             {
-                IsPressed = false;
-                RPC_UpdateKeyVisual(false);
+                if (HasStateAuthority || Runner.IsSharedModeMasterClient)
+                {
+                    IsPressed = false;
+                }
             }
         }
         
@@ -141,12 +180,18 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             {
                 PressKey(evt.Pose);
             }
+            // No necesitamos detectar Unselect ya que la tecla regresará automáticamente
         }
         
         private void PressKey(Pose interactionPose)
         {
             // Enviar RPC con información del jugador que presionó
             RPC_OnKeyPress(Runner.LocalPlayer, interactionPose.position);
+        }
+        
+        private void ReleaseKey()
+        {
+            // Ya no es necesario, la liberación se maneja en AnimateKeyPressAsync
         }
         
         [Rpc(RpcSources.All, RpcTargets.All)]
@@ -158,12 +203,15 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             if (HasStateAuthority || Runner.IsSharedModeMasterClient)
             {
                 IsPressed = true;
-                PressedTimer = TickTimer.CreateFromSeconds(Runner, 0.5f);
+                PressedTimer = TickTimer.CreateFromSeconds(Runner, 0.5f); // Timer corto para auto-release
             }
             
-            // Efectos visuales y sonoros para todos los clientes
-            PlayKeyAnimation(true);
+            // Ejecutar animación completa de presionar y soltar con cambio de material
+            AnimateKeyPressAsync().Forget();
+            
+            // Efectos de sonido y partículas
             PlaySound();
+            PlayParticleEffect();
             TriggerHaptics(player);
             
             // IMPORTANTE: Solo el cliente que presionó la tecla debe notificar al piano
@@ -181,6 +229,8 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             }
         }
         
+        // RPC_OnKeyRelease ya no es necesario porque la animación completa se maneja en AnimateKeyPressAsync
+        
         [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
         private void RPC_UpdateKeyVisual(NetworkBool pressed)
         {
@@ -196,16 +246,144 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
         
         public void ShowCorrectFeedback()
         {
-            if (_animationCoroutine != null)
-                StopCoroutine(_animationCoroutine);
-            _animationCoroutine = StartCoroutine(FlashMaterial(_correctMaterial, 0.5f));
+            FlashMaterialAsync(_correctMaterial, 500).Forget();
+            
+            // También reproducir partículas para feedback correcto
+            PlayParticleEffect();
         }
         
         public void ShowErrorFeedback()
         {
-            if (_animationCoroutine != null)
-                StopCoroutine(_animationCoroutine);
-            _animationCoroutine = StartCoroutine(FlashMaterial(_errorMaterial, 0.3f));
+            FlashMaterialAsync(_errorMaterial, 300).Forget();
+            
+            // Opcionalmente, reproducir partículas con color diferente para error
+            if (_useParticleEffects && _noteParticleSystem != null)
+            {
+                // Temporalmente cambiar el color de las partículas a rojo
+                var main = _noteParticleSystem.main;
+                var originalColor = main.startColor;
+                main.startColor = new Color(1f, 0.2f, 0.2f, 1f);
+                
+                PlayParticleEffect();
+                
+                // Restaurar color original después
+                RestoreParticleColorAsync(originalColor, 500).Forget();
+            }
+        }
+        
+        private async UniTaskVoid RestoreParticleColorAsync(ParticleSystem.MinMaxGradient originalColor, int delayMs)
+        {
+            await UniTask.Delay(delayMs);
+            
+            if (_noteParticleSystem != null)
+            {
+                var main = _noteParticleSystem.main;
+                main.startColor = originalColor;
+            }
+        }
+        
+        private async UniTaskVoid FlashMaterialAsync(Material flashMaterial, int durationMs)
+        {
+            if (_keyRenderer == null || flashMaterial == null) return;
+            
+            Material originalMat = _keyRenderer.material;
+            _keyRenderer.material = flashMaterial;
+            
+            await UniTask.Delay(durationMs);
+            
+            _keyRenderer.material = _defaultMaterial ?? originalMat;
+        }
+        
+        private async UniTaskVoid AnimateKeyPressAsync()
+        {
+            // Cancelar animación anterior si existe
+            _materialChangeCts?.Cancel();
+            _materialChangeCts = new CancellationTokenSource();
+            
+            if (_keyRenderer == null || _keyTransform == null) return;
+            
+            try
+            {
+                // 1. Cambiar al material luminoso inmediatamente
+                if (_luminousMaterial != null)
+                    _keyRenderer.material = _luminousMaterial;
+                
+                // 2. Animar la tecla hacia abajo
+                Vector3 targetPosDown = _originalPosition + Vector3.down * _keyDepth;
+                float duration = 0.1f;
+                float elapsed = 0f;
+                Vector3 startPos = _keyTransform.localPosition;
+                
+                while (elapsed < duration)
+                {
+                    elapsed += Time.deltaTime;
+                    float t = elapsed / duration;
+                    _keyTransform.localPosition = Vector3.Lerp(startPos, targetPosDown, t);
+                    await UniTask.Yield(cancellationToken: _materialChangeCts.Token);
+                }
+                
+                _keyTransform.localPosition = targetPosDown;
+                
+                // 3. Mantener presionado con material luminoso por un momento
+                await UniTask.Delay(200, cancellationToken: _materialChangeCts.Token);
+                
+                // 4. Animar la tecla de vuelta a su posición original
+                elapsed = 0f;
+                startPos = _keyTransform.localPosition;
+                
+                while (elapsed < duration)
+                {
+                    elapsed += Time.deltaTime;
+                    float t = elapsed / duration;
+                    _keyTransform.localPosition = Vector3.Lerp(startPos, _originalPosition, t);
+                    await UniTask.Yield(cancellationToken: _materialChangeCts.Token);
+                }
+                
+                _keyTransform.localPosition = _originalPosition;
+                
+                // 5. Cambiar de vuelta al material default
+                if (_defaultMaterial != null)
+                    _keyRenderer.material = _defaultMaterial;
+                
+                // 6. Resetear el estado IsPressed
+                if (HasStateAuthority || Runner.IsSharedModeMasterClient)
+                {
+                    IsPressed = false;
+                }
+            }
+            catch (System.OperationCanceledException)
+            {
+                // Animación cancelada, asegurar que vuelva al estado original
+                _keyTransform.localPosition = _originalPosition;
+                if (_defaultMaterial != null)
+                    _keyRenderer.material = _defaultMaterial;
+            }
+        }
+        
+        private async UniTaskVoid ChangeMaterialAsync(Material targetMaterial)
+        {
+            // Cancelar cambio de material anterior si existe
+            _materialChangeCts?.Cancel();
+            _materialChangeCts = new CancellationTokenSource();
+            
+            if (_keyRenderer == null || targetMaterial == null) return;
+            
+            try
+            {
+                // Cambio inmediato del material
+                _keyRenderer.material = targetMaterial;
+                
+                // Opcional: Agregar efecto de transición suave
+                if (targetMaterial == _luminousMaterial)
+                {
+                    // Efecto de brillo al presionar
+                    await UniTask.Delay(100, cancellationToken: _materialChangeCts.Token);
+                }
+            }
+            catch (System.OperationCanceledException)
+            {
+                // Cambio de material cancelado
+            }
         }
         
         private void PlayKeyAnimation(bool pressed)
@@ -221,8 +399,6 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             Vector3 targetPos = pressed ? 
                 _originalPosition + Vector3.down * _keyDepth : 
                 _originalPosition;
-                
-            Material targetMat = pressed ? _pressedMaterial : _defaultMaterial;
             
             float duration = 0.1f;
             float elapsed = 0f;
@@ -240,27 +416,41 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             
             _keyTransform.localPosition = targetPos;
             
-            if (_keyRenderer != null && targetMat != null)
-                _keyRenderer.material = targetMat;
+            // Material change is now handled by ChangeMaterialAsync
         }
         
-        private IEnumerator FlashMaterial(Material flashMaterial, float duration)
-        {
-            if (_keyRenderer == null || flashMaterial == null) yield break;
-            
-            Material originalMat = _keyRenderer.material;
-            _keyRenderer.material = flashMaterial;
-            
-            yield return new WaitForSeconds(duration);
-            
-            _keyRenderer.material = _defaultMaterial ?? originalMat;
-        }
         
         private void PlaySound()
         {
             if (_noteSound != null && _audioSource != null)
             {
                 _audioSource.PlayOneShot(_noteSound);
+            }
+        }
+        
+        private void PlayParticleEffect()
+        {
+            if (!_useParticleEffects || _noteParticleSystem == null) return;
+            
+            // Detener cualquier emisión anterior y limpiar partículas
+            _noteParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            
+            // Reproducir el sistema de partículas
+            _noteParticleSystem.Play();
+            
+            Debug.Log($"[NetworkedPianoKey] Playing particle effect for {_noteName}");
+            
+            // Opcional: Detener automáticamente después de la duración
+            StartCoroutine(StopParticlesAfterDuration());
+        }
+        
+        private IEnumerator StopParticlesAfterDuration()
+        {
+            yield return new WaitForSeconds(_particleDuration);
+            
+            if (_noteParticleSystem != null && _noteParticleSystem.isPlaying)
+            {
+                _noteParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             }
         }
         
@@ -288,6 +478,10 @@ namespace MetaAvatarsVR.Networking.PuzzleSync.Puzzles
             {
                 _pokeInteractable.WhenPointerEventRaised -= OnPokeEvent;
             }
+            
+            // Limpiar el CancellationTokenSource
+            _materialChangeCts?.Cancel();
+            _materialChangeCts?.Dispose();
         }
     }
 }
